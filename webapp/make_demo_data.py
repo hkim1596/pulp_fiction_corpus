@@ -110,6 +110,20 @@ def main():
     put("routeA", RAW_OCR)
     put("rules_routeA", RULES_TXT)
     put("llm_claude_routeA", LLM_TXT)
+    put("llm_qwen_routeA", LLM_TXT.replace("motionless", "motionless,"))
+
+    # per-page meta so the panel headers show model / latency / cost
+    for stage, model, lat, usd in [
+        ("llm_claude_routeA", "claude-haiku-4-5", 3.1, 0.0042),
+        ("llm_qwen_routeA", "qwen3.5-9b", 5.8, 0.0),
+    ]:
+        mp = os.path.join(ROOT, "data", "text", IID, stage, "meta.jsonl")
+        with open(mp, "w") as f:
+            for nn in (1, 2, 3):
+                f.write(json.dumps({
+                    "page": f"page_{nn:04d}.txt", "model": model,
+                    "latency_s": lat, "in_tokens": 780, "out_tokens": 760,
+                    "usd": usd, "similarity": 0.97, "accepted": True}) + "\n")
 
     # ia baseline
     rdir = os.path.join(ROOT, "data", "raw", IID)

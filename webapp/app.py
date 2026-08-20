@@ -29,7 +29,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.1.0"
+APP_VERSION = "0.2.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -111,6 +111,56 @@ def layout_of(iid, n):
     return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else None
 
 
+def stage_input(stage):
+    """Which stage a stage was computed FROM (for change highlighting)."""
+    if stage.startswith("rules_"):
+        return stage[len("rules_"):]
+    if stage.startswith("llm_"):
+        parts = stage.split("_", 2)          # llm, backend, src
+        return "rules_" + parts[2] if len(parts) == 3 else None
+    return None
+
+
+STAGE_ENGINE = {"ia": "ABBYY OCR (Internet Archive)",
+                "routeA": "Surya layout + recognition",
+                "routeB": "vision LLM"}
+
+
+def stage_page_meta(iid, stage):
+    """Per-page meta (latency, model, cost) written by s03/s05: page name -> record."""
+    p = os.path.join(DATA, "text", iid, stage, "meta.jsonl")
+    out = {}
+    if os.path.exists(p):
+        for line in open(p, encoding="utf-8"):
+            try:
+                r = json.loads(line)
+                out[r.get("page", "")] = r
+            except Exception:
+                pass
+    return out
+
+
+def issue_rates(iid):
+    """Seconds per page for each stage of this issue, from timings.jsonl."""
+    rates = {}
+    for r in timings():
+        if r.get("issue") != iid or not r.get("pages"):
+            continue
+        st, spp = r.get("stage"), r["seconds"] / r["pages"]
+        key = None
+        if st == "s02_layout_ocr":
+            key = "routeA"
+        elif st == "s03_vlm_ocr":
+            key = "routeB"
+        elif st == "s04_rules":
+            key = f"rules_{r.get('src', 'ia')}"
+        elif st == "s05_llm_clean":
+            key = f"llm_{r.get('backend', '?')}_{r.get('src', '?')}"
+        if key:
+            rates[key] = spp
+    return rates
+
+
 def timings():
     p = os.path.join(DATA, "timings.jsonl")
     if not os.path.exists(p):
@@ -178,11 +228,17 @@ th{background:#f3ead9}
 .muted{color:#75695a}
 .empty{background:#fff;border:1px dashed #b8a88e;padding:14px;font-size:14px;color:#5a4f40}
 .viewer{display:flex;gap:18px;align-items:flex-start}
-.scan{position:relative;flex:0 0 46%}
+.scan{position:relative;flex:0 0 36%}
 .scan img{width:100%;display:block;border:1px solid #b8a88e}
 .scan svg{position:absolute;left:0;top:0;width:100%;height:100%}
 .textpane{flex:1;min-width:0}
-pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:1.5;background:#fff;border:1px solid #d8cfc0;padding:12px;margin:0}
+.panelgrid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px;align-items:start}
+.panel{border:1px solid #b8a88e;background:#fff}
+.panel .ph{background:#f3ead9;border-bottom:1px solid #d8cfc0;padding:6px 10px;font-size:12.5px;line-height:1.5}
+.panel .ph .nm{color:#7a3020;letter-spacing:.4px}
+.panel .ph .facts{color:#5a4f40}
+.panel pre{border:0}
+pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:1.5;background:#fff;border:1px solid #d8cfc0;padding:12px;margin:0;max-height:640px;overflow-y:auto}
 .stages a{display:inline-block;margin:0 8px 6px 0;font-size:13px;padding:2px 7px;border:1px solid #b8a88e;text-decoration:none}
 .stages a.on{background:#1c1a17;color:#faf7f2;border-color:#1c1a17}
 .d_ins{background:#dcefdc}
@@ -502,23 +558,83 @@ To request access, write to {CONTACT}.</p>{note}
             return page("Unknown", "<h1>Unknown issue</h1>")
         pngs = pages_of(iid)
         sts = stages_of(iid)
-        stage = (qs.get("stage", [None])[0] or (sts[-1] if sts else "ia"))
-        diff = qs.get("diff", ["0"])[0] == "1"
-        text = page_text(iid, stage, n)
-        prev_stage = None
-        if stage in sts:
-            k = sts.index(stage)
-            prev_stage = sts[k - 1] if k > 0 else None
-        if diff and prev_stage:
-            content = f"<pre>{diff_html(page_text(iid, prev_stage, n), text)}</pre>"
-        elif text:
-            content = f"<pre>{esc(text)}</pre>"
-        else:
-            content = ("<div class='empty'>No text at this stage for this page "
-                       "yet — the stage has not run.</div>")
-        # overlay from route A layout json
+        pagefile = f"page_{n:04d}.txt"
+        rates = issue_rates(iid)
+
+        # which method panels are shown: ?show=a,b,c (default: all available)
+        show_param = qs.get("show", [""])[0]
+        shown = [s for s in show_param.split(",") if s in sts] or list(sts)
+        diff_stage = qs.get("diff", [""])[0]   # one panel may show its changes
+
+        def url(show_list, dstage):
+            q = []
+            if show_list != sts:
+                q.append("show=" + ",".join(show_list))
+            if dstage:
+                q.append("diff=" + dstage)
+            return f"/issue/{iid}/p/{n}" + ("?" + "&".join(q) if q else "")
+
+        # toggle row: click a method to show/hide its panel
+        toggles = []
+        for s in sts:
+            if s in shown:
+                new = [x for x in shown if x != s] or [s]
+                cls = "on"
+            else:
+                new = [x for x in sts if x in shown or x == s]
+                cls = ""
+            toggles.append(f"<a class='{cls}' href='{url(new, diff_stage)}'>"
+                           f"{esc(STAGE_LABEL.get(s, s))}</a>")
+        toggle_row = ("".join(toggles)
+                      or "<span class='muted'>no text stages yet — only the "
+                         "scan is on disk</span>")
+
+        # method panels, side by side
+        panels = []
+        for s in shown:
+            text = page_text(iid, s, n)
+            meta = stage_page_meta(iid, s).get(pagefile, {})
+            model = meta.get("model") or STAGE_ENGINE.get(s) or (
+                "deterministic rules" if s.startswith("rules_") else s)
+            secs = meta.get("latency_s") or rates.get(s)
+            facts = [esc(str(model))]
+            if secs:
+                facts.append(f"{round(secs, 2)} s/page")
+            if meta.get("usd") is not None:
+                facts.append(f"${meta['usd']:.4f}/page")
+            if meta.get("accepted") is False:
+                facts.append("guard: correction rejected, rules text kept")
+            src = stage_input(s)
+            dlink = ""
+            if src and src in sts:
+                if diff_stage == s:
+                    dlink = (f" · <a href='{url(shown, '')}'>plain</a>")
+                else:
+                    dlink = (f" · <a href='{url(shown, s)}'>changes vs "
+                             f"{esc(STAGE_LABEL.get(src, src))}</a>")
+            if diff_stage == s and src:
+                body_html = f"<pre>{diff_html(page_text(iid, src, n), text)}</pre>"
+            elif text:
+                body_html = f"<pre>{esc(text)}</pre>"
+            else:
+                body_html = ("<div class='empty' style='border:0'>This stage "
+                             "has not run for this page yet.</div>")
+            panels.append(
+                f"<div class='panel'><div class='ph'>"
+                f"<span class='nm'>{esc(STAGE_LABEL.get(s, s))}</span><br>"
+                f"<span class='facts'>{' · '.join(facts)}{dlink}</span></div>"
+                f"{body_html}</div>")
+        grid = ("<div class='panelgrid'>" + "".join(panels) + "</div>"
+                if panels else
+                "<div class='panelgrid'><div class='empty'>No text stages have "
+                "run yet for this issue. After stage s02 the first method "
+                "panel appears here; each later stage adds its own panel with "
+                "its time and model.</div></div>")
+
+        # scan + layout overlay (route A coordinates)
         lay = layout_of(iid, n)
         svg = ""
+        laynote = ""
         if lay and lay.get("width"):
             boxes = []
             for rg in lay["regions"]:
@@ -531,35 +647,36 @@ To request access, write to {CONTACT}.</p>{note}
                     f"{esc(rg['label'])}</text>")
             svg = (f"<svg viewBox='0 0 {lay['width']} {lay['height']}' "
                    f"preserveAspectRatio='none'>{''.join(boxes)}</svg>")
+        else:
+            laynote = ("<p class='muted' style='font-size:12.5px'>No layout "
+                       "regions for this page yet — the boxes appear after "
+                       "stage s02 (layout detection) has run.</p>")
         img = (f"<img src='/img/{iid}/page_{n:04d}.png' alt='page scan'>"
                if 0 < n <= len(pngs) else
                "<div class='empty'>No scan image for this page.</div>")
-        stage_links = "".join(
-            f"<a class='{'on' if s==stage else ''}' "
-            f"href='/issue/{iid}/p/{n}?stage={s}'>{esc(STAGE_LABEL.get(s,s))}</a>"
-            for s in sts) or "<span class='muted'>no stages yet</span>"
-        dtog = (f"<a href='/issue/{iid}/p/{n}?stage={stage}&diff={0 if diff else 1}'>"
-                f"{'hide' if diff else 'show'} changes vs previous stage</a>"
-                if prev_stage else "")
+
         nav = (f"<span class='pgnav'>"
-               + (f"<a href='/issue/{iid}/p/{n-1}?stage={stage}'>&larr; page {n-1}</a>" if n > 1 else "")
+               + (f"<a href='/issue/{iid}/p/{n-1}'>&larr; page {n-1}</a>" if n > 1 else "")
                + f" page {n} of {len(pngs) or '?'} "
-               + (f"<a href='/issue/{iid}/p/{n+1}?stage={stage}'>page {n+1} &rarr;</a>" if n < len(pngs) else "")
+               + (f"<a href='/issue/{iid}/p/{n+1}'>page {n+1} &rarr;</a>" if n < len(pngs) else "")
                + "</span>")
         body = (howto(
             "Left: the scan, with the layout regions our detector found drawn "
-            "on it (labels at the top-left of each box). Right: the text of "
-            "this page at the stage you pick. 'Show changes' marks what the "
-            "current stage changed against the stage before it: "
-            "<span class='d_ins'>added</span>, "
+            "on it once stage s02 has run. Right: one panel per cleaning "
+            "method, side by side, each labeled with the model used, its "
+            "measured seconds per page, and its cost per page where money is "
+            "involved — so methods can be compared directly for quality "
+            "against computing power. Click a method name above to show or "
+            "hide its panel; inside a panel, 'changes' marks what that method "
+            "changed against its input: <span class='d_ins'>added</span>, "
             "<span class='d_del'>removed</span>. Text is verbatim — errors "
             "are shown, not hidden.")
             + f"<h1><a href='/issue/{iid}'>{esc(info['magazine'])} "
               f"{esc(info['cover_date'])}</a> · page {n}</h1>"
-            + f"<p class='stages'>{stage_links}</p>"
-            + f"<p>{nav} · {dtog}</p>"
-            + f"<div class='viewer'><div class='scan'>{img}{svg}</div>"
-            + f"<div class='textpane'>{content}</div></div>")
+            + f"<p class='stages'>{toggle_row}</p>"
+            + f"<p>{nav}</p>"
+            + f"<div class='viewer'><div class='scan'>{img}{svg}{laynote}</div>"
+            + grid + "</div>")
         return page(f"{info['magazine']} p{n}", body,
                     path=f"/issue/{iid}/p/{n}")
 
