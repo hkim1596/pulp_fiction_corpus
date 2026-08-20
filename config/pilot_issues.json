@@ -1,8 +1,8 @@
 {
   "_comment": "The 10-issue pilot set = the project's declared DEVELOPMENT SET (named in the Registered Report protocol, excluded from study analyses). s01_download.py refuses to run while approved=false. Heejin: review the list, then set approved=true.",
-  "approved": false,
-  "approved_by": null,
-  "approved_date": null,
+  "approved": true,
+  "approved_by": "Heejin Kim",
+  "approved_date": "2026-08-20",
   "issues": [
     {
       "id": "wt_1925_11",

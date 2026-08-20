@@ -40,16 +40,22 @@ DROP_LABELS = {"Picture", "Figure", "Table", "Page-footer", "Page-header"}
 KEEP_TEXT_IN_JSON_ONLY = {"Caption", "Footnote"}
 
 
-def have(cmd):
-    return shutil.which(cmd) is not None
+def surya_bin(name):
+    """Find a surya command even when ~/.local/bin is not on PATH
+    (pip --user installs land there; rtx run tmux shells miss it)."""
+    p = shutil.which(name)
+    if p:
+        return p
+    cand = os.path.expanduser(f"~/.local/bin/{name}")
+    return cand if os.path.exists(cand) else None
 
 
 def run_surya(pages_dir, work_dir):
     """Run surya OCR (detection+recognition, layout) over an image folder."""
     os.makedirs(work_dir, exist_ok=True)
-    subprocess.run(["surya_ocr", pages_dir, "--output_dir",
+    subprocess.run([surya_bin("surya_ocr"), pages_dir, "--output_dir",
                     os.path.join(work_dir, "ocr")], check=True)
-    subprocess.run(["surya_layout", pages_dir, "--output_dir",
+    subprocess.run([surya_bin("surya_layout"), pages_dir, "--output_dir",
                     os.path.join(work_dir, "layout")], check=True)
 
 
@@ -129,7 +135,7 @@ def run_issue(iid):
     pages_dir = os.path.join(ROOT, "data", "pages", iid)
     if not os.path.isdir(pages_dir):
         print(f"[s02] {iid}: no pages, run s01 first"); return
-    if not (have("surya_ocr") and have("surya_layout")):
+    if not (surya_bin("surya_ocr") and surya_bin("surya_layout")):
         sys.exit("surya not installed — run scripts/server_setup.sh (GPU server)")
     n = len([f for f in os.listdir(pages_dir) if f.endswith(".png")])
     work = os.path.join(ROOT, "data", "work_surya", iid)
