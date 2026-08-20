@@ -1,73 +1,66 @@
-PASTE p1 (v2) — first deployment of the pulp project.
-Repo: git@github.com:hkim1596/pulp-fiction.git  ->  server ~/shared/khj/pulp_fiction_corpus
-Rules: paste ONE block at a time, top to bottom. Lines starting with ":" are
-instructions — they are harmless if pasted (zsh ignores them). Wait for each
-block to finish before the next. Blocks D2 and E2 are typed ON THE SERVER.
+PASTE p1 (v3) — deployment of the pulp project.
+Repo: git@github.com:hkim1596/pulp_fiction_corpus.git  ->  server ~/shared/khj/pulp_fiction_corpus
+Rules: paste ONE block at a time, top to bottom, and wait for it to finish.
+Lines that start with a colon and a quoted sentence are instructions; they do
+nothing if pasted. Blocks marked ON THE SERVER are typed after rtx ssh.
 
------ BLOCK A (Mac): point the project at the pulp-fiction repo -----
+----- BLOCK A (Mac): point at the final repo, drop stray files, push, clone -----
 cd ~/Library/CloudStorage/Dropbox/Documents/Topics/Projects/"Pulp Fiction"/pulp_fiction_corpus
-rtx new git@github.com:hkim1596/pulp-fiction.git
-: STOP HERE. rtx reprints the deploy key (same one as before, it is reused).
-: In the browser open github.com/hkim1596/pulp-fiction -> Settings ->
-: Deploy keys -> Add deploy key -> paste the key -> tick "Allow write access".
-: Then continue with BLOCK B.
-
------ BLOCK B (Mac): push the code, clone on the server -----
-cd ~/Library/CloudStorage/Dropbox/Documents/Topics/Projects/"Pulp Fiction"/pulp_fiction_corpus
+git remote set-url origin git@github.com:hkim1596/pulp_fiction_corpus.git
+git rm -q Deploy create
 git add -A
-git commit -m "p1: point at pulp-fiction repo, comment-safe paste"
+git commit -m "p1: repo is pulp_fiction_corpus; drop stray files"
 git push -u origin main --force
 rtx clone
-: The --force matters only if the repo was created with a README; the local
-: folder is the source of truth. Expect rtx clone to print the last 3 commits.
+: 'Before this block: the GitHub repo pulp_fiction_corpus must exist and have'
+: 'the deploy key (Settings, Deploy keys, Allow write access ticked).'
+: 'Success looks like: push accepted, then rtx clone prints the last 3 commits.'
 
------ BLOCK C (Mac): one-time server setup -----
+----- BLOCK B (Mac): one-time server setup -----
 cd ~/Library/CloudStorage/Dropbox/Documents/Topics/Projects/"Pulp Fiction"/pulp_fiction_corpus
 rtx run setup -- bash scripts/server_setup.sh
-: Wait ~2-4 minutes (pip installs). Check the result with:
+: 'Wait 2 to 4 minutes for pip installs, then pull the evidence:'
 rtx sync pull _server_check
-: then open _server_check/report_setup.txt and look for "py_compile ok".
+: 'Open _server_check/report_setup.txt and look for the line py_compile ok.'
 
------ BLOCK D1 (Mac): jump onto the server -----
+----- BLOCK C (Mac): jump onto the server -----
 cd ~/Library/CloudStorage/Dropbox/Documents/Topics/Projects/"Pulp Fiction"/pulp_fiction_corpus
 rtx ssh
 
------ BLOCK D2 (ON THE SERVER, one line at a time) -----
+----- BLOCK D (ON THE SERVER, one line at a time) -----
 nano ~/shared/khj/.pulp_env
-: fill every CHANGE_ME value, save, exit nano
+: 'Fill every CHANGE_ME value, save, exit nano.'
 nano ~/shared/khj/.pulp_site_password
-: replace the placeholder with the real passcode, save, exit nano
+: 'Replace the placeholder with the real passcode, save, exit nano.'
 tmux new -d -s pulpsite 'bash ~/shared/khj/pulp_fiction_corpus/webapp/serve_pulp.sh'
 curl -s http://127.0.0.1:8092/healthz
-: expect: ok
+: 'Expect the reply: ok'
 exit
 
------ BLOCK E1 (Mac): back onto the server for the tunnel -----
+----- BLOCK E (Mac): back onto the server for the tunnel -----
 cd ~/Library/CloudStorage/Dropbox/Documents/Topics/Projects/"Pulp Fiction"/pulp_fiction_corpus
 rtx ssh
 
------ BLOCK E2 (ON THE SERVER, one line at a time) -----
+----- BLOCK F (ON THE SERVER, one line at a time) -----
 ~/bin/cloudflared tunnel route dns cihd-site pulp.digihumeng.org
 nano ~/.cloudflared/config.yml
-: add these two lines ABOVE the causal-inference ingress entries,
-: aligned with the other "- hostname:" entries:
-:   - hostname: pulp.digihumeng.org
-:     service: http://127.0.0.1:8092
+: 'Add two lines ABOVE the causal-inference ingress entries, aligned with the'
+: 'other hostname entries. Line one: - hostname: pulp.digihumeng.org'
+: 'Line two, indented:  service: http://127.0.0.1:8092'
 ~/bin/cloudflared tunnel ingress validate
 tmux send-keys -t tunnel C-c
 sleep 2
 tmux send-keys -t tunnel '~/bin/cloudflared tunnel run cihd-site' Enter
 exit
 
------ BLOCK F (Mac): verify from outside -----
+----- BLOCK G (Mac): verify from outside -----
 curl -s https://pulp.digihumeng.org/healthz
-: expect: ok
-: Open https://pulp.digihumeng.org in the browser: landing page, then the
-: passcode. The site shows honest empty states until the pipeline runs.
+: 'Expect the reply: ok. Then open https://pulp.digihumeng.org in the browser.'
+: 'The site shows honest empty states until the pipeline has run.'
 
------ BLOCK G (Mac): ONLY after Heejin approves the 10-issue list -----
-: First edit config/pilot_issues.json: set "approved": true and fill
-: approved_by and approved_date. Then:
+----- BLOCK H (Mac): ONLY after Heejin approves the 10-issue list -----
+: 'First edit config/pilot_issues.json: set approved to true and fill in'
+: 'approved_by and approved_date. Then paste:'
 cd ~/Library/CloudStorage/Dropbox/Documents/Topics/Projects/"Pulp Fiction"/pulp_fiction_corpus
 git add -A
 git commit -m "approve pilot issue list"
@@ -75,8 +68,8 @@ git push
 rtx update
 rtx run s01 -- python3 pipeline/s01_download.py --all
 
------ BLOCK H (Mac): pipeline stages, each after the previous finishes -----
-: watch any stage live:  ssh rtx6000 -t tmux attach -t s01   (etc.)
+----- BLOCK I (Mac): pipeline stages, each after the previous finishes -----
+: 'Watch any stage live with: ssh rtx6000 -t tmux attach -t s01 (and so on).'
 rtx run s02 -- python3 pipeline/s02_layout_ocr.py --all
 rtx run s03 -- python3 pipeline/s03_vlm_ocr.py --all
 rtx run s04a -- python3 pipeline/s04_rules.py --all --src routeA
