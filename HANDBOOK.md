@@ -13,9 +13,11 @@ anything structural changes.
 - The GPU SERVER (rtx6000, `ssh rtx6000`, user tailab) does all work: downloads
   from the Internet Archive, OCR, cleanup, metrics, and the website. Project home:
   `~/shared/khj/pulp_fiction_corpus/`.
-- GITHUB holds the code privately: `github.com/hkim1596/pulp_fiction_corpus`,
-  deployed to the server with `rtx new / push / clone / update` (per-project
-  deploy key — see `rtx6000-tools/README.md` in the Causal Inference folder).
+- GITHUB holds the code: repo `github.com/hkim1596/pulp-fiction` (note: repo
+  name differs from the folder name `pulp_fiction_corpus` — rtx supports this;
+  the deploy key and the server directory are named after the FOLDER),
+  deployed with `rtx new / push / clone / update` (per-project deploy key —
+  see `rtx6000-tools/README.md` in the Causal Inference folder).
 - THE WEBSITE holds and shows all pilot data and the method, and is the main
   channel to collaborators. Public URL: https://pulp.digihumeng.org
   (landing open and capability-only; everything else passcode-gated).
