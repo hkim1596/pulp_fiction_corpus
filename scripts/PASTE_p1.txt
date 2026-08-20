@@ -1,0 +1,56 @@
+PASTE p1 — first deployment of the pulp project (run from the Mac, block by block)
+===================================================================================
+Prerequisite: the repo folder sits at
+  ~/Library/CloudStorage/Dropbox/Documents/Topics/Projects/Pulp Fiction/pulp_fiction_corpus
+and the rtx tool from the Causal Inference project is on PATH.
+
+--- BLOCK 1: GitHub + server clone (one time) --------------------------------
+cd ~/Library/CloudStorage/Dropbox/Documents/Topics/Projects/"Pulp Fiction"/pulp_fiction_corpus
+git init -b main 2>/dev/null; git add -A && git commit -m "pulp pilot scaffold v0.1"
+rtx new git@github.com:hkim1596/pulp_fiction_corpus.git
+# rtx prints a deploy key -> create the PRIVATE repo pulp_fiction_corpus on
+# GitHub, paste the key under Settings > Deploy keys, allow write access.
+rtx push
+rtx clone
+
+--- BLOCK 2: server setup + site up ------------------------------------------
+rtx run setup -- bash scripts/server_setup.sh
+rtx ssh
+  # now ON the server:
+  nano ~/shared/khj/.pulp_env               # fill CHANGE_ME values
+  nano ~/shared/khj/.pulp_site_password     # set the real passcode
+  tmux new -d -s pulpsite 'bash ~/shared/khj/pulp_fiction_corpus/webapp/serve_pulp.sh'
+  curl -s http://127.0.0.1:8092/healthz     # -> ok
+  exit
+
+--- BLOCK 3: tunnel hostname (one time, ON the server) ------------------------
+rtx ssh
+  ~/bin/cloudflared tunnel route dns cihd-site pulp.digihumeng.org
+  nano ~/.cloudflared/config.yml
+  # add ABOVE the causal-inference entries:
+  #   - hostname: pulp.digihumeng.org
+  #     service: http://127.0.0.1:8092
+  tmux send-keys -t tunnel C-c; sleep 2
+  tmux send-keys -t tunnel '~/bin/cloudflared tunnel run cihd-site' Enter
+  exit
+# verify from the Mac:
+curl -s https://pulp.digihumeng.org/healthz     # -> ok
+
+--- BLOCK 4: after Heejin approves the 10-issue list --------------------------
+# edit config/pilot_issues.json -> "approved": true, approved_by, approved_date
+cd ~/Library/CloudStorage/Dropbox/Documents/Topics/Projects/"Pulp Fiction"/pulp_fiction_corpus
+git add -A && git commit -m "approve pilot issue list" && rtx push && rtx update
+rtx run s01 -- python3 pipeline/s01_download.py --all
+# then, in order (each in its own tmux via rtx run):
+#   rtx run s02 -- python3 pipeline/s02_layout_ocr.py --all
+#   rtx run s03 -- python3 pipeline/s03_vlm_ocr.py --all
+#   rtx run s04a -- python3 pipeline/s04_rules.py --all --src routeA
+#   rtx run s04b -- python3 pipeline/s04_rules.py --all --src routeB
+#   rtx run s04c -- python3 pipeline/s04_rules.py --all --src ia
+#   rtx run s05q -- python3 pipeline/s05_llm_clean.py --all --backend qwen
+#   rtx run s05c -- python3 pipeline/s05_llm_clean.py --all --backend claude
+#   rtx run s06 -- python3 pipeline/s06_metrics.py
+
+--- ALWAYS END WITH THE GIT BLOCK ---------------------------------------------
+cd ~/Library/CloudStorage/Dropbox/Documents/Topics/Projects/"Pulp Fiction"/pulp_fiction_corpus
+git add -A && git commit -m "p1: first deployment" && git push

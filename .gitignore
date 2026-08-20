@@ -1,0 +1,11 @@
+# data never travels through git (rtx sync or server-side downloads only)
+data/
+_server_check/
+*.pyc
+__pycache__/
+.DS_Store
+# secrets live outside the repo, but belt and braces
+.pulp_env
+.pulp_site_password
+.pulp_webapp_secret
+*.key

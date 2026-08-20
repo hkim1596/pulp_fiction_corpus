@@ -1,0 +1,108 @@
+{
+  "_comment": "The 10-issue pilot set = the project's declared DEVELOPMENT SET (named in the Registered Report protocol, excluded from study analyses). s01_download.py refuses to run while approved=false. Heejin: review the list, then set approved=true.",
+  "approved": false,
+  "approved_by": null,
+  "approved_date": null,
+  "issues": [
+    {
+      "id": "wt_1925_11",
+      "ia_identifier": "Weird_Tales_v06n05_1925-11_sas",
+      "magazine": "Weird Tales",
+      "cover_date": "1925-11",
+      "genre": "weird",
+      "format": "pulp",
+      "gold": null,
+      "why": "1920s two-column weird pulp; sas scan (good quality line)"
+    },
+    {
+      "id": "wt_1934_05",
+      "ia_identifier": "Weird_Tales_v23n05_1934-05_sas",
+      "magazine": "Weird Tales",
+      "cover_date": "1934-05",
+      "genre": "weird",
+      "format": "pulp",
+      "gold": null,
+      "why": "1930s Weird Tales, peak period"
+    },
+    {
+      "id": "ast_1930_01",
+      "ia_identifier": "Astounding_v01n01_1930-01",
+      "magazine": "Astounding Stories of Super-Science",
+      "cover_date": "1930-01",
+      "genre": "science fiction",
+      "format": "pulp",
+      "gold": {"type": "full_issue", "pg_ebook": 41481, "note": "complete human-proofread issue on Project Gutenberg"},
+      "why": "first issue; FULL-ISSUE proofread gold for error-rate measurement"
+    },
+    {
+      "id": "ast_1930_03",
+      "ia_identifier": "Astounding_v01n03_1930-03_cape1736_edit",
+      "magazine": "Astounding Stories of Super-Science",
+      "cover_date": "1930-03",
+      "genre": "science fiction",
+      "format": "pulp",
+      "gold": {"type": "full_issue", "pg_ebook": 29607, "note": "complete human-proofread issue on Project Gutenberg"},
+      "why": "second FULL-ISSUE gold, different scanner than 1930-01"
+    },
+    {
+      "id": "gal_1952_03",
+      "ia_identifier": "galaxymagazine-1952-03",
+      "magazine": "Galaxy Science Fiction",
+      "cover_date": "1952-03",
+      "genre": "science fiction",
+      "format": "digest",
+      "gold": {"type": "stories", "pg_ebooks": [32764], "note": "story-level gold: Manners of the Age (H. B. Fyfe)"},
+      "why": "digest format + story-level proofread gold"
+    },
+    {
+      "id": "gal_1952_04",
+      "ia_identifier": "galaxymagazine-1952-04",
+      "magazine": "Galaxy Science Fiction",
+      "cover_date": "1952-04",
+      "genre": "science fiction",
+      "format": "digest",
+      "gold": {"type": "stories", "pg_ebooks": [32597, 29662], "note": "story-level gold: Accidental Flight (Wallace), The Moon is Green (Leiber)"},
+      "why": "digest format + two story-level golds in one issue"
+    },
+    {
+      "id": "td_1932_02",
+      "ia_identifier": "thrilling-detective-v-01-n-04-1932-02",
+      "magazine": "Thrilling Detective",
+      "cover_date": "1932-02",
+      "genre": "detective",
+      "format": "pulp",
+      "gold": null,
+      "why": "early-1930s detective pulp"
+    },
+    {
+      "id": "td_1948_12",
+      "ia_identifier": "thrilling-detective-v-63-n-01-1948-12",
+      "magazine": "Thrilling Detective",
+      "cover_date": "1948-12",
+      "genre": "detective",
+      "format": "pulp",
+      "gold": null,
+      "why": "late-1940s detective pulp; different paper/typography era"
+    },
+    {
+      "id": "ws_1937_02",
+      "ia_identifier": "western-story-magazine-v-154-n-03-1937-02-20",
+      "magazine": "Western Story Magazine",
+      "cover_date": "1937-02-20",
+      "genre": "western",
+      "format": "pulp",
+      "gold": null,
+      "why": "flagship western weekly, from the messy catch-all sub-collection"
+    },
+    {
+      "id": "www_1936_02",
+      "ia_identifier": "wild-west-weekly-v-100-n-02-1936-02-22",
+      "magazine": "Wild West Weekly",
+      "cover_date": "1936-02-22",
+      "genre": "western",
+      "format": "pulp",
+      "gold": null,
+      "why": "second western weekly; tests metadata handling in the catch-all sub-collection"
+    }
+  ]
+}
