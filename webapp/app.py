@@ -29,7 +29,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.2.0"
+APP_VERSION = "0.2.1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -95,15 +95,22 @@ def stages_of(iid):
 _ia_cache = {}
 def page_text(iid, stage, n):
     """Text of page n (1-based) at a stage; '' if missing."""
-    if stage == "ia":
-        if iid not in _ia_cache:
-            p = os.path.join(DATA, "raw", iid, "ia_text.txt")
-            _ia_cache[iid] = (open(p, encoding="utf-8", errors="replace")
-                              .read().split("\x0c") if os.path.exists(p) else [])
-        pages = _ia_cache[iid]
-        return pages[n - 1] if 0 < n <= len(pages) else ""
     p = os.path.join(DATA, "text", iid, stage, f"page_{n:04d}.txt")
-    return open(p, encoding="utf-8", errors="replace").read() if os.path.exists(p) else ""
+    if os.path.exists(p):
+        return open(p, encoding="utf-8", errors="replace").read()
+    if stage == "ia":
+        # fallback when s01b has not written per-page IA text yet
+        if iid not in _ia_cache:
+            rp = os.path.join(DATA, "raw", iid, "ia_text.txt")
+            _ia_cache[iid] = (open(rp, encoding="utf-8", errors="replace")
+                              .read().split("\x0c") if os.path.exists(rp) else [])
+        pages = _ia_cache[iid]
+        if len(pages) == 1:
+            return ("[The Internet Archive text for this issue has no page "
+                    "boundaries; run pipeline/s01b_ia_pages.py to split it "
+                    "by pages.]" if n > 1 else pages[0])
+        return pages[n - 1] if 0 < n <= len(pages) else ""
+    return ""
 
 
 def layout_of(iid, n):

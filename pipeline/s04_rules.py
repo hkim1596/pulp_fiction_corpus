@@ -195,6 +195,13 @@ def split_ia_text(path):
 
 def load_stage_pages(iid, src):
     if src == "ia":
+        # prefer per-page IA text written by s01b (from hOCR); fall back to
+        # the raw file split on form-feeds (single block when none exist)
+        d = os.path.join(ROOT, "data", "text", iid, "ia")
+        if os.path.isdir(d):
+            return [open(os.path.join(d, f), encoding="utf-8").read().splitlines()
+                    for f in sorted(os.listdir(d))
+                    if f.startswith("page_") and f.endswith(".txt")]
         p = os.path.join(ROOT, "data", "raw", iid, "ia_text.txt")
         if not os.path.exists(p):
             return None
