@@ -23,5 +23,8 @@ python3 pipeline/s05_llm_clean.py --all --backend claude
 echo "-- s06: metrics --"
 python3 pipeline/s06_metrics.py
 
+echo "-- s07: article assembly --"
+python3 pipeline/s07_articles.py --all
+
 df -h / | tail -1
 echo "== RECOVER-DONE $(date) =="

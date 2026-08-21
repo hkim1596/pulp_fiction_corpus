@@ -92,6 +92,8 @@ def call_llm(prompt, backend):
             base = os.environ["PULP_QWEN_BASE_URL"].rstrip("/")
             body = {"model": os.environ["PULP_QWEN_MODEL"],
                     "temperature": 0.0, "max_tokens": 4096,
+                    # Qwen thinking mode returns content=null; turn it off
+                    "chat_template_kwargs": {"enable_thinking": False},
                     "messages": [{"role": "user", "content": prompt}]}
             req = urllib.request.Request(
                 base + "/chat/completions", data=json.dumps(body).encode(),
@@ -99,7 +101,12 @@ def call_llm(prompt, backend):
                          "Authorization":
                          f"Bearer {os.environ.get('PULP_QWEN_KEY', 'none')}"})
             with urllib.request.urlopen(req, timeout=600) as r:
-                return json.load(r)["choices"][0]["message"]["content"]
+                content = json.load(r)["choices"][0]["message"].get("content")
+            content = re.sub(r"<think>.*?</think>", "", content or "",
+                             flags=re.S).strip()
+            if not content:
+                raise ValueError("empty model reply (thinking mode?)")
+            return content
         except Exception as e:
             print(f"  llm retry {attempt+1}: {e}")
             time.sleep(10 * (attempt + 1))
@@ -228,7 +235,17 @@ def run_issue(iid, backend):
                     t = (rg.get("text") or "").strip().replace("\n", " ")
                     seglines.append(f"[{i}] label={rg['label']} "
                                     f"text=\"{t[:SNIP]}\"")
-                out = llm_json(PASS_A_PROMPT + "\n".join(seglines), backend)
+                try:
+                    out = llm_json(PASS_A_PROMPT + "\n".join(seglines),
+                                   backend)
+                except Exception as e:
+                    # one bad page never kills the run: whole page -> unsorted
+                    print(f"  page {pno}: pass A failed ({e}) — "
+                          f"page kept as unsorted")
+                    out = {"units": [{"segments": list(range(len(regions))),
+                                      "kind": "unsorted", "title": None,
+                                      "author": None,
+                                      "continues_previous": False}]}
             for ui, u in enumerate(out.get("units", [])):
                 segs = [s for s in u.get("segments", [])
                         if isinstance(s, int) and 0 <= s < len(regions)]
@@ -266,7 +283,12 @@ def run_issue(iid, backend):
                         f"continues={f['continues_previous']} "
                         f"first=\"{f.get('first_words','')}\" "
                         f"last=\"{f.get('last_words','')}\"")
-                out = llm_json(PASS_B_PROMPT + "\n".join(lines), backend)
+                try:
+                    out = llm_json(PASS_B_PROMPT + "\n".join(lines), backend)
+                except Exception as e:
+                    print(f"  stitch window failed ({e}) — falling back to "
+                          f"rule-based stitching for this window")
+                    out = mock_pass_b(chunk)
             articles.extend(out.get("articles", []))
 
         # build final records

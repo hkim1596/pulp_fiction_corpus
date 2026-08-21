@@ -19,6 +19,7 @@ import argparse
 import difflib
 import json
 import os
+import re
 import sys
 import time
 import urllib.request
@@ -42,10 +43,17 @@ PROMPT = (
 COST_PER_M = {"claude": {"in": 1.0, "out": 5.0}, "qwen": {"in": 0.0, "out": 0.0}}
 
 
+def strip_think(text):
+    """Remove chain-of-thought markup some models emit before the answer."""
+    return re.sub(r"<think>.*?</think>", "", text or "", flags=re.S).strip()
+
+
 def call_qwen(text):
     base = os.environ["PULP_QWEN_BASE_URL"].rstrip("/")
     model = os.environ["PULP_QWEN_MODEL"]
     body = {"model": model, "temperature": 0.0, "max_tokens": 4096,
+            # Qwen thinking mode returns content=null; turn it off
+            "chat_template_kwargs": {"enable_thinking": False},
             "messages": [{"role": "user", "content": PROMPT + text}]}
     req = urllib.request.Request(
         base + "/chat/completions", data=json.dumps(body).encode(),
@@ -54,7 +62,10 @@ def call_qwen(text):
     with urllib.request.urlopen(req, timeout=600) as r:
         out = json.load(r)
     u = out.get("usage", {})
-    return (out["choices"][0]["message"]["content"], model,
+    content = strip_think(out["choices"][0]["message"].get("content"))
+    if not content:
+        raise ValueError("empty model reply (thinking mode or truncation)")
+    return (content, model,
             u.get("prompt_tokens", 0), u.get("completion_tokens", 0))
 
 
@@ -71,7 +82,10 @@ def call_claude(text):
     with urllib.request.urlopen(req, timeout=600) as r:
         out = json.load(r)
     u = out.get("usage", {})
-    return (out["content"][0]["text"], model,
+    content = "".join(b.get("text", "") for b in out.get("content", [])).strip()
+    if not content:
+        raise ValueError("empty model reply")
+    return (content, model,
             u.get("input_tokens", 0), u.get("output_tokens", 0))
 
 
@@ -89,7 +103,7 @@ def run_issue(iid, backend, src):
                    if f.startswith("page_") and f.endswith(".txt"))
     call = call_qwen if backend == "qwen" else call_claude
     metaf = open(os.path.join(outdir, "meta.jsonl"), "a", encoding="utf-8")
-    n_rej = 0
+    n_rej = n_err = consec_fail = 0
     with stage_timer("s05_llm_clean", iid, pages=len(pages),
                      extra={"backend": backend, "src": src}):
         for p in pages:
@@ -100,30 +114,49 @@ def run_issue(iid, backend, src):
             if not text.strip():
                 open(dest, "w").write(""); continue
             t0 = time.time()
+            fixed = err = None
+            model, tin, tout = backend, 0, 0
             for attempt in range(3):
                 try:
                     fixed, model, tin, tout = call(text)
                     break
                 except Exception as e:
-                    print(f"  retry {attempt+1}: {e}"); time.sleep(15 * (attempt + 1))
+                    err = str(e)[:200]
+                    print(f"  retry {attempt+1} on {p}: {e}")
+                    time.sleep(15 * (attempt + 1))
+            rec = {"page": p, "model": model,
+                   "latency_s": round(time.time() - t0, 2),
+                   "in_tokens": tin, "out_tokens": tout}
+            if fixed is None:
+                # a single bad page must never kill the run: keep the rules
+                # text, flag it, move on — but stop if the lane looks down
+                consec_fail += 1
+                n_err += 1
+                if consec_fail >= 20:
+                    metaf.close()
+                    raise RuntimeError(
+                        f"{backend}: 20 consecutive failures (last: {err}) — "
+                        f"the endpoint looks down; fix it and rerun (resumes)")
+                out_text, rec["accepted"], rec["error"] = text, False, err
+                rec["usd"] = 0.0
             else:
-                raise RuntimeError(f"{backend} failed on {iid}/{p}")
-            sim = similarity(text, fixed)
-            accepted = sim >= GUARD_MIN
-            if not accepted:
-                fixed = text  # keep the rule-cleaned page, flag it
-                n_rej += 1
+                consec_fail = 0
+                sim = similarity(text, fixed)
+                accepted = sim >= GUARD_MIN
+                if not accepted:
+                    n_rej += 1
+                out_text = fixed if accepted else text
+                rec["usd"] = round((tin * COST_PER_M[backend]["in"]
+                                    + tout * COST_PER_M[backend]["out"]) / 1e6, 5)
+                rec["similarity"] = round(sim, 3)
+                rec["accepted"] = accepted
             with open(dest, "w", encoding="utf-8") as f:
-                f.write(fixed)
-            cost = (tin * COST_PER_M[backend]["in"]
-                    + tout * COST_PER_M[backend]["out"]) / 1e6
-            metaf.write(json.dumps({
-                "page": p, "model": model, "latency_s": round(time.time() - t0, 2),
-                "in_tokens": tin, "out_tokens": tout, "usd": round(cost, 5),
-                "similarity": round(sim, 3), "accepted": accepted}) + "\n")
+                f.write(out_text)
+            metaf.write(json.dumps(rec) + "\n")
             metaf.flush()
     metaf.close()
-    print(f"[s05] {iid} ({backend}/{src}): {len(pages)} pages, {n_rej} guarded")
+    print(f"[s05] {iid} ({backend}/{src}): {len(pages)} pages, "
+          f"{n_rej} guarded, {n_err} call-failures kept as rules text")
 
 
 def main():
