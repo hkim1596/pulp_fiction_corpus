@@ -211,7 +211,11 @@ def clean_text(text):
     return "\n\n".join(paras)
 
 
-def run_issue(iid, backend):
+def run_issue(iid, backend, force=False):
+    outfile = os.path.join(ROOT, "data", "articles", iid, "articles.json")
+    if os.path.exists(outfile) and not force:
+        print(f"[s07] {iid}: already assembled — skipped (--force to redo)")
+        return
     laydir = os.path.join(ROOT, "data", "layout", iid)
     pagefiles = sorted(glob.glob(os.path.join(laydir, "page_*.json")))
     if not pagefiles:
@@ -361,6 +365,8 @@ def main():
     ap.add_argument("--issue")
     ap.add_argument("--backend", default="qwen",
                     choices=["qwen", "claude", "mock"])
+    ap.add_argument("--force", action="store_true",
+                    help="reassemble even if articles.json exists")
     args = ap.parse_args()
     load_pulp_env()
     if args.backend == "qwen" and not os.environ.get("PULP_QWEN_BASE_URL"):
@@ -375,7 +381,7 @@ def main():
     elif not args.all:
         sys.exit("pass --all or --issue <id>")
     for iid in ids:
-        run_issue(iid, args.backend)
+        run_issue(iid, args.backend, force=args.force)
     build_index()
 
 
