@@ -29,7 +29,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.2.1"
+APP_VERSION = "0.3.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -181,6 +181,26 @@ def timings():
     return out
 
 
+def articles_of(iid):
+    p = os.path.join(DATA, "articles", iid, "articles.json")
+    return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else None
+
+
+def articles_index():
+    p = os.path.join(DATA, "articles", "index.json")
+    return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else []
+
+
+def article_by_id(aid):
+    iid = aid.rsplit("_a", 1)[0]
+    d = articles_of(iid)
+    if d:
+        for a in d["articles"]:
+            if a["article_id"] == aid:
+                return a, d
+    return None, None
+
+
 # ---------------- auth ----------------
 
 def secret():
@@ -270,7 +290,8 @@ def esc(s):
 
 def page(title, body, member=True, path="/"):
     nav = ("<span class='nav'>"
-           "<a href='/issues'>issues</a><a href='/method'>method</a>"
+           "<a href='/issues'>issues</a><a href='/articles'>articles</a>"
+           "<a href='/method'>method</a>"
            "<a href='/timing'>timing</a><a href='/feedback'>feedback</a>"
            "<a href='/logout'>log out</a></span>") if member else ""
     fb = ("<div class='fb'><form method='POST' action='/feedback'>"
@@ -398,6 +419,11 @@ class H(BaseHTTPRequestHandler):
             return self._redirect("/login")
         if path == "/issues":
             return self._send(200, self.issues_page())
+        if path == "/articles":
+            return self._send(200, self.articles_page(qs))
+        m = re.fullmatch(r"/article/([\w\-]+)", path)
+        if m:
+            return self._send(200, self.article_page(m.group(1)))
         m = re.fullmatch(r"/issue/([\w\-]+)", path)
         if m:
             return self._send(200, self.issue_page(m.group(1)))
@@ -552,12 +578,35 @@ To request access, write to {CONTACT}.</p>{note}
             + (f" · gold: {esc(info['gold'].get('note',''))}" if info.get("gold") else "")
             + "</p>" + empty
             + (f"<h2>Pages ({len(pngs)})</h2><p class='pgnav'>{grid}</p>" if pngs else "")
+            + self.issue_articles_html(iid)
             + (f"<h2>Downloads (full text per stage)</h2><p>{dls}</p>" if sts else "")
             + ("<h2>Timing so far</h2><table><tr><th>stage</th><th>pages</th>"
                "<th>seconds</th><th>sec/page</th><th>note</th></tr>"
                + trows + "</table>" if t else
                "<div class='empty'>No timing rows for this issue yet.</div>"))
         return page(info["magazine"], body, path=f"/issue/{iid}")
+
+    def issue_articles_html(self, iid):
+        doc = articles_of(iid)
+        if not doc:
+            return ("<h2>Articles</h2><div class='empty'>Not yet assembled "
+                    "— the article stage (s07) has not run for this issue."
+                    "</div>")
+        rows = "".join(
+            f"<tr><td><a href='/article/{a['article_id']}'>"
+            f"{esc(a.get('title') or '(untitled)')}</a></td>"
+            f"<td>{esc(a.get('author') or '')}</td>"
+            f"<td>{esc(a.get('type') or '')}</td>"
+            f"<td class='num'>{a['pages'][0]}–{a['pages'][-1]}</td></tr>"
+            for a in doc["articles"])
+        extra = (f"<p class='muted'>{len(doc.get('furniture', []))} page-"
+                 f"furniture units recorded (page numbers, running heads) · "
+                 f"{len(doc.get('unsorted', []))} segments unsorted, kept "
+                 f"for review</p>")
+        return (f"<h2>Articles in this issue ({len(doc['articles'])})</h2>"
+                "<table><tr><th>title as printed</th><th>author</th>"
+                "<th>type</th><th>pages</th></tr>" + rows + "</table>"
+                + extra)
 
     def viewer(self, iid, n, qs):
         info = issue_by_id(iid)
@@ -686,6 +735,92 @@ To request access, write to {CONTACT}.</p>{note}
             + grid + "</div>")
         return page(f"{info['magazine']} p{n}", body,
                     path=f"/issue/{iid}/p/{n}")
+
+    def articles_page(self, qs):
+        rows = articles_index()
+        q = (qs.get("q", [""])[0] or "").strip().lower()
+        typ = (qs.get("type", [""])[0] or "").strip()
+        if q:
+            rows = [r for r in rows
+                    if q in (r.get("title") or "").lower()
+                    or q in (r.get("author") or "").lower()]
+        if typ:
+            rows = [r for r in rows if r.get("type") == typ]
+        types = sorted({r.get("type") or "other" for r in articles_index()})
+        opts = "<option value=''>all types</option>" + "".join(
+            f"<option value='{esc(t)}' {'selected' if t == typ else ''}>"
+            f"{esc(t)}</option>" for t in types)
+        form = (f"<form method='GET' action='/articles' "
+                f"style='margin:0 0 14px'>"
+                f"<input type='text' name='q' value='{esc(q)}' "
+                f"placeholder='title or author' "
+                f"style='font-size:14px;padding:4px;border:1px solid #b8a88e'> "
+                f"<select name='type' style='font-size:14px;padding:4px'>"
+                f"{opts}</select> "
+                f"<button style='font-size:14px;padding:4px 10px'>find"
+                f"</button></form>")
+        cfgmap = {i["id"]: i for i in cfg()["issues"]}
+        trows = ""
+        for r in rows:
+            info = cfgmap.get(r["issue"], {})
+            title = r.get("title") or "(untitled)"
+            trows += (f"<tr><td><a href='/article/{r['article_id']}'>"
+                      f"{esc(title)}</a></td>"
+                      f"<td>{esc(r.get('author') or '')}</td>"
+                      f"<td>{esc(r.get('type') or '')}</td>"
+                      f"<td><a href='/issue/{r['issue']}'>"
+                      f"{esc(info.get('magazine', r['issue']))} "
+                      f"{esc(info.get('cover_date', ''))}</a></td>"
+                      f"<td class='num'>{r['pages'][0] if r.get('pages') else ''}"
+                      f"–{r['pages'][-1] if r.get('pages') else ''}</td>"
+                      f"<td class='num'>{r.get('words', '')}</td></tr>")
+        body = (howto(
+            "Every separately printed unit the assembly stage found — "
+            "stories, serial installments, poems, features, letters pages, "
+            "and advertisements — one row each, findable by title or author. "
+            "Titles and authors are recorded exactly as printed, OCR errors "
+            "included. Click a title for the full text with links back to "
+            "the scan regions it was assembled from.")
+            + f"<h1>Articles ({len(rows)})</h1>" + form
+            + ("<table><tr><th>title as printed</th><th>author as printed"
+               "</th><th>type</th><th>issue</th><th>pages</th><th>words"
+               "</th></tr>" + trows + "</table>" if trows else
+               "<div class='empty'>0 articles match. If the whole table is "
+               "empty, the assembly stage (s07) has not run yet — every "
+               "issue gains its articles when it does.</div>"))
+        return page("Articles", body, path="/articles")
+
+    def article_page(self, aid):
+        art, doc = article_by_id(aid)
+        if not art:
+            return page("Unknown", "<h1>Unknown article</h1>")
+        iid = doc["issue"]
+        info = issue_by_id(iid) or {}
+        frows = ""
+        for fr in art.get("fragments", []):
+            regs = ", ".join(str(x) for x in fr.get("region_ids", []))
+            frows += (f"<tr><td><a href='/issue/{iid}/p/{fr['page']}'>"
+                      f"page {fr['page']}</a></td>"
+                      f"<td class='muted'>regions {esc(regs)}</td></tr>")
+        meta = (f"{esc(art.get('type') or '')} · "
+                f"<a href='/issue/{iid}'>{esc(info.get('magazine', iid))} "
+                f"{esc(info.get('cover_date', ''))}</a> · pages "
+                f"{art['pages'][0]}–{art['pages'][-1]} · "
+                f"{len(art.get('text', '').split())} words · assembled by "
+                f"{esc(doc.get('backend', '?'))}")
+        body = (howto(
+            "One article of the corpus, assembled from the scan regions "
+            "listed below — click any of them to see the original page with "
+            "its boxes. Title and author appear exactly as printed. The "
+            "text is the assembled, rule-cleaned reading text; wrong "
+            "grouping or wrong title? Say so in the feedback box.")
+            + f"<h1>{esc(art.get('title') or '(untitled)')}</h1>"
+            + (f"<p>by {esc(art['author'])}</p>" if art.get("author") else "")
+            + f"<p class='muted'>{meta}</p>"
+            + "<h2>Built from</h2><table>" + frows + "</table>"
+            + "<h2>Text</h2><pre style='max-height:none'>"
+            + esc(art.get("text") or "(no text)") + "</pre>")
+        return page(art.get("title") or aid, body, path=f"/article/{aid}")
 
     def method_page(self):
         p = os.path.join(ROOT, "METHOD.md")

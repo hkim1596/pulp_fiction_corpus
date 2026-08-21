@@ -72,6 +72,23 @@ issues, a dictionary-word rate tracks quality where no gold exists. All
 wall-clock timings are collected per stage and projected to full-corpus scale
 on the timing page.
 
+## Stage 7 — assembling the article database
+
+The final form of the corpus is not pages but articles: every separately
+printed unit — story, serial installment, poem, feature, letters page, and
+advertisement — becomes its own addressable record, findable by title or
+author. A language model receives each page's segments (their layout labels,
+positions, and text) and groups them into units: an ornamental display title
+is joined to the body text it introduces and recorded as that article's
+title, exactly as printed; a by-line becomes the author, exactly as printed;
+page numbers and running heads are recorded as page furniture; anything the
+model cannot place goes to an unsorted list for human review — nothing is
+silently dropped. A second pass stitches units across pages, since stories
+and serials rarely end on the page where they begin. Each finished article
+carries its type, title, author, page range, assembled and rule-cleaned
+text, and the exact scan regions it was built from, so every sentence can be
+traced back to its place on the page.
+
 ## What the website shows
 
 Every page of every pilot issue, as a side-by-side view: the scan with the

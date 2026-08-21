@@ -87,18 +87,39 @@ def main():
     for n in (1, 2, 3):
         W, H = make_page_png(os.path.join(ROOT, "data", "pages", IID,
                                           f"page_{n:04d}.png"))
-    # layout json (page 1 detailed)
-    lay = {"page": 1, "width": W, "height": H, "regions": [
-        {"label": "Page-header", "bbox": [60, 40, 700, 90], "order": 0, "lines": []},
-        {"label": "Section-header", "bbox": [90, 120, 670, 190], "order": 1, "lines": []},
-        {"label": "Text", "bbox": [60, 210, 380, 1000], "order": 2, "lines": []},
-        {"label": "Text", "bbox": [390, 210, 710, 1000], "order": 3, "lines": []},
-    ]}
+    # layout jsons with region-level text, so the article assembly (s07)
+    # can run on the demo in --mock mode
     ldir = os.path.join(ROOT, "data", "layout", IID)
     os.makedirs(ldir, exist_ok=True)
-    for n in (1, 2, 3):
-        lay["page"] = n
-        json.dump(lay, open(os.path.join(ldir, f"page_{n:04d}.json"), "w"))
+    pages_lay = [
+        [  # page 1: header, story title, byline+body, ad
+            {"label": "PageHeader", "bbox": [60, 40, 700, 90], "order": 0,
+             "text": "ASTOUNDING STORIES    17", "lines": []},
+            {"label": "SectionHeader", "bbox": [90, 120, 670, 190], "order": 1,
+             "text": "THE SKY WANDERER", "lines": []},
+            {"label": "Text", "bbox": [60, 210, 380, 1000], "order": 2,
+             "text": "By RAY COLEMAN\n\nTHE great ship hung mo-\ntionless above the frozen\nplain.", "lines": []},
+            {"label": "Text", "bbox": [390, 210, 710, 1000], "order": 3,
+             "text": "ADVERTISEMENT $1 LEARN RADIO AT HOME. AMAZING OFFER.", "lines": []},
+        ],
+        [  # page 2: header, continuation of the story
+            {"label": "PageHeader", "bbox": [60, 40, 700, 90], "order": 0,
+             "text": "18    ASTOUNDING STORIES", "lines": []},
+            {"label": "Text", "bbox": [60, 210, 710, 1000], "order": 1,
+             "text": "ing of the city they had left be-\nhind, and of the long road home.", "lines": []},
+        ],
+        [  # page 3: header, a second story
+            {"label": "PageHeader", "bbox": [60, 40, 700, 90], "order": 0,
+             "text": "ASTOUNDING STORIES    19", "lines": []},
+            {"label": "SectionHeader", "bbox": [90, 120, 670, 190], "order": 1,
+             "text": "THE MOON POOL MYSTERY", "lines": []},
+            {"label": "Text", "bbox": [60, 210, 710, 1000], "order": 2,
+             "text": "By A. K. BARNES\n\nNobody believed the diver's story\nat first.", "lines": []},
+        ],
+    ]
+    for n, regions in enumerate(pages_lay, 1):
+        json.dump({"page": n, "width": W, "height": H, "regions": regions},
+                  open(os.path.join(ldir, f"page_{n:04d}.json"), "w"))
 
     # stage texts
     def put(stage, text):
