@@ -24,7 +24,7 @@ import time
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from timing_util import stage_timer, ROOT
+from timing_util import stage_timer, ROOT, load_pulp_env
 
 PROMPT = (
     "This is a scanned page from a twentieth-century fiction magazine. "
@@ -105,6 +105,7 @@ def main():
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--issue")
     args = ap.parse_args()
+    load_pulp_env()
     base_url = os.environ.get("PULP_VLM_BASE_URL")
     model = os.environ.get("PULP_VLM_MODEL")
     key = os.environ.get("PULP_VLM_KEY", "")

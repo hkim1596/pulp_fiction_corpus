@@ -20,6 +20,23 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TIMINGS = os.path.join(ROOT, "data", "timings.jsonl")
 
 
+def load_pulp_env(path=None):
+    """Load export lines from ~/shared/khj/.pulp_env into os.environ.
+
+    tmux sessions started by `rtx run` do not source that file (the s05
+    failure of 2026-08-20), so every stage that needs endpoints or keys
+    calls this itself. Existing environment values are never overridden.
+    """
+    path = path or os.path.expanduser("~/shared/khj/.pulp_env")
+    if not os.path.exists(path):
+        return
+    for line in open(path, encoding="utf-8"):
+        line = line.strip()
+        if line.startswith("export ") and "=" in line:
+            k, v = line[len("export "):].split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+
 @contextmanager
 def stage_timer(stage, issue, pages=None, extra=None):
     t0 = time.time()

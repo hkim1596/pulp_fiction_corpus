@@ -24,7 +24,7 @@ import time
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from timing_util import stage_timer, ROOT
+from timing_util import stage_timer, ROOT, load_pulp_env
 
 GUARD_MIN = 0.85   # minimum SequenceMatcher ratio input->output to accept
 
@@ -133,6 +133,13 @@ def main():
     ap.add_argument("--backend", required=True, choices=["qwen", "claude"])
     ap.add_argument("--src", default="routeA", choices=["ia", "routeA", "routeB"])
     args = ap.parse_args()
+    load_pulp_env()
+    need = (["PULP_QWEN_BASE_URL", "PULP_QWEN_MODEL"] if args.backend == "qwen"
+            else ["ANTHROPIC_API_KEY"])
+    missing = [k for k in need if not os.environ.get(k)]
+    if missing:
+        sys.exit(f"missing environment values: {', '.join(missing)} — "
+                 f"fill them in ~/shared/khj/.pulp_env")
     cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"),
                          encoding="utf-8"))
     ids = [i["id"] for i in cfg["issues"]]
