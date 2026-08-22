@@ -94,8 +94,10 @@ change, delete, or approve anything.
 The token is a long random string in `~/shared/khj/.pulp_api_token`
 (env override `PULP_API_TOKEN_FILE`). Delete that file and the whole
 door is off; recreate it (any long random string, one line) and it is
-back. It is never in git or in this folder — the handover section
-below lists it with the other secrets. Only paths inside `data/` are
+back. It is never in git; its VALUE is kept, with every other secret,
+in the `secrets/` folder one level above this repository in the
+Dropbox share (project decision 2026-08-22: whoever has the Dropbox
+folder has full access). Only paths inside `data/` are
 reachable (path traversal is blocked), so passwords, keys, and code are
 not exposed even to a token holder. The backup-server scripts copy and
 use the same token file, so the door works during an outage too.
@@ -208,8 +210,12 @@ you are running the pre-p17 script; update the server clone.
     ~/shared/khj/.pulp_users.json     accounts (hashed passwords)
     ~/shared/khj/.pulp_api_token      read-only data door token
 
-To hand the project to a new administrator, transfer these five files
-directly (not through the shared folder), or recreate them: a new env
+By project decision (2026-08-22), the values of all five are mirrored
+in the `secrets/` folder one level above this repository in the
+Dropbox share — sharing the Dropbox folder hands over everything, and
+that folder's README explains each value and how to refresh the
+mirrors. They stay out of git so the repository itself can someday be
+published. To rotate or recreate one: a new env
 file from the template in `scripts/server_setup.sh`, a new passcode or
 data-door token by echoing a value into the file, a new admin with
 `scripts/add_user.py`. A person with server access can always read the

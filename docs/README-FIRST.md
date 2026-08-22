@@ -1,10 +1,12 @@
 # Read this first
 
 This folder is the complete, self-contained record of the Pulp Fiction
-Corpus project. If Heejin Kim has shared it with you, everything you need
-to understand, run, and continue the work is in here — except the secret
-files (passwords, API keys), which are deliberately kept outside and are
-listed in `docs/handbook.md` so you know what to ask for.
+Corpus project. If Heejin Kim has shared his Dropbox folder with you,
+everything you need to understand, run, and continue the work is in
+your hands: this repository (code and operational docs), the
+development journal one level above it (the project's full history),
+and the `secrets/` folder next to the journal (the actual passwords,
+tokens, and keys, each explained in its README). Nothing is held back.
 
 ## What this project is
 
@@ -50,7 +52,8 @@ annotator's name; the machine's output is never overwritten.
     pipeline/s01…s07         the processing stages, in order
     scripts/                 setup, deploy helpers, backup server scripts
     config/pilot_issues.json the approved 10-issue development set
-    docs/                    you are here — handbook, journal, results
+    docs/                    you are here — handbook, technical notes,
+                             pilot results
     METHOD.md                the method text, rendered live at /method
 
 The processed data itself (scans, text stages, articles, annotations)
@@ -63,9 +66,13 @@ sit one level above this repository folder in the Dropbox share.
 
 1. Read `docs/handbook.md` — architecture, servers, deploy routine,
    and the operating rules that were learned the hard way.
-2. Read `docs/development-journal.md` — the full story of what was asked,
-   built, broken, and fixed, in order, including the requests in
-   Heejin's own words. This is the "prompt thread" of the project.
+2. Read `development-journal.md`, ONE LEVEL ABOVE this repository in
+   the Dropbox share — the full story of what was asked, built,
+   broken, and fixed, in order, including the requests in Heejin's
+   own words. This is the "prompt thread" of the project. It stays
+   out of git on purpose, as does the `secrets/` folder next to it,
+   which holds the project's actual passwords and tokens with its
+   own README — full continuity for anyone who has the folder.
 3. Check `docs/pilot-results.md` before touching the pipeline, so you
    know what is already measured and decided.
 
@@ -80,7 +87,8 @@ continued there; this folder carries everything the chats produced.
 The ten pilot issues are the only Internet Archive data we download or
 analyze until the Registered Report protocol is accepted — this is a
 publication-ethics commitment, enforced by an approval gate in the
-downloader. Secrets (site passcode, account file, Anthropic API key)
-never enter this folder or git. And on the shared GPU server, never
+downloader. Secrets never enter git or GitHub — their values live only
+in the Dropbox `secrets/` folder outside this repository, so the
+repository can someday be published. And on the shared GPU server, never
 touch docker images, containers, or files belonging to other lab
 members without coordinating first.
