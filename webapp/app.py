@@ -25,11 +25,12 @@ import json
 import os
 import re
 import secrets as pysecrets
+import threading
 import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.4.0"
+APP_VERSION = "0.5.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -231,6 +232,9 @@ def site_password():
         return None  # no file -> site open
 
 
+USERS_LOCK = threading.Lock()
+
+
 def users():
     """Named accounts, or None when no users file exists (guest-only mode)."""
     try:
@@ -239,12 +243,37 @@ def users():
         return None
 
 
+def save_users(u):
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(u, f, ensure_ascii=False, indent=1)
+    try:
+        os.chmod(USERS_FILE, 0o600)
+    except Exception:
+        pass
+
+
+def account_status(rec):
+    return rec.get("status", "active")   # older accounts lack the field
+
+
+def is_admin(username):
+    u = (users() or {}).get(username or "")
+    return bool(u) and u.get("role") == "admin" \
+        and account_status(u) == "active"
+
+
 def check_user(username, password):
+    """True only for an ACTIVE account with the right password."""
     u = (users() or {}).get(username)
-    if not u:
+    if not u or account_status(u) != "active":
         return False
     h = hashlib.sha256((u["salt"] + password).encode()).hexdigest()
     return hmac.compare_digest(h, u["pw"])
+
+
+def is_pending(username):
+    u = (users() or {}).get(username)
+    return bool(u) and account_status(u) == "pending"
 
 
 def display_name(username):
@@ -509,12 +538,13 @@ def esc(s):
     return html.escape(str(s), quote=True)
 
 
-def page(title, body, member=True, path="/"):
+def page(title, body, member=True, path="/", admin=False):
+    userslink = "<a href='/users'>users</a>" if admin else ""
     nav = ("<span class='nav'>"
            "<a href='/issues'>issues</a><a href='/articles'>articles</a>"
            "<a href='/method'>method</a>"
            "<a href='/timing'>timing</a><a href='/activity'>activity</a>"
-           "<a href='/feedback'>feedback</a>"
+           f"<a href='/feedback'>feedback</a>{userslink}"
            "<a href='/logout'>log out</a></span>") if member else ""
     fb = ("<div class='fb'><form method='POST' action='/feedback'>"
           f"<input type='hidden' name='path' value='{esc(path)}'>"
@@ -633,6 +663,10 @@ class H(BaseHTTPRequestHandler):
         self.user = self._user()
         return self.user is not None
 
+    def _page(self, title, body, path="/"):
+        return page(title, body, member=True, path=path,
+                    admin=is_admin(getattr(self, "user", None)))
+
     def log_message(self, fmt, *args):
         pass  # quiet; serve script logs restarts
 
@@ -646,10 +680,19 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, self.landing())
         if path == "/login":
             return self._send(200, self.login_page(""))
+        if path == "/signup":
+            return self._send(200, self.signup_page("", {}))
         if path == "/logout":
             return self._redirect("/", cookie="pfauth=; Max-Age=0; Path=/")
         if not self._member():
             return self._redirect("/login")
+        if path == "/users":
+            if not is_admin(self.user):
+                return self._send(403, self._page(
+                    "Admins only", "<h1>Admins only</h1><p class='muted'>"
+                    "The user-management page is for administrator "
+                    "accounts.</p>"))
+            return self._send(200, self.users_page(""))
         if path == "/activity":
             return self._send(200, self.activity_page())
         if path == "/issues":
@@ -704,11 +747,20 @@ class H(BaseHTTPRequestHandler):
                 return self._redirect("/issues",
                     cookie=f"pfauth={urllib.parse.quote(tok)}; "
                            f"Max-Age={COOKIE_DAYS*86400}; Path=/; HttpOnly")
+            if uname and is_pending(uname):
+                return self._send(200, self.login_page(
+                    "That account is still waiting for approval."))
             time.sleep(1.0)
             return self._send(200, self.login_page(
                 "That login is not right."))
+        if path == "/signup":
+            return self.do_signup(get)
         if not self._member():
             return self._redirect("/login")
+        if path == "/users":
+            if not is_admin(self.user):
+                return self._send(403, "admins only", "text/plain")
+            return self.do_users_action(get)
         if path == "/feedback":
             os.makedirs(DATA, exist_ok=True)
             with open(FEEDBACK, "a", encoding="utf-8") as f:
@@ -721,13 +773,152 @@ class H(BaseHTTPRequestHandler):
             return self._redirect("/feedback")
         if path == "/annotate":
             if self.user == "guest":
-                return self._send(403, page("No", howto(
+                return self._send(403, self._page("No", howto(
                     "Annotation needs a named account, so the record shows "
                     "who verified or changed each article. Ask Heejin for "
                     "an account, then log in with it.") +
                     "<h1>Guests cannot annotate</h1>"))
             return self.do_annotate(get)
         return self._send(404, "no", "text/plain")
+
+    def do_signup(self, get):
+        uname = get("username").lower()
+        name = get("name")
+        note = get("note")[:300]
+        pw, pw2 = get("password"), get("password2")
+        vals = {"username": uname, "name": name, "note": note}
+        if not re.fullmatch(r"[a-z0-9_]{2,24}", uname) or uname in (
+                "guest", "admin", "root"):
+            return self._send(200, self.signup_page(
+                "Username: 2-24 characters, letters/digits/underscore "
+                "only.", vals))
+        if not name:
+            return self._send(200, self.signup_page(
+                "Please give your name.", vals))
+        if len(pw) < 6:
+            return self._send(200, self.signup_page(
+                "Password: at least 6 characters.", vals))
+        if pw != pw2:
+            return self._send(200, self.signup_page(
+                "The two passwords differ.", vals))
+        with USERS_LOCK:
+            u = users() or {}
+            if uname in u:
+                return self._send(200, self.signup_page(
+                    "That username is taken.", vals))
+            if sum(1 for r in u.values()
+                   if account_status(r) == "pending") >= 100:
+                return self._send(200, self.signup_page(
+                    "Too many open requests right now — write to "
+                    + CONTACT + " instead.", vals))
+            salt = pysecrets.token_hex(8)
+            u[uname] = {"name": name[:80], "salt": salt,
+                        "pw": hashlib.sha256((salt + pw).encode()).hexdigest(),
+                        "status": "pending", "note": note,
+                        "created_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+            save_users(u)
+        return self._send(200, self.signup_page(
+            "Request received. The administrator will approve your "
+            "account; you can log in once that has happened.", {}, ok=True))
+
+    def do_users_action(self, get):
+        uname = get("username")
+        act = get("act")
+        with USERS_LOCK:
+            u = users() or {}
+            rec = u.get(uname)
+            if not rec:
+                return self._redirect("/users")
+            if act == "approve" and account_status(rec) == "pending":
+                rec["status"] = "active"
+                rec["approved_by"] = self.user
+                rec["approved_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+            elif act == "remove" and uname != self.user:
+                del u[uname]
+            elif act == "make_admin" and account_status(rec) == "active":
+                rec["role"] = "admin"
+            save_users(u)
+        return self._redirect("/users")
+
+    def signup_page(self, msg, vals, ok=False):
+        m = (f"<p class='{'muted' if ok else ''}' "
+             f"style='{'color:#2c5e2e' if ok else 'color:#7a3020'}'>"
+             f"{esc(msg)}</p>" if msg else "")
+        form = "" if ok else f"""
+<form method='POST' action='/signup'>
+<p><input class='pw' type='text' name='username' placeholder='username'
+value='{esc(vals.get('username', ''))}'></p>
+<p><input class='pw' type='text' name='name' placeholder='your name'
+value='{esc(vals.get('name', ''))}' size='30'></p>
+<p><input class='pw' type='text' name='note' size='30'
+placeholder='who you are / affiliation (shown to the admin)'
+value='{esc(vals.get('note', ''))}'></p>
+<p><input class='pw' type='password' name='password'
+placeholder='password (min 6)'>
+<input class='pw' type='password' name='password2'
+placeholder='password again'></p>
+<p><button class='go'>Request account</button></p></form>"""
+        body = f"""<div class='land'><h1>Request an annotator account</h1>
+<p>Accounts let you correct and verify articles; every action is recorded
+under your name. New accounts start as requests and work after the
+administrator approves them.</p>
+{m}{form}
+<p class='muted'><a href='/login'>back to login</a> · questions:
+{CONTACT}</p></div>"""
+        return f"""<!doctype html><html><head><meta charset='utf-8'>
+<title>Sign up · Pulp Fiction Corpus</title><style>{CSS}</style></head>
+<body>{body}</body></html>"""
+
+    def users_page(self, msg):
+        u = users() or {}
+        rows = ""
+        for uname in sorted(u, key=lambda x: (account_status(u[x]) != "pending",
+                                              x)):
+            rec = u[uname]
+            st = account_status(rec)
+            chip = ("<span class='chip stM'>pending</span>" if st == "pending"
+                    else ("<span class='chip stV'>admin</span>"
+                          if rec.get("role") == "admin"
+                          else "<span class='chip stA'>annotator</span>"))
+            acts = ""
+            if st == "pending":
+                acts += (f"<form class='mini' method='POST' action='/users'>"
+                         f"<input type='hidden' name='username' "
+                         f"value='{esc(uname)}'>"
+                         f"<input type='hidden' name='act' value='approve'>"
+                         f"<button>approve</button></form> ")
+            elif rec.get("role") != "admin":
+                acts += (f"<form class='mini' method='POST' action='/users'>"
+                         f"<input type='hidden' name='username' "
+                         f"value='{esc(uname)}'>"
+                         f"<input type='hidden' name='act' value='make_admin'>"
+                         f"<button>make admin</button></form> ")
+            if uname != self.user:
+                acts += (f"<form class='mini' method='POST' action='/users'>"
+                         f"<input type='hidden' name='username' "
+                         f"value='{esc(uname)}'>"
+                         f"<input type='hidden' name='act' value='remove'>"
+                         f"<button>remove</button></form>")
+            approved = (f"approved by {esc(display_name(rec['approved_by']))}"
+                        if rec.get("approved_by") else "")
+            rows += (f"<tr><td>{esc(uname)}</td><td>{esc(rec.get('name', ''))}"
+                     f"</td><td>{chip}</td>"
+                     f"<td class='muted'>{esc(rec.get('note') or '')}</td>"
+                     f"<td class='muted'>{esc(rec.get('created_at') or '')} "
+                     f"{approved}</td><td>{acts}</td></tr>")
+        npend = sum(1 for r in u.values() if account_status(r) == "pending")
+        body = (howto(
+            "Every account on the site. Requests from the sign-up page "
+            "appear here as pending and cannot log in until approved. "
+            "Approving records your name and the time. Removing an account "
+            "does not remove the annotations it already made — those stay "
+            "in the log under its name.")
+            + f"<h1>Users ({len(u)} · {npend} pending)</h1>"
+            + ("<table><tr><th>username</th><th>name</th><th>role</th>"
+               "<th>note</th><th>history</th><th>actions</th></tr>"
+               + rows + "</table>" if rows else
+               "<div class='empty'>No accounts yet.</div>"))
+        return self._page("Users", body, path="/users")
 
     def do_annotate(self, get):
         iid = get("issue")
@@ -812,7 +1003,8 @@ To request access, write to {CONTACT}.</p>{note}
 autofocus> <input class='pw' type='password' name='password'
 placeholder='password'> <button class='go'>Log in</button></p></form>
 <p class='muted'>Named accounts can verify and correct articles; every
-action is recorded under your name.</p>"""
+action is recorded under your name. No account yet?
+<a href='/signup'>Request one</a>.</p>"""
         body = f"""<div class='land'><h1>Collaborator access</h1>{m}
 {acct}
 <h2 style='border:0'>Guest (read only)</h2>
@@ -856,12 +1048,12 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             + "<table><tr><th>issue</th><th>genre</th><th>pages</th>"
               "<th>gold</th><th>stages present</th></tr>"
             + "".join(rows) + "</table>")
-        return page("Issues", body, path="/issues")
+        return self._page("Issues", body, path="/issues")
 
     def issue_page(self, iid):
         info = issue_by_id(iid)
         if not info:
-            return page("Unknown", "<h1>Unknown issue</h1>")
+            return self._page("Unknown", "<h1>Unknown issue</h1>")
         pngs = pages_of(iid)
         sts = stages_of(iid)
         t = [r for r in timings() if r.get("issue") == iid]
@@ -896,7 +1088,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                "<th>seconds</th><th>sec/page</th><th>note</th></tr>"
                + trows + "</table>" if t else
                "<div class='empty'>No timing rows for this issue yet.</div>"))
-        return page(info["magazine"], body, path=f"/issue/{iid}")
+        return self._page(info["magazine"], body, path=f"/issue/{iid}")
 
     def issue_articles_html(self, iid):
         doc = effective_doc(iid)
@@ -927,7 +1119,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
     def viewer(self, iid, n, qs):
         info = issue_by_id(iid)
         if not info:
-            return page("Unknown", "<h1>Unknown issue</h1>")
+            return self._page("Unknown", "<h1>Unknown issue</h1>")
         pngs = pages_of(iid)
         sts = stages_of(iid)
         pagefile = f"page_{n:04d}.txt"
@@ -1049,7 +1241,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             + f"<p>{nav}</p>"
             + f"<div class='viewer'><div class='scan'>{img}{svg}{laynote}</div>"
             + grid + "</div>")
-        return page(f"{info['magazine']} p{n}", body,
+        return self._page(f"{info['magazine']} p{n}", body,
                     path=f"/issue/{iid}/p/{n}")
 
     def articles_page(self, qs):
@@ -1122,12 +1314,12 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                "</th><th>words</th></tr>" + trows + "</table>" if trows else
                "<div class='empty'>0 articles match. If the whole table is "
                "empty, the assembly stage (s07) has not run yet.</div>"))
-        return page("Articles", body, path="/articles")
+        return self._page("Articles", body, path="/articles")
 
     def article_page(self, aid):
         art, doc = article_by_id(aid)
         if not art:
-            return page("Unknown", "<h1>Unknown article</h1>")
+            return self._page("Unknown", "<h1>Unknown article</h1>")
         iid = doc["issue"]
         info = issue_by_id(iid) or {}
         can = self.user != "guest"
@@ -1266,7 +1458,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             + "</tr>" + frows + "</table>"
             + (f"<p>{mergeform}</p>" if mergeform else "")
             + "<h2>Text</h2>" + textblock)
-        return page(art.get("title") or aid, body, path=f"/article/{aid}")
+        return self._page(art.get("title") or aid, body, path=f"/article/{aid}")
 
     def activity_page(self):
         events = []
@@ -1299,7 +1491,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                if events else
                "<div class='empty'>No annotations yet. Corrections and "
                "verifications made on article pages appear here.</div>"))
-        return page("Activity", body, path="/activity")
+        return self._page("Activity", body, path="/activity")
 
 
     def method_page(self):
@@ -1312,7 +1504,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             "feedback box below; the method is revised from feedback before "
             "the protocol is frozen.")
             + md_to_html(md))
-        return page("Method", body, path="/method")
+        return self._page("Method", body, path="/method")
 
     def timing_page(self):
         t = timings()
@@ -1346,7 +1538,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                "<th>full corpus, hours (projected)</th></tr>" + rows + "</table>"
                if rows else
                "<div class='empty'>0 timing rows — no stage has run yet.</div>"))
-        return page("Timing", body, path="/timing")
+        return self._page("Timing", body, path="/timing")
 
     def feedback_page(self):
         items = []
@@ -1371,7 +1563,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                "<th>comment</th></tr>" + rows + "</table>" if items else
                "<div class='empty'>No feedback yet. Every members page has a "
                "feedback box at the bottom.</div>"))
-        return page("Feedback", body, path="/feedback")
+        return self._page("Feedback", body, path="/feedback")
 
 
 def main():

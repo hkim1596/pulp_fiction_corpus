@@ -2,12 +2,16 @@
 """Create or update an annotator account for the pulp site.
 
 Run ON THE SERVER (accounts live in ~/shared/khj/.pulp_users.json):
-    python3 scripts/add_user.py heejin "Heejin Kim"
+    python3 scripts/add_user.py heejin "Heejin Kim" --admin
     python3 scripts/add_user.py dennis "Dennis Yi Tenen"
-It prompts for the password (not shown while typing). Listing accounts:
+It prompts for the password (not shown while typing). --admin makes the
+account an administrator (sees the users page, approves sign-up requests).
+Listing accounts:
     python3 scripts/add_user.py --list
 Removing one:
     python3 scripts/add_user.py --remove username
+Normally only the FIRST admin is created here; everyone else signs up on
+the website and the admin approves them there.
 
 Once this file exists, the site's login page offers account login; the
 shared passcode keeps working as read-only guest access. Every annotation
@@ -52,8 +56,10 @@ def main():
         else:
             print("no such user")
         return
+    admin = "--admin" in args
+    args = [a for a in args if a != "--admin"]
     if len(args) != 2:
-        sys.exit("usage: add_user.py <username> \"Display Name\"  "
+        sys.exit("usage: add_user.py <username> \"Display Name\" [--admin] "
                  "| --list | --remove <username>")
     username, name = args[0].strip().lower(), args[1].strip()
     if not username.isidentifier():
@@ -66,9 +72,14 @@ def main():
     users[username] = {
         "name": name, "salt": salt,
         "pw": hashlib.sha256((salt + pw).encode()).hexdigest(),
+        "status": "active",
+        "created_at": __import__("time").strftime("%Y-%m-%dT%H:%M:%S"),
     }
+    if admin:
+        users[username]["role"] = "admin"
     save(users)
-    print(f"saved {username} ({name}) to {PATH}")
+    print(f"saved {username} ({name})"
+          f"{' as ADMIN' if admin else ''} to {PATH}")
 
 
 if __name__ == "__main__":
