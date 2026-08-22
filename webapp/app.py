@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.7.1"
+APP_VERSION = "0.7.2"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -215,7 +215,7 @@ STATUS_CHIP = {
 
 # workbench javascript (plain string; __TOKENS__ substituted per page)
 WB_JS = r"""
-var ISSUE="__ISSUE__", AID="__AID__", CAN=__CAN__;
+var ISSUE="__ISSUE__", AID="__AID__", CAN=__CAN__, FIRSTPG=__FIRSTPG__;
 function post(params){params.issue=ISSUE;params.article_id=AID;
   fetch('/annotate',{method:'POST',
     headers:{'Content-Type':'application/x-www-form-urlencoded'},
@@ -232,8 +232,37 @@ function selKey(k){
 }
 document.addEventListener('click',function(ev){
   var t=ev.target.closest('[data-selkey]');
-  if(t) selKey(t.getAttribute('data-selkey'));
+  if(!t)return;
+  if(t.getAttribute('data-member')==='0'){showIncl(t);return;}
+  selKey(t.getAttribute('data-selkey'));
 });
+function scrollLeftTo(pg){
+  var el=document.getElementById('pg'+pg);
+  var wl=document.querySelector('.wbleft');
+  if(el&&wl){wl.scrollTop+=el.getBoundingClientRect().top-wl.getBoundingClientRect().top;}
+}
+function pgjump(){
+  scrollLeftTo(document.getElementById('pgjump').value);
+  return false;
+}
+window.addEventListener('load',function(){
+  if(typeof FIRSTPG!=='undefined'&&FIRSTPG)scrollLeftTo(FIRSTPG);
+  var cl=document.getElementById('ip_close');
+  if(cl)cl.onclick=function(){document.getElementById('inclpanel').style.display='none';return false;};
+});
+function showIncl(g){
+  var p=document.getElementById('inclpanel');
+  if(!p)return;
+  document.getElementById('ip_id').textContent=g.getAttribute('data-boxid')||'';
+  document.getElementById('ip_info').textContent=g.getAttribute('data-info')||'';
+  document.getElementById('ip_snip').textContent=g.getAttribute('data-snip')||'(no text)';
+  var add=document.getElementById('ip_add');
+  if(add){add.onclick=function(){post({act:'moveto',frag:g.getAttribute('data-key'),to_id:AID});};}
+  var ow=document.getElementById('ip_openowner');
+  var link=g.getAttribute('data-ownerlink');
+  if(ow){if(link){ow.style.display='';ow.href=link;}else{ow.style.display='none';}}
+  p.style.display='block';
+}
 if(CAN){
   var cards=document.getElementById('cards');
   if(cards){
@@ -769,6 +798,13 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .card.rA{border-left:6px solid #2c5e2e}
 .card.rB{border-left:6px solid #1c1a17}
 .sechint{font-size:12.5px;color:#75695a;border:1px dashed #b8a88e;background:#fff;padding:8px 10px;margin:0 0 10px}
+.pgjump{font-size:13px;margin:0 0 10px;background:#f3ead9;border:1px solid #d8cfc0;padding:6px 10px}
+.pgjump input{width:64px;font-size:13px;border:1px solid #b8a88e;font-family:inherit;padding:1px 4px}
+.pgjump button{font-size:12.5px;border:1px solid #b8a88e;background:#fff;font-family:inherit;cursor:pointer}
+.pgjump a{margin-right:7px}
+.inclpanel{position:fixed;bottom:18px;right:22px;width:380px;background:#fff;border:2px solid #7a3020;box-shadow:0 4px 18px rgba(0,0,0,.28);z-index:50}
+.inclpanel .cardtext{max-height:130px}
+.inclpanel .go{font-size:13px;padding:3px 12px;border:1px solid #1c1a17;background:#1c1a17;color:#faf7f2;cursor:pointer}
 .footer{margin-top:44px;font-size:12px;color:#75695a;border-top:2px solid #1c1a17;padding-top:8px}
 .land{max-width:640px;margin:8vh auto 0;padding:0 20px}
 .land h1{font-size:34px}
@@ -1651,9 +1687,13 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                         f"<select name='type'>{topts}</select> "
                         f"<button>save title / author / type</button></form>")
 
-        # LEFT: scans; role-marked boxes of this article get section tints
+        # LEFT: every page of the ISSUE (lazy-loaded), so missing segments
+        # anywhere can be found and pulled in; opens at the story's first page
+        allpages = sorted(per_page.keys())
+        firstpg = art["pages"][0] if art["pages"] else (
+            allpages[0] if allpages else 1)
         left = ""
-        for pno in art["pages"]:
+        for pno in allpages:
             lay = layout_of(iid, pno) or {}
             W = lay.get("width") or 1000
             H = lay.get("height") or 1400
@@ -1699,20 +1739,40 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                               f"width='{w}' height='{fs+8}' fill='{stroke}'/>"
                               f"<text x='{lx+6}' y='{ty}' fill='#faf7f2' "
                               f"font-size='{fs}'>{e['id']}</text>")
+                r0 = e["region_ids"][0] if e["region_ids"] else -1
+                snip = ((regs[r0].get("text") or "")[:110]
+                        if 0 <= r0 < len(regs) else "")
+                if mine:
+                    binfo, ownerlink = "this article", ""
+                elif e["kind"] == "article":
+                    binfo = ("belongs to: "
+                             + (e.get("title") or e["owner"] or "?")[:40])
+                    ownerlink = f"/article/{e['owner']}"
+                elif e["kind"] == "furniture":
+                    binfo, ownerlink = (e.get("title")
+                                        or "page furniture"), ""
+                elif e["kind"] == "unsorted":
+                    binfo, ownerlink = "unsorted", ""
+                else:
+                    binfo, ownerlink = "not assigned by the machine", ""
                 boxes += (f"<g class='fbox' data-key='{e['key']}' "
-                          f"data-selkey='{e['key']}'>{inner}</g>")
-            left += (f"<div class='scanwrap'>"
+                          f"data-selkey='{e['key']}' "
+                          f"data-member='{1 if mine else 0}' "
+                          f"data-boxid='{e['id']}' "
+                          f"data-info='{esc(binfo)} · {esc(e.get('label') or '')}' "
+                          f"data-ownerlink='{ownerlink}' "
+                          f"data-snip='{esc(snip)}'>{inner}</g>")
+            inart = pno in art["pages"]
+            left += (f"<div class='scanwrap' id='pg{pno}'>"
                      f"<img src='/img/{iid}/page_{pno:04d}.png' "
-                     f"alt='page {pno}'>"
+                     f"loading='lazy' alt='page {pno}'>"
                      f"<svg viewBox='0 0 {W} {H}' "
                      f"preserveAspectRatio='none'>{boxes}</svg>"
-                     f"<div class='pgcap'>page {pno} · solid = this "
-                     f"article (red tint = title, green tint = author) · "
-                     f"long dashes = other articles · dotted = page "
-                     f"furniture · amber = unsorted or unassigned"
-                     f"</div></div>")
-        if not art["pages"]:
-            left = "<div class='empty'>No scan pages for this article.</div>"
+                     f"<div class='pgcap'>page {pno}"
+                     + (" · A PAGE OF THIS ARTICLE" if inart else "")
+                     + "</div></div>")
+        if not allpages:
+            left = "<div class='empty'>No scan pages in this issue.</div>"
 
         # RIGHT: cards in three color-coded sections
         body_keys = [fragkey(fr) for fr in art.get("fragments", [])
@@ -1873,9 +1933,34 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
         guestnote = ("" if can else
                      "<p class='muted'>You are viewing as guest — log in "
                      "with an annotator account to correct or verify.</p>")
+        artlinks = " ".join(
+            f"<a href='#' onclick='scrollLeftTo({p});return false'>{p}</a>"
+            for p in art["pages"][:20])
+        pjump = (f"<div class='pgjump'>whole issue, {len(allpages)} pages · "
+                 f"go to page <input id='pgjump' type='number' min='1' "
+                 f"max='{allpages[-1] if allpages else 1}'> "
+                 f"<button onclick='return pgjump()'>go</button>"
+                 + (f" · this article: {artlinks}" if artlinks else "")
+                 + "<br><span class='muted'>solid = this article (red tint "
+                 "= title, green = author) · long dash = other articles · "
+                 "dotted = furniture · amber = unsorted/unassigned · click "
+                 "any box not in this article to include it</span></div>")
+        inclpanel = (
+            "<div id='inclpanel' class='inclpanel' style='display:none'>"
+            "<div class='ch'><span class='idchip other' id='ip_id'></span>"
+            "<span class='muted' id='ip_info'></span>"
+            "<span style='margin-left:auto'><a href='#' id='ip_close'>"
+            "close</a></span></div>"
+            "<div class='cardtext' id='ip_snip'></div>"
+            "<div style='padding:7px 10px'>"
+            + ("<button class='go' id='ip_add'>add to this article</button> "
+               if can else "")
+            + "<a id='ip_openowner' href='#' style='display:none'>open its "
+            "article</a></div></div>")
         script = ("<script>"
                   + WB_JS.replace("__ISSUE__", iid).replace("__AID__", aid)
                   .replace("__CAN__", "true" if can else "false")
+                  .replace("__FIRSTPG__", str(firstpg))
                   + "</script>")
         body = (howto(
             "Left: the scans, with EVERY detected box labeled — page "
@@ -1901,13 +1986,13 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             + (f"<p>by {esc(art['author'])}</p>" if art.get("author") else "")
             + f"<p class='muted'>{meta}</p>"
             + f"<p>{stline}</p>" + guestnote + metaform
-            + "<div class='wb'><div class='wbleft'>" + left + "</div>"
+            + "<div class='wb'><div class='wbleft'>" + pjump + left + "</div>"
             + "<div class='wbright'>" + sections
             + (("<h2>On these pages, assigned elsewhere</h2>" + oth)
                if oth else "")
             + (f"<p>{mergeform}</p>" if mergeform else "")
             + textblock
-            + "</div></div>" + script)
+            + "</div></div>" + inclpanel + script)
         return self._page(art.get("title") or aid, body,
                           path=f"/article/{aid}")
 
