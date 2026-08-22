@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.6.0"
+APP_VERSION = "0.6.1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -441,7 +441,13 @@ def effective_doc(iid):
         return None
     arts = []
     for a in doc["articles"]:
-        arts.append({**a, "fragments": [dict(f) for f in a["fragments"]],
+        # region-level granularity: every layout box is its own unit, so
+        # every box gets its own id, card, and controls on the workbench
+        expl = []
+        for f in a["fragments"]:
+            for r in f["region_ids"]:
+                expl.append({"page": f["page"], "region_ids": [r]})
+        arts.append({**a, "fragments": expl,
                      "status": "auto", "verified_by": None,
                      "verified_at": None, "modified_by": [],
                      "text_override": None, "last_mod": ""})
@@ -451,9 +457,29 @@ def effective_doc(iid):
     uns = []
     for u in doc.get("unsorted", []):
         segs = u.get("segments") or u.get("region_ids") or []
-        if u.get("page") is not None and segs:
-            uns.append({"page": u["page"], "region_ids": list(segs)})
+        if u.get("page") is not None:
+            for r in segs:
+                uns.append({"page": u["page"], "region_ids": [r]})
+    mach_furn = []
+    for u in doc.get("furniture", []):
+        segs = u.get("segments") or []
+        if u.get("page") is not None:
+            for r in segs:
+                mach_furn.append({"page": u["page"], "region_ids": [r]})
     n_user = 0
+
+    def synth(k):
+        """A fragment for a bare region key (page:r) — lets annotators pull
+        in page furniture or regions the machine never assigned."""
+        try:
+            pno, r = k.split(":")
+            pno, r = int(pno), int(r)
+        except Exception:
+            return None
+        regs = page_regions(iid, pno)
+        if 0 <= r < len(regs):
+            return {"page": pno, "region_ids": [r]}
+        return None
 
     def findfrag(k):
         for a in arts:
@@ -493,10 +519,13 @@ def effective_doc(iid):
         elif act == "move_frag":
             src, fr = findfrag(ev.get("frag", ""))
             if not fr:
-                continue
+                fr = synth(ev.get("frag", ""))  # furniture / unassigned
+                src = None
+                if not fr:
+                    continue
             if src == "unsorted":
                 uns.remove(fr)
-            else:
+            elif src is not None:
                 src["fragments"].remove(fr)
                 touch(src, ev)
             tgt = byid.get(ev.get("to_id", ""))
@@ -516,10 +545,12 @@ def effective_doc(iid):
                 touch(tgt, ev)
         elif act == "frag_furniture":
             src, fr = findfrag(ev.get("frag", ""))
+            if not fr and synth(ev.get("frag", "")):
+                fr, src = synth(ev.get("frag", "")), None
             if fr:
                 if src == "unsorted":
                     uns.remove(fr)
-                else:
+                elif src is not None:
                     src["fragments"].remove(fr)
                     touch(src, ev)
                 user_furniture.append({"frag": ev.get("frag"),
@@ -557,35 +588,54 @@ def effective_doc(iid):
             a["status"] = "modified"
         out.append(a)
     return {**doc, "articles": out, "unsorted": uns,
+            "machine_furniture": mach_furn,
             "frag_overrides": overrides,
             "user_furniture": user_furniture}
 
 
 def issue_frag_map(iid, doc):
-    """Per page: every segment (from any article, or unsorted) with a short
-    unique id like 12A (page 12, first segment in reading order)."""
-    per_page = {}
-    def omin(pno, region_ids):
-        regs = page_regions(iid, pno)
-        vals = [regs[r].get("order", r) for r in region_ids if r < len(regs)]
-        return min(vals) if vals else 999
+    """EVERY layout region of every page gets a short unique id like 12A
+    (page 12, first box in reading order) — page numbers and running heads
+    included — plus its current classification: which article owns it, or
+    furniture / unsorted / unassigned."""
+    art_of = {}
     for a in doc["articles"]:
         for fr in a["fragments"]:
-            per_page.setdefault(fr["page"], []).append(
-                {"key": fragkey(fr), "owner": a["article_id"],
-                 "title": a.get("title"), "region_ids": fr["region_ids"],
-                 "page": fr["page"], "o": omin(fr["page"], fr["region_ids"])})
-    for fr in doc.get("unsorted", []):
-        per_page.setdefault(fr["page"], []).append(
-            {"key": fragkey(fr), "owner": None, "title": "(unsorted)",
-             "region_ids": fr["region_ids"], "page": fr["page"],
-             "o": omin(fr["page"], fr["region_ids"])})
-    ids = {}
-    for pno, lst in per_page.items():
-        lst.sort(key=lambda e: e["o"])
-        for i, e in enumerate(lst):
-            e["id"] = f"{pno}{chr(65 + i) if i < 26 else 'Z' + str(i)}"
-            ids[e["key"]] = e["id"]
+            art_of[fragkey(fr)] = (a["article_id"], a.get("title"))
+    ufurn = {u.get("frag") for u in doc.get("user_furniture", [])}
+    mfurn = {fragkey(fr) for fr in doc.get("machine_furniture", [])}
+    unsrt = {fragkey(fr) for fr in doc.get("unsorted", [])}
+
+    per_page, ids = {}, {}
+    laydir = os.path.join(DATA, "layout", iid)
+    pfiles = (sorted(f for f in os.listdir(laydir)
+                     if f.startswith("page_") and f.endswith(".json"))
+              if os.path.isdir(laydir) else [])
+    for pf in pfiles:
+        pno = int(pf[5:9])
+        regs = page_regions(iid, pno)
+        order = sorted(range(len(regs)),
+                       key=lambda r: regs[r].get("order", r))
+        lst = []
+        for i, r in enumerate(order):
+            key = f"{pno}:{r}"
+            rid = f"{pno}{chr(65 + i) if i < 26 else 'Z' + str(i)}"
+            owner, title, kind = None, None, "unassigned"
+            if key in art_of:
+                owner, title = art_of[key]
+                kind = "article"
+            elif key in ufurn or key in mfurn:
+                kind = "furniture"
+                title = ("marked not story text" if key in ufurn
+                         else "page furniture")
+            elif key in unsrt:
+                kind = "unsorted"
+                title = "unsorted"
+            lst.append({"key": key, "id": rid, "owner": owner,
+                        "title": title, "kind": kind, "region_ids": [r],
+                        "page": pno, "label": regs[r].get("label", "")})
+            ids[key] = rid
+        per_page[pno] = lst
     return per_page, ids
 
 
@@ -1541,9 +1591,18 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             regs = page_regions(iid, pno)
             boxes = ""
             for e in per_page.get(pno, []):
-                mine = e["owner"] == aid
-                stroke = "#7a3020" if mine else "#75695a"
-                dash = "" if mine else " stroke-dasharray='14,10'"
+                mine = e["kind"] == "article" and e["owner"] == aid
+                if mine:
+                    stroke, width, dash = "#7a3020", 4, ""
+                elif e["kind"] == "article":
+                    stroke, width, dash = ("#75695a", 3,
+                                           " stroke-dasharray='14,10'")
+                elif e["kind"] == "furniture":
+                    stroke, width, dash = ("#b8a88e", 2,
+                                           " stroke-dasharray='4,7'")
+                else:  # unsorted / unassigned
+                    stroke, width, dash = ("#c99b4e", 3,
+                                           " stroke-dasharray='8,8'")
                 inner, lx, ly = "", None, None
                 for r in e["region_ids"]:
                     if r < len(regs):
@@ -1551,7 +1610,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                         inner += (f"<rect x='{x0}' y='{y0}' "
                                   f"width='{x1-x0}' height='{y1-y0}' "
                                   f"fill='rgba(0,0,0,0)' stroke='{stroke}' "
-                                  f"stroke-width='{4 if mine else 3}'{dash}/>")
+                                  f"stroke-width='{width}'{dash}/>")
                         if lx is None:
                             lx, ly = x0, y0
                 if lx is not None:
@@ -1570,7 +1629,9 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                      f"<svg viewBox='0 0 {W} {H}' "
                      f"preserveAspectRatio='none'>{boxes}</svg>"
                      f"<div class='pgcap'>page {pno} · solid = this "
-                     f"article, dashed = other articles</div></div>")
+                     f"article · long dashes = other articles · dotted = "
+                     f"page furniture · amber = unsorted or unassigned"
+                     f"</div></div>")
         if not art["pages"]:
             left = "<div class='empty'>No scan pages for this article.</div>"
 
@@ -1580,6 +1641,10 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             k = fragkey(fr)
             fid = ids.get(k, "?")
             txt = frag_text(iid, fr, overrides)
+            regs0 = page_regions(iid, fr["page"])
+            r0 = fr["region_ids"][0] if fr["region_ids"] else -1
+            lab = (regs0[r0].get("label", "") if 0 <= r0 < len(regs0)
+                   else "")
             corrected = k in overrides
             btns = ""
             if can:
@@ -1600,30 +1665,40 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                       f"<div class='ch'>"
                       f"<span class='idchip' data-selkey='{k}'>{fid}</span>"
                       f"<span class='muted'>page {fr['page']}"
+                      f"{' · ' + esc(lab) if lab else ''}"
                       f"{' · corrected' if corrected else ''}</span>"
                       f"<span style='margin-left:auto'>{btns}</span></div>"
                       f"<div class='cardtext{' edited' if corrected else ''}' "
                       f"data-key='{k}'>{esc(txt)}</div></div>")
 
-        # other segments on the same pages
+        # every other box on the same pages, whatever its classification
         oth = ""
         for pno in art["pages"]:
             for e in per_page.get(pno, []):
-                if e["owner"] == aid:
+                if e["kind"] == "article" and e["owner"] == aid:
                     continue
                 fr = {"page": e["page"], "region_ids": e["region_ids"]}
                 txt = frag_text(iid, fr, overrides)[:180]
-                owner = ("<a href='/article/" + e["owner"] + "'>"
-                         + esc((e.get("title") or e["owner"])[:36]) + "</a>"
-                         if e["owner"] else "(unsorted)")
+                if e["kind"] == "article":
+                    owner = ("belongs to <a href='/article/" + e["owner"]
+                             + "'>" + esc((e.get("title")
+                                           or e["owner"])[:36]) + "</a>")
+                elif e["kind"] == "furniture":
+                    owner = esc(e.get("title") or "page furniture")
+                elif e["kind"] == "unsorted":
+                    owner = "unsorted"
+                else:
+                    owner = "not assigned by the machine"
+                lab = esc(e.get("label") or "")
                 add = (mini("add to this article", act="moveto",
                             frag=e["key"], to_id=aid) if can else "")
                 oth += (f"<div class='othercard card' data-key='{e['key']}'>"
                         f"<div class='ch'><span class='idchip other' "
                         f"data-selkey='{e['key']}'>{e['id']}</span>"
-                        f"<span class='muted'>belongs to {owner}</span>"
+                        f"<span class='muted'>{owner} · {lab}</span>"
                         f"<span style='margin-left:auto'>{add}</span></div>"
-                        f"<div class='cardtext'>{esc(txt)}</div></div>")
+                        f"<div class='cardtext'>{esc(txt) or '(no text)'}"
+                        f"</div></div>")
 
         mergeform = ""
         if can and others:
@@ -1659,18 +1734,21 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                   .replace("__CAN__", "true" if can else "false")
                   + "</script>")
         body = (howto(
-            "Left: the scans, with every segment boxed and labeled "
-            "(12A = page 12, first segment). Solid boxes belong to this "
-            "article; dashed ones belong elsewhere. Right: the same "
-            "segments as cards in reading order, same labels. Click a box "
-            "or a label to flash its partner. Drag cards to fix the order "
-            "(saved instantly). Double-click a card's text to correct OCR "
-            "errors in place. 'Not story text' expels a page number or a "
-            "'Continued from page' notice; 'add to this article' pulls in "
-            "a segment that was assigned elsewhere. When everything is "
-            "right, mark it verified — 'verify, then next unverified' "
-            "moves you straight on. Every action is recorded under your "
-            "name; the machine's output is never overwritten.")
+            "Left: the scans, with EVERY detected box labeled — page "
+            "numbers and running heads included (12A = page 12, first box "
+            "in reading order). Solid = this article; long dashes = other "
+            "articles; dotted = page furniture; amber = unsorted or "
+            "unassigned. Right: this article's boxes as cards in reading "
+            "order, then every other box on these pages with its "
+            "classification. Click a box or a label to flash its partner. "
+            "Drag cards to fix the order (saved instantly). Double-click "
+            "a card's text to correct OCR errors in place. 'Not story "
+            "text' expels a box from the article; 'add to this article' "
+            "claims any box — even one the machine called furniture or "
+            "never assigned. When everything is right, mark it verified — "
+            "'verify, then next unverified' moves you straight on. Every "
+            "action is recorded under your name; the machine's output is "
+            "never overwritten.")
             + f"<h1>{esc(art.get('title') or '(untitled)')}</h1>"
             + (f"<p>by {esc(art['author'])}</p>" if art.get("author") else "")
             + f"<p class='muted'>{meta}</p>"
