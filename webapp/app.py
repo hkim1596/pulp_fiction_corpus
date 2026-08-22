@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.5.0"
+APP_VERSION = "0.6.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -213,6 +213,67 @@ STATUS_CHIP = {
     "verified": "<span class='chip stV'>verified</span>",
 }
 
+# workbench javascript (plain string; __TOKENS__ substituted per page)
+WB_JS = r"""
+var ISSUE="__ISSUE__", AID="__AID__", CAN=__CAN__;
+function post(params){params.issue=ISSUE;params.article_id=AID;
+  fetch('/annotate',{method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams(params)}).then(function(){location.reload();});}
+function selKey(k){
+  document.querySelectorAll('.hl').forEach(function(e){e.classList.remove('hl');});
+  document.querySelectorAll('[data-key="'+k+'"]').forEach(function(e){
+    e.classList.add('hl');
+    if(e.classList.contains('card')||e.classList.contains('othercard'))
+      e.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+  var g=document.querySelector('g[data-key="'+k+'"]');
+  if(g) g.closest('.scanwrap').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+document.addEventListener('click',function(ev){
+  var t=ev.target.closest('[data-selkey]');
+  if(t) selKey(t.getAttribute('data-selkey'));
+});
+if(CAN){
+  var cards=document.getElementById('cards');
+  if(cards){
+    var dragging=null;
+    cards.querySelectorAll('.card').forEach(function(c){
+      c.addEventListener('dragstart',function(){dragging=c;c.classList.add('dragging');});
+      c.addEventListener('dragend',function(){c.classList.remove('dragging');dragging=null;});
+      c.addEventListener('dragover',function(e){
+        e.preventDefault();
+        if(!dragging||dragging===c)return;
+        var r=c.getBoundingClientRect();
+        if(e.clientY < r.top + r.height/2) cards.insertBefore(dragging,c);
+        else cards.insertBefore(dragging,c.nextSibling);
+      });
+    });
+    cards.addEventListener('drop',function(e){
+      e.preventDefault();
+      var order=[].map.call(cards.querySelectorAll('.card'),function(c){
+        return c.getAttribute('data-key');}).join(',');
+      post({act:'order_js',order:order});
+    });
+    cards.addEventListener('dragover',function(e){e.preventDefault();});
+  }
+  document.querySelectorAll('.cardtext').forEach(function(el){
+    el.addEventListener('dblclick',function(){
+      if(el.querySelector('textarea'))return;
+      var orig=el.textContent;
+      el.innerHTML='';
+      var ta=document.createElement('textarea');ta.className='editbox';ta.value=orig;
+      var sv=document.createElement('button');sv.textContent='save correction';
+      var ca=document.createElement('button');ca.textContent='cancel';
+      ca.style.marginLeft='8px';
+      sv.onclick=function(){post({act:'fragtext',frag:el.getAttribute('data-key'),text:ta.value});};
+      ca.onclick=function(){el.textContent=orig;};
+      el.appendChild(ta);el.appendChild(sv);el.appendChild(ca);
+    });
+  });
+}
+"""
+
 
 # ---------------- auth ----------------
 
@@ -342,7 +403,12 @@ def fragkey(fr):
     return f"{fr['page']}:{'-'.join(str(x) for x in fr['region_ids'])}"
 
 
-def frag_text(iid, fr):
+def frag_text(iid, fr, overrides=None):
+    """A fragment's OCR text; a human per-segment correction wins."""
+    if overrides:
+        o = overrides.get(fragkey(fr))
+        if o is not None:
+            return o
     regs = page_regions(iid, fr["page"])
     parts = []
     for ridx in fr["region_ids"]:
@@ -351,8 +417,8 @@ def frag_text(iid, fr):
     return "\n".join(parts)
 
 
-def assemble_text(iid, fragments):
-    raw = "\n".join(frag_text(iid, fr) for fr in fragments)
+def assemble_text(iid, fragments, overrides=None):
+    raw = "\n".join(frag_text(iid, fr, overrides) for fr in fragments)
     try:
         import sys as _sys
         _p = os.path.join(ROOT, "pipeline")
@@ -381,6 +447,12 @@ def effective_doc(iid):
                      "text_override": None, "last_mod": ""})
     byid = {a["article_id"]: a for a in arts}
     user_furniture = []
+    overrides = {}
+    uns = []
+    for u in doc.get("unsorted", []):
+        segs = u.get("segments") or u.get("region_ids") or []
+        if u.get("page") is not None and segs:
+            uns.append({"page": u["page"], "region_ids": list(segs)})
     n_user = 0
 
     def findfrag(k):
@@ -388,6 +460,9 @@ def effective_doc(iid):
             for fr in a["fragments"]:
                 if fragkey(fr) == k:
                     return a, fr
+        for fr in uns:                      # claiming an unsorted segment
+            if fragkey(fr) == k:
+                return "unsorted", fr
         return None, None
 
     def touch(a, ev):
@@ -419,8 +494,11 @@ def effective_doc(iid):
             src, fr = findfrag(ev.get("frag", ""))
             if not fr:
                 continue
-            src["fragments"].remove(fr)
-            touch(src, ev)
+            if src == "unsorted":
+                uns.remove(fr)
+            else:
+                src["fragments"].remove(fr)
+                touch(src, ev)
             tgt = byid.get(ev.get("to_id", ""))
             if ev.get("to_id") == "new" or not tgt:
                 n_user += 1
@@ -439,10 +517,19 @@ def effective_doc(iid):
         elif act == "frag_furniture":
             src, fr = findfrag(ev.get("frag", ""))
             if fr:
-                src["fragments"].remove(fr)
+                if src == "unsorted":
+                    uns.remove(fr)
+                else:
+                    src["fragments"].remove(fr)
+                    touch(src, ev)
                 user_furniture.append({"frag": ev.get("frag"),
                                        "by": ev["user"], "ts": ev["ts"]})
-                touch(src, ev)
+        elif act == "edit_frag_text":
+            k = ev.get("frag", "")
+            overrides[k] = ev.get("text", "")
+            a2, _fr = findfrag(k)
+            if a2 and a2 != "unsorted":
+                touch(a2, ev)
         elif act == "merge" and a:
             tgt = byid.get(ev.get("into_id", ""))
             if tgt and tgt is not a:
@@ -463,14 +550,43 @@ def effective_doc(iid):
             continue  # emptied by moves/merges
         a["pages"] = sorted({fr["page"] for fr in a["fragments"]}) or a["pages"]
         a["text"] = (a["text_override"] if a["text_override"] is not None
-                     else assemble_text(iid, a["fragments"]))
+                     else assemble_text(iid, a["fragments"], overrides))
         if a["verified_at"] and a["verified_at"] >= a["last_mod"]:
             a["status"] = "verified"
         elif a["modified_by"]:
             a["status"] = "modified"
         out.append(a)
-    return {**doc, "articles": out,
+    return {**doc, "articles": out, "unsorted": uns,
+            "frag_overrides": overrides,
             "user_furniture": user_furniture}
+
+
+def issue_frag_map(iid, doc):
+    """Per page: every segment (from any article, or unsorted) with a short
+    unique id like 12A (page 12, first segment in reading order)."""
+    per_page = {}
+    def omin(pno, region_ids):
+        regs = page_regions(iid, pno)
+        vals = [regs[r].get("order", r) for r in region_ids if r < len(regs)]
+        return min(vals) if vals else 999
+    for a in doc["articles"]:
+        for fr in a["fragments"]:
+            per_page.setdefault(fr["page"], []).append(
+                {"key": fragkey(fr), "owner": a["article_id"],
+                 "title": a.get("title"), "region_ids": fr["region_ids"],
+                 "page": fr["page"], "o": omin(fr["page"], fr["region_ids"])})
+    for fr in doc.get("unsorted", []):
+        per_page.setdefault(fr["page"], []).append(
+            {"key": fragkey(fr), "owner": None, "title": "(unsorted)",
+             "region_ids": fr["region_ids"], "page": fr["page"],
+             "o": omin(fr["page"], fr["region_ids"])})
+    ids = {}
+    for pno, lst in per_page.items():
+        lst.sort(key=lambda e: e["o"])
+        for i, e in enumerate(lst):
+            e["id"] = f"{pno}{chr(65 + i) if i < 26 else 'Z' + str(i)}"
+            ids[e["key"]] = e["id"]
+    return per_page, ids
 
 
 # ---------------- html helpers ----------------
@@ -524,6 +640,25 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .annform select,.annform button{font-size:13px;padding:3px 8px;border:1px solid #b8a88e;background:#fff;font-family:inherit}
 .annform textarea{width:100%;height:280px;font-size:13.5px;font-family:inherit;border:1px solid #b8a88e;padding:8px}
 .fragsnip{color:#5a4f40;font-size:12.5px}
+.wb{display:flex;gap:16px;align-items:flex-start}
+.wbleft{flex:0 0 42%;max-height:86vh;overflow-y:auto;padding-right:4px}
+.wbright{flex:1;min-width:0}
+.scanwrap{position:relative;margin:0 0 14px}
+.scanwrap img{width:100%;display:block;border:1px solid #b8a88e}
+.scanwrap svg{position:absolute;left:0;top:0;width:100%;height:100%}
+.scanwrap .pgcap{font-size:12px;color:#75695a;margin:2px 0 0}
+.card{border:1px solid #b8a88e;background:#fff;margin:0 0 10px}
+.card[draggable=true]{cursor:grab}
+.card.dragging{opacity:.45}
+.card.hl,.othercard.hl{outline:3px solid #7a3020}
+.card .ch{background:#f3ead9;border-bottom:1px solid #d8cfc0;padding:4px 8px;font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.idchip{display:inline-block;background:#1c1a17;color:#faf7f2;font-size:11.5px;padding:0 7px;letter-spacing:.6px;cursor:pointer}
+.idchip.other{background:#75695a}
+.cardtext{padding:8px 10px;font-size:13.5px;line-height:1.5;white-space:pre-wrap;max-height:170px;overflow-y:auto}
+.cardtext.edited{background:#f7f3e8}
+.othercard{opacity:.8;border-style:dashed;margin:0 0 10px}
+.fbox rect{cursor:pointer}
+.editbox{width:100%;height:150px;font-size:13px;font-family:inherit;border:1px solid #7a3020;padding:6px}
 .footer{margin-top:44px;font-size:12px;color:#75695a;border-top:2px solid #1c1a17;padding-top:8px}
 .land{max-width:640px;margin:8vh auto 0;padding:0 20px}
 .land h1{font-size:34px}
@@ -951,10 +1086,20 @@ administrator approves them.</p>
             ann_append(iid, self.user, "move_frag",
                        {"article_id": aid, "frag": get("frag"),
                         "to_id": "new"})
-        elif act == "moveto" and art and get("to_id"):
+        elif act == "moveto" and get("to_id") and get("frag"):
+            # source is wherever the fragment currently lives (an article
+            # or the unsorted list); replay finds it by key
             ann_append(iid, self.user, "move_frag",
                        {"article_id": aid, "frag": get("frag"),
                         "to_id": get("to_id")})
+        elif act == "order_js" and art and get("order"):
+            order = [k for k in get("order").split(",") if k]
+            ann_append(iid, self.user, "set_frag_order",
+                       {"article_id": aid, "order": order})
+        elif act == "fragtext" and get("frag"):
+            ann_append(iid, self.user, "edit_frag_text",
+                       {"article_id": aid, "frag": get("frag"),
+                        "text": get("text")})
         elif act == "furniture" and art:
             ann_append(iid, self.user, "frag_furniture",
                        {"article_id": aid, "frag": get("frag")})
@@ -1324,6 +1469,8 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
         info = issue_by_id(iid) or {}
         can = self.user != "guest"
         others = [a for a in doc["articles"] if a["article_id"] != aid]
+        per_page, ids = issue_frag_map(iid, doc)
+        overrides = doc.get("frag_overrides", {})
 
         def hidden(**kw):
             s = (f"<input type='hidden' name='issue' value='{iid}'>"
@@ -1338,6 +1485,15 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
 
         st = art.get("status", "auto")
         stline = STATUS_CHIP.get(st, "")
+        order_ids = [a["article_id"] for a in doc["articles"]]
+        nxt = None
+        if aid in order_ids:
+            k0 = order_ids.index(aid)
+            ring = order_ids[k0 + 1:] + order_ids[:k0]
+            nxt = next((x for x in ring
+                        if next(a for a in doc["articles"]
+                                if a["article_id"] == x)["status"] != "verified"),
+                       None)
         if st == "verified":
             stline += (f" <span class='muted'>by "
                        f"{esc(display_name(art['verified_by']))} at "
@@ -1352,34 +1508,9 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                            + "</span>")
             if can:
                 stline += " " + mini("mark as verified", act="verify")
-
-        frows = ""
-        for i, fr in enumerate(art.get("fragments", [])):
-            k = fragkey(fr)
-            snip = esc(frag_text(iid, fr)[:110].replace("\n", " "))
-            btns = ""
-            if can:
-                btns = (mini("up", act="up", frag=k)
-                        + mini("down", act="down", frag=k)
-                        + mini("not story text", act="furniture", frag=k)
-                        + mini("detach", act="detach", frag=k))
-                if others:
-                    opts = "".join(
-                        f"<option value='{o['article_id']}'>"
-                        f"{esc((o.get('title') or o['article_id'])[:38])}"
-                        f"</option>" for o in others)
-                    btns += ("<form class='mini' method='POST' "
-                             "action='/annotate'>"
-                             + hidden(act="moveto", frag=k)
-                             + f"<select name='to_id'>{opts}</select>"
-                             f"<button>move to</button></form>")
-            frows += (f"<tr><td class='num'>{i+1}</td>"
-                      f"<td><a href='/issue/{iid}/p/{fr['page']}'>"
-                      f"p.{fr['page']}</a> <span class='muted'>"
-                      f"r{','.join(str(x) for x in fr['region_ids'])}"
-                      f"</span></td>"
-                      f"<td><span class='fragsnip'>{snip}</span></td>"
-                      f"<td>{btns}</td></tr>")
+                if nxt:
+                    stline += mini("verify, then next unverified",
+                                   act="verify", back=f"/article/{nxt}")
 
         metaform = ""
         if can:
@@ -1401,6 +1532,99 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                         f"<select name='type'>{topts}</select> "
                         f"<button>save title / author / type</button></form>")
 
+        # LEFT: scans with labeled boxes
+        left = ""
+        for pno in art["pages"]:
+            lay = layout_of(iid, pno) or {}
+            W = lay.get("width") or 1000
+            H = lay.get("height") or 1400
+            regs = page_regions(iid, pno)
+            boxes = ""
+            for e in per_page.get(pno, []):
+                mine = e["owner"] == aid
+                stroke = "#7a3020" if mine else "#75695a"
+                dash = "" if mine else " stroke-dasharray='14,10'"
+                inner, lx, ly = "", None, None
+                for r in e["region_ids"]:
+                    if r < len(regs):
+                        x0, y0, x1, y1 = regs[r]["bbox"]
+                        inner += (f"<rect x='{x0}' y='{y0}' "
+                                  f"width='{x1-x0}' height='{y1-y0}' "
+                                  f"fill='rgba(0,0,0,0)' stroke='{stroke}' "
+                                  f"stroke-width='{4 if mine else 3}'{dash}/>")
+                        if lx is None:
+                            lx, ly = x0, y0
+                if lx is not None:
+                    fs = max(26, int(H * 0.022))
+                    w = int(fs * 0.66 * len(e["id"])) + 12
+                    ty = max(ly - 8, fs)
+                    inner += (f"<rect x='{lx}' y='{max(ly-fs-10, 0)}' "
+                              f"width='{w}' height='{fs+8}' fill='{stroke}'/>"
+                              f"<text x='{lx+6}' y='{ty}' fill='#faf7f2' "
+                              f"font-size='{fs}'>{e['id']}</text>")
+                boxes += (f"<g class='fbox' data-key='{e['key']}' "
+                          f"data-selkey='{e['key']}'>{inner}</g>")
+            left += (f"<div class='scanwrap'>"
+                     f"<img src='/img/{iid}/page_{pno:04d}.png' "
+                     f"alt='page {pno}'>"
+                     f"<svg viewBox='0 0 {W} {H}' "
+                     f"preserveAspectRatio='none'>{boxes}</svg>"
+                     f"<div class='pgcap'>page {pno} · solid = this "
+                     f"article, dashed = other articles</div></div>")
+        if not art["pages"]:
+            left = "<div class='empty'>No scan pages for this article.</div>"
+
+        # RIGHT: one draggable card per segment
+        cards = ""
+        for fr in art.get("fragments", []):
+            k = fragkey(fr)
+            fid = ids.get(k, "?")
+            txt = frag_text(iid, fr, overrides)
+            corrected = k in overrides
+            btns = ""
+            if can:
+                btns = (mini("not story text", act="furniture", frag=k)
+                        + mini("detach", act="detach", frag=k))
+                if others:
+                    opts = "".join(
+                        f"<option value='{o['article_id']}'>"
+                        f"{esc((o.get('title') or o['article_id'])[:34])}"
+                        f"</option>" for o in others)
+                    btns += ("<form class='mini' method='POST' "
+                             "action='/annotate'>"
+                             + hidden(act="moveto", frag=k)
+                             + f"<select name='to_id'>{opts}</select>"
+                             f"<button>move to</button></form>")
+            cards += (f"<div class='card' data-key='{k}'"
+                      f"{' draggable=true' if can else ''}>"
+                      f"<div class='ch'>"
+                      f"<span class='idchip' data-selkey='{k}'>{fid}</span>"
+                      f"<span class='muted'>page {fr['page']}"
+                      f"{' · corrected' if corrected else ''}</span>"
+                      f"<span style='margin-left:auto'>{btns}</span></div>"
+                      f"<div class='cardtext{' edited' if corrected else ''}' "
+                      f"data-key='{k}'>{esc(txt)}</div></div>")
+
+        # other segments on the same pages
+        oth = ""
+        for pno in art["pages"]:
+            for e in per_page.get(pno, []):
+                if e["owner"] == aid:
+                    continue
+                fr = {"page": e["page"], "region_ids": e["region_ids"]}
+                txt = frag_text(iid, fr, overrides)[:180]
+                owner = ("<a href='/article/" + e["owner"] + "'>"
+                         + esc((e.get("title") or e["owner"])[:36]) + "</a>"
+                         if e["owner"] else "(unsorted)")
+                add = (mini("add to this article", act="moveto",
+                            frag=e["key"], to_id=aid) if can else "")
+                oth += (f"<div class='othercard card' data-key='{e['key']}'>"
+                        f"<div class='ch'><span class='idchip other' "
+                        f"data-selkey='{e['key']}'>{e['id']}</span>"
+                        f"<span class='muted'>belongs to {owner}</span>"
+                        f"<span style='margin-left:auto'>{add}</span></div>"
+                        f"<div class='cardtext'>{esc(txt)}</div></div>")
+
         mergeform = ""
         if can and others:
             opts = "".join(
@@ -1413,19 +1637,12 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                          f"<button>merge this whole article into</button>"
                          f"</form>")
 
-        textblock = ("<pre style='max-height:none'>"
-                     + esc(art.get("text") or "(no text)") + "</pre>")
-        if can:
-            textblock += ("<details><summary class='muted' "
-                          "style='cursor:pointer;margin-top:8px'>edit the "
-                          "text directly (overrides the assembled text)"
-                          "</summary>"
-                          "<form class='annform' method='POST' "
-                          "action='/annotate'>" + hidden(act="text")
-                          + f"<textarea name='text'>"
-                          f"{esc(art.get('text') or '')}</textarea>"
-                          f"<p><button>save text</button></p></form>"
-                          f"</details>")
+        textblock = ("<details><summary class='muted' "
+                     "style='cursor:pointer'>assembled reading text "
+                     "(from the segments above)</summary>"
+                     "<pre style='max-height:none'>"
+                     + esc(art.get("text") or "(no text)") + "</pre>"
+                     "</details>")
 
         meta = (f"{esc(art.get('type') or '')} · "
                 f"<a href='/issue/{iid}'>{esc(info.get('magazine', iid))} "
@@ -1437,28 +1654,40 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
         guestnote = ("" if can else
                      "<p class='muted'>You are viewing as guest — log in "
                      "with an annotator account to correct or verify.</p>")
+        script = ("<script>"
+                  + WB_JS.replace("__ISSUE__", iid).replace("__AID__", aid)
+                  .replace("__CAN__", "true" if can else "false")
+                  + "</script>")
         body = (howto(
-            "This page is the annotation tool. The table lists the "
-            "separately recognized pieces this article was assembled from, "
-            "in their current order — each links to its scan page. Fix a "
-            "wrong order with up/down; throw a 'Continued from page' "
-            "notice out of the text with 'not story text'; split a wrongly "
-            "joined piece out with 'detach'; move a piece to the story it "
-            "belongs to with 'move to'; fix title, author, or the text "
-            "itself below. When the article is right, mark it verified. "
-            "Every action is recorded under your name; the machine's "
-            "original output is never overwritten.")
+            "Left: the scans, with every segment boxed and labeled "
+            "(12A = page 12, first segment). Solid boxes belong to this "
+            "article; dashed ones belong elsewhere. Right: the same "
+            "segments as cards in reading order, same labels. Click a box "
+            "or a label to flash its partner. Drag cards to fix the order "
+            "(saved instantly). Double-click a card's text to correct OCR "
+            "errors in place. 'Not story text' expels a page number or a "
+            "'Continued from page' notice; 'add to this article' pulls in "
+            "a segment that was assigned elsewhere. When everything is "
+            "right, mark it verified — 'verify, then next unverified' "
+            "moves you straight on. Every action is recorded under your "
+            "name; the machine's output is never overwritten.")
             + f"<h1>{esc(art.get('title') or '(untitled)')}</h1>"
             + (f"<p>by {esc(art['author'])}</p>" if art.get("author") else "")
             + f"<p class='muted'>{meta}</p>"
             + f"<p>{stline}</p>" + guestnote + metaform
-            + f"<h2>Pieces ({len(art.get('fragments', []))})</h2>"
-            + "<table><tr><th>#</th><th>source</th><th>begins with</th>"
-            + ("<th>actions</th>" if can else "<th></th>")
-            + "</tr>" + frows + "</table>"
+            + "<div class='wb'><div class='wbleft'>" + left + "</div>"
+            + "<div class='wbright'>"
+            + f"<h2>Segments in this article "
+              f"({len(art.get('fragments', []))})</h2>"
+            + "<div id='cards'>" + cards + "</div>"
+            + (("<h2>On these pages, assigned elsewhere</h2>" + oth)
+               if oth else "")
             + (f"<p>{mergeform}</p>" if mergeform else "")
-            + "<h2>Text</h2>" + textblock)
-        return self._page(art.get("title") or aid, body, path=f"/article/{aid}")
+            + textblock
+            + "</div></div>" + script)
+        return self._page(art.get("title") or aid, body,
+                          path=f"/article/{aid}")
+
 
     def activity_page(self):
         events = []
