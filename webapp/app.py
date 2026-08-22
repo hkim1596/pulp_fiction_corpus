@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.6.1"
+APP_VERSION = "0.7.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -257,6 +257,21 @@ if(CAN){
     });
     cards.addEventListener('dragover',function(e){e.preventDefault();});
   }
+  document.querySelectorAll('.posdd').forEach(function(sel){
+    sel.addEventListener('mousedown',function(e){e.stopPropagation();});
+    sel.addEventListener('change',function(){
+      var cc=document.getElementById('cards');
+      var keys=[].map.call(cc.querySelectorAll('.card'),function(c){
+        return c.getAttribute('data-key');});
+      var k=sel.getAttribute('data-key');
+      var from=keys.indexOf(k);
+      if(from<0)return;
+      keys.splice(from,1);
+      var to=Math.min(Math.max(parseInt(sel.value)-1,0),keys.length);
+      keys.splice(to,0,k);
+      post({act:'order_js',order:keys.join(',')});
+    });
+  });
   document.querySelectorAll('.cardtext').forEach(function(el){
     el.addEventListener('dblclick',function(){
       if(el.querySelector('textarea'))return;
@@ -400,6 +415,8 @@ def page_regions(iid, pno):
 
 
 def fragkey(fr):
+    if fr.get("mid") is not None:           # manually added text segment
+        return f"m:{fr['mid']}"
     return f"{fr['page']}:{'-'.join(str(x) for x in fr['region_ids'])}"
 
 
@@ -409,6 +426,8 @@ def frag_text(iid, fr, overrides=None):
         o = overrides.get(fragkey(fr))
         if o is not None:
             return o
+    if fr.get("mid") is not None:           # manual segment: text lives in
+        return ""                           # overrides only
     regs = page_regions(iid, fr["page"])
     parts = []
     for ridx in fr["region_ids"]:
@@ -454,6 +473,8 @@ def effective_doc(iid):
     byid = {a["article_id"]: a for a in arts}
     user_furniture = []
     overrides = {}
+    roles = {}
+    n_manual = 0
     uns = []
     for u in doc.get("unsorted", []):
         segs = u.get("segments") or u.get("region_ids") or []
@@ -561,6 +582,26 @@ def effective_doc(iid):
             a2, _fr = findfrag(k)
             if a2 and a2 != "unsorted":
                 touch(a2, ev)
+        elif act == "set_role":
+            k = ev.get("frag", "")
+            role = ev.get("role", "")
+            a2, fr2 = findfrag(k)
+            if not fr2 or a2 == "unsorted":
+                continue
+            if role:
+                roles[k] = role
+                if role in ("title", "subtitle", "author"):
+                    val = " ".join(frag_text(iid, fr2, overrides).split())
+                    a2[role] = val or None
+            else:
+                roles.pop(k, None)
+            touch(a2, ev)
+        elif act == "add_manual" and a:
+            n_manual += 1
+            fr = {"page": 0, "region_ids": [], "mid": n_manual}
+            overrides[fragkey(fr)] = ev.get("text", "")
+            a["fragments"].append(fr)
+            touch(a, ev)
         elif act == "merge" and a:
             tgt = byid.get(ev.get("into_id", ""))
             if tgt and tgt is not a:
@@ -579,9 +620,15 @@ def effective_doc(iid):
     for a in arts:
         if not a["fragments"] and not a["text_override"]:
             continue  # emptied by moves/merges
-        a["pages"] = sorted({fr["page"] for fr in a["fragments"]}) or a["pages"]
+        a["pages"] = sorted({fr["page"] for fr in a["fragments"]
+                             if fr["page"]}) or a["pages"]
+        # segments marked title/subtitle/author live in those fields, not in
+        # the running text
+        body_frs = [fr for fr in a["fragments"]
+                    if roles.get(fragkey(fr)) not in
+                    ("title", "subtitle", "author")]
         a["text"] = (a["text_override"] if a["text_override"] is not None
-                     else assemble_text(iid, a["fragments"], overrides))
+                     else assemble_text(iid, body_frs, overrides))
         if a["verified_at"] and a["verified_at"] >= a["last_mod"]:
             a["status"] = "verified"
         elif a["modified_by"]:
@@ -589,7 +636,7 @@ def effective_doc(iid):
         out.append(a)
     return {**doc, "articles": out, "unsorted": uns,
             "machine_furniture": mach_furn,
-            "frag_overrides": overrides,
+            "frag_overrides": overrides, "frag_roles": roles,
             "user_furniture": user_furniture}
 
 
@@ -691,8 +738,8 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .annform textarea{width:100%;height:280px;font-size:13.5px;font-family:inherit;border:1px solid #b8a88e;padding:8px}
 .fragsnip{color:#5a4f40;font-size:12.5px}
 .wb{display:flex;gap:16px;align-items:flex-start}
-.wbleft{flex:0 0 42%;max-height:86vh;overflow-y:auto;padding-right:4px}
-.wbright{flex:1;min-width:0}
+.wbleft{flex:0 0 42%;max-height:88vh;overflow-y:auto;padding-right:4px}
+.wbright{flex:1;min-width:0;max-height:88vh;overflow-y:auto;padding-right:4px}
 .scanwrap{position:relative;margin:0 0 14px}
 .scanwrap img{width:100%;display:block;border:1px solid #b8a88e}
 .scanwrap svg{position:absolute;left:0;top:0;width:100%;height:100%}
@@ -709,6 +756,9 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .othercard{opacity:.8;border-style:dashed;margin:0 0 10px}
 .fbox rect{cursor:pointer}
 .editbox{width:100%;height:150px;font-size:13px;font-family:inherit;border:1px solid #7a3020;padding:6px}
+.posdd{font-size:11.5px;border:1px solid #b8a88e;font-family:inherit;padding:0 2px}
+.rolechip{display:inline-block;background:#2c5e2e;color:#faf7f2;font-size:10.5px;padding:0 6px;letter-spacing:.4px}
+.subtitleline{font-size:16px;color:#5a4f40;margin:-8px 0 10px}
 .footer{margin-top:44px;font-size:12px;color:#75695a;border-top:2px solid #1c1a17;padding-top:8px}
 .land{max-width:640px;margin:8vh auto 0;padding:0 20px}
 .land h1{font-size:34px}
@@ -1150,6 +1200,13 @@ administrator approves them.</p>
             ann_append(iid, self.user, "edit_frag_text",
                        {"article_id": aid, "frag": get("frag"),
                         "text": get("text")})
+        elif act == "role" and get("frag"):
+            ann_append(iid, self.user, "set_role",
+                       {"article_id": aid, "frag": get("frag"),
+                        "role": get("role")})
+        elif act == "add_manual" and art and get("text"):
+            ann_append(iid, self.user, "add_manual",
+                       {"article_id": aid, "text": get("text")})
         elif act == "furniture" and art:
             ann_append(iid, self.user, "frag_furniture",
                        {"article_id": aid, "frag": get("frag")})
@@ -1636,20 +1693,43 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             left = "<div class='empty'>No scan pages for this article.</div>"
 
         # RIGHT: one draggable card per segment
+        roles = doc.get("frag_roles", {})
         cards = ""
-        for fr in art.get("fragments", []):
+        nfr = len(art.get("fragments", []))
+        n_manual_lbl = 0
+        for pos, fr in enumerate(art.get("fragments", []), 1):
             k = fragkey(fr)
-            fid = ids.get(k, "?")
+            manual = fr.get("mid") is not None
+            if manual:
+                n_manual_lbl += 1
+                fid = f"M{n_manual_lbl}"
+                lab = ""
+            else:
+                fid = ids.get(k, "?")
+                regs0 = page_regions(iid, fr["page"])
+                r0 = fr["region_ids"][0] if fr["region_ids"] else -1
+                lab = (regs0[r0].get("label", "") if 0 <= r0 < len(regs0)
+                       else "")
             txt = frag_text(iid, fr, overrides)
-            regs0 = page_regions(iid, fr["page"])
-            r0 = fr["region_ids"][0] if fr["region_ids"] else -1
-            lab = (regs0[r0].get("label", "") if 0 <= r0 < len(regs0)
-                   else "")
-            corrected = k in overrides
+            role = roles.get(k, "")
+            corrected = (k in overrides) and not manual
             btns = ""
             if can:
-                btns = (mini("not story text", act="furniture", frag=k)
-                        + mini("detach", act="detach", frag=k))
+                posopts = "".join(
+                    f"<option value='{i}'{' selected' if i == pos else ''}>"
+                    f"{i}</option>" for i in range(1, nfr + 1))
+                btns = (f"<select class='posdd' data-key='{k}' "
+                        f"title='move to position'>{posopts}</select> ")
+                if role:
+                    btns += mini("clear role", act="role", frag=k, role="")
+                else:
+                    btns += (mini("title", act="role", frag=k, role="title")
+                             + mini("subtitle", act="role", frag=k,
+                                    role="subtitle")
+                             + mini("author", act="role", frag=k,
+                                    role="author"))
+                btns += (mini("not story text", act="furniture", frag=k)
+                         + mini("detach", act="detach", frag=k))
                 if others:
                     opts = "".join(
                         f"<option value='{o['article_id']}'>"
@@ -1664,9 +1744,13 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                       f"{' draggable=true' if can else ''}>"
                       f"<div class='ch'>"
                       f"<span class='idchip' data-selkey='{k}'>{fid}</span>"
-                      f"<span class='muted'>page {fr['page']}"
-                      f"{' · ' + esc(lab) if lab else ''}"
-                      f"{' · corrected' if corrected else ''}</span>"
+                      + (f"<span class='rolechip'>{esc(role)}</span>"
+                         if role else "")
+                      + f"<span class='muted'>"
+                      + ("added by annotator" if manual
+                         else f"page {fr['page']}")
+                      + (f" · {esc(lab)}" if lab else "")
+                      + f"{' · corrected' if corrected else ''}</span>"
                       f"<span style='margin-left:auto'>{btns}</span></div>"
                       f"<div class='cardtext{' edited' if corrected else ''}' "
                       f"data-key='{k}'>{esc(txt)}</div></div>")
@@ -1712,6 +1796,19 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                          f"<button>merge this whole article into</button>"
                          f"</form>")
 
+        addmanual = ""
+        if can:
+            addmanual = ("<details><summary class='muted' "
+                         "style='cursor:pointer;margin:2px 0 12px'>add a "
+                         "text segment by hand (for words the scan reading "
+                         "missed)</summary>"
+                         "<form class='annform' method='POST' "
+                         "action='/annotate'>" + hidden(act="add_manual")
+                         + "<textarea name='text' placeholder='the missing "
+                         "text, exactly as printed'></textarea>"
+                         "<p><button>add segment</button></p></form>"
+                         "</details>")
+
         textblock = ("<details><summary class='muted' "
                      "style='cursor:pointer'>assembled reading text "
                      "(from the segments above)</summary>"
@@ -1741,15 +1838,21 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             "unassigned. Right: this article's boxes as cards in reading "
             "order, then every other box on these pages with its "
             "classification. Click a box or a label to flash its partner. "
-            "Drag cards to fix the order (saved instantly). Double-click "
-            "a card's text to correct OCR errors in place. 'Not story "
-            "text' expels a box from the article; 'add to this article' "
-            "claims any box — even one the machine called furniture or "
-            "never assigned. When everything is right, mark it verified — "
+            "Drag cards to fix the order, or pick a position number from "
+            "the dropdown on the card — both save instantly. Double-click "
+            "a card's text to correct OCR errors in place. Mark a segment "
+            "as title, subtitle, or author: its text fills that field and "
+            "leaves the running text. 'Not story text' expels a box from "
+            "the article; 'add to this article' claims any box — even one "
+            "the machine called furniture or never assigned; 'add a text "
+            "segment by hand' inserts words the scan reading missed. "
+            "When everything is right, mark it verified — "
             "'verify, then next unverified' moves you straight on. Every "
             "action is recorded under your name; the machine's output is "
             "never overwritten.")
             + f"<h1>{esc(art.get('title') or '(untitled)')}</h1>"
+            + (f"<p class='subtitleline'>{esc(art['subtitle'])}</p>"
+               if art.get("subtitle") else "")
             + (f"<p>by {esc(art['author'])}</p>" if art.get("author") else "")
             + f"<p class='muted'>{meta}</p>"
             + f"<p>{stline}</p>" + guestnote + metaform
@@ -1758,6 +1861,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             + f"<h2>Segments in this article "
               f"({len(art.get('fragments', []))})</h2>"
             + "<div id='cards'>" + cards + "</div>"
+            + addmanual
             + (("<h2>On these pages, assigned elsewhere</h2>" + oth)
                if oth else "")
             + (f"<p>{mergeform}</p>" if mergeform else "")
