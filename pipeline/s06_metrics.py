@@ -37,6 +37,7 @@ OUT = os.path.join(ROOT, "data", "metrics.json")
 
 try:
     from rapidfuzz.distance import Levenshtein as _RFL
+    from rapidfuzz.distance import Indel as _RFI
     from rapidfuzz import fuzz as _rff
     HAVE_RF = True
 except Exception:
@@ -104,27 +105,61 @@ def dict_rate(text):
     return round(sum(1 for t in toks if t in wl) / len(toks), 4)
 
 
-def _anchor_ratio(a, b):
-    if HAVE_RF:
-        return _rff.ratio(a, b) / 100.0
-    return difflib.SequenceMatcher(None, a, b).ratio()
+def locate_span(hay, ref):
+    """Locate the gold story inside the whole-issue text.
 
-
-def locate_span(hay, needle_start, needle_end):
-    """Fuzzy-locate a story inside issue text by its first/last anchors."""
-    def best_pos(anchor, from_pos=0):
-        best, bpos = 0.0, -1
-        step = max(1, len(anchor) // 2)
-        for pos in range(from_pos, max(1, len(hay) - len(anchor)), step):
-            r = _anchor_ratio(hay[pos:pos + len(anchor)], anchor)
-            if r > best:
-                best, bpos = r, pos
-        return bpos, best
-    s, rs = best_pos(needle_start)
-    e, re_ = best_pos(needle_end, from_pos=max(0, s))
-    if rs < 0.5 or re_ < 0.5:
+    The old first/last-200-character anchors failed whenever the Project
+    Gutenberg file opens with material the magazine page does not have
+    (title block, transcriber preamble). Instead, three 300-character
+    probes taken from 10%, 50%, and 90% of the way into the story are
+    each matched against the issue text as a best-window search; if at
+    least two probes land, the span is cut between refined start/end
+    matches (falling back to a margin around the probes)."""
+    if not HAVE_RF:
         return None
-    return hay[s:e + len(needle_end)]
+    n = len(ref)
+    if n < 900 or not hay:
+        return None
+    hits = []
+    for frac in (0.10, 0.50, 0.90):
+        p0 = min(max(0, int(n * frac)), n - 300)
+        probe = ref[p0:p0 + 300]
+        al = _rff.partial_ratio_alignment(probe, hay)
+        if al is not None and al.score >= 60:
+            hits.append((p0, al.dest_start, al.dest_end))
+    if len(hits) < 2:
+        return None
+    first, last = hits[0], hits[-1]
+    start = max(0, first[1] - int(first[0] * 1.05) - 200)
+    end = min(len(hay), last[2] + int((n - last[0] - 300) * 1.05) + 200)
+    if end <= start:
+        return None
+    seg = hay[start:end]
+    a1 = _rff.partial_ratio_alignment(ref[:300], seg)
+    a2 = _rff.partial_ratio_alignment(ref[-300:], seg)
+    if (a1 is not None and a2 is not None and a1.score >= 55
+            and a2.score >= 55 and a2.dest_end > a1.dest_start):
+        return seg[a1.dest_start:a2.dest_end]
+    return seg
+
+
+def gold_scores(hyp, ref):
+    """CER/WER plus what the errors are made of.
+
+    sub_share: of all erroneous characters, the fraction that are
+    misread characters (substitutions); the rest are missing or extra
+    content (insertions and deletions). Near 1.0 = reading errors;
+    near 0.0 = the two texts do not contain the same material."""
+    rec = {"cer": cer(hyp, ref), "wer": wer(hyp, ref),
+           "hyp_chars": len(norm(hyp)), "ref_chars": len(norm(ref))}
+    if HAVE_RF and rec["cer"] is not None:
+        a, b = norm(hyp), norm(ref)
+        lev = _RFL.distance(a, b)
+        indel_only = _RFI.distance(a, b)
+        subs = max(0, indel_only - lev)
+        indels = max(0, 2 * lev - indel_only)
+        rec["sub_share"] = round(subs / max(1, subs + indels), 3)
+    return rec
 
 
 def issue_stage_text(iid, stage):
@@ -185,20 +220,23 @@ def main():
                 ref = norm(g)
                 h = norm(hyp)
                 if gold["type"] == "stories":
-                    span = locate_span(h, ref[:200], ref[-200:])
+                    span = locate_span(h, ref)
                     if span is None:
                         per_gold.append({"cer": None, "wer": None,
                                          "note": "story not located"})
                         continue
                     h = span
-                c, w = cer(h, ref), wer(h, ref)
-                rec = {"cer": c, "wer": w}
-                if c is None:
+                rec = gold_scores(h, ref)
+                if rec["cer"] is None:
                     rec["note"] = "too long for stdlib difflib; install rapidfuzz"
                 per_gold.append(rec)
             gscores[stage] = per_gold
             shown = ", ".join(
-                f"cer={p['cer']} wer={p['wer']}" for p in per_gold)
+                f"cer={p['cer']} wer={p['wer']}"
+                + (f" sub_share={p['sub_share']}" if "sub_share" in p else "")
+                + (f" [{p['hyp_chars']}h/{p['ref_chars']}r]"
+                   if "hyp_chars" in p else "")
+                for p in per_gold)
             say(f"[s06] gold {iid} · {stage}: {shown} "
                 f"({time.time() - t0:.1f}s)")
         report["gold"][iid] = gscores
