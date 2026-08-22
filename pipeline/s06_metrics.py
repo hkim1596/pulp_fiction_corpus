@@ -2,12 +2,12 @@
 """Stage 6 — measurement. Two kinds of numbers, written to data/metrics.json:
 
 1. Error rates against proofread gold (issues with PG overlap):
-   character error rate (CER) and word error rate (WER) = the share of
-   characters / words that differ from the human-proofread text, computed per
-   stage (ia, routeA, routeB, rules_*, llm_*_*) over the aligned span.
-   Full-issue gold: whole text aligned. Story-level gold: the story is located
-   inside the issue text by fuzzy anchors (first/last 200 characters) and only
-   that span is scored.
+   character error rate (CER) and word error rate (WER) = edit distance
+   from the human-proofread text divided by its length, in characters /
+   words, computed per stage (ia, routeA, routeB, rules_*, llm_*_*) over
+   the aligned span. Full-issue gold: whole text aligned. Story-level
+   gold: the story is located inside the issue text by fuzzy anchors
+   (first/last 200 characters) and only that span is scored.
 
 2. Dictionary-word rate for every issue and stage (works without gold):
    share of alphabetic tokens found in the wordlist. Coarse but comparable.
@@ -15,6 +15,11 @@
 Normalization before scoring (both sides): lowercase, straight quotes,
 collapse whitespace, strip PG boilerplate (everything outside the
 *** START/END OF ... *** markers) and PG transcriber notes in brackets.
+
+Edit distances come from rapidfuzz (exact Levenshtein, C++, handles
+full-issue texts in seconds). Without rapidfuzz the stdlib fallback is
+used for short texts only; oversized comparisons are skipped with a note,
+because difflib at issue scale needs hours.
 """
 import difflib
 import glob
@@ -22,12 +27,27 @@ import json
 import os
 import re
 import sys
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from timing_util import ROOT
 from s04_rules import words
 
 OUT = os.path.join(ROOT, "data", "metrics.json")
+
+try:
+    from rapidfuzz.distance import Levenshtein as _RFL
+    from rapidfuzz import fuzz as _rff
+    HAVE_RF = True
+except Exception:
+    HAVE_RF = False
+
+# difflib is quadratic; beyond this size the fallback would take hours.
+DIFFLIB_MAX = 120_000
+
+
+def say(msg):
+    print(msg, flush=True)
 
 
 def norm(t):
@@ -49,7 +69,11 @@ def strip_pg(t):
 
 
 def edit_distance_ratio(a, b):
-    """Levenshtein distance via difflib opcodes (stdlib, fine at pilot scale)."""
+    """Edit distance divided by reference length; None if not computable."""
+    if HAVE_RF:
+        return _RFL.distance(a, b) / max(1, len(b))
+    if len(a) > DIFFLIB_MAX or len(b) > DIFFLIB_MAX:
+        return None  # stdlib difflib would take hours at this size
     sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
     dist = 0
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
@@ -61,23 +85,13 @@ def edit_distance_ratio(a, b):
 
 
 def cer(hyp, ref):
-    return round(edit_distance_ratio(norm(hyp), norm(ref)), 4)
+    r = edit_distance_ratio(norm(hyp), norm(ref))
+    return None if r is None else round(r, 4)
 
 
 def wer(hyp, ref):
-    h, r = norm(hyp).split(), norm(ref).split()
-    return round(edit_distance_ratio_list(h, r), 4)
-
-
-def edit_distance_ratio_list(a, b):
-    sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
-    dist = 0
-    for tag, i1, i2, j1, j2 in sm.get_opcodes():
-        if tag == "replace":
-            dist += max(i2 - i1, j2 - j1)
-        elif tag in ("delete", "insert"):
-            dist += (i2 - i1) + (j2 - j1)
-    return dist / max(1, len(b))
+    r = edit_distance_ratio(norm(hyp).split(), norm(ref).split())
+    return None if r is None else round(r, 4)
 
 
 def dict_rate(text):
@@ -90,14 +104,19 @@ def dict_rate(text):
     return round(sum(1 for t in toks if t in wl) / len(toks), 4)
 
 
+def _anchor_ratio(a, b):
+    if HAVE_RF:
+        return _rff.ratio(a, b) / 100.0
+    return difflib.SequenceMatcher(None, a, b).ratio()
+
+
 def locate_span(hay, needle_start, needle_end):
     """Fuzzy-locate a story inside issue text by its first/last anchors."""
     def best_pos(anchor, from_pos=0):
         best, bpos = 0.0, -1
         step = max(1, len(anchor) // 2)
         for pos in range(from_pos, max(1, len(hay) - len(anchor)), step):
-            r = difflib.SequenceMatcher(
-                None, hay[pos:pos + len(anchor)], anchor).ratio()
+            r = _anchor_ratio(hay[pos:pos + len(anchor)], anchor)
             if r > best:
                 best, bpos = r, pos
         return bpos, best
@@ -130,6 +149,9 @@ def stages_present(iid):
 
 
 def main():
+    say(f"[s06] rapidfuzz available: {HAVE_RF}"
+        + ("" if HAVE_RF else " (long texts will be skipped with a note; "
+           "pip install --user rapidfuzz)"))
     cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"),
                          encoding="utf-8"))
     report = {"issues": {}, "gold": {}}
@@ -141,6 +163,7 @@ def main():
             if text:
                 st[stage] = {"chars": len(text), "dict_rate": dict_rate(text)}
         report["issues"][iid] = st
+        say(f"[s06] {iid}: dictionary rates for {len(st)} stages")
 
         gold = issue.get("gold")
         if not gold:
@@ -149,12 +172,14 @@ def main():
         gtexts = [strip_pg(open(f, encoding="utf-8", errors="replace").read())
                   for f in sorted(glob.glob(os.path.join(gdir, "pg_*.txt")))]
         if not gtexts:
+            say(f"[s06] {iid}: gold expected but no pg_*.txt found")
             continue
         gscores = {}
         for stage in stages_present(iid):
             hyp = issue_stage_text(iid, stage)
             if not hyp:
                 continue
+            t0 = time.time()
             per_gold = []
             for g in gtexts:
                 ref = norm(g)
@@ -166,14 +191,22 @@ def main():
                                          "note": "story not located"})
                         continue
                     h = span
-                per_gold.append({"cer": cer(h, ref), "wer": wer(h, ref)})
+                c, w = cer(h, ref), wer(h, ref)
+                rec = {"cer": c, "wer": w}
+                if c is None:
+                    rec["note"] = "too long for stdlib difflib; install rapidfuzz"
+                per_gold.append(rec)
             gscores[stage] = per_gold
+            shown = ", ".join(
+                f"cer={p['cer']} wer={p['wer']}" for p in per_gold)
+            say(f"[s06] gold {iid} · {stage}: {shown} "
+                f"({time.time() - t0:.1f}s)")
         report["gold"][iid] = gscores
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(report, f, ensure_ascii=False, indent=1)
-    print(f"[s06] wrote {OUT}")
+    say(f"[s06] wrote {OUT}")
 
 
 if __name__ == "__main__":
