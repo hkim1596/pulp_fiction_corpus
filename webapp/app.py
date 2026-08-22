@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.7.2"
+APP_VERSION = "0.7.3"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -338,6 +338,12 @@ def site_password():
 
 
 USERS_LOCK = threading.Lock()
+
+# Page-strip previews: the full scans are ~2-5 MB each and an issue has
+# 116-164 pages, so the workbench serves a small cached JPEG per page
+# instead (the per-page viewer keeps the full-resolution scan).
+THUMB_PX = 900
+THUMB_LOCK = threading.Lock()
 
 
 def users():
@@ -907,12 +913,13 @@ class H(BaseHTTPRequestHandler):
     server_version = "pulpsite"
 
     # --- plumbing ---
-    def _send(self, code, body, ctype="text/html; charset=utf-8", cookie=None):
+    def _send(self, code, body, ctype="text/html; charset=utf-8", cookie=None,
+              cache=None):
         data = body if isinstance(body, bytes) else body.encode("utf-8")
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(data)))
-        self.send_header("Cache-Control", "no-store")
+        self.send_header("Cache-Control", cache or "no-store")
         if cookie:
             self.send_header("Set-Cookie", cookie)
         self.end_headers()
@@ -950,6 +957,38 @@ class H(BaseHTTPRequestHandler):
 
     def log_message(self, fmt, *args):
         pass  # quiet; serve script logs restarts
+
+    def _thumb(self, iid, nn):
+        """Small JPEG preview of one page scan, for the workbench page strip.
+
+        Built from the full PNG on first request and cached under
+        data/thumbs/, so later requests are just a file read. If Pillow is
+        missing or the conversion fails, the full PNG is served instead
+        (correct, only heavier)."""
+        src = os.path.join(DATA, "pages", iid, f"page_{nn}.png")
+        if not os.path.exists(src):
+            return self._send(404, "no image", "text/plain")
+        cache = "private, max-age=86400"
+        tp = os.path.join(DATA, "thumbs", iid, f"page_{nn}.jpg")
+        if not os.path.exists(tp):
+            try:
+                with THUMB_LOCK:
+                    if not os.path.exists(tp):
+                        from PIL import Image
+                        os.makedirs(os.path.dirname(tp), exist_ok=True)
+                        im = Image.open(src)
+                        if im.mode != "RGB":
+                            im = im.convert("RGB")
+                        if im.height > THUMB_PX:
+                            w = max(1, round(im.width * THUMB_PX / im.height))
+                            im = im.resize((w, THUMB_PX))
+                        im.save(tp + ".part", "JPEG", quality=78)
+                        os.replace(tp + ".part", tp)
+            except Exception:
+                return self._send(200, open(src, "rb").read(), "image/png",
+                                  cache=cache)
+        return self._send(200, open(tp, "rb").read(), "image/jpeg",
+                          cache=cache)
 
     # --- routes ---
     def do_GET(self):
@@ -993,8 +1032,12 @@ class H(BaseHTTPRequestHandler):
         if m:
             p = os.path.join(DATA, "pages", m.group(1), f"page_{m.group(2)}.png")
             if os.path.exists(p):
-                return self._send(200, open(p, "rb").read(), "image/png")
+                return self._send(200, open(p, "rb").read(), "image/png",
+                                  cache="private, max-age=86400")
             return self._send(404, "no image", "text/plain")
+        m = re.fullmatch(r"/thumb/([\w\-]+)/page_(\d{4})\.jpg", path)
+        if m:
+            return self._thumb(m.group(1), m.group(2))
         m = re.fullmatch(r"/dl/([\w\-]+)/([\w\-]+)", path)
         if m:
             iid, stage = m.groups()
@@ -1764,13 +1807,14 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                           f"data-snip='{esc(snip)}'>{inner}</g>")
             inart = pno in art["pages"]
             left += (f"<div class='scanwrap' id='pg{pno}'>"
-                     f"<img src='/img/{iid}/page_{pno:04d}.png' "
-                     f"loading='lazy' alt='page {pno}'>"
+                     f"<img src='/thumb/{iid}/page_{pno:04d}.jpg' "
+                     f"loading='lazy' decoding='async' alt='page {pno}'>"
                      f"<svg viewBox='0 0 {W} {H}' "
                      f"preserveAspectRatio='none'>{boxes}</svg>"
                      f"<div class='pgcap'>page {pno}"
                      + (" · A PAGE OF THIS ARTICLE" if inart else "")
-                     + "</div></div>")
+                     + f" · <a href='/issue/{iid}/p/{pno}' target='_blank'>"
+                     "full size</a></div></div>")
         if not allpages:
             left = "<div class='empty'>No scan pages in this issue.</div>"
 
