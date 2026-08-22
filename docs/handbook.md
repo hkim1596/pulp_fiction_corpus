@@ -74,6 +74,38 @@ command-form, Ctrl-C kills the whole session and takes BOTH sites down
 before editing its config, back the file up and run `cloudflared tunnel
 ingress validate`.
 
+## The read-only data door (the /api paths)
+
+Since v0.8.1 the site has a second, machine-friendly way in, built so
+that a development session (Claude, or any tool a developer trusts) can
+READ the server's data directly over the web instead of asking a human
+to run terminal commands. It is separate from the human passcode and
+from annotator accounts, and it can only read — nothing behind it can
+change, delete, or approve anything.
+
+    /api/<token>/ls?path=annotations          list a folder under data/
+    /api/<token>/get?path=annotations/x.jsonl read one file (8 MB cap)
+    /api/<token>/doc/<issue-id>               an issue's full assembled
+                                              state as JSON: articles with
+                                              fragment keys, unsorted,
+                                              furniture, roles, and every
+                                              box with its owner
+
+The token is a long random string in `~/shared/khj/.pulp_api_token`
+(env override `PULP_API_TOKEN_FILE`). Delete that file and the whole
+door is off; recreate it (any long random string, one line) and it is
+back. It is never in git or in this folder — the handover section
+below lists it with the other secrets. Only paths inside `data/` are
+reachable (path traversal is blocked), so passwords, keys, and code are
+not exposed even to a token holder. The backup-server scripts copy and
+use the same token file, so the door works during an outage too.
+
+Why it exists: debugging from a chat session used to mean sending
+Heejin diagnostic pastes and waiting for output. With the door, the
+session fetches `…/doc/wt_1925_11` itself and sees exactly what the
+replay engine sees. The duplicate-region bug of 2026-08-22 was the
+first thing verified this way.
+
 ## The site process and the deploy routine
 
 The site runs in tmux session `pulpsite` as a wrapper loop that restarts
@@ -174,8 +206,12 @@ you are running the pre-p17 script; update the server clone.
     ~/shared/khj/.pulp_site_password  guest passcode
     ~/shared/khj/.pulp_webapp_secret  cookie signing
     ~/shared/khj/.pulp_users.json     accounts (hashed passwords)
+    ~/shared/khj/.pulp_api_token      read-only data door token
 
-To hand the project to a new administrator, transfer these four files
+To hand the project to a new administrator, transfer these five files
 directly (not through the shared folder), or recreate them: a new env
-file from the template in `scripts/server_setup.sh`, a new passcode by
-echoing into the file, a new admin with `scripts/add_user.py`.
+file from the template in `scripts/server_setup.sh`, a new passcode or
+data-door token by echoing a value into the file, a new admin with
+`scripts/add_user.py`. A person with server access can always read the
+current values with `rtx ssh` — nothing is lost if a handover note goes
+missing.

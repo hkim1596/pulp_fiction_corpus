@@ -189,6 +189,40 @@ first-repair walkthrough. And `docs/assembly-notes.md`: Sujin's six
 assembly rules, recorded as the specification for the next s07 —
 verified human-repaired articles become its test set.
 
+## 2026-08-22 (v0.8.1) — the duplicate-region bug, and the data door
+
+Heejin's first real repair session on Weird Tales 1925-11 surfaced a
+data bug the demos never could: after claiming box 131K into his story,
+the box stayed grey on the scan and stayed in the excluded list, while
+its card sat correctly in the body text. A server-side probe showed
+why: the machine assembly had assigned the same region (key 131:10) to
+TWO records at once, the claim moved only the first copy it found, and
+the box map let the later record win. Fix, v0.8.1, three parts: a
+human claim now evicts EVERY copy of that region from every record and
+the unsorted list (a decision is definitive); duplicate regions inside
+one machine record are dropped on load; and a claimed piece is inserted
+at its reading-order position instead of the end of the list — which
+also removed the tedious re-ordering after every claim. Because the
+site recomputes state from the append-only log, the fix applied
+retroactively to repairs already made. "One region belongs to exactly
+one record" was added to `docs/assembly-notes.md` as rule 7 for the
+s07 rewrite.
+
+The same session added the READ-ONLY DATA DOOR (handbook, "/api"
+section), at Heejin's direction that a development session should be
+able to read server data itself rather than sending terminal pastes:
+token-gated /api paths for listing and reading the data tree and for
+fetching any issue's assembled state as JSON. The token lives only on
+the server (`~/shared/khj/.pulp_api_token`, listed with the other
+secrets in the handbook; never in git or this folder). Minutes after
+deploy, the 131:10 fix was verified through the door over the public
+site — the first debugging round trip with no terminal involved.
+
+Standing practice, restated at Heejin's request: every work session
+records what it built and why in these docs — the handbook for how
+things now work, this journal for what happened — so anyone who
+receives this folder can continue from the exact same place.
+
 ## How to keep this journal alive
 
 Add an entry whenever a work session changes the code, the data, or a
