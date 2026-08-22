@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.7.0"
+APP_VERSION = "0.7.1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -758,7 +758,17 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .editbox{width:100%;height:150px;font-size:13px;font-family:inherit;border:1px solid #7a3020;padding:6px}
 .posdd{font-size:11.5px;border:1px solid #b8a88e;font-family:inherit;padding:0 2px}
 .rolechip{display:inline-block;background:#2c5e2e;color:#faf7f2;font-size:10.5px;padding:0 6px;letter-spacing:.4px}
+.rolechip.t{background:#7a3020}
 .subtitleline{font-size:16px;color:#5a4f40;margin:-8px 0 10px}
+.secbar{font-size:12px;letter-spacing:1.4px;color:#faf7f2;padding:5px 12px;margin:16px 0 10px}
+.secbar:first-child{margin-top:0}
+.secbar.secT{background:#7a3020}
+.secbar.secA{background:#2c5e2e}
+.secbar.secB{background:#1c1a17}
+.card.rT{border-left:6px solid #7a3020}
+.card.rA{border-left:6px solid #2c5e2e}
+.card.rB{border-left:6px solid #1c1a17}
+.sechint{font-size:12.5px;color:#75695a;border:1px dashed #b8a88e;background:#fff;padding:8px 10px;margin:0 0 10px}
 .footer{margin-top:44px;font-size:12px;color:#75695a;border-top:2px solid #1c1a17;padding-top:8px}
 .land{max-width:640px;margin:8vh auto 0;padding:0 20px}
 .land h1{font-size:34px}
@@ -1578,6 +1588,8 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
         others = [a for a in doc["articles"] if a["article_id"] != aid]
         per_page, ids = issue_frag_map(iid, doc)
         overrides = doc.get("frag_overrides", {})
+        roles = doc.get("frag_roles", {})
+        ROLE_SEC = {"title": "T", "subtitle": "T", "author": "A"}
 
         def hidden(**kw):
             s = (f"<input type='hidden' name='issue' value='{iid}'>"
@@ -1639,7 +1651,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                         f"<select name='type'>{topts}</select> "
                         f"<button>save title / author / type</button></form>")
 
-        # LEFT: scans with labeled boxes
+        # LEFT: scans; role-marked boxes of this article get section tints
         left = ""
         for pno in art["pages"]:
             lay = layout_of(iid, pno) or {}
@@ -1649,15 +1661,24 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             boxes = ""
             for e in per_page.get(pno, []):
                 mine = e["kind"] == "article" and e["owner"] == aid
+                fill = "rgba(0,0,0,0)"
                 if mine:
-                    stroke, width, dash = "#7a3020", 4, ""
+                    role = roles.get(e["key"], "")
+                    if role in ("title", "subtitle"):
+                        stroke, width, dash = "#7a3020", 5, ""
+                        fill = "rgba(122,48,32,0.12)"
+                    elif role == "author":
+                        stroke, width, dash = "#2c5e2e", 5, ""
+                        fill = "rgba(44,94,46,0.12)"
+                    else:
+                        stroke, width, dash = "#7a3020", 4, ""
                 elif e["kind"] == "article":
                     stroke, width, dash = ("#75695a", 3,
                                            " stroke-dasharray='14,10'")
                 elif e["kind"] == "furniture":
                     stroke, width, dash = ("#b8a88e", 2,
                                            " stroke-dasharray='4,7'")
-                else:  # unsorted / unassigned
+                else:
                     stroke, width, dash = ("#c99b4e", 3,
                                            " stroke-dasharray='8,8'")
                 inner, lx, ly = "", None, None
@@ -1666,7 +1687,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                         x0, y0, x1, y1 = regs[r]["bbox"]
                         inner += (f"<rect x='{x0}' y='{y0}' "
                                   f"width='{x1-x0}' height='{y1-y0}' "
-                                  f"fill='rgba(0,0,0,0)' stroke='{stroke}' "
+                                  f"fill='{fill}' stroke='{stroke}' "
                                   f"stroke-width='{width}'{dash}/>")
                         if lx is None:
                             lx, ly = x0, y0
@@ -1686,18 +1707,22 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                      f"<svg viewBox='0 0 {W} {H}' "
                      f"preserveAspectRatio='none'>{boxes}</svg>"
                      f"<div class='pgcap'>page {pno} · solid = this "
-                     f"article · long dashes = other articles · dotted = "
-                     f"page furniture · amber = unsorted or unassigned"
+                     f"article (red tint = title, green tint = author) · "
+                     f"long dashes = other articles · dotted = page "
+                     f"furniture · amber = unsorted or unassigned"
                      f"</div></div>")
         if not art["pages"]:
             left = "<div class='empty'>No scan pages for this article.</div>"
 
-        # RIGHT: one draggable card per segment
-        roles = doc.get("frag_roles", {})
-        cards = ""
-        nfr = len(art.get("fragments", []))
+        # RIGHT: cards in three color-coded sections
+        body_keys = [fragkey(fr) for fr in art.get("fragments", [])
+                     if roles.get(fragkey(fr)) not in
+                     ("title", "subtitle", "author")]
+        n_body = len(body_keys)
+        sec = {"T": "", "A": "", "B": ""}
         n_manual_lbl = 0
-        for pos, fr in enumerate(art.get("fragments", []), 1):
+        body_pos = 0
+        for fr in art.get("fragments", []):
             k = fragkey(fr)
             manual = fr.get("mid") is not None
             if manual:
@@ -1712,14 +1737,21 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                        else "")
             txt = frag_text(iid, fr, overrides)
             role = roles.get(k, "")
+            s_key = ROLE_SEC.get(role, "B")
+            in_body = s_key == "B"
+            if in_body:
+                body_pos += 1
             corrected = (k in overrides) and not manual
             btns = ""
             if can:
-                posopts = "".join(
-                    f"<option value='{i}'{' selected' if i == pos else ''}>"
-                    f"{i}</option>" for i in range(1, nfr + 1))
-                btns = (f"<select class='posdd' data-key='{k}' "
-                        f"title='move to position'>{posopts}</select> ")
+                if in_body:
+                    posopts = "".join(
+                        f"<option value='{i}'"
+                        f"{' selected' if i == body_pos else ''}>{i}"
+                        f"</option>" for i in range(1, n_body + 1))
+                    btns += (f"<select class='posdd' data-key='{k}' "
+                             f"title='move to position'>{posopts}"
+                             f"</select> ")
                 if role:
                     btns += mini("clear role", act="role", frag=k, role="")
                 else:
@@ -1740,20 +1772,48 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                              + hidden(act="moveto", frag=k)
                              + f"<select name='to_id'>{opts}</select>"
                              f"<button>move to</button></form>")
-            cards += (f"<div class='card' data-key='{k}'"
-                      f"{' draggable=true' if can else ''}>"
-                      f"<div class='ch'>"
-                      f"<span class='idchip' data-selkey='{k}'>{fid}</span>"
-                      + (f"<span class='rolechip'>{esc(role)}</span>"
-                         if role else "")
-                      + f"<span class='muted'>"
-                      + ("added by annotator" if manual
-                         else f"page {fr['page']}")
-                      + (f" · {esc(lab)}" if lab else "")
-                      + f"{' · corrected' if corrected else ''}</span>"
-                      f"<span style='margin-left:auto'>{btns}</span></div>"
-                      f"<div class='cardtext{' edited' if corrected else ''}' "
-                      f"data-key='{k}'>{esc(txt)}</div></div>")
+            rc = ("<span class='rolechip"
+                  + (" t" if role in ("title", "subtitle") else "")
+                  + f"'>{esc(role)}</span>") if role else ""
+            drag = " draggable=true" if (can and in_body) else ""
+            sec[s_key] += (
+                f"<div class='card r{s_key}' data-key='{k}'{drag}>"
+                f"<div class='ch'>"
+                f"<span class='idchip' data-selkey='{k}'>{fid}</span>{rc}"
+                f"<span class='muted'>"
+                + ("added by annotator" if manual else f"page {fr['page']}")
+                + (f" · {esc(lab)}" if lab else "")
+                + f"{' · corrected' if corrected else ''}</span>"
+                f"<span style='margin-left:auto'>{btns}</span></div>"
+                f"<div class='cardtext{' edited' if corrected else ''}' "
+                f"data-key='{k}'>{esc(txt)}</div></div>")
+
+        addmanual = ""
+        if can:
+            addmanual = ("<details><summary class='muted' "
+                         "style='cursor:pointer;margin:2px 0 12px'>add a "
+                         "text segment by hand (for words the scan reading "
+                         "missed)</summary>"
+                         "<form class='annform' method='POST' "
+                         "action='/annotate'>" + hidden(act="add_manual")
+                         + "<textarea name='text' placeholder='the missing "
+                         "text, exactly as printed'></textarea>"
+                         "<p><button>add segment</button></p></form>"
+                         "</details>")
+
+        hintT = ("<div class='sechint'>none yet — press 'title' or "
+                 "'subtitle' on a body segment below</div>")
+        hintA = ("<div class='sechint'>none yet — press 'author' on the "
+                 "by-line segment below</div>")
+        sections = (
+            "<div class='secbar secT'>TITLE &amp; SUBTITLE</div>"
+            + (sec["T"] or hintT)
+            + "<div class='secbar secA'>AUTHOR</div>"
+            + (sec["A"] or hintA)
+            + f"<div class='secbar secB'>BODY TEXT · {n_body} segments in "
+            f"reading order</div>"
+            + "<div id='cards'>" + sec["B"] + "</div>"
+            + addmanual)
 
         # every other box on the same pages, whatever its classification
         oth = ""
@@ -1796,22 +1856,9 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                          f"<button>merge this whole article into</button>"
                          f"</form>")
 
-        addmanual = ""
-        if can:
-            addmanual = ("<details><summary class='muted' "
-                         "style='cursor:pointer;margin:2px 0 12px'>add a "
-                         "text segment by hand (for words the scan reading "
-                         "missed)</summary>"
-                         "<form class='annform' method='POST' "
-                         "action='/annotate'>" + hidden(act="add_manual")
-                         + "<textarea name='text' placeholder='the missing "
-                         "text, exactly as printed'></textarea>"
-                         "<p><button>add segment</button></p></form>"
-                         "</details>")
-
         textblock = ("<details><summary class='muted' "
                      "style='cursor:pointer'>assembled reading text "
-                     "(from the segments above)</summary>"
+                     "(from the body segments above)</summary>"
                      "<pre style='max-height:none'>"
                      + esc(art.get("text") or "(no text)") + "</pre>"
                      "</details>")
@@ -1833,21 +1880,19 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
         body = (howto(
             "Left: the scans, with EVERY detected box labeled — page "
             "numbers and running heads included (12A = page 12, first box "
-            "in reading order). Solid = this article; long dashes = other "
-            "articles; dotted = page furniture; amber = unsorted or "
-            "unassigned. Right: this article's boxes as cards in reading "
-            "order, then every other box on these pages with its "
-            "classification. Click a box or a label to flash its partner. "
-            "Drag cards to fix the order, or pick a position number from "
-            "the dropdown on the card — both save instantly. Double-click "
-            "a card's text to correct OCR errors in place. Mark a segment "
-            "as title, subtitle, or author: its text fills that field and "
-            "leaves the running text. 'Not story text' expels a box from "
-            "the article; 'add to this article' claims any box — even one "
-            "the machine called furniture or never assigned; 'add a text "
-            "segment by hand' inserts words the scan reading missed. "
-            "When everything is right, mark it verified — "
-            "'verify, then next unverified' moves you straight on. Every "
+            "in reading order). Solid = this article (red tint = title or "
+            "subtitle, green tint = author); long dashes = other articles; "
+            "dotted = page furniture; amber = unsorted or unassigned. "
+            "Right: three color-coded sections — TITLE &amp; SUBTITLE "
+            "(red), AUTHOR (green), BODY TEXT (black). Move a segment "
+            "between sections with the title / subtitle / author buttons; "
+            "its text fills that field, exactly as printed, and leaves the "
+            "reading text. In the body section, drag cards or pick a "
+            "position number — both save instantly. Double-click any "
+            "card's text to correct OCR errors. 'Not story text' expels a "
+            "box; 'add to this article' claims any box from these pages; "
+            "'add a text segment by hand' inserts words the scan reading "
+            "missed. When everything is right, mark it verified. Every "
             "action is recorded under your name; the machine's output is "
             "never overwritten.")
             + f"<h1>{esc(art.get('title') or '(untitled)')}</h1>"
@@ -1857,11 +1902,7 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             + f"<p class='muted'>{meta}</p>"
             + f"<p>{stline}</p>" + guestnote + metaform
             + "<div class='wb'><div class='wbleft'>" + left + "</div>"
-            + "<div class='wbright'>"
-            + f"<h2>Segments in this article "
-              f"({len(art.get('fragments', []))})</h2>"
-            + "<div id='cards'>" + cards + "</div>"
-            + addmanual
+            + "<div class='wbright'>" + sections
             + (("<h2>On these pages, assigned elsewhere</h2>" + oth)
                if oth else "")
             + (f"<p>{mergeform}</p>" if mergeform else "")
