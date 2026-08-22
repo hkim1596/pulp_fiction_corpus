@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.8.0"
+APP_VERSION = "0.8.1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -41,6 +41,9 @@ SECRET_FILE = os.environ.get("PULP_SECRET_FILE",
                              os.path.expanduser("~/shared/khj/.pulp_webapp_secret"))
 USERS_FILE = os.environ.get("PULP_USERS_FILE",
                             os.path.expanduser("~/shared/khj/.pulp_users.json"))
+API_TOKEN_FILE = os.environ.get(
+    "PULP_API_TOKEN_FILE",
+    os.path.expanduser("~/shared/khj/.pulp_api_token"))
 ANNDIR = os.path.join(DATA, "annotations")
 FEEDBACK = os.path.join(DATA, "feedback.jsonl")
 COOKIE_DAYS = 45
@@ -565,10 +568,17 @@ def effective_doc(iid):
     arts = []
     for a in doc["articles"]:
         # region-level granularity: every layout box is its own unit, so
-        # every box gets its own id, card, and controls on the workbench
+        # every box gets its own id, card, and controls on the workbench.
+        # The machine sometimes lists the same region twice in one
+        # article (overlapping fragments) — keep only the first copy.
         expl = []
+        seen_regions = set()
         for f in a["fragments"]:
             for r in f["region_ids"]:
+                rk = f"{f['page']}:{r}"
+                if rk in seen_regions:
+                    continue
+                seen_regions.add(rk)
                 expl.append({"page": f["page"], "region_ids": [r]})
         arts.append({**a, "fragments": expl,
                      "status": "auto", "verified_by": None,
@@ -616,6 +626,29 @@ def effective_doc(iid):
                 return "unsorted", fr
         return None, None
 
+    _rp_cache = {}
+
+    def readpos(fr):
+        """(page, position in the page's reading order) — where a
+        fragment sits on the physical page; manual segments sort last."""
+        if fr.get("mid") is not None:
+            return (10 ** 9, 10 ** 9)
+        p = fr["page"]
+        if p not in _rp_cache:
+            regs = page_regions(iid, p)
+            order = sorted(range(len(regs)),
+                           key=lambda r: regs[r].get("order", r))
+            _rp_cache[p] = {r: i for i, r in enumerate(order)}
+        r0 = fr["region_ids"][0] if fr["region_ids"] else 0
+        return (p, _rp_cache[p].get(r0, 10 ** 9))
+
+    def insert_pos(frags, fr):
+        rp = readpos(fr)
+        for i, f2 in enumerate(frags):
+            if readpos(f2) > rp:
+                return i
+        return len(frags)
+
     def touch(a, ev):
         if ev["user"] not in a["modified_by"]:
             a["modified_by"].append(ev["user"])
@@ -642,17 +675,28 @@ def effective_doc(iid):
             a["fragments"] = newlist
             touch(a, ev)
         elif act == "move_frag":
-            src, fr = findfrag(ev.get("frag", ""))
-            if not fr:
-                fr = synth(ev.get("frag", ""))  # furniture / unassigned
-                src = None
-                if not fr:
+            # A human claim is definitive: remove EVERY copy of this
+            # region everywhere (the machine sometimes assigned one box
+            # to two records), then place one copy at its reading-order
+            # position in the target.
+            k = ev.get("frag", "")
+            fr = None
+            for a2 in arts:
+                hits = [f2 for f2 in a2["fragments"] if fragkey(f2) == k]
+                if hits:
+                    for f2 in hits:
+                        a2["fragments"].remove(f2)
+                    fr = hits[0]
+                    if a2["article_id"] != ev.get("to_id"):
+                        touch(a2, ev)
+            for f2 in [f2 for f2 in uns if fragkey(f2) == k]:
+                uns.remove(f2)
+                if fr is None:
+                    fr = f2
+            if fr is None:
+                fr = synth(k)               # furniture / unassigned box
+                if fr is None:
                     continue
-            if src == "unsorted":
-                uns.remove(fr)
-            elif src is not None:
-                src["fragments"].remove(fr)
-                touch(src, ev)
             tgt = byid.get(ev.get("to_id", ""))
             if ev.get("to_id") == "new" or not tgt:
                 n_user += 1
@@ -666,7 +710,7 @@ def effective_doc(iid):
                 byid[na["article_id"]] = na
                 touch(na, ev)
             else:
-                tgt["fragments"].append(fr)
+                tgt["fragments"].insert(insert_pos(tgt["fragments"], fr), fr)
                 touch(tgt, ev)
         elif act == "frag_furniture":
             src, fr = findfrag(ev.get("frag", ""))
@@ -752,7 +796,9 @@ def issue_frag_map(iid, doc):
     art_of = {}
     for a in doc["articles"]:
         for fr in a["fragments"]:
-            art_of[fragkey(fr)] = (a["article_id"], a.get("title"))
+            k = fragkey(fr)
+            if k not in art_of:     # machine double-assignments: first wins
+                art_of[k] = (a["article_id"], a.get("title"))
     ufurn = {u.get("frag") for u in doc.get("user_furniture", [])}
     mfurn = {fragkey(fr) for fr in doc.get("machine_furniture", [])}
     unsrt = {fragkey(fr) for fr in doc.get("unsorted", [])}
@@ -1034,6 +1080,89 @@ class H(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         pass  # quiet; serve script logs restarts
 
+    def api(self, path, qs):
+        """Read-only data access for automated debugging.
+
+        Lets a trusted tool (Claude, during development sessions) read
+        the pipeline's data tree and any issue's assembled state through
+        the public site, without terminal pastes. Gated by a long random
+        token kept OUTSIDE git (~/shared/khj/.pulp_api_token; env
+        PULP_API_TOKEN_FILE). No token file on disk = the whole API is
+        off. Strictly read-only, data/ tree only.
+
+            /api/<token>/ls?path=annotations      list a data folder
+            /api/<token>/get?path=annotations/x   read one file
+            /api/<token>/doc/<issue-id>           assembled state as JSON
+        """
+        try:
+            want = open(API_TOKEN_FILE).read().strip()
+        except Exception:
+            want = ""
+        if not want:
+            return self._send(404, "api disabled", "text/plain")
+        parts = path.split("/", 3)          # '', 'api', token, rest
+        if len(parts) < 4 or not hmac.compare_digest(parts[2], want):
+            return self._send(403, "bad token", "text/plain")
+        rest = parts[3]
+
+        def safe(sub):
+            p = os.path.normpath(os.path.join(DATA, sub.strip("/")))
+            ok = p == DATA or p.startswith(DATA + os.sep)
+            return p if ok else None
+
+        if rest == "ls":
+            d = safe(qs.get("path", [""])[0])
+            if not d or not os.path.isdir(d):
+                return self._send(404, "no such folder", "text/plain")
+            out = [{"name": n, "dir": os.path.isdir(os.path.join(d, n)),
+                    "bytes": (os.path.getsize(os.path.join(d, n))
+                              if os.path.isfile(os.path.join(d, n))
+                              else None)}
+                   for n in sorted(os.listdir(d))]
+            return self._send(200, json.dumps(out, ensure_ascii=False),
+                              "application/json")
+        if rest == "get":
+            p = safe(qs.get("path", [""])[0])
+            if not p or not os.path.isfile(p):
+                return self._send(404, "no such file", "text/plain")
+            if os.path.getsize(p) > 8_000_000:
+                return self._send(413, "file too large for the api",
+                                  "text/plain")
+            ctype = ("image/png" if p.endswith(".png") else
+                     "image/jpeg" if p.endswith(".jpg") else
+                     "application/json" if p.endswith(".json") else
+                     "text/plain; charset=utf-8")
+            return self._send(200, open(p, "rb").read(), ctype)
+        m = re.fullmatch(r"doc/([\w\-]+)", rest)
+        if m:
+            iid = m.group(1)
+            doc = effective_doc(iid)
+            if not doc:
+                return self._send(404, "no such issue", "text/plain")
+            pp, _ids = issue_frag_map(iid, doc)
+            out = {
+                "issue": iid,
+                "articles": [{
+                    "article_id": a["article_id"], "type": a.get("type"),
+                    "title": a.get("title"), "author": a.get("author"),
+                    "pages": a.get("pages"), "status": a.get("status"),
+                    "modified_by": a.get("modified_by"),
+                    "fragments": [fragkey(fr) for fr in a["fragments"]],
+                } for a in doc["articles"]],
+                "unsorted": [fragkey(fr) for fr in doc.get("unsorted", [])],
+                "machine_furniture": [fragkey(fr) for fr in
+                                      doc.get("machine_furniture", [])],
+                "frag_roles": doc.get("frag_roles", {}),
+                "boxes": {str(p): [{"key": e["key"], "id": e["id"],
+                                    "kind": e["kind"],
+                                    "owner": e.get("owner")}
+                                   for e in lst]
+                          for p, lst in sorted(pp.items())},
+            }
+            return self._send(200, json.dumps(out, ensure_ascii=False),
+                              "application/json")
+        return self._send(404, "unknown api call", "text/plain")
+
     def _thumb(self, iid, nn):
         """Small JPEG preview of one page scan, for the workbench page strip.
 
@@ -1072,6 +1201,8 @@ class H(BaseHTTPRequestHandler):
         qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         if path == "/healthz":
             return self._send(200, "ok", "text/plain")
+        if path.startswith("/api/"):
+            return self.api(path, qs)
         if path == "/":
             return self._send(200, self.landing())
         if path == "/login":

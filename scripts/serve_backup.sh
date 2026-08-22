@@ -11,6 +11,7 @@ cd "$BASE/pulp_fiction_corpus"
 export PULP_SITE_PASSWORD_FILE="$BASE/secrets/.pulp_site_password"
 export PULP_SECRET_FILE="$BASE/secrets/.pulp_webapp_secret"
 export PULP_USERS_FILE="$BASE/secrets/.pulp_users.json"
+export PULP_API_TOKEN_FILE="$BASE/secrets/.pulp_api_token"
 
 echo "pulp backup site starting on http://127.0.0.1:8092 (Ctrl-C stops it)"
 while true; do

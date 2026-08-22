@@ -22,7 +22,7 @@ rsync -a --progress "$SRV:~/shared/khj/pulp_fiction_corpus/" "$HOME/pulp_backup/
 
 echo "-- copying the account and secret files (kept OUTSIDE the project folder) --"
 mkdir -p "$HOME/pulp_backup/secrets"
-for f in .pulp_site_password .pulp_webapp_secret .pulp_users.json; do
+for f in .pulp_site_password .pulp_webapp_secret .pulp_users.json .pulp_api_token; do
   rsync -a "$SRV:~/shared/khj/$f" "$HOME/pulp_backup/secrets/" && echo "  $f ok" || echo "  $f MISSING on server"
 done
 chmod 600 "$HOME/pulp_backup/secrets/".pulp_* 2>/dev/null
