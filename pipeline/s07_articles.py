@@ -51,6 +51,8 @@ Group the segments into units and classify each unit. Rules:
 - kind must be one of: fragment (part of a story/article/poem/feature), ad (advertisement), furniture (page number, running head, decorative line), unsorted (cannot tell).
 - A unit of kind fragment gets: title (the displayed title exactly as printed, or null if this page shows no title for it), author (as printed, or null), continues_previous (true if the text clearly continues a unit from an earlier page, e.g. starts mid-sentence or is labeled "continued").
 - An ornamental or display title segment belongs in the SAME unit as the body text it introduces.
+- Notices like "Continued from page 34", "Continued on page 102", "(Continued)" are FURNITURE, never part of story text — but they DO mean the neighboring body text continues an earlier unit (set continues_previous true).
+- A heading INSIDE a story — a chapter number, a roman numeral (II, III), a small section subtitle between paragraphs of the same story — does NOT start a new unit; it stays inside the story's unit. Only a full display title with its own typography starts a new unit.
 - Do not correct or rewrite any text. Copy titles and authors exactly as printed.
 Answer with JSON only, no other words:
 {"units":[{"segments":[ids...],"kind":"fragment|ad|furniture|unsorted","title":null,"author":null,"continues_previous":false}]}
@@ -62,7 +64,9 @@ PASS_B_PROMPT = """You are assembling a scanned pulp magazine's table of content
 Below is an ordered list of fragments (page number, fragment index, candidate title, candidate author, whether it continues an earlier fragment, first and last words).
 Join fragments that belong to the same printed work. Rules:
 - Each article gets: type (one of story, serial_part, poem, feature, letters, toc, ad, other), title (as printed; null only if truly untitled), author (as printed or null), fragments (ordered list of [page, fragment_index]).
-- A fragment marked continues_previous joins the nearest earlier open article whose text it plausibly continues.
+- A fragment marked continues_previous joins the nearest earlier open article whose text it plausibly continues (check that the last words of the earlier fragment flow into the first words of this one).
+- An article's fragments MUST be listed in ascending page order, and the article list itself must follow the page order of each article's first fragment.
+- Untitled fragments between two parts of the same story (chapter breaks, section breaks) belong to that story — never make them separate articles.
 - Advertisements stay separate articles of type ad, one per advertisement.
 Answer with JSON only, no other words:
 {"articles":[{"type":"story","title":null,"author":null,"fragments":[[page,frag],...]}]}
@@ -216,6 +220,12 @@ def run_issue(iid, backend, force=False):
     if os.path.exists(outfile) and not force:
         print(f"[s07] {iid}: already assembled — skipped (--force to redo)")
         return
+    if force:
+        ann = os.path.join(ROOT, "data", "annotations", f"{iid}.jsonl")
+        if os.path.exists(ann):
+            os.rename(ann, ann + "." + time.strftime("%Y%m%d%H%M%S") + ".bak")
+            print(f"[s07] {iid}: reassembly invalidates human annotations — "
+                  f"archived to .bak")
     laydir = os.path.join(ROOT, "data", "layout", iid)
     pagefiles = sorted(glob.glob(os.path.join(laydir, "page_*.json")))
     if not pagefiles:

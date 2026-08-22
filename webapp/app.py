@@ -29,7 +29,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.3.0"
+APP_VERSION = "0.4.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -38,6 +38,9 @@ PASS_FILE = os.environ.get("PULP_SITE_PASSWORD_FILE",
                            os.path.expanduser("~/shared/khj/.pulp_site_password"))
 SECRET_FILE = os.environ.get("PULP_SECRET_FILE",
                              os.path.expanduser("~/shared/khj/.pulp_webapp_secret"))
+USERS_FILE = os.environ.get("PULP_USERS_FILE",
+                            os.path.expanduser("~/shared/khj/.pulp_users.json"))
+ANNDIR = os.path.join(DATA, "annotations")
 FEEDBACK = os.path.join(DATA, "feedback.jsonl")
 COOKIE_DAYS = 45
 CONTACT = "hkim1596@knu.ac.kr"
@@ -192,13 +195,22 @@ def articles_index():
 
 
 def article_by_id(aid):
-    iid = aid.rsplit("_a", 1)[0]
-    d = articles_of(iid)
+    m = re.match(r"(.+)_(?:a|u)\d+$", aid)
+    if not m:
+        return None, None
+    d = effective_doc(m.group(1))
     if d:
         for a in d["articles"]:
             if a["article_id"] == aid:
                 return a, d
     return None, None
+
+
+STATUS_CHIP = {
+    "auto": "<span class='chip stA'>automatic</span>",
+    "modified": "<span class='chip stM'>modified</span>",
+    "verified": "<span class='chip stV'>verified</span>",
+}
 
 
 # ---------------- auth ----------------
@@ -219,19 +231,217 @@ def site_password():
         return None  # no file -> site open
 
 
-def make_token():
-    exp = str(int(time.time()) + COOKIE_DAYS * 86400)
-    sig = hmac.new(secret().encode(), exp.encode(), hashlib.sha256).hexdigest()
-    return f"{exp}.{sig}"
-
-
-def token_ok(tok):
+def users():
+    """Named accounts, or None when no users file exists (guest-only mode)."""
     try:
-        exp, sig = tok.split(".", 1)
-        good = hmac.new(secret().encode(), exp.encode(), hashlib.sha256).hexdigest()
-        return hmac.compare_digest(sig, good) and int(exp) > time.time()
+        return json.load(open(USERS_FILE, encoding="utf-8"))
     except Exception:
+        return None
+
+
+def check_user(username, password):
+    u = (users() or {}).get(username)
+    if not u:
         return False
+    h = hashlib.sha256((u["salt"] + password).encode()).hexdigest()
+    return hmac.compare_digest(h, u["pw"])
+
+
+def display_name(username):
+    u = (users() or {}).get(username)
+    return (u or {}).get("name") or username
+
+
+def make_token(user):
+    exp = str(int(time.time()) + COOKIE_DAYS * 86400)
+    payload = f"{user}|{exp}"
+    sig = hmac.new(secret().encode(), payload.encode(),
+                   hashlib.sha256).hexdigest()
+    return f"{payload}|{sig}"
+
+
+def token_user(tok):
+    """Return the username ('guest' included) for a valid cookie, else None."""
+    try:
+        user, exp, sig = tok.split("|")
+        good = hmac.new(secret().encode(), f"{user}|{exp}".encode(),
+                        hashlib.sha256).hexdigest()
+        if hmac.compare_digest(sig, good) and int(exp) > time.time():
+            return user
+    except Exception:
+        pass
+    return None
+
+
+# ---------------- annotations: append-only event log ----------------
+
+def ann_events(iid):
+    p = os.path.join(ANNDIR, f"{iid}.jsonl")
+    out = []
+    if os.path.exists(p):
+        for line in open(p, encoding="utf-8"):
+            try:
+                out.append(json.loads(line))
+            except Exception:
+                pass
+    return out
+
+
+def ann_append(iid, user, action, payload):
+    os.makedirs(ANNDIR, exist_ok=True)
+    with open(os.path.join(ANNDIR, f"{iid}.jsonl"), "a",
+              encoding="utf-8") as f:
+        f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                            "user": user, "issue": iid, "action": action,
+                            **payload}, ensure_ascii=False) + "\n")
+
+
+_regions_cache = {}
+def page_regions(iid, pno):
+    key = (iid, pno)
+    if key not in _regions_cache:
+        p = os.path.join(DATA, "layout", iid, f"page_{pno:04d}.json")
+        try:
+            regs = json.load(open(p, encoding="utf-8"))["regions"]
+        except Exception:
+            regs = []
+        _regions_cache[key] = sorted(regs, key=lambda r: r.get("order", 0))
+    return _regions_cache[key]
+
+
+def fragkey(fr):
+    return f"{fr['page']}:{'-'.join(str(x) for x in fr['region_ids'])}"
+
+
+def frag_text(iid, fr):
+    regs = page_regions(iid, fr["page"])
+    parts = []
+    for ridx in fr["region_ids"]:
+        if 0 <= ridx < len(regs):
+            parts.append(regs[ridx].get("text") or "")
+    return "\n".join(parts)
+
+
+def assemble_text(iid, fragments):
+    raw = "\n".join(frag_text(iid, fr) for fr in fragments)
+    try:
+        import sys as _sys
+        _p = os.path.join(ROOT, "pipeline")
+        if _p not in _sys.path:
+            _sys.path.insert(0, _p)
+        from s07_articles import clean_text
+        return clean_text(raw)
+    except Exception:
+        return raw
+
+
+def effective_doc(iid):
+    """Machine articles + replayed human annotations -> what the site shows.
+
+    The machine output is never modified; every human action is one JSONL
+    event with its user and time, replayed here in order.
+    """
+    doc = articles_of(iid)
+    if not doc:
+        return None
+    arts = []
+    for a in doc["articles"]:
+        arts.append({**a, "fragments": [dict(f) for f in a["fragments"]],
+                     "status": "auto", "verified_by": None,
+                     "verified_at": None, "modified_by": [],
+                     "text_override": None, "last_mod": ""})
+    byid = {a["article_id"]: a for a in arts}
+    user_furniture = []
+    n_user = 0
+
+    def findfrag(k):
+        for a in arts:
+            for fr in a["fragments"]:
+                if fragkey(fr) == k:
+                    return a, fr
+        return None, None
+
+    def touch(a, ev):
+        if ev["user"] not in a["modified_by"]:
+            a["modified_by"].append(ev["user"])
+        a["last_mod"] = ev["ts"]
+
+    for ev in ann_events(iid):
+        act = ev.get("action")
+        aid = ev.get("article_id")
+        a = byid.get(aid)
+        if act == "set_meta" and a:
+            for k in ("title", "author", "type"):
+                if k in ev:
+                    a[k] = ev[k] or None
+            touch(a, ev)
+        elif act == "set_text" and a:
+            a["text_override"] = ev.get("text", "")
+            touch(a, ev)
+        elif act == "set_frag_order" and a:
+            want = ev.get("order", [])
+            cur = {fragkey(fr): fr for fr in a["fragments"]}
+            newlist = [cur[k] for k in want if k in cur]
+            newlist += [fr for fr in a["fragments"]
+                        if fragkey(fr) not in want]
+            a["fragments"] = newlist
+            touch(a, ev)
+        elif act == "move_frag":
+            src, fr = findfrag(ev.get("frag", ""))
+            if not fr:
+                continue
+            src["fragments"].remove(fr)
+            touch(src, ev)
+            tgt = byid.get(ev.get("to_id", ""))
+            if ev.get("to_id") == "new" or not tgt:
+                n_user += 1
+                na = {"article_id": f"{iid}_u{n_user:03d}", "type": "story",
+                      "title": None, "author": None, "pages": [],
+                      "fragments": [fr], "text": "", "status": "auto",
+                      "verified_by": None, "verified_at": None,
+                      "modified_by": [], "text_override": None,
+                      "last_mod": ""}
+                arts.append(na)
+                byid[na["article_id"]] = na
+                touch(na, ev)
+            else:
+                tgt["fragments"].append(fr)
+                touch(tgt, ev)
+        elif act == "frag_furniture":
+            src, fr = findfrag(ev.get("frag", ""))
+            if fr:
+                src["fragments"].remove(fr)
+                user_furniture.append({"frag": ev.get("frag"),
+                                       "by": ev["user"], "ts": ev["ts"]})
+                touch(src, ev)
+        elif act == "merge" and a:
+            tgt = byid.get(ev.get("into_id", ""))
+            if tgt and tgt is not a:
+                tgt["fragments"].extend(a["fragments"])
+                a["fragments"] = []
+                touch(a, ev)
+                touch(tgt, ev)
+        elif act == "verify" and a:
+            a["verified_by"] = ev["user"]
+            a["verified_at"] = ev["ts"]
+        elif act == "unverify" and a:
+            a["verified_by"] = None
+            a["verified_at"] = None
+
+    out = []
+    for a in arts:
+        if not a["fragments"] and not a["text_override"]:
+            continue  # emptied by moves/merges
+        a["pages"] = sorted({fr["page"] for fr in a["fragments"]}) or a["pages"]
+        a["text"] = (a["text_override"] if a["text_override"] is not None
+                     else assemble_text(iid, a["fragments"]))
+        if a["verified_at"] and a["verified_at"] >= a["last_mod"]:
+            a["status"] = "verified"
+        elif a["modified_by"]:
+            a["status"] = "modified"
+        out.append(a)
+    return {**doc, "articles": out,
+            "user_furniture": user_furniture}
 
 
 # ---------------- html helpers ----------------
@@ -274,6 +484,17 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .fb{margin-top:34px;border-top:1px solid #d8cfc0;padding-top:12px;font-size:14px}
 .fb input[type=text]{width:180px} .fb textarea{width:100%;height:60px}
 .fb input,.fb textarea,.fb button{font-family:inherit;font-size:14px;border:1px solid #b8a88e;background:#fff;padding:5px}
+.chip{font-size:11.5px;padding:1px 8px;border:1px solid;border-radius:9px;letter-spacing:.4px}
+.stA{color:#75695a;border-color:#b8a88e;background:#f3ead9}
+.stM{color:#7a5220;border-color:#c99b4e;background:#f7ecd4}
+.stV{color:#2c5e2e;border-color:#7fae81;background:#e3efe3}
+.mini{display:inline}
+.mini button{font-size:11.5px;padding:1px 6px;border:1px solid #b8a88e;background:#fff;cursor:pointer;font-family:inherit}
+.mini select{font-size:11.5px;padding:1px;border:1px solid #b8a88e;font-family:inherit}
+.annform input[type=text]{font-size:14px;padding:3px;border:1px solid #b8a88e;font-family:inherit}
+.annform select,.annform button{font-size:13px;padding:3px 8px;border:1px solid #b8a88e;background:#fff;font-family:inherit}
+.annform textarea{width:100%;height:280px;font-size:13.5px;font-family:inherit;border:1px solid #b8a88e;padding:8px}
+.fragsnip{color:#5a4f40;font-size:12.5px}
 .footer{margin-top:44px;font-size:12px;color:#75695a;border-top:2px solid #1c1a17;padding-top:8px}
 .land{max-width:640px;margin:8vh auto 0;padding:0 20px}
 .land h1{font-size:34px}
@@ -292,7 +513,8 @@ def page(title, body, member=True, path="/"):
     nav = ("<span class='nav'>"
            "<a href='/issues'>issues</a><a href='/articles'>articles</a>"
            "<a href='/method'>method</a>"
-           "<a href='/timing'>timing</a><a href='/feedback'>feedback</a>"
+           "<a href='/timing'>timing</a><a href='/activity'>activity</a>"
+           "<a href='/feedback'>feedback</a>"
            "<a href='/logout'>log out</a></span>") if member else ""
     fb = ("<div class='fb'><form method='POST' action='/feedback'>"
           f"<input type='hidden' name='path' value='{esc(path)}'>"
@@ -393,12 +615,23 @@ class H(BaseHTTPRequestHandler):
             self.send_header("Set-Cookie", cookie)
         self.end_headers()
 
-    def _member(self):
-        if site_password() is None:
-            return True
+    def _user(self):
+        """Username for a named account, 'guest' for passcode access,
+        None when not logged in. Site fully open (guest) with no password
+        file and no users file."""
         c = self.headers.get("Cookie", "")
         m = re.search(r"pfauth=([^;]+)", c)
-        return bool(m and token_ok(m.group(1)))
+        if m:
+            u = token_user(urllib.parse.unquote(m.group(1)))
+            if u:
+                return u
+        if users() is None and site_password() is None:
+            return "guest"
+        return None
+
+    def _member(self):
+        self.user = self._user()
+        return self.user is not None
 
     def log_message(self, fmt, *args):
         pass  # quiet; serve script logs restarts
@@ -417,6 +650,8 @@ class H(BaseHTTPRequestHandler):
             return self._redirect("/", cookie="pfauth=; Max-Age=0; Path=/")
         if not self._member():
             return self._redirect("/login")
+        if path == "/activity":
+            return self._send(200, self.activity_page())
         if path == "/issues":
             return self._send(200, self.issues_page())
         if path == "/articles":
@@ -456,24 +691,91 @@ class H(BaseHTTPRequestHandler):
         form = urllib.parse.parse_qs(self.rfile.read(ln).decode("utf-8"))
         get = lambda k: form.get(k, [""])[0].strip()
         if path == "/login":
-            pw = site_password()
-            if pw is not None and hmac.compare_digest(get("passcode"), pw):
-                tok = make_token()
+            uname, pword = get("username"), get("password")
+            if uname and check_user(uname, pword):
+                tok = make_token(uname)
                 return self._redirect("/issues",
-                    cookie=f"pfauth={tok}; Max-Age={COOKIE_DAYS*86400}; Path=/; HttpOnly")
+                    cookie=f"pfauth={urllib.parse.quote(tok)}; "
+                           f"Max-Age={COOKIE_DAYS*86400}; Path=/; HttpOnly")
+            pw = site_password()
+            if (not uname and pw is not None
+                    and hmac.compare_digest(get("passcode"), pw)):
+                tok = make_token("guest")
+                return self._redirect("/issues",
+                    cookie=f"pfauth={urllib.parse.quote(tok)}; "
+                           f"Max-Age={COOKIE_DAYS*86400}; Path=/; HttpOnly")
             time.sleep(1.0)
-            return self._send(200, self.login_page("That passcode is not right."))
+            return self._send(200, self.login_page(
+                "That login is not right."))
+        if not self._member():
+            return self._redirect("/login")
         if path == "/feedback":
-            if not self._member():
-                return self._redirect("/login")
             os.makedirs(DATA, exist_ok=True)
             with open(FEEDBACK, "a", encoding="utf-8") as f:
                 f.write(json.dumps({
                     "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
-                    "path": get("path")[:300], "name": get("name")[:80],
+                    "path": get("path")[:300],
+                    "name": get("name")[:80] or display_name(self.user),
+                    "user": self.user,
                     "comment": get("comment")[:4000]}, ensure_ascii=False) + "\n")
             return self._redirect("/feedback")
+        if path == "/annotate":
+            if self.user == "guest":
+                return self._send(403, page("No", howto(
+                    "Annotation needs a named account, so the record shows "
+                    "who verified or changed each article. Ask Heejin for "
+                    "an account, then log in with it.") +
+                    "<h1>Guests cannot annotate</h1>"))
+            return self.do_annotate(get)
         return self._send(404, "no", "text/plain")
+
+    def do_annotate(self, get):
+        iid = get("issue")
+        aid = get("article_id")
+        act = get("act")
+        back = get("back") or f"/article/{aid}"
+        doc = effective_doc(iid)
+        if not doc:
+            return self._send(404, "no issue", "text/plain")
+        art = next((a for a in doc["articles"]
+                    if a["article_id"] == aid), None)
+        if act == "meta" and art:
+            ann_append(iid, self.user, "set_meta",
+                       {"article_id": aid, "title": get("title"),
+                        "author": get("author"), "type": get("type")})
+        elif act == "text" and art:
+            ann_append(iid, self.user, "set_text",
+                       {"article_id": aid, "text": get("text")})
+        elif act in ("up", "down") and art:
+            order = [fragkey(fr) for fr in art["fragments"]]
+            k = get("frag")
+            if k in order:
+                i = order.index(k)
+                j = i - 1 if act == "up" else i + 1
+                if 0 <= j < len(order):
+                    order[i], order[j] = order[j], order[i]
+                    ann_append(iid, self.user, "set_frag_order",
+                               {"article_id": aid, "order": order})
+        elif act == "detach" and art:
+            ann_append(iid, self.user, "move_frag",
+                       {"article_id": aid, "frag": get("frag"),
+                        "to_id": "new"})
+        elif act == "moveto" and art and get("to_id"):
+            ann_append(iid, self.user, "move_frag",
+                       {"article_id": aid, "frag": get("frag"),
+                        "to_id": get("to_id")})
+        elif act == "furniture" and art:
+            ann_append(iid, self.user, "frag_furniture",
+                       {"article_id": aid, "frag": get("frag")})
+        elif act == "merge" and art and get("into_id"):
+            ann_append(iid, self.user, "merge",
+                       {"article_id": aid, "into_id": get("into_id")})
+            back = f"/article/{get('into_id')}"
+        elif act == "verify" and art:
+            ann_append(iid, self.user, "verify", {"article_id": aid})
+        elif act == "unverify" and art:
+            ann_append(iid, self.user, "unverify", {"article_id": aid})
+        return self._redirect(back)
 
     # --- pages ---
     def landing(self):
@@ -502,12 +804,22 @@ To request access, write to {CONTACT}.</p>{note}
 
     def login_page(self, msg):
         m = f"<p class='muted'>{esc(msg)}</p>" if msg else ""
-        body = f"""<div class='land'><h1>Collaborator access</h1>{m}
+        acct = ""
+        if users() is not None:
+            acct = """<h2 style='border:0'>Annotator account</h2>
 <form method='POST' action='/login'>
-<p><input class='pw' type='password' name='passcode' autofocus>
-<button class='go'>Enter</button></p></form>
-<p class='muted'>One shared passcode for the project team. Request it at
-{CONTACT}.</p></div>"""
+<p><input class='pw' type='text' name='username' placeholder='username'
+autofocus> <input class='pw' type='password' name='password'
+placeholder='password'> <button class='go'>Log in</button></p></form>
+<p class='muted'>Named accounts can verify and correct articles; every
+action is recorded under your name.</p>"""
+        body = f"""<div class='land'><h1>Collaborator access</h1>{m}
+{acct}
+<h2 style='border:0'>Guest (read only)</h2>
+<form method='POST' action='/login'>
+<p><input class='pw' type='password' name='passcode'
+placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
+<p class='muted'>Accounts and the passcode: {CONTACT}.</p></div>"""
         return f"""<!doctype html><html><head><meta charset='utf-8'>
 <title>Access · Pulp Fiction Corpus</title><style>{CSS}</style></head>
 <body>{body}</body></html>"""
@@ -587,7 +899,7 @@ To request access, write to {CONTACT}.</p>{note}
         return page(info["magazine"], body, path=f"/issue/{iid}")
 
     def issue_articles_html(self, iid):
-        doc = articles_of(iid)
+        doc = effective_doc(iid)
         if not doc:
             return ("<h2>Articles</h2><div class='empty'>Not yet assembled "
                     "— the article stage (s07) has not run for this issue."
@@ -597,16 +909,20 @@ To request access, write to {CONTACT}.</p>{note}
             f"{esc(a.get('title') or '(untitled)')}</a></td>"
             f"<td>{esc(a.get('author') or '')}</td>"
             f"<td>{esc(a.get('type') or '')}</td>"
-            f"<td class='num'>{a['pages'][0]}–{a['pages'][-1]}</td></tr>"
+            f"<td>{STATUS_CHIP.get(a.get('status'), '')}</td>"
+            f"<td class='num'>{a['pages'][0] if a['pages'] else '?'}–"
+            f"{a['pages'][-1] if a['pages'] else '?'}</td></tr>"
             for a in doc["articles"])
-        extra = (f"<p class='muted'>{len(doc.get('furniture', []))} page-"
-                 f"furniture units recorded (page numbers, running heads) · "
-                 f"{len(doc.get('unsorted', []))} segments unsorted, kept "
-                 f"for review</p>")
+        nv = sum(1 for a in doc["articles"] if a.get("status") == "verified")
+        extra = (f"<p class='muted'>{nv} of {len(doc['articles'])} verified · "
+                 f"{len(doc.get('furniture', []))} page-furniture units from "
+                 f"the machine + {len(doc.get('user_furniture', []))} marked "
+                 f"by annotators · {len(doc.get('unsorted', []))} segments "
+                 f"unsorted, kept for review</p>")
         return (f"<h2>Articles in this issue ({len(doc['articles'])})</h2>"
                 "<table><tr><th>title as printed</th><th>author</th>"
-                "<th>type</th><th>pages</th></tr>" + rows + "</table>"
-                + extra)
+                "<th>type</th><th>status</th><th>pages</th></tr>"
+                + rows + "</table>" + extra)
 
     def viewer(self, iid, n, qs):
         info = issue_by_id(iid)
@@ -737,57 +1053,75 @@ To request access, write to {CONTACT}.</p>{note}
                     path=f"/issue/{iid}/p/{n}")
 
     def articles_page(self, qs):
-        rows = articles_index()
         q = (qs.get("q", [""])[0] or "").strip().lower()
         typ = (qs.get("type", [""])[0] or "").strip()
+        stat = (qs.get("status", [""])[0] or "").strip()
+        cfgmap = {i["id"]: i for i in cfg()["issues"]}
+        rows, types = [], set()
+        for iid in cfgmap:
+            doc = effective_doc(iid)
+            if not doc:
+                continue
+            for a in doc["articles"]:
+                types.add(a.get("type") or "other")
+                rows.append({**a, "issue": iid,
+                             "words": len((a.get("text") or "").split())})
+        total = len(rows)
         if q:
             rows = [r for r in rows
                     if q in (r.get("title") or "").lower()
                     or q in (r.get("author") or "").lower()]
         if typ:
-            rows = [r for r in rows if r.get("type") == typ]
-        types = sorted({r.get("type") or "other" for r in articles_index()})
-        opts = "<option value=''>all types</option>" + "".join(
+            rows = [r for r in rows if (r.get("type") or "other") == typ]
+        if stat:
+            rows = [r for r in rows if r.get("status") == stat]
+        topts = "<option value=''>all types</option>" + "".join(
             f"<option value='{esc(t)}' {'selected' if t == typ else ''}>"
-            f"{esc(t)}</option>" for t in types)
+            f"{esc(t)}</option>" for t in sorted(types))
+        sopts = "<option value=''>all statuses</option>" + "".join(
+            f"<option value='{s}' {'selected' if s == stat else ''}>{s}"
+            f"</option>" for s in ("auto", "modified", "verified"))
         form = (f"<form method='GET' action='/articles' "
                 f"style='margin:0 0 14px'>"
                 f"<input type='text' name='q' value='{esc(q)}' "
                 f"placeholder='title or author' "
                 f"style='font-size:14px;padding:4px;border:1px solid #b8a88e'> "
                 f"<select name='type' style='font-size:14px;padding:4px'>"
-                f"{opts}</select> "
+                f"{topts}</select> "
+                f"<select name='status' style='font-size:14px;padding:4px'>"
+                f"{sopts}</select> "
                 f"<button style='font-size:14px;padding:4px 10px'>find"
                 f"</button></form>")
-        cfgmap = {i["id"]: i for i in cfg()["issues"]}
         trows = ""
         for r in rows:
             info = cfgmap.get(r["issue"], {})
-            title = r.get("title") or "(untitled)"
             trows += (f"<tr><td><a href='/article/{r['article_id']}'>"
-                      f"{esc(title)}</a></td>"
+                      f"{esc(r.get('title') or '(untitled)')}</a></td>"
                       f"<td>{esc(r.get('author') or '')}</td>"
                       f"<td>{esc(r.get('type') or '')}</td>"
+                      f"<td>{STATUS_CHIP.get(r.get('status'), '')}</td>"
                       f"<td><a href='/issue/{r['issue']}'>"
                       f"{esc(info.get('magazine', r['issue']))} "
                       f"{esc(info.get('cover_date', ''))}</a></td>"
                       f"<td class='num'>{r['pages'][0] if r.get('pages') else ''}"
                       f"–{r['pages'][-1] if r.get('pages') else ''}</td>"
                       f"<td class='num'>{r.get('words', '')}</td></tr>")
+        nv = sum(1 for r in rows if r.get("status") == "verified")
         body = (howto(
-            "Every separately printed unit the assembly stage found — "
-            "stories, serial installments, poems, features, letters pages, "
-            "and advertisements — one row each, findable by title or author. "
-            "Titles and authors are recorded exactly as printed, OCR errors "
-            "included. Click a title for the full text with links back to "
-            "the scan regions it was assembled from.")
-            + f"<h1>Articles ({len(rows)})</h1>" + form
+            "Every separately printed unit — stories, serial installments, "
+            "poems, features, letters pages, advertisements — one row each, "
+            "findable by title or author exactly as printed. The status "
+            "column shows whether a row is the machine's untouched output "
+            "(automatic), corrected by a person (modified), or checked and "
+            "confirmed (verified). Click a title to view — and, with an "
+            "annotator account, to fix and verify it.")
+            + f"<h1>Articles ({len(rows)} of {total} · {nv} verified)</h1>"
+            + form
             + ("<table><tr><th>title as printed</th><th>author as printed"
-               "</th><th>type</th><th>issue</th><th>pages</th><th>words"
-               "</th></tr>" + trows + "</table>" if trows else
+               "</th><th>type</th><th>status</th><th>issue</th><th>pages"
+               "</th><th>words</th></tr>" + trows + "</table>" if trows else
                "<div class='empty'>0 articles match. If the whole table is "
-               "empty, the assembly stage (s07) has not run yet — every "
-               "issue gains its articles when it does.</div>"))
+               "empty, the assembly stage (s07) has not run yet.</div>"))
         return page("Articles", body, path="/articles")
 
     def article_page(self, aid):
@@ -796,31 +1130,177 @@ To request access, write to {CONTACT}.</p>{note}
             return page("Unknown", "<h1>Unknown article</h1>")
         iid = doc["issue"]
         info = issue_by_id(iid) or {}
+        can = self.user != "guest"
+        others = [a for a in doc["articles"] if a["article_id"] != aid]
+
+        def hidden(**kw):
+            s = (f"<input type='hidden' name='issue' value='{iid}'>"
+                 f"<input type='hidden' name='article_id' value='{aid}'>")
+            for k, v in kw.items():
+                s += f"<input type='hidden' name='{k}' value='{esc(str(v))}'>"
+            return s
+
+        def mini(label, **kw):
+            return ("<form class='mini' method='POST' action='/annotate'>"
+                    + hidden(**kw) + f"<button>{label}</button></form> ")
+
+        st = art.get("status", "auto")
+        stline = STATUS_CHIP.get(st, "")
+        if st == "verified":
+            stline += (f" <span class='muted'>by "
+                       f"{esc(display_name(art['verified_by']))} at "
+                       f"{esc(art['verified_at'])}</span>")
+            if can:
+                stline += " " + mini("remove verification", act="unverify")
+        else:
+            if art.get("modified_by"):
+                stline += (" <span class='muted'>changed by "
+                           + esc(", ".join(display_name(u)
+                                           for u in art["modified_by"]))
+                           + "</span>")
+            if can:
+                stline += " " + mini("mark as verified", act="verify")
+
         frows = ""
-        for fr in art.get("fragments", []):
-            regs = ", ".join(str(x) for x in fr.get("region_ids", []))
-            frows += (f"<tr><td><a href='/issue/{iid}/p/{fr['page']}'>"
-                      f"page {fr['page']}</a></td>"
-                      f"<td class='muted'>regions {esc(regs)}</td></tr>")
+        for i, fr in enumerate(art.get("fragments", [])):
+            k = fragkey(fr)
+            snip = esc(frag_text(iid, fr)[:110].replace("\n", " "))
+            btns = ""
+            if can:
+                btns = (mini("up", act="up", frag=k)
+                        + mini("down", act="down", frag=k)
+                        + mini("not story text", act="furniture", frag=k)
+                        + mini("detach", act="detach", frag=k))
+                if others:
+                    opts = "".join(
+                        f"<option value='{o['article_id']}'>"
+                        f"{esc((o.get('title') or o['article_id'])[:38])}"
+                        f"</option>" for o in others)
+                    btns += ("<form class='mini' method='POST' "
+                             "action='/annotate'>"
+                             + hidden(act="moveto", frag=k)
+                             + f"<select name='to_id'>{opts}</select>"
+                             f"<button>move to</button></form>")
+            frows += (f"<tr><td class='num'>{i+1}</td>"
+                      f"<td><a href='/issue/{iid}/p/{fr['page']}'>"
+                      f"p.{fr['page']}</a> <span class='muted'>"
+                      f"r{','.join(str(x) for x in fr['region_ids'])}"
+                      f"</span></td>"
+                      f"<td><span class='fragsnip'>{snip}</span></td>"
+                      f"<td>{btns}</td></tr>")
+
+        metaform = ""
+        if can:
+            topts = "".join(
+                f"<option value='{t}' "
+                f"{'selected' if t == (art.get('type') or 'other') else ''}>"
+                f"{t}</option>"
+                for t in ("story", "serial_part", "poem", "feature",
+                          "letters", "toc", "ad", "other"))
+            metaform = ("<form class='annform' method='POST' "
+                        "action='/annotate' style='margin:8px 0'>"
+                        + hidden(act="meta")
+                        + f"<input type='text' name='title' size='40' "
+                        f"value='{esc(art.get('title') or '')}' "
+                        f"placeholder='title as printed'> "
+                        f"<input type='text' name='author' size='24' "
+                        f"value='{esc(art.get('author') or '')}' "
+                        f"placeholder='author as printed'> "
+                        f"<select name='type'>{topts}</select> "
+                        f"<button>save title / author / type</button></form>")
+
+        mergeform = ""
+        if can and others:
+            opts = "".join(
+                f"<option value='{o['article_id']}'>"
+                f"{esc((o.get('title') or o['article_id'])[:48])}</option>"
+                for o in others)
+            mergeform = ("<form class='mini' method='POST' "
+                         "action='/annotate'>" + hidden(act="merge")
+                         + f"<select name='into_id'>{opts}</select>"
+                         f"<button>merge this whole article into</button>"
+                         f"</form>")
+
+        textblock = ("<pre style='max-height:none'>"
+                     + esc(art.get("text") or "(no text)") + "</pre>")
+        if can:
+            textblock += ("<details><summary class='muted' "
+                          "style='cursor:pointer;margin-top:8px'>edit the "
+                          "text directly (overrides the assembled text)"
+                          "</summary>"
+                          "<form class='annform' method='POST' "
+                          "action='/annotate'>" + hidden(act="text")
+                          + f"<textarea name='text'>"
+                          f"{esc(art.get('text') or '')}</textarea>"
+                          f"<p><button>save text</button></p></form>"
+                          f"</details>")
+
         meta = (f"{esc(art.get('type') or '')} · "
                 f"<a href='/issue/{iid}'>{esc(info.get('magazine', iid))} "
                 f"{esc(info.get('cover_date', ''))}</a> · pages "
-                f"{art['pages'][0]}–{art['pages'][-1]} · "
-                f"{len(art.get('text', '').split())} words · assembled by "
-                f"{esc(doc.get('backend', '?'))}")
+                f"{art['pages'][0] if art['pages'] else '?'}–"
+                f"{art['pages'][-1] if art['pages'] else '?'} · "
+                f"{len((art.get('text') or '').split())} words · assembled "
+                f"by {esc(doc.get('backend', '?'))}")
+        guestnote = ("" if can else
+                     "<p class='muted'>You are viewing as guest — log in "
+                     "with an annotator account to correct or verify.</p>")
         body = (howto(
-            "One article of the corpus, assembled from the scan regions "
-            "listed below — click any of them to see the original page with "
-            "its boxes. Title and author appear exactly as printed. The "
-            "text is the assembled, rule-cleaned reading text; wrong "
-            "grouping or wrong title? Say so in the feedback box.")
+            "This page is the annotation tool. The table lists the "
+            "separately recognized pieces this article was assembled from, "
+            "in their current order — each links to its scan page. Fix a "
+            "wrong order with up/down; throw a 'Continued from page' "
+            "notice out of the text with 'not story text'; split a wrongly "
+            "joined piece out with 'detach'; move a piece to the story it "
+            "belongs to with 'move to'; fix title, author, or the text "
+            "itself below. When the article is right, mark it verified. "
+            "Every action is recorded under your name; the machine's "
+            "original output is never overwritten.")
             + f"<h1>{esc(art.get('title') or '(untitled)')}</h1>"
             + (f"<p>by {esc(art['author'])}</p>" if art.get("author") else "")
             + f"<p class='muted'>{meta}</p>"
-            + "<h2>Built from</h2><table>" + frows + "</table>"
-            + "<h2>Text</h2><pre style='max-height:none'>"
-            + esc(art.get("text") or "(no text)") + "</pre>")
+            + f"<p>{stline}</p>" + guestnote + metaform
+            + f"<h2>Pieces ({len(art.get('fragments', []))})</h2>"
+            + "<table><tr><th>#</th><th>source</th><th>begins with</th>"
+            + ("<th>actions</th>" if can else "<th></th>")
+            + "</tr>" + frows + "</table>"
+            + (f"<p>{mergeform}</p>" if mergeform else "")
+            + "<h2>Text</h2>" + textblock)
         return page(art.get("title") or aid, body, path=f"/article/{aid}")
+
+    def activity_page(self):
+        events = []
+        if os.path.isdir(ANNDIR):
+            for f in os.listdir(ANNDIR):
+                if f.endswith(".jsonl"):
+                    for line in open(os.path.join(ANNDIR, f),
+                                     encoding="utf-8"):
+                        try:
+                            events.append(json.loads(line))
+                        except Exception:
+                            pass
+        events.sort(key=lambda e: e.get("ts", ""), reverse=True)
+        rows = "".join(
+            f"<tr><td class='muted'>{esc(e.get('ts', ''))}</td>"
+            f"<td>{esc(display_name(e.get('user', '?')))}</td>"
+            f"<td>{esc(e.get('action', ''))}</td>"
+            f"<td><a href='/article/{esc(e.get('article_id', ''))}'>"
+            f"{esc(e.get('article_id', ''))}</a></td>"
+            f"<td class='muted'>{esc(str(e.get('frag') or e.get('into_id') or e.get('to_id') or ''))}</td></tr>"
+            for e in events[:400])
+        body = (howto(
+            "The complete annotation record, newest first: who verified or "
+            "changed which article, when, and how. The machine output is "
+            "never edited in place, so the original and every human action "
+            "are both preserved.")
+            + f"<h1>Annotation activity ({len(events)})</h1>"
+            + ("<table><tr><th>when</th><th>who</th><th>action</th>"
+               "<th>article</th><th>detail</th></tr>" + rows + "</table>"
+               if events else
+               "<div class='empty'>No annotations yet. Corrections and "
+               "verifications made on article pages appear here.</div>"))
+        return page("Activity", body, path="/activity")
+
 
     def method_page(self):
         p = os.path.join(ROOT, "METHOD.md")

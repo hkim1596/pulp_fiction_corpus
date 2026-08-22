@@ -89,6 +89,27 @@ carries its type, title, author, page range, assembled and rule-cleaned
 text, and the exact scan regions it was built from, so every sentence can be
 traced back to its place on the page.
 
+## Human verification: the annotation layer
+
+The machine's assembly is treated as a first draft. Every article page on
+this site is also an annotation tool: a named annotator sees the separately
+recognized pieces an article was built from, in their current order, each
+linked to its scan page — and can reorder them, expel a piece that is not
+story text (a "Continued from page" notice, a stray page number), detach a
+wrongly joined piece into its own article, move a piece to the story it
+belongs to, merge articles, and correct the title, author, type, or the text
+itself. When an article is right, the annotator marks it verified.
+
+Three rules make this trustworthy. First, the machine output is never
+edited in place: every human action is one line in an append-only log, and
+what the site shows is the machine draft with those actions replayed on
+top — the original is always recoverable. Second, every action carries the
+name of the account that made it, and each article shows its status:
+automatic, modified (with the names of who changed it), or verified (with
+the name and time). Third, the whole record is public to the team on the
+activity page. Guest access (the shared passcode) can read everything but
+change nothing; annotator accounts are created by the project lead.
+
 ## What the website shows
 
 Every page of every pilot issue, as a side-by-side view: the scan with the
