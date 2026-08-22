@@ -167,6 +167,28 @@ complete project — code, documentation, results, and this journal —
 so anyone it is shared with can continue the work without missing
 anything.
 
+## 2026-08-22 (late) — the feedback round and site v0.8.0
+
+The site's feedback box did its job on day one. Sujin Kang hand-repaired
+stories in Astounding 1930-01 and reported, with page-level precision,
+that all three long stories split at every chapter heading (one had
+mid-story boxes assigned to nothing at all), that the machine prefers
+ornamental garble over the printed title and by-line, and that the
+contents page — the issue's own ground truth — was being treated as just
+another article. Heejin's own notes named the interaction pains: losing
+your place after every action, no way to select several boxes at once,
+no color feedback on inclusion. Response in two parts. Site v0.8.0: the
+page now remembers scroll position through every action; boxes
+multi-select with one confirm; a range claim takes a box and everything
+after it through page N; pickers are labeled and readable (id, page
+range, title); whole records merge in both directions; chapter no. /
+chapter title one-click roles (convention: chapter apparatus stays in
+the text, tagged — Sujin's option c, adopted); a rewritten workbench
+help box, a friendlier landing, and a new guide page with a
+first-repair walkthrough. And `docs/assembly-notes.md`: Sujin's six
+assembly rules, recorded as the specification for the next s07 —
+verified human-repaired articles become its test set.
+
 ## How to keep this journal alive
 
 Add an entry whenever a work session changes the code, the data, or a

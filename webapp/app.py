@@ -12,7 +12,7 @@ Access control:
   cookie: pfauth = <expiry_ts>.<hmac_sha256(secret, expiry_ts)>, HttpOnly, 45 days
   secret: $PULP_SECRET_FILE (default ~/shared/khj/.pulp_webapp_secret), auto-created
 
-House rules honored here: no <b>/<strong> anywhere; a HOW TO READ THIS PAGE box
+House rules honored here: no /<strong> anywhere; a HOW TO READ THIS PAGE box
 on every members page; plain English; honest empty states with live numbers;
 Cache-Control: no-store on every page.
 """
@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.7.3"
+APP_VERSION = "0.8.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -216,10 +216,20 @@ STATUS_CHIP = {
 # workbench javascript (plain string; __TOKENS__ substituted per page)
 WB_JS = r"""
 var ISSUE="__ISSUE__", AID="__AID__", CAN=__CAN__, FIRSTPG=__FIRSTPG__;
+var SEL=[];
+function saveScroll(){
+  try{
+    var wl=document.querySelector('.wbleft'),wr=document.querySelector('.wbright');
+    sessionStorage.setItem('pulpwb:'+location.pathname,JSON.stringify({
+      w:window.scrollY,l:wl?wl.scrollTop:0,r:wr?wr.scrollTop:0}));
+  }catch(e){}
+}
 function post(params){params.issue=ISSUE;params.article_id=AID;
+  saveScroll();
   fetch('/annotate',{method:'POST',
     headers:{'Content-Type':'application/x-www-form-urlencoded'},
     body:new URLSearchParams(params)}).then(function(){location.reload();});}
+document.addEventListener('submit',function(){saveScroll();},true);
 function selKey(k){
   document.querySelectorAll('.hl').forEach(function(e){e.classList.remove('hl');});
   document.querySelectorAll('[data-key="'+k+'"]').forEach(function(e){
@@ -228,12 +238,47 @@ function selKey(k){
       e.scrollIntoView({behavior:'smooth',block:'center'});
   });
   var g=document.querySelector('g[data-key="'+k+'"]');
-  if(g) g.closest('.scanwrap').scrollIntoView({behavior:'smooth',block:'nearest'});
+  if(g){
+    var wrap=g.closest('.scanwrap');
+    if(wrap){scrollLeftTo(wrap.id.replace('pg',''));}
+    g.classList.add('flash');
+    setTimeout(function(){g.classList.remove('flash');},1600);
+  }
+}
+function updSelbar(){
+  var b=document.getElementById('selbar');
+  if(!b)return;
+  if(SEL.length){
+    document.getElementById('sb_n').textContent=SEL.length;
+    b.style.display='block';
+  }else{b.style.display='none';}
+  var n2=document.getElementById('ip_addsel_n');
+  if(n2)n2.textContent=SEL.length;
+  var row=document.getElementById('ip_addsel_row');
+  if(row)row.style.display=SEL.length>1?'block':'none';
+}
+function toggleSel(g){
+  var k=g.getAttribute('data-key');
+  var i=SEL.indexOf(k);
+  if(i>=0){SEL.splice(i,1);g.classList.remove('selbox');}
+  else{SEL.push(k);g.classList.add('selbox');}
+  updSelbar();
+}
+function addSelected(){
+  if(SEL.length)post({act:'moveto_many',frags:SEL.join(','),to_id:AID});
+}
+function clearSel(){
+  SEL=[];
+  document.querySelectorAll('.selbox').forEach(function(e){e.classList.remove('selbox');});
+  updSelbar();
 }
 document.addEventListener('click',function(ev){
   var t=ev.target.closest('[data-selkey]');
   if(!t)return;
-  if(t.getAttribute('data-member')==='0'){showIncl(t);return;}
+  if(t.getAttribute('data-member')==='0'){
+    if(CAN)toggleSel(t);
+    showIncl(t);return;
+  }
   selKey(t.getAttribute('data-selkey'));
 });
 function scrollLeftTo(pg){
@@ -246,9 +291,20 @@ function pgjump(){
   return false;
 }
 window.addEventListener('load',function(){
-  if(typeof FIRSTPG!=='undefined'&&FIRSTPG)scrollLeftTo(FIRSTPG);
+  var saved=null;
+  try{saved=JSON.parse(sessionStorage.getItem('pulpwb:'+location.pathname));}catch(e){}
+  if(saved){
+    var wl=document.querySelector('.wbleft'),wr=document.querySelector('.wbright');
+    if(wl)wl.scrollTop=saved.l||0;
+    if(wr)wr.scrollTop=saved.r||0;
+    window.scrollTo(0,saved.w||0);
+  }else if(typeof FIRSTPG!=='undefined'&&FIRSTPG){scrollLeftTo(FIRSTPG);}
   var cl=document.getElementById('ip_close');
   if(cl)cl.onclick=function(){document.getElementById('inclpanel').style.display='none';return false;};
+  var sb=document.getElementById('sb_add');
+  if(sb)sb.onclick=addSelected;
+  var sc=document.getElementById('sb_clear');
+  if(sc)sc.onclick=clearSel;
 });
 function showIncl(g){
   var p=document.getElementById('inclpanel');
@@ -258,10 +314,23 @@ function showIncl(g){
   document.getElementById('ip_snip').textContent=g.getAttribute('data-snip')||'(no text)';
   var add=document.getElementById('ip_add');
   if(add){add.onclick=function(){post({act:'moveto',frag:g.getAttribute('data-key'),to_id:AID});};}
+  var asel=document.getElementById('ip_addsel');
+  if(asel){asel.onclick=addSelected;}
+  var rng=document.getElementById('ip_range');
+  if(rng){
+    var pgof=(g.closest('.scanwrap')||{id:'pg0'}).id.replace('pg','');
+    var inp=document.getElementById('ip_thru');
+    if(inp&&!inp.value)inp.value=pgof;
+    rng.onclick=function(){
+      post({act:'moveto_range',frag:g.getAttribute('data-key'),
+            to_id:AID,thru:document.getElementById('ip_thru').value});
+    };
+  }
   var ow=document.getElementById('ip_openowner');
   var link=g.getAttribute('data-ownerlink');
   if(ow){if(link){ow.style.display='';ow.href=link;}else{ow.style.display='none';}}
   p.style.display='block';
+  updSelbar();
 }
 if(CAN){
   var cards=document.getElementById('cards');
@@ -811,6 +880,12 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .inclpanel{position:fixed;bottom:18px;right:22px;width:380px;background:#fff;border:2px solid #7a3020;box-shadow:0 4px 18px rgba(0,0,0,.28);z-index:50}
 .inclpanel .cardtext{max-height:130px}
 .inclpanel .go{font-size:13px;padding:3px 12px;border:1px solid #1c1a17;background:#1c1a17;color:#faf7f2;cursor:pointer}
+.selbar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1c1a17;color:#faf7f2;padding:9px 16px;box-shadow:0 4px 18px rgba(0,0,0,.35);z-index:60;font-size:14px}
+.selbar .go{font-size:13px;padding:3px 12px;border:1px solid #faf7f2;background:#7a3020;color:#faf7f2;cursor:pointer}
+.selbar button{cursor:pointer}
+g.selbox rect{stroke:#b8860b !important;stroke-width:9 !important;fill:rgba(201,155,78,.28) !important}
+g.flash rect{stroke:#b8860b !important;stroke-width:10 !important}
+.rolechip.c{background:#5b3b8a}
 .footer{margin-top:44px;font-size:12px;color:#75695a;border-top:2px solid #1c1a17;padding-top:8px}
 .land{max-width:640px;margin:8vh auto 0;padding:0 20px}
 .land h1{font-size:34px}
@@ -828,6 +903,7 @@ def esc(s):
 def page(title, body, member=True, path="/", admin=False):
     userslink = "<a href='/users'>users</a>" if admin else ""
     nav = ("<span class='nav'>"
+           "<a href='/guide'>guide</a>"
            "<a href='/issues'>issues</a><a href='/articles'>articles</a>"
            "<a href='/method'>method</a>"
            "<a href='/timing'>timing</a><a href='/activity'>activity</a>"
@@ -1044,6 +1120,8 @@ class H(BaseHTTPRequestHandler):
             n = len(pages_of(iid)) or 500
             text = "\n\n".join(page_text(iid, stage, i) for i in range(1, n + 1)).strip()
             return self._send(200, text, "text/plain; charset=utf-8")
+        if path == "/guide":
+            return self._send(200, self.guide_page())
         if path == "/method":
             return self._send(200, self.method_page())
         if path == "/timing":
@@ -1281,6 +1359,45 @@ administrator approves them.</p>
             ann_append(iid, self.user, "move_frag",
                        {"article_id": aid, "frag": get("frag"),
                         "to_id": get("to_id")})
+        elif act == "moveto_many" and get("to_id") and get("frags"):
+            # several boxes chosen on the scans, claimed in one confirm
+            for k in get("frags").split(","):
+                k = k.strip()
+                if k:
+                    ann_append(iid, self.user, "move_frag",
+                               {"article_id": aid, "frag": k,
+                                "to_id": get("to_id")})
+        elif act == "moveto_range" and get("to_id") and get("frag"):
+            # claim a box and everything after it, through page N
+            # (reading order; page furniture is left out; capped at 30
+            # pages so a slip of the finger stays repairable)
+            start_key, to_id = get("frag"), get("to_id")
+            per_page, _ids = issue_frag_map(iid, doc)
+            try:
+                start_page = int(start_key.split(":")[0])
+            except ValueError:
+                start_page = None
+            if start_page is not None:
+                try:
+                    thru = int(get("thru") or start_page)
+                except ValueError:
+                    thru = start_page
+                thru = max(start_page, min(thru, start_page + 30))
+                begun = False
+                for pno in sorted(p for p in per_page
+                                  if start_page <= p <= thru):
+                    for e in per_page[pno]:
+                        if e["key"] == start_key:
+                            begun = True
+                        if not begun:
+                            continue
+                        if e["kind"] == "furniture":
+                            continue
+                        if e["kind"] == "article" and e["owner"] == to_id:
+                            continue
+                        ann_append(iid, self.user, "move_frag",
+                                   {"article_id": aid, "frag": e["key"],
+                                    "to_id": to_id})
         elif act == "order_js" and art and get("order"):
             order = [k for k in get("order").split(",") if k]
             ann_append(iid, self.user, "set_frag_order",
@@ -1322,11 +1439,21 @@ administrator approves them.</p>
 <p>A research archive in preparation: American pulp fiction magazines
 (1896–1959), rebuilt from library scans into clean, page-anchored text for
 computational study. A pilot of {n} issue{'s' if n != 1 else ''} is being
-processed end to end.</p>
+processed end to end: a computer pipeline reads the scanned pages, and a
+small team checks and repairs the result — every story, poem, feature,
+and advertisement becomes its own verified record, traceable to the
+exact spot on the scan it was printed.</p>
 <p>Digital Humanities Engineering Center, Kyungpook National University,
 with the Department of English and Comparative Literature, Columbia University.</p>
-<p>Access for collaborators: <a href='/login'>enter the passcode</a>.
-To request access, write to {CONTACT}.</p>{note}
+<p>WHAT YOU CAN DO HERE. With the shared passcode you can read
+everything: every scan beside its text at every cleaning stage, every
+assembled article, the full method, and the running log of the team's
+work. With an annotator account you can also repair and verify articles
+yourself — the site explains each step as you go, and a guide page
+walks you through your first repair.</p>
+<p>Ready? <a href='/login'>Enter with the passcode, or log in / sign
+up</a>. New annotator accounts are approved by the project lead. To
+request the passcode, write to {CONTACT}.</p>{note}
 <div class='footer'>v{APP_VERSION}</div>
 </div>"""
         return f"""<!doctype html><html><head><meta charset='utf-8'>
@@ -1352,7 +1479,9 @@ action is recorded under your name. No account yet?
 <form method='POST' action='/login'>
 <p><input class='pw' type='password' name='passcode'
 placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
-<p class='muted'>Accounts and the passcode: {CONTACT}.</p></div>"""
+<p class='muted'>Accounts and the passcode: {CONTACT}. Once you are in,
+the guide page in the top menu explains what everything is and what to
+click first.</p></div>"""
         return f"""<!doctype html><html><head><meta charset='utf-8'>
 <title>Access · Pulp Fiction Corpus</title><style>{CSS}</style></head>
 <body>{body}</body></html>"""
@@ -1669,6 +1798,15 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
         overrides = doc.get("frag_overrides", {})
         roles = doc.get("frag_roles", {})
         ROLE_SEC = {"title": "T", "subtitle": "T", "author": "A"}
+        CHAPTER_ROLES = ("chapter_number", "chapter_title")
+
+        def artopt(o):
+            """Readable dropdown label: short id, page range, title."""
+            pgs = o.get("pages") or []
+            pr = f"pp {pgs[0]}-{pgs[-1]}" if pgs else "no pages"
+            t = " ".join((o.get("title") or "untitled").split())[:26]
+            short = o["article_id"].rsplit("_", 1)[-1]
+            return f"{short} · {pr} · {t}"
 
         def hidden(**kw):
             s = (f"<input type='hidden' name='issue' value='{iid}'>"
@@ -1753,6 +1891,9 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                     elif role == "author":
                         stroke, width, dash = "#2c5e2e", 5, ""
                         fill = "rgba(44,94,46,0.12)"
+                    elif role in CHAPTER_ROLES:
+                        stroke, width, dash = "#5b3b8a", 5, ""
+                        fill = "rgba(91,59,138,0.10)"
                     else:
                         stroke, width, dash = "#7a3020", 4, ""
                 elif e["kind"] == "article":
@@ -1863,22 +2004,31 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                              + mini("subtitle", act="role", frag=k,
                                     role="subtitle")
                              + mini("author", act="role", frag=k,
-                                    role="author"))
+                                    role="author")
+                             + mini("chapter no.", act="role", frag=k,
+                                    role="chapter_number")
+                             + mini("chapter title", act="role", frag=k,
+                                    role="chapter_title"))
                 btns += (mini("not story text", act="furniture", frag=k)
                          + mini("detach", act="detach", frag=k))
                 if others:
                     opts = "".join(
                         f"<option value='{o['article_id']}'>"
-                        f"{esc((o.get('title') or o['article_id'])[:34])}"
-                        f"</option>" for o in others)
+                        f"{esc(artopt(o))}</option>" for o in others)
                     btns += ("<form class='mini' method='POST' "
-                             "action='/annotate'>"
+                             "action='/annotate' "
+                             "title='send this one segment to another "
+                             "article: pick the article, then press "
+                             "move to'>"
                              + hidden(act="moveto", frag=k)
+                             + "<span class='muted'>this segment "
+                             "belongs in:</span> "
                              + f"<select name='to_id'>{opts}</select>"
                              f"<button>move to</button></form>")
             rc = ("<span class='rolechip"
                   + (" t" if role in ("title", "subtitle") else "")
-                  + f"'>{esc(role)}</span>") if role else ""
+                  + (" c" if role in CHAPTER_ROLES else "")
+                  + f"'>{esc(role.replace('_', ' '))}</span>") if role else ""
             drag = " draggable=true" if (can and in_body) else ""
             sec[s_key] += (
                 f"<div class='card r{s_key}' data-key='{k}'{drag}>"
@@ -1952,13 +2102,23 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
         if can and others:
             opts = "".join(
                 f"<option value='{o['article_id']}'>"
-                f"{esc((o.get('title') or o['article_id'])[:48])}</option>"
-                for o in others)
-            mergeform = ("<form class='mini' method='POST' "
-                         "action='/annotate'>" + hidden(act="merge")
-                         + f"<select name='into_id'>{opts}</select>"
-                         f"<button>merge this whole article into</button>"
-                         f"</form>")
+                f"{esc(artopt(o))}</option>" for o in others)
+            pullopts = opts
+            mergeform = (
+                "<span class='muted'>pull a whole other article INTO this "
+                "one (its segments join the end of this body text):</span> "
+                "<form class='mini' method='POST' action='/annotate'>"
+                f"<input type='hidden' name='issue' value='{iid}'>"
+                f"<input type='hidden' name='act' value='merge'>"
+                f"<input type='hidden' name='into_id' value='{aid}'>"
+                f"<select name='article_id'>{pullopts}</select>"
+                f"<button>pull it into this article</button></form>"
+                "<br><span class='muted'>or send THIS whole article into "
+                "another one:</span> "
+                "<form class='mini' method='POST' action='/annotate'>"
+                + hidden(act="merge")
+                + f"<select name='into_id'>{opts}</select>"
+                f"<button>merge this article into it</button></form>")
 
         textblock = ("<details><summary class='muted' "
                      "style='cursor:pointer'>assembled reading text "
@@ -2000,30 +2160,57 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
             + ("<button class='go' id='ip_add'>add to this article</button> "
                if can else "")
             + "<a id='ip_openowner' href='#' style='display:none'>open its "
-            "article</a></div></div>")
+            "article</a>"
+            + (("<div id='ip_addsel_row' style='display:none;margin-top:6px'>"
+                "<button class='go' id='ip_addsel'>add all "
+                "<span id='ip_addsel_n'>0</span> chosen boxes</button>"
+                "</div>"
+                "<div style='margin-top:6px' class='muted'>"
+                "or claim this box and everything after it, through page "
+                "<input id='ip_thru' size='3' style='width:44px'> "
+                "<button class='go' id='ip_range'>claim range</button>"
+                "<br>(reading order; page furniture is left out)"
+                "</div>") if can else "")
+            + "</div></div>"
+            + ("<div id='selbar' class='selbar' style='display:none'>"
+               "<span id='sb_n'>0</span> boxes chosen · "
+               "<button class='go' id='sb_add'>add them all to this "
+               "article</button> "
+               "<button id='sb_clear'>clear choice</button></div>"
+               if can else ""))
         script = ("<script>"
                   + WB_JS.replace("__ISSUE__", iid).replace("__AID__", aid)
                   .replace("__CAN__", "true" if can else "false")
                   .replace("__FIRSTPG__", str(firstpg))
                   + "</script>")
         body = (howto(
-            "Left: the scans, with EVERY detected box labeled — page "
-            "numbers and running heads included (12A = page 12, first box "
-            "in reading order). Solid = this article (red tint = title or "
-            "subtitle, green tint = author); long dashes = other articles; "
-            "dotted = page furniture; amber = unsorted or unassigned. "
-            "Right: three color-coded sections — TITLE &amp; SUBTITLE "
-            "(red), AUTHOR (green), BODY TEXT (black). Move a segment "
-            "between sections with the title / subtitle / author buttons; "
-            "its text fills that field, exactly as printed, and leaves the "
-            "reading text. In the body section, drag cards or pick a "
-            "position number — both save instantly. Double-click any "
-            "card's text to correct OCR errors. 'Not story text' expels a "
-            "box; 'add to this article' claims any box from these pages; "
-            "'add a text segment by hand' inserts words the scan reading "
-            "missed. When everything is right, mark it verified. Every "
-            "action is recorded under your name; the machine's output is "
-            "never overwritten.")
+            "THIS PAGE IS THE REPAIR BENCH for one article. Left: every "
+            "page of the whole issue, each box labeled (12A = page 12, "
+            "first box in reading order). Solid boxes belong to THIS "
+            "article; long dashes = another article's; dotted = page "
+            "furniture; amber = not assigned to anything. Right: this "
+            "article's segments in three sections — TITLE &amp; SUBTITLE "
+            "(red), AUTHOR (green), BODY TEXT (black). "
+            "TO PULL IN A MISSING PIECE: click its box on a scan — click "
+            "several to choose several — then press 'add' on the dark bar "
+            "that appears, or use 'claim range' in the corner panel to "
+            "take everything through page N in one go. "
+            "TO FIX THE ORDER: drag body cards, or use a card's position "
+            "number menu. TO FIX WRONG TEXT: double-click the card's "
+            "text. TO NAME THE ARTICLE: press title / subtitle / author "
+            "on the segment that shows those words as printed (chapter "
+            "no. / chapter title mark chapter headings without removing "
+            "them from the text). A segment that is not story text at "
+            "all: 'not story text'. A segment that belongs to a "
+            "different story: 'this segment belongs in'. A whole record "
+            "that is really a piece of this one: 'pull it into this "
+            "article' at the bottom. Clicking a segment's id shows its "
+            "box on the scan. The page remembers where you were after "
+            "every action. When everything is right, press 'mark as "
+            "verified'. Every action is recorded under your name; the "
+            "machine's output is never overwritten, so nothing you do "
+            "can destroy anything. Full walkthrough: the guide page in "
+            "the top menu.")
             + f"<h1>{esc(art.get('title') or '(untitled)')}</h1>"
             + (f"<p class='subtitleline'>{esc(art['subtitle'])}</p>"
                if art.get("subtitle") else "")
@@ -2074,6 +2261,88 @@ placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
                "verifications made on article pages appear here.</div>"))
         return self._page("Activity", body, path="/activity")
 
+
+    def guide_page(self):
+        body = """<h1>Welcome — what this site is, and what to do here</h1>
+<p>This site is where a small team turns scanned pulp fiction magazines
+(1896&ndash;1959, from the Internet Archive) into a clean, citable text
+collection. A computer pipeline has already read the scans and taken a
+first pass at cutting each magazine issue into its printed pieces:
+stories, poems, features, letters pages, even advertisements. The
+computer's first pass makes mistakes &mdash; most often it breaks one
+story into several records at chapter headings. The human work on this
+site is putting those pieces back together correctly and marking each
+finished article verified. Every verified article also teaches
+us how to make the automatic step better.</p>
+
+<h2>The words we use</h2>
+<p>An issue is one magazine (for example Astounding, January
+1930). A box is one region the computer found on a scanned page
+&mdash; a column of text, a title, a picture, a page number. Every box
+has an id like 12A: page 12, first box in reading order. A
+segment is a box's text as one movable card. An article
+(or record) is our goal: one printed unit &mdash; one story, one poem,
+one advertisement &mdash; built from its segments in the right order.
+Page furniture is printing that belongs to the page, not the
+story: running heads, page numbers. Unsorted means the computer
+could not place it &mdash; nothing is ever thrown away.</p>
+
+<h2>Two ways to be here</h2>
+<p>With the shared passcode you are a guest: you can read
+everything &mdash; every scan, every article, every stage of the
+cleaned text &mdash; but change nothing. With an annotator
+account (sign up on the login page; the project lead approves new
+accounts) you can repair and verify articles, and everything you do is
+recorded under your name. You cannot break anything: the computer's
+original output is never overwritten, and every human action is one
+line in a permanent log, so any state can be recovered.</p>
+
+<h2>Your first repair, in five steps</h2>
+<p>1. Open <a href='/articles'>articles</a>, pick an issue, and choose
+a story that is not yet verified &mdash; the list shows each record's
+status. Stories broken at chapter headings look like several short
+records on neighboring pages with heading-like titles.</p>
+<p>2. On the article's page, read the right-hand cards top to bottom
+against the scans on the left. The scans open at the story's first
+page; the strip above them jumps to any page.</p>
+<p>3. Pull in what is missing. Click each box on the scans that
+belongs to this story but is not solid-edged yet &mdash; click several;
+they turn gold &mdash; then press add them all to this article
+on the dark bar. For a long stretch, use claim range in the
+corner panel: it takes one box and everything after it through the
+page number you give. If a whole record is really just a piece of this
+story (a chapter mistaken for an article), use pull it into this
+article at the bottom of the page instead.</p>
+<p>4. Tidy up. Drag body cards (or use their position menus) until the
+reading order is right. Press title / subtitle /
+author on the segments that show those words as printed
+&mdash; that fills the article's name fields. Mark chapter headings
+with chapter no. / chapter title (they stay in the text,
+just labeled). Expel anything that is not story text. Double-click a
+card's text to fix reading errors.</p>
+<p>5. When the article reads correctly from start to finish, press
+mark as verified. Done &mdash; the record now carries your name
+and the time, and verify, then next unverified takes you
+straight to the next one.</p>
+
+<h2>What the other pages are for</h2>
+<p><a href='/issues'>issues</a>: the ten pilot magazines; each opens
+page by page with the scan next to the text at every cleaning stage.
+<a href='/articles'>articles</a>: every printed unit found so far,
+searchable by title and author. <a href='/method'>method</a>: exactly
+how the pipeline works, kept in step with the code.
+<a href='/timing'>timing</a>: how long each step takes and what the
+full collection would cost. <a href='/activity'>activity</a>: the
+complete log of who did what, newest first.
+<a href='/feedback'>feedback</a>: tell us what is confusing or broken
+&mdash; every page also has a feedback box at the bottom, and comments
+land in the project log with a link back to the page they were written
+on.</p>
+
+<p class='muted'>Stuck, or unsure whether a change is right? Leave a
+feedback note on the exact page &mdash; that is the fastest way to get
+an answer that everyone else benefits from too.</p>"""
+        return self._page("Guide", body, path="/guide")
 
     def method_page(self):
         p = os.path.join(ROOT, "METHOD.md")
