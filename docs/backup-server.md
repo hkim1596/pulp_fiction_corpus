@@ -1,111 +1,149 @@
-# Backup web server on the Mac Studio
+# Backup web server on the Mac Studio — setup and operation
 
-The main server (rtx6000) will be down for about a week. During that
-time the website keeps running from a Mac Studio. The Studio has no
-GPU, so no pipeline runs there — it only serves the site: browsing,
-accounts, and annotation all work, because the site needs nothing but
-Python and the copied `data/` folder. Annotations made during the week
-are copied back to the main server afterward.
+The Mac Studio is a warm standby for the website. It keeps a fresh copy
+of everything by pulling from the main server every night, and during a
+main-server outage it becomes the live site at the same public address.
+It has no GPU, so the pipeline never runs there — only the website,
+which needs nothing but Python and the copied data.
 
-The one rule for the whole exercise: ONLY ONE SERVER IS LIVE AT A TIME.
-Annotation events are per-issue log files; if people annotated on both
-servers at once, the files would have to be merged by hand. Switch the
-public address to the Studio when the main server goes down, switch it
-back when the main server returns, and treat the Studio's data as the
-master copy in between.
+## Why there can be no conflict
 
-## Before the outage (main server still up)
+Only three kinds of files ever change on a live site: annotation logs,
+the feedback log, and the accounts file. Everything else (scans, texts,
+articles) is produced by the pipeline on the main server only. The
+design keeps the two machines from ever writing the same files in the
+same period:
 
-1. On the Mac Studio, install the command line tools if needed
-   (`xcode-select --install`) and make sure it can reach the main
-   server with ssh (same account you use from the MacBook; if the
-   Studio has no ssh key yet, `ssh-keygen` and add the public key to
-   the server's `~/.ssh/authorized_keys`).
+The Studio has a MODE, written in the file `~/pulp_backup/MODE`:
+"standby" or "live". In standby (normal life), the Studio only PULLS —
+a nightly one-way copy from the main server at 3:00 am — and nobody
+uses its site, because the public address points at the main server.
+When you make it live (one script), the nightly pull PAUSES ITSELF, so
+a stale copy from the returning main server can never overwrite the
+outage period's work. Handing back (one script) copies the outage
+period's annotations, feedback, and accounts to the main server FIRST,
+then returns the public address, then resumes the nightly pull. One
+machine writes at a time; the sync always flows away from whichever
+machine has been writing. That is the whole trick.
 
-2. Copy this repository folder onto the Studio (any way you like —
-   AirDrop, Dropbox, or git clone), open Terminal in it, and run:
+## One-time setup (about 30 minutes, most of it copying)
 
-       bash scripts/backup_server_setup.sh
+Do this while the main server is still up. Steps 1–3 happen ON THE MAC
+STUDIO, in Terminal.
 
-   It asks for the server's ssh address, copies the whole project
-   including `data/` (several GB — the page scans are the bulk), copies
-   the three account/secret files into `~/pulp_backup/secrets/`, and
-   checks the site code compiles. Rerunning it later refreshes the
-   copy: run it again on the last day before the outage so the backup
-   carries the newest annotations.
+STEP 1 — tools. Install the command line tools and cloudflared:
 
-3. Install cloudflared on the Studio: `brew install cloudflared`
-   (or download the mac build from Cloudflare). Then, one time:
+    xcode-select --install
+    brew install cloudflared
 
-       cloudflared tunnel login
-       cloudflared tunnel create pulp-backup
+(If the Studio has no Homebrew: install it first from https://brew.sh,
+or download the mac build of cloudflared from Cloudflare's site.)
 
-   The login step opens a browser — choose the digihumeng.org zone.
-   Then write the config file at `~/.cloudflared/config.yml`:
+STEP 2 — ssh access to the main server. The main server is
+tailab@155.230.137.46, port 52345 (the laptop's "rtx6000" shortcut).
+Give the Studio the same shortcut and a key of its own — run on the
+Studio:
 
-       tunnel: pulp-backup
-       credentials-file: /Users/YOURUSER/.cloudflared/<the-id-shown-by-create>.json
-       ingress:
-         - hostname: pulp.digihumeng.org
-           service: http://127.0.0.1:8092
-         - service: http_status:404
+    mkdir -p ~/.ssh
+    printf '%s\n' "Host rtx6000" "  HostName 155.230.137.46" "  User tailab" "  Port 52345" >> ~/.ssh/config
+    chmod 600 ~/.ssh/config
+    test -f ~/.ssh/id_ed25519 || ssh-keygen -t ed25519 -N "" -f ~/.ssh/id_ed25519
+    ssh-copy-id rtx6000
+    ssh rtx6000 hostname
 
-   (Replace the credentials path with the actual file that
-   `tunnel create` printed — it shows the exact path.)
+ssh-copy-id asks for the tailab password one time; after that the last
+line must print the server's name with no password prompt. The key is
+made without a passphrase on purpose — the 3:00 am job must log in
+with nobody at the keyboard.
+
+STEP 3 — get the project and run setup. Copy the repository folder
+onto the Studio any way you like (Dropbox is easiest), open Terminal
+in it, and run:
+
+    bash scripts/backup_server_setup.sh
+
+It asks for the server's ssh address — answer exactly: rtx6000 — then: copies the whole project
+(code and data, several GB), copies the five secret files into
+`~/pulp_backup/secrets/`, records the address, sets MODE to standby,
+checks the site code, and installs the 3:00 am nightly pull. From this
+moment the Studio keeps itself current with no further attention.
+
+STEP 4 — the public-address tunnel, one time:
+
+    cloudflared tunnel login
+    cloudflared tunnel create pulp-backup
+
+The login opens a browser — choose the digihumeng.org zone. Then write
+`~/.cloudflared/config.yml` (replace the credentials path with the one
+`tunnel create` printed):
+
+    tunnel: pulp-backup
+    credentials-file: /Users/YOURUSER/.cloudflared/THE-ID.json
+    ingress:
+      - hostname: pulp.digihumeng.org
+        service: http://127.0.0.1:8092
+      - service: http_status:404
+
+STEP 5 — keep the Studio awake: System Settings → Energy → prevent
+automatic sleeping. Done. The Studio is now a warm standby.
+
+## Every night (automatic)
+
+At 3:00 am the Studio pulls the whole project and the secret files
+from the main server. If the main server is off, the pull fails
+harmlessly and notes it in the log. If the Studio is live, the pull
+skips itself. Check the history any time:
+
+    tail -20 ~/pulp_backup/sync.log
 
 ## The day the main server goes down
 
-On the Studio, two Terminal windows:
+Before a PLANNED shutdown, run one manual pull first, so the backup
+carries the very latest work (skip this if the server died on its own):
 
-    Window 1:  bash ~/pulp_backup/pulp_fiction_corpus/scripts/serve_backup.sh
-    Window 2:  cloudflared tunnel run pulp-backup
+    bash ~/pulp_backup/pulp_fiction_corpus/scripts/backup_sync.sh
 
-Then point the public name at the backup tunnel (this is the actual
-switch; it takes effect within a minute or two):
+Then, on the Studio, open two Terminal windows and a third for the
+switch:
 
-    cloudflared tunnel route dns --overwrite-dns pulp-backup pulp.digihumeng.org
+    window 1:  bash ~/pulp_backup/pulp_fiction_corpus/scripts/serve_backup.sh
+    window 2:  cloudflared tunnel run pulp-backup
+    window 3:  bash ~/pulp_backup/pulp_fiction_corpus/scripts/go_live.sh
 
-Check from any browser: https://pulp.digihumeng.org should show the
-site with the version number in the footer. causal.digihumeng.org will
-be down for the week — that is expected; it lives on the main server.
+go_live.sh checks the site is running, sets MODE to live (pausing the
+nightly pull), and points pulp.digihumeng.org at the Studio. Within a
+minute or two the site is public again, with all accounts and
+annotations as of the last pull. Annotators work normally all week;
+their work lands in the Studio's copy.
 
-Keep both Terminal windows open for the week (the serve script restarts
-the site by itself if it crashes; System Settings → prevent the Studio
-from sleeping).
+(causal.digihumeng.org stays down during the outage — it lives on the
+main server. That is expected.)
 
 ## The day the main server comes back
 
-1. Stop new annotation for half an hour (tell the team).
-2. Copy the week's work from the Studio back to the main server —
-   run ON THE STUDIO (same ssh address as during setup):
+Tell the team to pause annotation for ten minutes, then on the Studio:
 
-       rsync -a ~/pulp_backup/pulp_fiction_corpus/data/annotations/ SRV:~/shared/khj/pulp_fiction_corpus/data/annotations/
-       rsync -a ~/pulp_backup/pulp_fiction_corpus/data/feedback.jsonl SRV:~/shared/khj/pulp_fiction_corpus/data/feedback.jsonl
-       rsync -a ~/pulp_backup/secrets/.pulp_users.json SRV:~/shared/khj/.pulp_users.json
+    bash ~/pulp_backup/pulp_fiction_corpus/scripts/go_standby.sh
 
-   (Replace SRV with the server address. This is safe because the main
-   server was off all week — nothing there changed. The annotations
-   folder only ever grows; the users file is copied whole so accounts
-   approved during the week survive.)
-3. On the main server, make sure the site and tunnel sessions are up
-   (handbook, "site process" and "tunnel" sections).
-4. Point the public name back at the main tunnel — from the Studio or
-   any machine logged in to the Cloudflare account:
+It confirms the main server is reachable, copies the outage period's
+annotations, feedback log, and accounts file back, returns the public
+address to the main tunnel, sets MODE to standby, and resumes the
+nightly pull. Close the two Terminal windows (Ctrl-C in each). On the
+main server, confirm the `pulpsite` and `tunnel` tmux sessions are up
+(handbook, "site process" and "tunnel" sections).
 
-       cloudflared tunnel route dns --overwrite-dns cihd-site pulp.digihumeng.org
+## Troubleshooting
 
-5. On the Studio, Ctrl-C both windows. Done. Keep the Studio copy — it
-   is now a cold backup; refresh it now and then with
-   `bash scripts/backup_server_setup.sh`.
-
-## If something goes wrong
-
-Site shows error 1033 after the switch: the tunnel window on the
-Studio is not running, or DNS has not switched yet — wait two minutes,
-then rerun the route dns command. Site asks for a passcode nobody
-knows: the secrets copy failed — rerun the setup script and check the
-three "ok" lines. Accounts missing on the backup: same cause, same
-fix. Site up but page previews slow the first time: the Studio is
-building previews on demand; run
-`python3 scripts/make_thumbs.py` in the project folder once
-(or just let it warm up as people browse).
+Public site shows error 1033 after go_live: the tunnel window is not
+running, or DNS has not flipped yet — wait two minutes; if it
+persists, rerun go_live.sh. Site asks for a passcode nobody knows, or
+accounts are missing: the secrets copy is stale — run backup_sync.sh
+once and restart serve_backup.sh. Nightly log says PROJECT SYNC FAILED
+while the main server is up: the Studio lost ssh access — repeat step
+2's test. Page previews slow on first views during an outage: run
+`python3 scripts/make_thumbs.py` inside `~/pulp_backup/pulp_fiction_corpus`
+once, or let them build as people browse. Unplanned crash of the main
+server: work done on the main server after the last 3:00 am pull (less
+than a day's worth) is not on the Studio; it is still on the main
+server's disk and comes back with it — nothing is lost, the two
+periods just stitch together at hand-back.
