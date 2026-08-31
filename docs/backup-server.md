@@ -189,6 +189,17 @@ the DNS route must be recreated with it (rerun studio_ssh_enable.sh).
 
 ## Troubleshooting
 
+`ssh studio` works only every other time ("websocket: bad handshake"
+on the failures) and the ssh name answers 200 and 404 in alternation:
+two cloudflared processes are serving the same tunnel — an old one
+without the ssh rule and the new one — and Cloudflare spreads
+connections across both. Happened on 2026-08-31: Ctrl-C had not ended
+the original process. Cure from the MacBook, retrying until a
+connection lands on the new process: `ssh studio 'pgrep -fl
+"cloudflared tunnel run"'`, then kill the process with the longer
+elapsed time (`ps -axo pid,etime,command`); the new one keeps serving
+the site.
+
 Public site shows error 1033 after go_live: the tunnel window is not
 running, or DNS has not flipped yet — wait two minutes; if it
 persists, rerun go_live.sh. Site asks for a passcode nobody knows, or

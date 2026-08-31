@@ -98,6 +98,9 @@ change, delete, or approve anything.
     /api/<token>/magazine/<slug>              export record, live article,
     /api/<token>/authors /magazines           matches, alignments, pair
     /api/<token>/stories /pairs               row, annotation events, lists
+    /api/<token>/locate/<story>?text=<words>  where a passage sits in the
+                                              article now: region key,
+                                              page, surrounding words
 
 The token is a long random string in `~/shared/khj/.pulp_api_token`
 (env override `PULP_API_TOKEN_FILE`). Delete that file and the whole

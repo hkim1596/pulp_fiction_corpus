@@ -1226,6 +1226,16 @@ class H(BaseHTTPRequestHandler):
         if m:
             text = EX.raw_json("pair", (m.group(1), m.group(2)))
             return self._send(200, text, "application/json")
+        m = re.fullmatch(r"locate/([\w\-]+)", rest)
+        if m:
+            # where a passage sits in the article as it stands now: the
+            # region key the workbench highlights, the page, and context
+            sid = m.group(1)
+            im = re.match(r"(.+)_(?:a|u)\d+$", sid)
+            passage = qs.get("text", [""])[0]
+            loc = RP.locate_in_article(im.group(1), sid, passage) if im and passage else None
+            return self._send(200, json.dumps({"story_id": sid, "passage": passage, "located": loc},
+                                              ensure_ascii=False), "application/json")
         return self._send(404, "unknown api call", "text/plain")
 
     def _raw(self, kind, arg, as_json):
