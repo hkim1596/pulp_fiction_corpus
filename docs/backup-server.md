@@ -4,7 +4,10 @@ The Mac Studio is a warm standby for the website. It keeps a fresh copy
 of everything by pulling from the main server every night, and during a
 main-server outage it becomes the live site at the same public address.
 It has no GPU, so the pipeline never runs there — only the website,
-which needs nothing but Python and the copied data.
+which needs nothing but Python and the copied data. (A
+project-independent version of this whole design, reusable for other
+sites, is saved one level above this repository in the Dropbox share
+as `warm-standby-recipe.md`.)
 
 ## Why there can be no conflict
 

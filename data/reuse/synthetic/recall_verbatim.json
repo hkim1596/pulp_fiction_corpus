@@ -1,0 +1,74 @@
+{
+ "k6": {
+  "total_matches": 685,
+  "per_kind": {
+   "verbatim": {
+    "plants": 20,
+    "recovered": 20,
+    "recall": 1.0,
+    "mean_token_share": 0.999
+   },
+   "near-verbatim": {
+    "plants": 20,
+    "recovered": 20,
+    "recall": 1.0,
+    "mean_token_share": 0.847
+   },
+   "heavy-edit": {
+    "plants": 20,
+    "recovered": 20,
+    "recall": 1.0,
+    "mean_token_share": 0.255
+   }
+  }
+ },
+ "k7": {
+  "total_matches": 168,
+  "per_kind": {
+   "verbatim": {
+    "plants": 20,
+    "recovered": 20,
+    "recall": 1.0,
+    "mean_token_share": 0.999
+   },
+   "near-verbatim": {
+    "plants": 20,
+    "recovered": 20,
+    "recall": 1.0,
+    "mean_token_share": 0.81
+   },
+   "heavy-edit": {
+    "plants": 20,
+    "recovered": 15,
+    "recall": 0.75,
+    "mean_token_share": 0.153
+   }
+  }
+ },
+ "k8": {
+  "total_matches": 100,
+  "per_kind": {
+   "verbatim": {
+    "plants": 20,
+    "recovered": 20,
+    "recall": 1.0,
+    "mean_token_share": 0.999
+   },
+   "near-verbatim": {
+    "plants": 20,
+    "recovered": 20,
+    "recall": 1.0,
+    "mean_token_share": 0.745
+   },
+   "heavy-edit": {
+    "plants": 20,
+    "recovered": 9,
+    "recall": 0.45,
+    "mean_token_share": 0.088
+   }
+  }
+ },
+ "_generated": "2026-08-31 02:37",
+ "_stories": 178,
+ "_plants": 60
+}

@@ -8,8 +8,9 @@ over. Plain facts, no assumed knowledge.
 
 THE CONTROL DESK is Heejin's Mac. Code is edited here (or arrives here
 from a Claude session writing into this Dropbox folder), committed to
-git, and pushed to GitHub (`hkim1596/pulp_fiction_corpus`, private,
-reached through a deploy key). The `rtx` helper tool on the Mac pushes,
+git, and pushed to GitHub (`hkim1596/pulp_fiction_corpus`; the
+repository is public, which is why secrets live only in Dropbox; the
+main server pulls through a deploy key, the Studio over plain HTTPS). The `rtx` helper tool on the Mac pushes,
 updates the server clone (`rtx update pulp_fiction_corpus`), runs
 commands in server tmux sessions (`rtx run <name> -- <command>`), and
 opens a shell (`rtx ssh`). Multi-step server work is normally done with
@@ -136,6 +137,28 @@ The standard deploy, after editing `webapp/app.py` (bump `APP_VERSION`):
 
 The printed version must match the new `APP_VERSION`.
 
+While the Studio is the live server (main server down), the deploy is
+a GitHub round trip — the repository is public, so the Studio pulls
+over HTTPS with no key. On the Mac: the same add / commit / push as
+above. Then on the Studio, in a new Terminal window (the serve window
+keeps running):
+
+    cd ~/pulp_backup/pulp_fiction_corpus
+    git remote set-url origin https://github.com/hkim1596/pulp_fiction_corpus.git
+    git stash push -m "studio-local-before-pull"
+    git fetch origin
+    git checkout -B main origin/main
+    python3 -m py_compile webapp/app.py webapp/reuse_pages.py && echo COMPILE-OK
+    pkill -f "webapp/app.py --port 8092"
+    sleep 6
+    curl -s https://pulp.digihumeng.org/ | grep -o "v[0-9.]*" | head -1
+
+The serve loop (scripts/serve_backup.sh) restarts python within three
+seconds of the kill; the last line must print the new version. The
+stash line only matters if the Studio's copy was ever edited by hand;
+normally it says "No local changes to save". Files the pipeline wrote
+under data/ are untracked and untouched by the checkout.
+
 ## Writing terminal pastes for Heejin (learned the hard way)
 
 Heejin pastes whole blocks into zsh, so every line must be safe to
@@ -188,6 +211,121 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     pages → data/articles/<id>/articles.json + index.
                     --force re-assembles and archives that issue's
                     human annotations to .bak first — use with care.
+
+## The text-reuse pipeline (the r-series) and the reuse pages
+
+Protocol sections 3 and 4, rehearsed on the ten development-set
+issues. Every stage is one file in `pipeline/`, CPU only, stdlib plus
+numpy/pandas/scikit-learn/statsmodels and the `fastembed` package
+(ONNX runtime; it downloads the embedding model on first use). The
+stages read `data/pilot_stories.jsonl` and write under `data/reuse/`;
+the website reads that folder in place. All settings below were
+decided by Heejin on 2026-08-31 and are the development-set defaults;
+the protocol says the paraphrase settings are re-set on a
+hand-reviewed validation set and then frozen.
+
+    r00_export_stories  runs where data/ lives (the live server). Asks
+                        the site's own replay (machine assembly plus
+                        every human action) for every article and
+                        writes one JSON line per article: metadata,
+                        status, region keys, text.
+                        → data/pilot_stories.jsonl (+ .gz)
+    r01_normalize       conservative normalization (protocol 3.1):
+                        NFKC, soft hyphens out, line-break hyphenation
+                        rejoined, quotes and dashes straightened,
+                        whitespace collapsed; tokens = letter/digit runs
+                        with internal apostrophes, folded to lowercase,
+                        with offsets into the canonical text.
+                        No stemming, no stopword removal.
+    r02_verbatim        exact reuse: shingle index at seeds 6, 7, 8
+                        (separate passes), maximal left/right extension,
+                        commonplace cap MAX_DF=50 stories per shingle
+                        (skipped shingles are written out), union-find
+                        clusters. Only pairs from DIFFERENT issues form
+                        the inventory; same-issue matches go to
+                        *_sameissue.jsonl labelled "shared-region
+                        duplicate" (the two records own the same scan
+                        regions) or "same-issue repeat". Records of one
+                        issue that share regions form a "family";
+                        witness counts are reported raw and collapsed.
+                        → data/reuse/<set>_k<k>_{stats,clusters,pairs,
+                          story_share,skipped_shingles}.json,
+                          _matches.jsonl, _sameissue.jsonl,
+                          <set>_region_overlap.json
+    r03_synthetic       a SEPARATE copy of the story corpus with planted
+                        reuse (20 verbatim, 20 near-verbatim with 8% of
+                        words damaged, 20 heavily edited), ids suffixed
+                        "~synth", scored for recall at each seed.
+                        → data/reuse/synthetic/
+    r04_paraphrase      near-verbatim and rewritten reuse (protocol 3.2):
+                        passages of 50 words, step 25; BAAI/bge-small-
+                        en-v1.5 embeddings; K nearest neighbours in
+                        other stories (K=10 main, 5 and 20 sensitivity,
+                        all from one K=20 retrieval); plus every exact
+                        match as a candidate (the lexical near-match
+                        tier). Candidates widened by 25 words are
+                        aligned word by word (local alignment, match +2,
+                        mismatch -1, gap -1; words equal if identical or,
+                        at 5+ letters, one edit apart); touching
+                        alignments are joined and re-aligned. Keep rule:
+                        20+ columns and identity 0.60+. Same-issue
+                        alignments are diagnostics, as in r02.
+                        Embeddings are cached (emb_*.npz, never in git).
+                        --synthetic runs the planted copy and scores it;
+                        --window 100 --stride 50 is the sensitivity run.
+                        → data/reuse/para/<set>_w50s25_k<K>_*
+    r05_background      protocol 4.1: one row per story pair (all pairs
+                        at pilot scale) with exact and paraphrase extent,
+                        later date, years apart, topic similarity
+                        (TF-IDF cosine on reuse-masked text, plus the
+                        embedding cosine), same author / magazine /
+                        publisher / genre / format flags (publishers from
+                        pipeline/publishers.json). Same-issue pairs are
+                        flagged and excluded from the background. Also:
+                        survival curves P(longest >= L | stratum), the
+                        stratified sampler run against the full table as
+                        a check, the most unusual pairs, and a first
+                        full two-part hierarchical model (any reuse:
+                        logistic; extent: Poisson; one random intercept
+                        per story entering for both members of a pair;
+                        variational Bayes via statsmodels) as a proposal
+                        for Dennis.
+                        → data/reuse/background/pairs_<set>.csv.gz,
+                          summary_<set>.json
+
+Story sets: `machine` (every assembled story, 50+ words), `verified`
+(human-verified only) and `corrected` (verified or modified). The
+2026-08-31 run used machine and corrected because only one story was
+verified.
+
+Typical run, in order, on a machine holding the export:
+
+    python3 pipeline/r02_verbatim.py --set machine
+    python3 pipeline/r02_verbatim.py --set corrected
+    python3 pipeline/r03_synthetic.py
+    python3 pipeline/r04_paraphrase.py --set machine      (~15 min CPU, first time)
+    python3 pipeline/r04_paraphrase.py --synthetic
+    python3 pipeline/r05_background.py --set machine      (~3 min)
+
+Each file has `--selftest`. Outputs are small JSON and travel with the
+repository (data/reuse is the one data folder git tracks); the site on
+the Studio gets them by `git pull`.
+
+The reuse pages (webapp/reuse_pages.py, v0.9.0): `/reuse` overview
+with server-drawn SVG charts (no libraries), `/reuse/clusters` with
+filters, `/reuse/cluster/<set>/<kind>/<k>/<n>` with witnesses grouped
+by story and located live in the current article text ("open on
+workbench" is the article page with `?sel=<region key>`, which
+highlights that region), `/reuse/progress` with annotation progress,
+the pipeline status board and the corpus-building board. Member login
+required, like the rest of the site.
+
+Two facts the first run established (details in docs/pilot-results.md
+and the journal): the machine assembly lists some scan regions under
+two records — td_1932_02_a001 holds 2,235 of the issue's 2,474 regions
+including five complete stories that also exist as their own records
+— and department columns and contents pages are typed as stories.
+Both are assembly-v2 work (rules 6 and 7 in docs/assembly-notes.md).
 
 ## Troubleshooting
 

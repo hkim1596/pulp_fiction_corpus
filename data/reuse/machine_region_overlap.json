@@ -1,0 +1,161 @@
+{
+ "ast_1930_01": {
+  "stories": 33,
+  "region_keys": 2238,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "ast_1930_03": {
+  "stories": 5,
+  "region_keys": 2309,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "gal_1952_03": {
+  "stories": 24,
+  "region_keys": 2326,
+  "keys_owned_by_2plus": 287,
+  "stories_sharing": 19,
+  "worst_pairs": [
+   {
+    "a": "gal_1952_03_a034",
+    "b": "gal_1952_03_a037",
+    "shared_keys": 35
+   },
+   {
+    "a": "gal_1952_03_a004",
+    "b": "gal_1952_03_a018",
+    "shared_keys": 32
+   },
+   {
+    "a": "gal_1952_03_a004",
+    "b": "gal_1952_03_a009",
+    "shared_keys": 27
+   },
+   {
+    "a": "gal_1952_03_a004",
+    "b": "gal_1952_03_a011",
+    "shared_keys": 25
+   },
+   {
+    "a": "gal_1952_03_a004",
+    "b": "gal_1952_03_a020",
+    "shared_keys": 24
+   },
+   {
+    "a": "gal_1952_03_a004",
+    "b": "gal_1952_03_a013",
+    "shared_keys": 22
+   },
+   {
+    "a": "gal_1952_03_a004",
+    "b": "gal_1952_03_a015",
+    "shared_keys": 21
+   },
+   {
+    "a": "gal_1952_03_a004",
+    "b": "gal_1952_03_a012",
+    "shared_keys": 20
+   },
+   {
+    "a": "gal_1952_03_a004",
+    "b": "gal_1952_03_a014",
+    "shared_keys": 15
+   },
+   {
+    "a": "gal_1952_03_a004",
+    "b": "gal_1952_03_a016",
+    "shared_keys": 15
+   }
+  ]
+ },
+ "gal_1952_04": {
+  "stories": 7,
+  "region_keys": 1986,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "td_1932_02": {
+  "stories": 6,
+  "region_keys": 2258,
+  "keys_owned_by_2plus": 1301,
+  "stories_sharing": 6,
+  "worst_pairs": [
+   {
+    "a": "td_1932_02_a001",
+    "b": "td_1932_02_a006",
+    "shared_keys": 356
+   },
+   {
+    "a": "td_1932_02_a001",
+    "b": "td_1932_02_a005",
+    "shared_keys": 294
+   },
+   {
+    "a": "td_1932_02_a001",
+    "b": "td_1932_02_a010",
+    "shared_keys": 260
+   },
+   {
+    "a": "td_1932_02_a001",
+    "b": "td_1932_02_a007",
+    "shared_keys": 227
+   },
+   {
+    "a": "td_1932_02_a001",
+    "b": "td_1932_02_a017",
+    "shared_keys": 164
+   }
+  ]
+ },
+ "td_1948_12": {
+  "stories": 46,
+  "region_keys": 2033,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "ws_1937_02": {
+  "stories": 57,
+  "region_keys": 2121,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "wt_1925_11": {
+  "stories": 21,
+  "region_keys": 1579,
+  "keys_owned_by_2plus": 31,
+  "stories_sharing": 2,
+  "worst_pairs": [
+   {
+    "a": "wt_1925_11_a012",
+    "b": "wt_1925_11_a048",
+    "shared_keys": 31
+   }
+  ]
+ },
+ "wt_1934_05": {
+  "stories": 48,
+  "region_keys": 1807,
+  "keys_owned_by_2plus": 6,
+  "stories_sharing": 2,
+  "worst_pairs": [
+   {
+    "a": "wt_1934_05_a035",
+    "b": "wt_1934_05_a036",
+    "shared_keys": 6
+   }
+  ]
+ },
+ "www_1936_02": {
+  "stories": 40,
+  "region_keys": 2140,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ }
+}

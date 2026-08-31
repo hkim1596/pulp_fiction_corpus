@@ -48,19 +48,26 @@ annotator's name; the machine's output is never overwritten.
 
 ## Map of this folder
 
-    webapp/app.py            the entire website (one file, no frameworks)
-    pipeline/s01…s07         the processing stages, in order
+    webapp/app.py            the website (one file, no frameworks)
+    webapp/reuse_pages.py    the text-reuse pages of the site (/reuse…)
+    pipeline/s01…s07         the corpus-building stages, in order
+    pipeline/r00…r05         the text-reuse analysis stages (protocol
+                             sections 3–4), rehearsed on the pilot
     scripts/                 setup, deploy helpers, backup server scripts
     config/pilot_issues.json the approved 10-issue development set
+    data/reuse/              the reuse pipeline's result files (the one
+                             data folder kept in git; small JSON)
     docs/                    you are here — handbook, technical notes,
-                             pilot results
+                             pilot results, implementation plan
     METHOD.md                the method text, rendered live at /method
 
 The processed data itself (scans, text stages, articles, annotations)
 lives on the servers under `data/`, not in this folder — it is large and
 reproducible from the pipeline. The pulled result files
 (`pulp_metrics.json`, `pulp_timings.jsonl`, `pulp_articles_index.json`)
-sit one level above this repository folder in the Dropbox share.
+and the story export the reuse pipeline ran on
+(`pilot_export/pilot_stories.jsonl.gz`) sit one level above this
+repository folder in the Dropbox share.
 
 ## How to continue development
 

@@ -1,3 +1,7 @@
 docs/development-journal.md
 .pulp_*
 secrets/
+# data lives on the servers; only the reuse pipeline's small result files travel in git
+data/*
+!data/reuse/
+data/reuse/**/*.npz

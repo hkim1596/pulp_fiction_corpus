@@ -95,3 +95,77 @@ human verification through the website workbench: annotators repair
 stories by adding and removing segments; once a set of stories is
 human-corrected, those corrections become the reference for diagnosing
 and fixing the automatic assembly.
+
+## The text-reuse rehearsal (2026-08-31)
+
+The analysis stages of the protocol (sections 3 and 4) ran end to end
+on the pilot's own stories — 726 records, 360 typed as stories, 287
+long enough to compare (50+ words), 679,941 words — as a rehearsal of
+the method, not a study of pulp fiction. Full method in
+docs/handbook.md; every number below is on the site under /reuse.
+
+Exact reuse (r02). No genuine cross-issue reuse, as expected of ten
+issues from five magazines: the longest passage shared by two stories
+from different issues is ten words ("no more than a minute or two had
+passed since", Astounding 1930-01 and 1930-03). Cross-issue matches:
+599 at seed 6, 64 at seed 7, 5 at seed 8 — stock phrasing ("on the
+other side of the", 102 times) and Street & Smith's address in
+department columns. One real find: "Operative Carnes of the United
+States Secret Service" in both S. P. Meek stories, a same-author
+series formula. Same-issue matches (331 at seed 6) are diagnostics:
+91 come from records that own the same scan regions; the rest are
+real within-issue repeats — the Astounding contents page repeats each
+story's teaser word for word, which assembly v2 can use to link
+contents entries to first pages.
+
+Two data problems the same-issue check exposed. The machine assembly
+double-owns regions: td_1932_02_a001 (59,000 words) holds 2,235 of
+that issue's 2,474 regions, including the full text of five stories
+that also exist as their own records; gal_1952_03 has the Heinlein
+story plus six single-page copies; wt_1925_11 31 shared regions. The
+issue's annotation log holds one event, so this is the machine's
+doing. And department columns and the contents page are typed as
+stories ("Mines and Mining", "The Hollow Tree", "Contents"). Both go
+to assembly v2 (docs/assembly-notes.md, rules 6 and 7). Only one
+story was verified at run time, so the second story set was
+"corrected" (verified or modified, 12 stories); same picture, longest
+cross-issue match seven words.
+
+Planted reuse (r03, separate copy; 178 stories, 60 plants). Exact
+stage: verbatim plants 100% recovered at all seeds; near-verbatim
+plants (8% of words damaged) all detected but only 85 / 81 / 75% of
+their words recovered at seeds 6 / 7 / 8; heavy edits detected 100 /
+75 / 45% with 26 / 15 / 9% of words recovered.
+
+Paraphrase (r04; 27,044 passages of 50 words, K neighbours 5/10/20,
+alignment kept at 20+ columns and 60%+ identity). Real corpus: two
+cross-issue alignments, both publisher boilerplate with substitutions
+— the second-class-mail notice (Astounding 1930-01 contents page and
+Wild West Weekly 1936-02) and "Address all communications to …, care
+of Street & Smith's …, 79 Seventh Avenue" (Western Story and Wild West
+Weekly, identity 0.70). Same-issue alignments reproduce the region
+duplicates at full length (10,212 columns, identity 1.0). Planted
+copy: verbatim and near-verbatim plants 100% recovered at full extent
+(the exact stage's 75–85% partial coverage of damaged copies becomes
+99.9%); heavy edits 40% at the default keep rule, 95% (89% of words)
+when the rule is loosened to 15 columns and 50% identity — the number
+that tells us the hand-reviewed validation set will decide the
+threshold. K made no difference at the default rule (every kept
+alignment also had an exact seed); at the loose rule embedding-only
+candidates begin to contribute. On the real corpus the loose rule
+admits nine cross-issue alignments: the four publisher formulas and
+five chance resemblances of ordinary prose ("on the other side of
+the page … / … of the wharf …"), which is the false-positive side of
+the same threshold question. The 100-word-window sensitivity run
+found the same two alignments as the 50-word run.
+
+Background (r05; 41,041 pairs, 35,442 across issues). 1.2% of
+cross-issue pairs share a six-word passage; the share rises from 0.07%
+in the lowest topic-similarity quartile to 4.3% in the highest, which
+is the protocol's premise showing up in ten issues. The stratified
+sampler (40 non-matching pairs per stratum, 20 draws) reproduces the
+full-table probabilities exactly and the topic mean within 0.001,
+where the unweighted sample is off by a factor of twenty. The two-part
+model fits in under a minute (topic similarity is the dominant term
+in the any-reuse part, +1.4 log-odds per standard deviation); its
+coefficients are machinery output, not findings.

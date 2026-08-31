@@ -1,0 +1,71 @@
+{
+ "k5": {
+  "verbatim": {
+   "plants": 20,
+   "recovered": 20,
+   "locatable": 20,
+   "recall": 1.0,
+   "mean_cover": 1.0
+  },
+  "near-verbatim": {
+   "plants": 20,
+   "recovered": 20,
+   "locatable": 20,
+   "recall": 1.0,
+   "mean_cover": 0.999
+  },
+  "heavy-edit": {
+   "plants": 20,
+   "recovered": 8,
+   "locatable": 20,
+   "recall": 0.4,
+   "mean_cover": 0.367
+  }
+ },
+ "k10": {
+  "verbatim": {
+   "plants": 20,
+   "recovered": 20,
+   "locatable": 20,
+   "recall": 1.0,
+   "mean_cover": 1.0
+  },
+  "near-verbatim": {
+   "plants": 20,
+   "recovered": 20,
+   "locatable": 20,
+   "recall": 1.0,
+   "mean_cover": 0.999
+  },
+  "heavy-edit": {
+   "plants": 20,
+   "recovered": 8,
+   "locatable": 20,
+   "recall": 0.4,
+   "mean_cover": 0.367
+  }
+ },
+ "k20": {
+  "verbatim": {
+   "plants": 20,
+   "recovered": 20,
+   "locatable": 20,
+   "recall": 1.0,
+   "mean_cover": 1.0
+  },
+  "near-verbatim": {
+   "plants": 20,
+   "recovered": 20,
+   "locatable": 20,
+   "recall": 1.0,
+   "mean_cover": 0.999
+  },
+  "heavy-edit": {
+   "plants": 20,
+   "recovered": 8,
+   "locatable": 20,
+   "recall": 0.4,
+   "mean_cover": 0.367
+  }
+ }
+}

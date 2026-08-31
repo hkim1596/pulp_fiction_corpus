@@ -1,0 +1,51 @@
+{
+ "set": "synthetic",
+ "window": 50,
+ "stride": 25,
+ "k": 10,
+ "model": "BAAI/bge-small-en-v1.5",
+ "min_cols": 15,
+ "min_identity": 0.5,
+ "scores": {
+  "match": 2,
+  "mismatch": -1,
+  "gap": -1
+ },
+ "fuzzy": {
+  "min_len": 5,
+  "alternates": 3
+ },
+ "stories": 178,
+ "passages": 26444,
+ "candidate_regions": 467394,
+ "alignments": 71,
+ "same_issue_alignments": 42,
+ "same_issue_from_shared_regions": 16,
+ "clusters": 63,
+ "clusters_3plus_witnesses": 7,
+ "length_hist": {
+  "seed-9": 0,
+  "10-19": 6,
+  "20-49": 20,
+  "50-99": 33,
+  "100-499": 12,
+  "500+": 0
+ },
+ "identity_hist": {
+  "100%": 18,
+  "50-59%": 19,
+  "60-69%": 6,
+  "70-79%": 3,
+  "80-89%": 3,
+  "90-99%": 22
+ },
+ "by_source": {
+  "embedding+exact": 63,
+  "embedding": 5,
+  "exact": 3
+ },
+ "longest_alignment": 154,
+ "stories_with_paraphrase": 91,
+ "seconds_total": 138.4,
+ "generated": "2026-08-31 03:08"
+}

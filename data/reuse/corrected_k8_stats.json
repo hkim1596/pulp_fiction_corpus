@@ -1,0 +1,30 @@
+{
+ "set": "corrected",
+ "k": 8,
+ "max_df": 50,
+ "stories": 12,
+ "tokens": 110305,
+ "issues": 3,
+ "region_families": 12,
+ "matches": 0,
+ "same_issue_matches": 2,
+ "same_issue_from_shared_regions": 0,
+ "skipped_commonplace_shingles": 0,
+ "clusters": 0,
+ "clusters_3plus_witnesses": 0,
+ "clusters_3plus_witnesses_collapsed": 0,
+ "length_hist": {
+  "seed-9": 0,
+  "10-19": 0,
+  "20-49": 0,
+  "50-99": 0,
+  "100-499": 0,
+  "500+": 0
+ },
+ "longest_match": 0,
+ "stories_with_reuse": 0,
+ "stories_with_reuse_collapsed": 0,
+ "seconds_index_and_extend": 0.16,
+ "seconds_total": 0.16,
+ "generated": "2026-08-31 02:49"
+}

@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.8.1"
+APP_VERSION = "0.9.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -302,6 +302,8 @@ window.addEventListener('load',function(){
     if(wr)wr.scrollTop=saved.r||0;
     window.scrollTo(0,saved.w||0);
   }else if(typeof FIRSTPG!=='undefined'&&FIRSTPG){scrollLeftTo(FIRSTPG);}
+  var selq=new URLSearchParams(location.search).get('sel');
+  if(selq){setTimeout(function(){selKey(selq);},60);}
   var cl=document.getElementById('ip_close');
   if(cl)cl.onclick=function(){document.getElementById('inclpanel').style.display='none';return false;};
   var sb=document.getElementById('sb_add');
@@ -951,7 +953,7 @@ def page(title, body, member=True, path="/", admin=False):
     nav = ("<span class='nav'>"
            "<a href='/guide'>guide</a>"
            "<a href='/issues'>issues</a><a href='/articles'>articles</a>"
-           "<a href='/method'>method</a>"
+           "<a href='/reuse'>reuse</a><a href='/method'>method</a>"
            "<a href='/timing'>timing</a><a href='/activity'>activity</a>"
            f"<a href='/feedback'>feedback</a>{userslink}"
            "<a href='/logout'>log out</a></span>") if member else ""
@@ -1027,6 +1029,13 @@ def md_to_html(md):
     if in_code:
         out.append("</pre>")
     return "\n".join(out)
+
+
+# ---------------- reuse pages (webapp/reuse_pages.py) ----------------
+import sys as _sys
+_sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import reuse_pages as RP  # noqa: E402
+RP.bind(globals())
 
 
 # ---------------- request handler ----------------
@@ -1251,6 +1260,15 @@ class H(BaseHTTPRequestHandler):
             n = len(pages_of(iid)) or 500
             text = "\n\n".join(page_text(iid, stage, i) for i in range(1, n + 1)).strip()
             return self._send(200, text, "text/plain; charset=utf-8")
+        if path == "/reuse":
+            return self._send(200, RP.overview())
+        if path == "/reuse/clusters":
+            return self._send(200, RP.clusters_page(qs))
+        if path == "/reuse/progress":
+            return self._send(200, RP.progress_page())
+        m = re.fullmatch(r"/reuse/cluster/(\w+)/(exact|para)/(\d+)/(\d+)", path)
+        if m:
+            return self._send(200, RP.cluster_page(m.group(1), m.group(2), int(m.group(3)), int(m.group(4))))
         if path == "/guide":
             return self._send(200, self.guide_page())
         if path == "/method":

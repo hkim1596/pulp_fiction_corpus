@@ -1,0 +1,15 @@
+{
+  "_comment": "Publisher of each pilot issue, for the same-publisher flag in the pair table (protocol 4.1: publication venue). Source notes say where each entry comes from; 'masthead' means read from the issue's own statement of ownership in the OCR text, 'reference' means standard reference knowledge (FictionMags Index / ISFDB style) to be confirmed against the scan. A publisher_group joins corporate names of one house so that name changes do not break the flag. Correct freely; the pipeline reads this file at run time.",
+  "issues": {
+    "wt_1925_11": {"publisher": "Popular Fiction Publishing Co.", "publisher_group": "Popular Fiction (Weird Tales)", "city": "Indianapolis", "source": "reference"},
+    "wt_1934_05": {"publisher": "Popular Fiction Publishing Co.", "publisher_group": "Popular Fiction (Weird Tales)", "city": "Indianapolis / Chicago", "source": "reference"},
+    "ast_1930_01": {"publisher": "Publishers' Fiscal Corporation (Clayton Magazines)", "publisher_group": "Clayton", "city": "New York", "source": "reference"},
+    "ast_1930_03": {"publisher": "Publishers' Fiscal Corporation (Clayton Magazines)", "publisher_group": "Clayton", "city": "New York", "source": "reference"},
+    "gal_1952_03": {"publisher": "Galaxy Publishing Corporation", "publisher_group": "Galaxy Publishing", "city": "New York", "source": "reference"},
+    "gal_1952_04": {"publisher": "Galaxy Publishing Corporation", "publisher_group": "Galaxy Publishing", "city": "New York", "source": "reference"},
+    "td_1932_02": {"publisher": "Metropolitan Magazines, Inc.", "publisher_group": "Pines (Thrilling group)", "city": "New York, 570 Seventh Avenue", "source": "masthead (statement of ownership in td_1932_02_a005 text)"},
+    "td_1948_12": {"publisher": "Standard Magazines, Inc.", "publisher_group": "Pines (Thrilling group)", "city": "New York", "source": "reference"},
+    "ws_1937_02": {"publisher": "Street & Smith Publications, Inc.", "publisher_group": "Street & Smith", "city": "New York, 79 Seventh Avenue", "source": "masthead (address in department columns)"},
+    "www_1936_02": {"publisher": "Street & Smith Publications, Inc.", "publisher_group": "Street & Smith", "city": "New York, 79-89 Seventh Avenue", "source": "masthead (www_1936_02_a020 text)"}
+  }
+}

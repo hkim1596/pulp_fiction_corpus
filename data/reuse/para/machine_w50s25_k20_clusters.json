@@ -1,0 +1,76 @@
+[
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 24,
+  "representative": {
+   "story_id": "www_1936_02_a020",
+   "tok": [
+    59,
+    83
+   ],
+   "text": "as Second-class Matter, December 8, 1911, at the Post Office at New York, N. Y., under Act of Congress of March 3, 1879"
+  },
+  "members": [
+   {
+    "story_id": "www_1936_02_a020",
+    "issue": "www_1936_02",
+    "tok": [
+     59,
+     83
+    ],
+    "len": 24,
+    "text": "as Second-class Matter, December 8, 1911, at the Post Office at New York, N. Y., under Act of Congress of March 3, 1879"
+   },
+   {
+    "story_id": "ast_1930_01_a007",
+    "issue": "ast_1930_01",
+    "tok": [
+     282,
+     300
+    ],
+    "len": 18,
+    "text": "as second-class mail pending at the Post Office at New York, under Act of March 3, 1879"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 20,
+  "representative": {
+   "story_id": "ws_1937_02_a094",
+   "tok": [
+    86,
+    106
+   ],
+   "text": "Address all communications to John North, care of Street & Smith's Western Story Magazine, 79 Seventh Avenue, New York, N. Y"
+  },
+  "members": [
+   {
+    "story_id": "ws_1937_02_a094",
+    "issue": "ws_1937_02",
+    "tok": [
+     86,
+     106
+    ],
+    "len": 20,
+    "text": "Address all communications to John North, care of Street & Smith's Western Story Magazine, 79 Seventh Avenue, New York, N. Y"
+   },
+   {
+    "story_id": "www_1936_02_a098",
+    "issue": "www_1936_02",
+    "tok": [
+     101,
+     121
+    ],
+    "len": 20,
+    "text": "Address all letters to Fiddlin' Joe, care of Street & Smith's Wild West Weekly, 79 Seventh Avenue, New York, N. Y"
+   }
+  ]
+ }
+]
