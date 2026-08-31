@@ -62,6 +62,27 @@ def tokenize(canon):
     return out
 
 
+HONORIFICS = {"captain", "capt", "dr", "prof", "professor", "mr", "mrs", "miss",
+              "lieut", "lieutenant", "major", "col", "colonel", "sgt", "rev", "by"}
+
+
+def author_key(name):
+    """Comparison key for a printed by-line, or None when unusable ("THE
+    EDITOR", "Author of ...", initials only). Pulp pseudonyms are NOT
+    resolved here (implementation plan 0.4): this is the verbatim-name
+    state with an explicit unknown. Shared by r05 and the website."""
+    if not name:
+        return None
+    s = name.lower()
+    if s.startswith("author of") or "the editor" in s:
+        return None
+    s = re.sub(r"[^a-z\s]", " ", s)
+    parts = [p for p in s.split() if p not in HONORIFICS]
+    if len(parts) < 2 or sum(len(p) for p in parts) < 5:
+        return None
+    return " ".join(parts)
+
+
 def story_units(record):
     """Canonical text and token arrays for one exported story record."""
     canon = prepare(record.get("text", ""))

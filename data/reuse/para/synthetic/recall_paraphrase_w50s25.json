@@ -67,5 +67,10 @@
    "recall": 0.4,
    "mean_cover": 0.367
   }
+ },
+ "_generated": "2026-08-31 03:40",
+ "_keep_rule": {
+  "min_cols": 20,
+  "min_identity": 0.6
  }
 }

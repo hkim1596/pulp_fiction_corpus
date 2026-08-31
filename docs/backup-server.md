@@ -135,6 +135,58 @@ nightly pull. Close the two Terminal windows (Ctrl-C in each). On the
 main server, confirm the `pulpsite` and `tunnel` tmux sessions are up
 (handbook, "site process" and "tunnel" sections).
 
+## Reaching the Studio from the MacBook — "ssh studio" through the tunnel
+
+Since 2026-08-31 the Studio is operated from the MacBook, the way the
+main server is (`ssh rtx6000`), and nobody needs to sit at its
+keyboard. The path is the Cloudflare tunnel that already serves the
+site: a second hostname, `studio-ssh.digihumeng.org`, is routed by the
+same tunnel to the Studio's own ssh service, and the MacBook connects
+through Cloudflare with `cloudflared access ssh` as the ssh proxy. It
+works from any network, needs no firewall rules, and the only new
+software is cloudflared on the MacBook. Security rests on the ssh key
+(the hostname is reachable from the internet; keep password logins
+off once the key works — see below).
+
+One-time setup, in three parts.
+
+ON THE STUDIO, once (a new Terminal window; the serve and tunnel
+windows keep running):
+
+    cd ~/pulp_backup/pulp_fiction_corpus && bash scripts/studio_ssh_enable.sh
+
+It turns on Remote Login (or tells you to do it in System Settings →
+General → Sharing → Remote Login), adds the ssh rule to
+`~/.cloudflared/config.yml`, validates the file, creates the DNS name,
+and prints the Studio's account name. Then, in the tunnel window,
+press Ctrl-C and run `cloudflared tunnel run pulp-backup` again (the
+site is away for a few seconds).
+
+ON THE MACBOOK, once:
+
+    cd "<the Dropbox repository folder>" && bash scripts/mac_ssh_studio_setup.sh <studio-account-name>
+
+It installs cloudflared with Homebrew if missing, adds a `Host studio`
+entry to `~/.ssh/config` (HostName studio-ssh.digihumeng.org, the
+account name, ProxyCommand cloudflared access ssh), copies the
+MacBook's key over (asks the Studio password once), and tests the
+connection.
+
+From then on, from the MacBook, from anywhere:
+
+    ssh studio                                   a shell on the Studio
+    ssh studio 'bash -s' <<'EOS'                 a paste, like rtx6000
+    cd ~/pulp_backup/pulp_fiction_corpus && git pull
+    pkill -f "webapp/app.py --port 8092"
+    EOS
+
+Hardening, recommended once the key works: on the Studio, in
+`/etc/ssh/sshd_config`, set `PasswordAuthentication no` and
+`KbdInteractiveAuthentication no`, then `sudo launchctl kickstart -k
+system/com.openssh.sshd` — after that only the MacBook's key opens the
+door. If the tunnel is ever recreated, the ssh rule in config.yml and
+the DNS route must be recreated with it (rerun studio_ssh_enable.sh).
+
 ## Troubleshooting
 
 Public site shows error 1033 after go_live: the tunnel window is not

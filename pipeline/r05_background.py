@@ -46,6 +46,7 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import r02_verbatim as r2  # noqa: E402
 import r04_paraphrase as r4  # noqa: E402
+from r01_normalize import author_key  # noqa: E402  (shared with the website)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REUSE = os.path.join(ROOT, "data", "reuse")
@@ -56,28 +57,6 @@ PARA_TAG = "machine_w50s25"
 PARA_KS = (5, 10, 20)
 PARA_MAIN = 10
 YEAR_BANDS = [(0, 3, "0-2"), (3, 10, "3-9"), (10, 20, "10-19"), (20, 1000, "20+")]
-HONORIFICS = {"captain", "capt", "dr", "prof", "professor", "mr", "mrs", "miss",
-              "lieut", "lieutenant", "major", "col", "colonel", "sgt", "rev", "by"}
-
-
-# ---------------------------------------------------------------- facts
-
-def author_key(name):
-    """Comparison key for a printed by-line, or None when unusable. Pulp
-    pseudonyms are NOT resolved here (plan item 0.4); this is the
-    verbatim-name state with an explicit unknown."""
-    if not name:
-        return None
-    s = name.lower()
-    if s.startswith("author of") or "the editor" in s:
-        return None
-    s = re.sub(r"[^a-z\s]", " ", s)
-    parts = [p for p in s.split() if p not in HONORIFICS]
-    if len(parts) < 2 or sum(len(p) for p in parts) < 5:
-        return None
-    return " ".join(parts)
-
-
 def decimal_year(cover_date):
     m = re.match(r"(\d{4})(?:-(\d{1,2}))?(?:-(\d{1,2}))?", cover_date or "")
     if not m:

@@ -497,14 +497,18 @@ def status_table(runs):
 
 # ---------------------------------------------------------------- overview
 
-def overview():
+def _render(render, title, body, path):
+    return (render or _G["page"])(title, body, path=path)
+
+
+def overview(render=None):
     runs = _runs()
     if not runs["exact"]:
         body = (_howto("Results of the text-reuse pipeline appear here once its output "
                        "files are on this server.")
                 + "<h1>Text reuse</h1><div class='empty'>Nothing to show yet: the pipeline "
                 "has not written any results into this server's data folder.</div>")
-        return _G["page"]("Text reuse", body, path="/reuse")
+        return _render(render, "Text reuse", body, "/reuse")
     sets = _sets(runs)
     out = [_howto(
         "This page shows what the text-reuse pipeline found in the ten pilot issues "
@@ -786,12 +790,12 @@ def overview():
                    "counted here is a job for assembly version 2 or for the correction sprint; the "
                    "reuse inventory collapses such records into one witness meanwhile. "
                    "<a href='/reuse/clusters?kind=exact&k=6&same=1'>Browse the same-issue diagnostics</a>.</p>")
-    return _G["page"]("Text reuse", "".join(out), path="/reuse")
+    return _render(render, "Text reuse", "".join(out), "/reuse")
 
 
 # ---------------------------------------------------------------- clusters
 
-def clusters_page(qs):
+def clusters_page(qs, render=None):
     runs = _runs()
     sets = _sets(runs) or ["machine"]
     g = lambda k, d: (qs.get(k, [d]) or [d])[0]
@@ -854,10 +858,10 @@ def clusters_page(qs):
                        f"<td class='muted'>{_esc((m.get('excerpt') or m.get('text_a') or '')[:220])}</td></tr>")
         tbl.append("</table>")
         out.append(f"<h2>Same-issue matches — {len(rows)} shown</h2>" + ("".join(tbl) if rows else "<div class='empty'>None for this setting.</div>"))
-        return _G["page"]("Reuse clusters", "".join(out), path="/reuse/clusters")
+        return _render(render, "Reuse clusters", "".join(out), "/reuse/clusters")
     if clusters is None:
         out.append("<div class='empty'>No output for this setting on this server.</div>")
-        return _G["page"]("Reuse clusters", "".join(out), path="/reuse/clusters")
+        return _render(render, "Reuse clusters", "".join(out), "/reuse/clusters")
     rows = []
     for i, c in enumerate(clusters):
         if c["witnesses"] < min_wit or c["max_len"] < min_len:
@@ -879,10 +883,10 @@ def clusters_page(qs):
     out.append(f"<h2>{len(rows)} of {len(clusters)} clusters shown"
                f"{' · generated ' + _esc(st.get('generated', '')) if st.get('generated') else ''}</h2>"
                + ("".join(tbl) if rows else "<div class='empty'>No cluster matches these filters.</div>"))
-    return _G["page"]("Reuse clusters", "".join(out), path="/reuse/clusters")
+    return _render(render, "Reuse clusters", "".join(out), "/reuse/clusters")
 
 
-def cluster_page(set_, kind, k, idx):
+def cluster_page(set_, kind, k, idx, render=None):
     runs = _runs()
     if kind == "exact":
         clusters, matches, _, stats = _exact_files(set_, k)
@@ -890,7 +894,7 @@ def cluster_page(set_, kind, k, idx):
         tag = _para_tag(runs, set_)
         clusters, matches, _, stats = _para_files(tag, k) if tag else (None, None, None, None)
     if not clusters or idx < 0 or idx >= len(clusters):
-        return _G["page"]("Cluster", "<h1>No such cluster</h1>", path="/reuse/clusters")
+        return _render(render, "Cluster", "<h1>No such cluster</h1>", "/reuse/clusters")
     c = clusters[idx]
     meta = _story_meta()
     out = [_howto(
@@ -957,12 +961,12 @@ def cluster_page(set_, kind, k, idx):
                     f"score {al['score']} · source {', '.join(al['sources'])}"
                     f"{' · cosine ' + str(al['max_cosine']) if al.get('max_cosine') is not None else ''}</span></div>"
                     f"<div class='cardtext' style='max-height:none'>{_G['diff_html'](al['text_a'], al['text_b'])}</div></div>")
-    return _G["page"]("Cluster", "".join(out), path=f"/reuse/cluster/{set_}/{kind}/{k}/{idx}")
+    return _render(render, "Cluster", "".join(out), f"/reuse/cluster/{set_}/{kind}/{k}/{idx}")
 
 
 # ---------------------------------------------------------------- progress
 
-def progress_page():
+def progress_page(render=None):
     runs = _runs()
     events = []
     anndir = _G["ANNDIR"]
@@ -1078,4 +1082,4 @@ def progress_page():
                + "</table><p class='muted'>The full-study rows (survey of the whole archive, rolling download, "
                "reading, assembly, the stratified verification sample) fill in after protocol acceptance; the "
                "frame is here so the same page keeps working.</p>")
-    return _G["page"]("Progress", "".join(out), path="/reuse/progress")
+    return _render(render, "Progress", "".join(out), "/reuse/progress")

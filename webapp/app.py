@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.9.0"
+APP_VERSION = "0.10.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -844,10 +844,12 @@ CSS = """
 body{font-family:Georgia,'Times New Roman',serif;margin:0;color:#1c1a17;background:#faf7f2}
 a{color:#7a3020}
 .wrap{max-width:1200px;margin:0 auto;padding:16px 20px 60px}
-.top{border-bottom:2px solid #1c1a17;padding:14px 0;margin-bottom:18px;display:flex;justify-content:space-between;align-items:baseline}
+.top{border-bottom:2px solid #1c1a17;padding:14px 0;margin-bottom:18px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
 .brand{font-size:22px;letter-spacing:.4px}
 .brand a{text-decoration:none;color:#1c1a17}
-.nav a{margin-left:14px;font-size:14px}
+.nav a{margin-left:12px;font-size:14px}
+.nav .navgrp{margin-left:18px;font-size:10.5px;letter-spacing:1.4px;color:#75695a;text-transform:uppercase}
+.nav .navgrp:first-child{margin-left:0}
 h1{font-size:26px;font-weight:normal;margin:8px 0 14px}
 h2{font-size:19px;font-weight:normal;margin:20px 0 8px;border-bottom:1px solid #d8cfc0;padding-bottom:3px}
 .howto{background:#f3ead9;border:1px solid #d8cfc0;padding:10px 14px;font-size:14px;margin:0 0 18px}
@@ -934,6 +936,9 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 g.selbox rect{stroke:#b8860b !important;stroke-width:9 !important;fill:rgba(201,155,78,.28) !important}
 g.flash rect{stroke:#b8860b !important;stroke-width:10 !important}
 .rolechip.c{background:#5b3b8a}
+blockquote.proto{border-left:4px solid #7a3020;background:#fff;margin:10px 0;padding:8px 14px;font-size:14.5px;line-height:1.55}
+code{font-family:Menlo,Consolas,monospace;font-size:12.5px;background:#f3ead9;padding:0 3px}
+.method-toc a{margin-right:14px}
 .footer{margin-top:44px;font-size:12px;color:#75695a;border-top:2px solid #1c1a17;padding-top:8px}
 .land{max-width:640px;margin:8vh auto 0;padding:0 20px}
 .land h1{font-size:34px}
@@ -951,9 +956,14 @@ def esc(s):
 def page(title, body, member=True, path="/", admin=False):
     userslink = "<a href='/users'>users</a>" if admin else ""
     nav = ("<span class='nav'>"
-           "<a href='/guide'>guide</a>"
-           "<a href='/issues'>issues</a><a href='/articles'>articles</a>"
+           "<span class='navgrp'>explore</span>"
+           "<a href='/overview'>overview</a><a href='/authors'>authors</a>"
+           "<a href='/magazines'>magazines</a><a href='/issues'>issues</a>"
+           "<a href='/stories'>records</a><a href='/pairs'>pairs</a>"
            "<a href='/reuse'>reuse</a><a href='/method'>method</a>"
+           "<span class='navgrp'>workroom</span>"
+           "<a href='/guide'>guide</a><a href='/articles'>workbench</a>"
+           "<a href='/reuse/progress'>progress</a>"
            "<a href='/timing'>timing</a><a href='/activity'>activity</a>"
            f"<a href='/feedback'>feedback</a>{userslink}"
            "<a href='/logout'>log out</a></span>") if member else ""
@@ -1001,31 +1011,60 @@ def diff_html(old, new):
 
 
 def md_to_html(md):
-    """Small markdown renderer for METHOD.md: headers, lists, code, paragraphs."""
-    out, in_code, in_list = [], False, False
+    """Small markdown renderer for the method texts: headers, lists (with
+    wrapped continuation lines), code blocks, block quotes, and paragraphs
+    that may be hard-wrapped over several source lines."""
+    out, in_code = [], False
+    para, quote, items = [], [], []
+
+    def inline(text):
+        return re.sub(r"`([^`]+)`", r"<code>\1</code>", esc(text))
+
+    def flush():
+        if para:
+            out.append(f"<p>{inline(' '.join(para))}</p>")
+            para.clear()
+        if quote:
+            out.append(f"<blockquote class='proto'>{inline(' '.join(quote))}</blockquote>")
+            quote.clear()
+        if items:
+            out.append("<ul>" + "".join(f"<li>{inline(i)}</li>" for i in items) + "</ul>")
+            items.clear()
     for line in md.splitlines():
         if line.strip().startswith("```"):
+            flush()
             out.append("</pre>" if in_code else "<pre>")
             in_code = not in_code
             continue
         if in_code:
             out.append(esc(line))
             continue
-        if re.match(r"\s*[-*] ", line):
-            if not in_list:
-                out.append("<ul>"); in_list = True
-            out.append(f"<li>{esc(line.strip()[2:])}</li>")
+        if not line.strip():
+            flush()
             continue
-        if in_list:
-            out.append("</ul>"); in_list = False
+        if line.startswith("> "):
+            if para or items:
+                flush()
+            quote.append(line[2:].strip())
+            continue
+        if re.match(r"\s*[-*] ", line):
+            if para or quote:
+                flush()
+            items.append(line.strip()[2:])
+            continue
+        if items and line.startswith("  "):
+            items[-1] += " " + line.strip()
+            continue
         m = re.match(r"(#{1,3}) (.*)", line)
         if m:
-            lvl = min(len(m.group(1)) + 0, 3)
+            flush()
+            lvl = min(len(m.group(1)), 3)
             out.append(f"<h{lvl}>{esc(m.group(2))}</h{lvl}>")
-        elif line.strip():
-            out.append(f"<p>{esc(line)}</p>")
-    if in_list:
-        out.append("</ul>")
+            continue
+        if quote or items:
+            flush()
+        para.append(line.strip())
+    flush()
     if in_code:
         out.append("</pre>")
     return "\n".join(out)
@@ -1035,7 +1074,9 @@ def md_to_html(md):
 import sys as _sys
 _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reuse_pages as RP  # noqa: E402
+import explore_pages as EX  # noqa: E402
 RP.bind(globals())
+EX.bind(globals())
 
 
 # ---------------- request handler ----------------
@@ -1134,12 +1175,13 @@ class H(BaseHTTPRequestHandler):
             p = safe(qs.get("path", [""])[0])
             if not p or not os.path.isfile(p):
                 return self._send(404, "no such file", "text/plain")
-            if os.path.getsize(p) > 8_000_000:
+            if os.path.getsize(p) > 64_000_000:
                 return self._send(413, "file too large for the api",
                                   "text/plain")
             ctype = ("image/png" if p.endswith(".png") else
                      "image/jpeg" if p.endswith(".jpg") else
                      "application/json" if p.endswith(".json") else
+                     "application/gzip" if p.endswith(".gz") else
                      "text/plain; charset=utf-8")
             return self._send(200, open(p, "rb").read(), ctype)
         m = re.fullmatch(r"doc/([\w\-]+)", rest)
@@ -1170,7 +1212,29 @@ class H(BaseHTTPRequestHandler):
             }
             return self._send(200, json.dumps(out, ensure_ascii=False),
                               "application/json")
+        m = re.fullmatch(r"(index|authors|magazines|stories|pairs)", rest)
+        if m:
+            text = EX.raw_json(m.group(1), None)
+            return self._send(200, text, "application/json")
+        m = re.fullmatch(r"(story|author|issue|magazine)/([\w\-]+)", rest)
+        if m:
+            text = EX.raw_json(m.group(1), m.group(2))
+            if text is None:
+                return self._send(404, "no such record", "text/plain")
+            return self._send(200, text, "application/json")
+        m = re.fullmatch(r"pair/([\w\-]+)/([\w\-]+)", rest)
+        if m:
+            text = EX.raw_json("pair", (m.group(1), m.group(2)))
+            return self._send(200, text, "application/json")
         return self._send(404, "unknown api call", "text/plain")
+
+    def _raw(self, kind, arg, as_json):
+        if as_json:
+            text = EX.raw_json(kind, arg)
+            if text is None:
+                return self._send(404, "no such record", "text/plain")
+            return self._send(200, text, "application/json")
+        return self._send(200, EX.raw_page(kind, arg, render=self._page))
 
     def _thumb(self, iid, nn):
         """Small JPEG preview of one page scan, for the workbench page strip.
@@ -1260,15 +1324,54 @@ class H(BaseHTTPRequestHandler):
             n = len(pages_of(iid)) or 500
             text = "\n\n".join(page_text(iid, stage, i) for i in range(1, n + 1)).strip()
             return self._send(200, text, "text/plain; charset=utf-8")
+        if path == "/overview":
+            return self._send(200, EX.overview(render=self._page))
+        if path == "/authors":
+            return self._send(200, EX.authors_page(qs, render=self._page))
+        if path == "/magazines":
+            return self._send(200, EX.magazines_page(render=self._page))
+        if path == "/stories":
+            return self._send(200, EX.stories_page(qs, render=self._page))
+        if path == "/pairs":
+            return self._send(200, EX.pairs_page(qs, render=self._page))
+        m = re.fullmatch(r"/author/([\w\-]+)", path)
+        if m:
+            return self._send(200, EX.author_page(m.group(1), render=self._page))
+        m = re.fullmatch(r"/magazine/([\w\-]+)", path)
+        if m:
+            return self._send(200, EX.magazine_page(m.group(1), render=self._page))
+        m = re.fullmatch(r"/story/([\w\-]+)", path)
+        if m:
+            return self._send(200, EX.story_page(m.group(1), render=self._page))
+        m = re.fullmatch(r"/pair/([\w\-]+)/([\w\-]+)", path)
+        if m:
+            return self._send(200, EX.pair_page(m.group(1), m.group(2), render=self._page))
+        m = re.fullmatch(r"/raw/(story|author|issue|magazine)/([\w\-]+?)(\.json)?", path)
+        if m:
+            return self._raw(m.group(1), m.group(2), bool(m.group(3)))
+        m = re.fullmatch(r"/raw/pair/([\w\-]+)/([\w\-]+?)(\.json)?", path)
+        if m:
+            return self._raw("pair", (m.group(1), m.group(2)), bool(m.group(3)))
+        m = re.fullmatch(r"/raw/(index|authors|magazines|stories|pairs)(\.json)?", path)
+        if m:
+            return self._raw(m.group(1), None, bool(m.group(2)))
+        if path == "/raw/file":
+            p = EX.raw_file_path(qs.get("path", [""])[0])
+            if not p:
+                return self._send(404, page("Not found", "<h1>No such data file</h1>"))
+            ctype = ("application/json" if p.endswith(".json") else "application/gzip" if p.endswith(".gz")
+                     else "image/png" if p.endswith(".png") else "text/plain; charset=utf-8")
+            return self._send(200, open(p, "rb").read(), ctype)
         if path == "/reuse":
-            return self._send(200, RP.overview())
+            return self._send(200, RP.overview(render=self._page))
         if path == "/reuse/clusters":
-            return self._send(200, RP.clusters_page(qs))
+            return self._send(200, RP.clusters_page(qs, render=self._page))
         if path == "/reuse/progress":
-            return self._send(200, RP.progress_page())
+            return self._send(200, RP.progress_page(render=self._page))
         m = re.fullmatch(r"/reuse/cluster/(\w+)/(exact|para)/(\d+)/(\d+)", path)
         if m:
-            return self._send(200, RP.cluster_page(m.group(1), m.group(2), int(m.group(3)), int(m.group(4))))
+            return self._send(200, RP.cluster_page(m.group(1), m.group(2), int(m.group(3)),
+                                                   int(m.group(4)), render=self._page))
         if path == "/guide":
             return self._send(200, self.guide_page())
         if path == "/method":
@@ -1288,14 +1391,14 @@ class H(BaseHTTPRequestHandler):
             uname, pword = get("username"), get("password")
             if uname and check_user(uname, pword):
                 tok = make_token(uname)
-                return self._redirect("/issues",
+                return self._redirect("/overview",
                     cookie=f"pfauth={urllib.parse.quote(tok)}; "
                            f"Max-Age={COOKIE_DAYS*86400}; Path=/; HttpOnly")
             pw = site_password()
             if (not uname and pw is not None
                     and hmac.compare_digest(get("passcode"), pw)):
                 tok = make_token("guest")
-                return self._redirect("/issues",
+                return self._redirect("/overview",
                     cookie=f"pfauth={urllib.parse.quote(tok)}; "
                            f"Max-Age={COOKIE_DAYS*86400}; Path=/; HttpOnly")
             if uname and is_pending(uname):
@@ -1595,10 +1698,13 @@ exact spot on the scan it was printed.</p>
 <p>Digital Humanities Engineering Center, Kyungpook National University,
 with the Department of English and Comparative Literature, Columbia University.</p>
 <p>WHAT YOU CAN DO HERE. With the shared passcode you can read
-everything: every scan beside its text at every cleaning stage, every
-assembled article, the full method, and the running log of the team's
-work. With an annotator account you can also repair and verify articles
-yourself — the site explains each step as you go, and a guide page
+everything, in layers: an overview of charts, then lists of authors,
+magazines, issues, records and story pairs, then one page per entity,
+then the printed page on the scan and the raw record behind it — every
+number on the site can be followed down to the data it came from. The
+full method is on one page, with the protocol quoted step by step. With
+an annotator account you can also repair and verify articles on the
+workbench — the site explains each step as you go, and a guide page
 walks you through your first repair.</p>
 <p>Ready? <a href='/login'>Enter with the passcode, or log in / sign
 up</a>. New annotator accounts are approved by the project lead. To
@@ -1706,7 +1812,8 @@ click first.</p></div>"""
             + ("<h2>Timing so far</h2><table><tr><th>stage</th><th>pages</th>"
                "<th>seconds</th><th>sec/page</th><th>note</th></tr>"
                + trows + "</table>" if t else
-               "<div class='empty'>No timing rows for this issue yet.</div>"))
+               "<div class='empty'>No timing rows for this issue yet.</div>")
+            + EX.issue_extra_html(iid))
         return self._page(info["magazine"], body, path=f"/issue/{iid}")
 
     def issue_articles_html(self, iid):
@@ -2423,6 +2530,15 @@ story into several records at chapter headings. The human work on this
 site is putting those pieces back together correctly and marking each
 finished article verified. Every verified article also teaches
 us how to make the automatic step better.</p>
+<p>The navigation has two halves. EXPLORE is the reading side: an
+<a href='/overview'>overview</a> of charts, lists of
+<a href='/authors'>authors</a>, <a href='/magazines'>magazines</a>,
+<a href='/issues'>issues</a>, <a href='/stories'>records</a> and
+<a href='/pairs'>story pairs</a>, the <a href='/reuse'>text-reuse
+results</a>, and the <a href='/method'>method</a>; every page links one
+layer down until you reach the scan and the raw record. WORKROOM is the
+working side: the <a href='/articles'>workbench</a> where articles are
+repaired, and the progress, timing, activity and feedback pages.</p>
 
 <h2>The words we use</h2>
 <p>An issue is one magazine (for example Astounding, January
@@ -2494,15 +2610,34 @@ an answer that everyone else benefits from too.</p>"""
         return self._page("Guide", body, path="/guide")
 
     def method_page(self):
-        p = os.path.join(ROOT, "METHOD.md")
-        md = open(p, encoding="utf-8").read() if os.path.exists(p) else "(METHOD.md missing)"
+        def read(rel):
+            p = os.path.join(ROOT, rel)
+            return open(p, encoding="utf-8").read() if os.path.exists(p) else f"({rel} missing)"
+        toc = ("<p class='method-toc muted'>Sections: <a href='#corpus'>1 corpus construction</a>"
+               "<a href='#reuse'>2 text reuse (protocol and implementation)</a>"
+               "<a href='#params'>3 parameters in force</a><a href='#dict'>4 data dictionary</a>"
+               "<a href='#files'>5 result files on this server</a><a href='#decisions'>6 decisions</a></p>")
         body = (howto(
-            "The full processing method, exactly as implemented in the "
-            "repository. This page is rendered from METHOD.md in the repo, so "
-            "the description and the code move together. Comment via the "
-            "feedback box below; the method is revised from feedback before "
-            "the protocol is frozen.")
-            + md_to_html(md))
+            "The full method in one place. Part 1 is the corpus-building method as implemented "
+            "(rendered from METHOD.md in the repository, so text and code move together). Part 2 "
+            "quotes the Registered Report protocol word for word, step by step, and states after "
+            "each step what this site's pipeline does for it. Parts 3–5 are generated from the "
+            "result files on this server, so they always describe the numbers you see. Comment "
+            "through the feedback box; the method is revised from feedback before the protocol "
+            "is frozen.")
+            + "<h1>Method</h1>" + toc
+            + "<h1 id='corpus' style='font-size:22px;margin-top:26px'>1. Corpus construction</h1>"
+            + md_to_html(read("METHOD.md"))
+            + "<h1 id='reuse' style='font-size:22px;margin-top:26px'>2. Text reuse</h1>"
+            + md_to_html(read(os.path.join("docs", "method-reuse.md")))
+            + "<h1 id='params' style='font-size:22px;margin-top:26px'>3. Parameters in force</h1>"
+            + EX.params_html()
+            + "<h1 id='dict' style='font-size:22px;margin-top:26px'>4. Data dictionary</h1>"
+            + EX.data_dictionary_html()
+            + "<h1 id='files' style='font-size:22px;margin-top:26px'>5. Result files on this server</h1>"
+            + EX.files_html()
+            + "<h1 id='decisions' style='font-size:22px;margin-top:26px'>6. Decisions</h1>"
+            + md_to_html(read(os.path.join("docs", "decisions.md"))))
         return self._page("Method", body, path="/method")
 
     def timing_page(self):

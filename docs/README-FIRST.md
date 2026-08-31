@@ -48,7 +48,8 @@ annotator's name; the machine's output is never overwritten.
 
 ## Map of this folder
 
-    webapp/app.py            the website (one file, no frameworks)
+    webapp/app.py            the website (no frameworks; routes, workbench, viewer)
+    webapp/explore_pages.py  the explorer: overview, lists, entity pages, raw layer
     webapp/reuse_pages.py    the text-reuse pages of the site (/reuse…)
     pipeline/s01…s07         the corpus-building stages, in order
     pipeline/r00…r05         the text-reuse analysis stages (protocol
@@ -58,7 +59,10 @@ annotator's name; the machine's output is never overwritten.
     data/reuse/              the reuse pipeline's result files (the one
                              data folder kept in git; small JSON)
     docs/                    you are here — handbook, technical notes,
-                             pilot results, implementation plan
+                             pilot results, implementation plan; also
+                             method-reuse.md (the protocol quoted step by
+                             step with the implementation) and decisions.md,
+                             both rendered live at /method
     METHOD.md                the method text, rendered live at /method
 
 The processed data itself (scans, text stages, articles, annotations)

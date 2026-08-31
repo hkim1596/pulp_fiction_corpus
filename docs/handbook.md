@@ -85,12 +85,19 @@ from annotator accounts, and it can only read — nothing behind it can
 change, delete, or approve anything.
 
     /api/<token>/ls?path=annotations          list a folder under data/
-    /api/<token>/get?path=annotations/x.jsonl read one file (8 MB cap)
+    /api/<token>/get?path=annotations/x.jsonl read one file (64 MB cap)
     /api/<token>/doc/<issue-id>               an issue's full assembled
                                               state as JSON: articles with
                                               fragment keys, unsorted,
                                               furniture, roles, and every
                                               box with its owner
+    /api/<token>/index                        what the explorer index holds
+                                              and every result file
+    /api/<token>/story/<id>  /pair/<a>/<b>    the same JSON the explorer's
+    /api/<token>/author/<slug> /issue/<id>    raw pages show (v0.10.0):
+    /api/<token>/magazine/<slug>              export record, live article,
+    /api/<token>/authors /magazines           matches, alignments, pair
+    /api/<token>/stories /pairs               row, annotation events, lists
 
 The token is a long random string in `~/shared/khj/.pulp_api_token`
 (env override `PULP_API_TOKEN_FILE`). Delete that file and the whole
@@ -132,7 +139,7 @@ The standard deploy, after editing `webapp/app.py` (bump `APP_VERSION`):
       done
       sleep 6
       pgrep -af "webapp/app.py" | grep -v "while true" || echo "SITE-NOT-RUNNING"
-      curl -s https://pulp.digihumeng.org/ | grep -o "v[0-9.]*" | head -1
+      curl -s https://pulp.digihumeng.org/ | grep -o "v[0-9][0-9.]*" | head -1
       EOS
 
 The printed version must match the new `APP_VERSION`.
@@ -140,24 +147,24 @@ The printed version must match the new `APP_VERSION`.
 While the Studio is the live server (main server down), the deploy is
 a GitHub round trip — the repository is public, so the Studio pulls
 over HTTPS with no key. On the Mac: the same add / commit / push as
-above. Then on the Studio, in a new Terminal window (the serve window
-keeps running):
+above, then the Studio update from the Mac through `ssh studio` (set
+up once as described in docs/backup-server.md, "Reaching the Studio"):
 
+    ssh studio 'bash -s' <<'EOS'
     cd ~/pulp_backup/pulp_fiction_corpus
-    git remote set-url origin https://github.com/hkim1596/pulp_fiction_corpus.git
-    git stash push -m "studio-local-before-pull"
-    git fetch origin
-    git checkout -B main origin/main
-    python3 -m py_compile webapp/app.py webapp/reuse_pages.py && echo COMPILE-OK
+    git fetch origin && git checkout -B main origin/main
+    python3 -m py_compile webapp/app.py webapp/reuse_pages.py webapp/explore_pages.py && echo COMPILE-OK
     pkill -f "webapp/app.py --port 8092"
     sleep 6
-    curl -s https://pulp.digihumeng.org/ | grep -o "v[0-9.]*" | head -1
+    curl -s http://127.0.0.1:8092/ | grep -o "v[0-9][0-9.]*" | head -1
+    EOS
 
 The serve loop (scripts/serve_backup.sh) restarts python within three
-seconds of the kill; the last line must print the new version. The
-stash line only matters if the Studio's copy was ever edited by hand;
-normally it says "No local changes to save". Files the pipeline wrote
-under data/ are untracked and untouched by the checkout.
+seconds of the kill; the last line must print the new version. Files
+the pipeline wrote under data/ are untracked and untouched by the
+checkout. (Before `ssh studio` existed the same lines were pasted into
+a Terminal window on the Studio, after `git remote set-url origin
+https://github.com/hkim1596/pulp_fiction_corpus.git` once.)
 
 ## Writing terminal pastes for Heejin (learned the hard way)
 
@@ -310,6 +317,25 @@ Typical run, in order, on a machine holding the export:
 Each file has `--selftest`. Outputs are small JSON and travel with the
 repository (data/reuse is the one data folder git tracks); the site on
 the Studio gets them by `git pull`.
+
+The explorer (webapp/explore_pages.py, v0.10.0) is the service side
+of the site: `/overview` (charts: author reuse network, magazine grid,
+time axis, census, background curve, progress), lists (`/authors`,
+`/magazines`, `/issues`, `/stories`, `/pairs`), entity pages
+(`/author/<key>`, `/magazine/<slug>`, `/issue/<id>` with provenance
+from the Internet Archive item record, `/story/<id>`, `/pair/<a>/<b>`),
+and the raw layer (`/raw/story/<id>`, `/raw/pair/<a>/<b>`,
+`/raw/author/<slug>`, `/raw/issue/<id>`, `/raw/magazine/<slug>`,
+`/raw/index`, `/raw/file?path=<under data/>`; add `.json` for the file
+itself). It keeps one in-memory index built from the export, the reuse
+outputs, the pair table, the annotation logs and the archive metadata,
+rebuilt when any of those files changes. The data door serves the same
+records (`/api/<token>/story/<id>` and the other entity paths, plus
+`/api/<token>/index`), so an automated reader can read everything the
+pages show. `/method` quotes the protocol verbatim step by step
+(docs/method-reuse.md) with the implementation after each step, and
+generates the parameter table, data dictionary and file list from the
+result files.
 
 The reuse pages (webapp/reuse_pages.py, v0.9.0): `/reuse` overview
 with server-drawn SVG charts (no libraries), `/reuse/clusters` with
