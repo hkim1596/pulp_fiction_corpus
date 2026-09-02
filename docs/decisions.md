@@ -72,3 +72,10 @@ Dropbox share carries the full context of each.
   v2.md); the human-corrected records stay the yardstick in
   data/assembly_archive; the model-with-rules variant is tried later
   on the main server for pages the rules cannot anchor.
+- 2026-09-02 — Storage on the main server: no mirror; project data on
+  /mnt/sda (data/pages and data/thumbs moved there, symbolic links
+  keep the paths); /mnt/sdb unassigned; Docker left untouched ("Don't
+  remove") — other members' containers and images stay.
+- 2026-09-02 — The site went back to the main server the same day
+  (hand-back through the MacBook; docs/backup-server.md); the Studio
+  keeps its tunnel for ssh and returns to the nightly pull.

@@ -1,74 +1,74 @@
 {
  "k6": {
-  "total_matches": 685,
+  "total_matches": 546,
   "per_kind": {
    "verbatim": {
     "plants": 20,
     "recovered": 20,
     "recall": 1.0,
-    "mean_token_share": 0.999
+    "mean_token_share": 0.995
    },
    "near-verbatim": {
     "plants": 20,
     "recovered": 20,
     "recall": 1.0,
-    "mean_token_share": 0.847
+    "mean_token_share": 0.86
    },
    "heavy-edit": {
     "plants": 20,
-    "recovered": 20,
-    "recall": 1.0,
-    "mean_token_share": 0.255
+    "recovered": 19,
+    "recall": 0.95,
+    "mean_token_share": 0.189
    }
   }
  },
  "k7": {
-  "total_matches": 168,
+  "total_matches": 135,
   "per_kind": {
    "verbatim": {
     "plants": 20,
     "recovered": 20,
     "recall": 1.0,
-    "mean_token_share": 0.999
+    "mean_token_share": 0.995
    },
    "near-verbatim": {
     "plants": 20,
     "recovered": 20,
     "recall": 1.0,
-    "mean_token_share": 0.81
+    "mean_token_share": 0.816
    },
    "heavy-edit": {
     "plants": 20,
-    "recovered": 15,
-    "recall": 0.75,
-    "mean_token_share": 0.153
+    "recovered": 13,
+    "recall": 0.65,
+    "mean_token_share": 0.106
    }
   }
  },
  "k8": {
-  "total_matches": 100,
+  "total_matches": 82,
   "per_kind": {
    "verbatim": {
     "plants": 20,
     "recovered": 20,
     "recall": 1.0,
-    "mean_token_share": 0.999
+    "mean_token_share": 0.995
    },
    "near-verbatim": {
     "plants": 20,
     "recovered": 20,
     "recall": 1.0,
-    "mean_token_share": 0.745
+    "mean_token_share": 0.768
    },
    "heavy-edit": {
     "plants": 20,
-    "recovered": 9,
-    "recall": 0.45,
-    "mean_token_share": 0.088
+    "recovered": 8,
+    "recall": 0.4,
+    "mean_token_share": 0.063
    }
   }
  },
- "_generated": "2026-08-31 02:37",
- "_stories": 178,
+ "_generated": "2026-09-03 00:43",
+ "_stories": 76,
  "_plants": 60
 }

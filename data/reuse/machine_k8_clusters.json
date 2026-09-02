@@ -1,82 +1,35 @@
 [
  {
-  "witnesses": 3,
-  "witnesses_collapsed": 2,
-  "issues": 2,
-  "occurrences": 3,
-  "max_len": 8,
-  "representative": {
-   "story_id": "wt_1925_11_a022",
-   "tok": [
-    3688,
-    3696
-   ],
-   "text": "the door at the end of the hall"
-  },
-  "members": [
-   {
-    "story_id": "wt_1925_11_a022",
-    "issue": "wt_1925_11",
-    "tok": [
-     3688,
-     3696
-    ],
-    "len": 8,
-    "text": "the door at the end of the hall"
-   },
-   {
-    "story_id": "td_1932_02_a001",
-    "issue": "td_1932_02",
-    "tok": [
-     30977,
-     30985
-    ],
-    "len": 8,
-    "text": "the door at the end of the hall"
-   },
-   {
-    "story_id": "td_1932_02_a006",
-    "issue": "td_1932_02",
-    "tok": [
-     4528,
-     4536
-    ],
-    "len": 8,
-    "text": "the door at the end of the hall"
-   }
-  ]
- },
- {
   "witnesses": 2,
   "witnesses_collapsed": 2,
   "issues": 2,
   "occurrences": 2,
   "max_len": 10,
   "representative": {
-   "story_id": "ast_1930_01_a028",
+   "story_id": "ast_1930_01_a019",
    "tok": [
-    1150,
-    1160
+    9825,
+    9835
    ],
    "text": "no more than a minute or two had passed since"
   },
   "members": [
    {
-    "story_id": "ast_1930_01_a028",
+    "story_id": "ast_1930_01_a019",
     "issue": "ast_1930_01",
     "tok": [
-     1150,
-     1160
+     9825,
+     9835
     ],
     "len": 10,
     "text": "no more than a minute or two had passed since"
    },
    {
-    "story_id": "ast_1930_03_a002",
+    "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     21739,
-     21749
+     21554,
+     21564
     ],
     "len": 10,
     "text": "No more than a minute or two had passed since"
@@ -90,33 +43,33 @@
   "occurrences": 2,
   "max_len": 8,
   "representative": {
-   "story_id": "ast_1930_01_a022",
+   "story_id": "wt_1925_11_a023",
    "tok": [
-    35,
-    43
+    3674,
+    3682
    ],
-   "text": "Operative Carnes of the United States Secret Service"
+   "text": "the door at the end of the hall"
   },
   "members": [
    {
-    "story_id": "ast_1930_01_a022",
-    "issue": "ast_1930_01",
+    "story_id": "wt_1925_11_a023",
+    "issue": "wt_1925_11",
     "tok": [
-     35,
-     43
+     3674,
+     3682
     ],
     "len": 8,
-    "text": "Operative Carnes of the United States Secret Service"
+    "text": "the door at the end of the hall"
    },
    {
-    "story_id": "ast_1930_03_a001",
-    "issue": "ast_1930_03",
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
     "tok": [
-     372,
-     380
+     4480,
+     4488
     ],
     "len": 8,
-    "text": "Operative Carnes of the United States Secret Service"
+    "text": "the door at the end of the hall"
    }
   ]
  },
@@ -127,33 +80,33 @@
   "occurrences": 2,
   "max_len": 8,
   "representative": {
-   "story_id": "ast_1930_01_a103",
+   "story_id": "ast_1930_01_a017",
    "tok": [
-    154,
-    162
+    35,
+    43
    ],
-   "text": "it won't do you a bit of good"
+   "text": "Operative Carnes of the United States Secret Service"
   },
   "members": [
    {
-    "story_id": "ast_1930_01_a103",
+    "story_id": "ast_1930_01_a017",
     "issue": "ast_1930_01",
     "tok": [
-     154,
-     162
+     35,
+     43
     ],
     "len": 8,
-    "text": "it won't do you a bit of good"
+    "text": "Operative Carnes of the United States Secret Service"
    },
    {
-    "story_id": "gal_1952_03_a004",
-    "issue": "gal_1952_03",
+    "story_id": "ast_1930_03_a014",
+    "issue": "ast_1930_03",
     "tok": [
-     1916,
-     1924
+     290,
+     298
     ],
     "len": 8,
-    "text": "It won't do you a bit of good"
+    "text": "Operative Carnes of the United States Secret Service"
    }
   ]
  }

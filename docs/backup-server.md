@@ -135,6 +135,44 @@ nightly pull. Close the two Terminal windows (Ctrl-C in each). On the
 main server, confirm the `pulpsite` and `tunnel` tmux sessions are up
 (handbook, "site process" and "tunnel" sections).
 
+### How the hand-back of 2026-09-02 was actually done
+
+The first real hand-back (outage 24 August – 2 September 2026) went
+through the MacBook instead of go_standby.sh, because the MacBook holds
+both ssh routes ("ssh studio" and "ssh rtx6000") while the Studio's own
+route to the main server had not been exercised. The order that
+worked, each step a paste from the MacBook:
+
+1. main server: pull the current code, move the page images to the new
+   disk, build the explorer database, start the site in tmux
+   (`tmux new -d -s pulpsite 'bash …/webapp/serve_pulp.sh'`), check
+   `curl 127.0.0.1:8092/healthz` and the tunnel's config.yml rule;
+2. keep a copy of the main server's own annotations and feedback
+   (data/_before_handback/), then copy the Studio's data/annotations,
+   data/feedback.jsonl and secrets/.pulp_users.json to the main server
+   through the MacBook (`ssh studio 'tar czf - …' > /tmp/x.tgz`, then
+   `ssh rtx6000 'tar xzf -' < /tmp/x.tgz`; the accounts file with scp);
+3. stop the Studio's site loop FIRST (so no action lands after the
+   copy), copy once more, then on the Studio
+   `cloudflared tunnel route dns --overwrite-dns cihd-site pulp.digihumeng.org`
+   and `echo standby > ~/pulp_backup/MODE`; the Studio's tunnel keeps
+   running so that "ssh studio" still works;
+4. from the MacBook, `curl -s https://pulp.digihumeng.org/` until it
+   prints the main server's version.
+
+Three lessons. Inside `ssh studio 'bash -s'` the Studio's PATH has no
+/opt/homebrew/bin, so `cloudflared` is "command not found" there: use
+the full path (/opt/homebrew/bin/cloudflared) or run the DNS route
+command on the main server (`~/bin/cloudflared tunnel route dns
+--overwrite-dns cihd-site pulp.digihumeng.org`; it holds the account's
+certificate too). macOS tar adds AppleDouble files (`._name.jsonl`) for
+files that carry extended attributes; set `COPYFILE_DISABLE=1` before
+`tar` on the Studio and remove any `._*` that arrived (Python's glob
+ignores dot-files, so the site was not hurt, but they are junk). And
+`pkill -f "app.py --port 8092"` must run inside `ssh host 'bash -s'
+<<'EOS' … EOS`, never in a one-line `ssh host '…'` command, whose own
+command line contains the pattern and would be killed first.
+
 ## Reaching the Studio from the MacBook — "ssh studio" through the tunnel
 
 Since 2026-08-31 the Studio is operated from the MacBook, the way the

@@ -169,3 +169,43 @@ where the unweighted sample is off by a factor of twenty. The two-part
 model fits in under a minute (topic similarity is the dominant term
 in the any-reuse part, +1.4 log-odds per standard deviation); its
 coefficients are machinery output, not findings.
+
+## The same rehearsal on the rules' records (2026-09-02, after the assembly switch)
+
+Assembly v2 (docs/assembly-v2.md) replaced the model's 727 fragments
+with 549 records of which 83 are stories or serial parts — whole
+stories, not chapter pieces — and the text-reuse stages were rerun on
+that export the same evening (r02–r05 on the main server, about
+fifteen minutes; no corrected set yet, because the switch archived the
+human corrections and the workbench starts clean).
+
+Exact matching (82 stories of fifty words or more, 629,059 tokens):
+415 cross-issue matches at seed 6 (209 clusters, 34 with three or more
+witnesses), 35 at seed 7, 3 at seed 8; the longest is still 10 words;
+64 of the 82 stories share at least one six-word phrase with a story
+in another issue. Same-issue duplicates from shared scan regions: none
+(there were 331 before — the double-owned regions went with the old
+assembly). Planted copy: verbatim and near-verbatim plants recovered
+100% at every seed; heavy edits 95% at seed 6 (65% at 7, 40% at 8) —
+on whole stories the seed-6 net catches nearly every damaged copy.
+
+Paraphrase (25,118 passages of 50 words, step 25): no alignment at all
+at K=5, 10 or 20 with the default keep rule. The two alignments of the
+first run were publisher boilerplate between fragments the model had
+typed as stories; with real stories there is nothing to align, which
+is the honest result for ten issues of six magazines. Planted copies:
+verbatim and near-verbatim 100% recovered at full extent, heavy edits
+60% (58% of their words) at the default rule.
+
+Background: 3,321 story pairs, 2,973 across issues. 9.5% of cross-
+issue pairs share a six-word phrase (up from 1.2%: whole stories of
+7,700 words on average meet by chance far more often than 1,900-word
+fragments did), and the share runs from 0.13% in the lowest topic-
+similarity quartile to 25% in the highest — the same gradient, wider.
+The sampler check again reproduces the full-table probabilities
+exactly. The two-part model fits for seed 6 (282 matched pairs; topic
+similarity +1.7 log-odds per standard deviation, same magazine +1.4)
+and seed 7 (33 pairs); the paraphrase model is skipped for want of a
+single matched pair. All of it is machinery output on ten issues; the
+numbers change again when a corrected story set exists and when the
+corpus arrives.

@@ -15,31 +15,26 @@
   "min_len": 5,
   "alternates": 3
  },
- "stories": 287,
- "passages": 27044,
- "candidate_regions": 477086,
- "alignments": 2,
- "same_issue_alignments": 35,
- "same_issue_from_shared_regions": 23,
- "clusters": 2,
+ "stories": 82,
+ "passages": 25118,
+ "candidate_regions": 461518,
+ "alignments": 0,
+ "same_issue_alignments": 0,
+ "same_issue_from_shared_regions": 0,
+ "clusters": 0,
  "clusters_3plus_witnesses": 0,
  "length_hist": {
   "seed-9": 0,
   "10-19": 0,
-  "20-49": 2,
+  "20-49": 0,
   "50-99": 0,
   "100-499": 0,
   "500+": 0
  },
- "identity_hist": {
-  "60-69%": 1,
-  "70-79%": 1
- },
- "by_source": {
-  "embedding+exact": 2
- },
- "longest_alignment": 24,
- "stories_with_paraphrase": 4,
- "seconds_total": 142.1,
- "generated": "2026-08-31 02:48"
+ "identity_hist": {},
+ "by_source": {},
+ "longest_alignment": 0,
+ "stories_with_paraphrase": 0,
+ "seconds_total": 45.0,
+ "generated": "2026-09-03 00:44"
 }

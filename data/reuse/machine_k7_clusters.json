@@ -1,172 +1,45 @@
 [
  {
-  "witnesses": 8,
-  "witnesses_collapsed": 8,
-  "issues": 2,
-  "occurrences": 10,
-  "max_len": 7,
-  "representative": {
-   "story_id": "ws_1937_02_a062",
-   "tok": [
-    88,
-    95
-   ],
-   "text": "79 Seventh Avenue, New York, N. Y"
-  },
-  "members": [
-   {
-    "story_id": "ws_1937_02_a062",
-    "issue": "ws_1937_02",
-    "tok": [
-     88,
-     95
-    ],
-    "len": 7,
-    "text": "79 Seventh Avenue, New York, N. Y"
-   },
-   {
-    "story_id": "www_1936_02_a098",
-    "issue": "www_1936_02",
-    "tok": [
-     114,
-     121
-    ],
-    "len": 7,
-    "text": "79 Seventh Avenue, New York, N. Y"
-   },
-   {
-    "story_id": "www_1936_02_a105",
-    "issue": "www_1936_02",
-    "tok": [
-     22,
-     29
-    ],
-    "len": 7,
-    "text": "79 Seventh Avenue, New York, N. Y"
-   },
-   {
-    "story_id": "ws_1937_02_a080",
-    "issue": "ws_1937_02",
-    "tok": [
-     51,
-     58
-    ],
-    "len": 7,
-    "text": "79 Seventh Avenue, New York, N. Y"
-   },
-   {
-    "story_id": "ws_1937_02_a080",
-    "issue": "ws_1937_02",
-    "tok": [
-     894,
-     901
-    ],
-    "len": 7,
-    "text": "79 Seventh Avenue, New York, N. Y"
-   },
-   {
-    "story_id": "ws_1937_02_a081",
-    "issue": "ws_1937_02",
-    "tok": [
-     234,
-     241
-    ],
-    "len": 7,
-    "text": "79 Seventh Avenue, New York, N. Y"
-   },
-   {
-    "story_id": "ws_1937_02_a088",
-    "issue": "ws_1937_02",
-    "tok": [
-     18,
-     25
-    ],
-    "len": 7,
-    "text": "79 Seventh Avenue, New York, N. Y"
-   },
-   {
-    "story_id": "ws_1937_02_a094",
-    "issue": "ws_1937_02",
-    "tok": [
-     99,
-     106
-    ],
-    "len": 7,
-    "text": "79 Seventh Avenue, New York, N. Y"
-   },
-   {
-    "story_id": "ws_1937_02_a094",
-    "issue": "ws_1937_02",
-    "tok": [
-     799,
-     806
-    ],
-    "len": 7,
-    "text": "79 Seventh Avenue, New York, N. Y"
-   },
-   {
-    "story_id": "ws_1937_02_a100",
-    "issue": "ws_1937_02",
-    "tok": [
-     254,
-     261
-    ],
-    "len": 7,
-    "text": "79 Seventh Avenue, New York, N. Y"
-   }
-  ]
- },
- {
-  "witnesses": 4,
+  "witnesses": 3,
   "witnesses_collapsed": 3,
   "issues": 3,
-  "occurrences": 4,
+  "occurrences": 3,
   "max_len": 8,
   "representative": {
-   "story_id": "wt_1925_11_a022",
+   "story_id": "wt_1925_11_a023",
    "tok": [
-    3688,
-    3696
+    3674,
+    3682
    ],
    "text": "the door at the end of the hall"
   },
   "members": [
    {
-    "story_id": "wt_1925_11_a022",
+    "story_id": "wt_1925_11_a023",
     "issue": "wt_1925_11",
     "tok": [
-     3688,
-     3696
+     3674,
+     3682
     ],
     "len": 8,
     "text": "the door at the end of the hall"
    },
    {
-    "story_id": "td_1932_02_a001",
+    "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     30977,
-     30985
+     4480,
+     4488
     ],
     "len": 8,
     "text": "the door at the end of the hall"
    },
    {
-    "story_id": "td_1932_02_a006",
-    "issue": "td_1932_02",
-    "tok": [
-     4528,
-     4536
-    ],
-    "len": 8,
-    "text": "the door at the end of the hall"
-   },
-   {
-    "story_id": "td_1948_12_a054",
+    "story_id": "td_1948_12_a027",
     "issue": "td_1948_12",
     "tok": [
-     1835,
-     1842
+     1684,
+     1691
     ],
     "len": 7,
     "text": "door at the end of the hall"
@@ -174,254 +47,46 @@
   ]
  },
  {
-  "witnesses": 4,
-  "witnesses_collapsed": 3,
-  "issues": 2,
-  "occurrences": 5,
-  "max_len": 7,
-  "representative": {
-   "story_id": "ast_1930_01_a035",
-   "tok": [
-    6486,
-    6493
-   ],
-   "text": "at the other end of the wire"
-  },
-  "members": [
-   {
-    "story_id": "ast_1930_01_a035",
-    "issue": "ast_1930_01",
-    "tok": [
-     6486,
-     6493
-    ],
-    "len": 7,
-    "text": "at the other end of the wire"
-   },
-   {
-    "story_id": "td_1932_02_a001",
-    "issue": "td_1932_02",
-    "tok": [
-     48753,
-     48760
-    ],
-    "len": 7,
-    "text": "at the other end of the wire"
-   },
-   {
-    "story_id": "td_1932_02_a010",
-    "issue": "td_1932_02",
-    "tok": [
-     4256,
-     4263
-    ],
-    "len": 7,
-    "text": "at the other end of the wire"
-   },
-   {
-    "story_id": "ast_1930_01_a040",
-    "issue": "ast_1930_01",
-    "tok": [
-     8093,
-     8100
-    ],
-    "len": 7,
-    "text": "at the other end of the wire"
-   },
-   {
-    "story_id": "ast_1930_01_a040",
-    "issue": "ast_1930_01",
-    "tok": [
-     8404,
-     8411
-    ],
-    "len": 7,
-    "text": "at the other end of the wire"
-   }
-  ]
- },
- {
-  "witnesses": 3,
-  "witnesses_collapsed": 2,
-  "issues": 2,
-  "occurrences": 3,
-  "max_len": 7,
-  "representative": {
-   "story_id": "wt_1925_11_a027",
-   "tok": [
-    427,
-    434
-   ],
-   "text": "Try as he would, he could not"
-  },
-  "members": [
-   {
-    "story_id": "wt_1925_11_a027",
-    "issue": "wt_1925_11",
-    "tok": [
-     427,
-     434
-    ],
-    "len": 7,
-    "text": "Try as he would, he could not"
-   },
-   {
-    "story_id": "td_1932_02_a001",
-    "issue": "td_1932_02",
-    "tok": [
-     23635,
-     23642
-    ],
-    "len": 7,
-    "text": "try as he would he could not"
-   },
-   {
-    "story_id": "td_1932_02_a007",
-    "issue": "td_1932_02",
-    "tok": [
-     3054,
-     3061
-    ],
-    "len": 7,
-    "text": "try as he would he could not"
-   }
-  ]
- },
- {
-  "witnesses": 3,
-  "witnesses_collapsed": 2,
-  "issues": 2,
-  "occurrences": 3,
-  "max_len": 7,
-  "representative": {
-   "story_id": "wt_1925_11_a027",
-   "tok": [
-    12173,
-    12180
-   ],
-   "text": "on the back of a chair with"
-  },
-  "members": [
-   {
-    "story_id": "wt_1925_11_a027",
-    "issue": "wt_1925_11",
-    "tok": [
-     12173,
-     12180
-    ],
-    "len": 7,
-    "text": "on the back of a chair with"
-   },
-   {
-    "story_id": "td_1932_02_a001",
-    "issue": "td_1932_02",
-    "tok": [
-     35064,
-     35071
-    ],
-    "len": 7,
-    "text": "on the back of a chair with"
-   },
-   {
-    "story_id": "td_1932_02_a006",
-    "issue": "td_1932_02",
-    "tok": [
-     8615,
-     8622
-    ],
-    "len": 7,
-    "text": "on the back of a chair with"
-   }
-  ]
- },
- {
-  "witnesses": 3,
-  "witnesses_collapsed": 2,
-  "issues": 2,
-  "occurrences": 3,
-  "max_len": 7,
-  "representative": {
-   "story_id": "wt_1934_05_a014",
-   "tok": [
-    620,
-    627
-   ],
-   "text": "he had opened his eyes to find"
-  },
-  "members": [
-   {
-    "story_id": "wt_1934_05_a014",
-    "issue": "wt_1934_05",
-    "tok": [
-     620,
-     627
-    ],
-    "len": 7,
-    "text": "he had opened his eyes to find"
-   },
-   {
-    "story_id": "td_1932_02_a001",
-    "issue": "td_1932_02",
-    "tok": [
-     37005,
-     37012
-    ],
-    "len": 7,
-    "text": "he had opened his eyes to find"
-   },
-   {
-    "story_id": "td_1932_02_a005",
-    "issue": "td_1932_02",
-    "tok": [
-     332,
-     339
-    ],
-    "len": 7,
-    "text": "he had opened his eyes to find"
-   }
-  ]
- },
- {
   "witnesses": 3,
   "witnesses_collapsed": 3,
   "issues": 3,
   "occurrences": 3,
   "max_len": 7,
   "representative": {
-   "story_id": "wt_1934_05_a029",
+   "story_id": "wt_1934_05_a014",
    "tok": [
-    2326,
-    2333
+    2319,
+    2326
    ],
    "text": "a little to one side of the"
   },
   "members": [
    {
-    "story_id": "wt_1934_05_a029",
+    "story_id": "wt_1934_05_a014",
     "issue": "wt_1934_05",
     "tok": [
-     2326,
-     2333
+     2319,
+     2326
     ],
     "len": 7,
     "text": "a little to one side of the"
    },
    {
-    "story_id": "ast_1930_01_a020",
+    "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     2563,
-     2570
+     11979,
+     11986
     ],
     "len": 7,
     "text": "a little to one side of the"
    },
    {
-    "story_id": "td_1932_02_a001",
+    "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     13529,
-     13536
+     14663,
+     14670
     ],
     "len": 7,
     "text": "A little to one side of the"
@@ -430,189 +95,58 @@
  },
  {
   "witnesses": 3,
-  "witnesses_collapsed": 2,
+  "witnesses_collapsed": 3,
   "issues": 2,
-  "occurrences": 3,
+  "occurrences": 4,
   "max_len": 7,
   "representative": {
-   "story_id": "ast_1930_03_a004",
+   "story_id": "ast_1930_01_a020",
    "tok": [
-    1137,
-    1144
+    7480,
+    7487
    ],
-   "text": "On the other side of the room"
+   "text": "at the other end of the wire"
   },
   "members": [
    {
-    "story_id": "ast_1930_03_a004",
-    "issue": "ast_1930_03",
+    "story_id": "ast_1930_01_a020",
+    "issue": "ast_1930_01",
     "tok": [
-     1137,
-     1144
+     7480,
+     7487
     ],
     "len": 7,
-    "text": "On the other side of the room"
-   },
-   {
-    "story_id": "td_1932_02_a001",
-    "issue": "td_1932_02",
-    "tok": [
-     51630,
-     51637
-    ],
-    "len": 7,
-    "text": "on the other side of the room"
-   },
-   {
-    "story_id": "td_1932_02_a010",
-    "issue": "td_1932_02",
-    "tok": [
-     7133,
-     7140
-    ],
-    "len": 7,
-    "text": "on the other side of the room"
-   }
-  ]
- },
- {
-  "witnesses": 3,
-  "witnesses_collapsed": 2,
-  "issues": 2,
-  "occurrences": 3,
-  "max_len": 7,
-  "representative": {
-   "story_id": "gal_1952_04_a015",
-   "tok": [
-    2505,
-    2512
-   ],
-   "text": "a lot of energy and a lot"
-  },
-  "members": [
-   {
-    "story_id": "gal_1952_04_a015",
-    "issue": "gal_1952_04",
-    "tok": [
-     2505,
-     2512
-    ],
-    "len": 7,
-    "text": "a lot of energy and a lot"
-   },
-   {
-    "story_id": "td_1932_02_a001",
-    "issue": "td_1932_02",
-    "tok": [
-     44845,
-     44852
-    ],
-    "len": 7,
-    "text": "a lot of energy and a lot"
-   },
-   {
-    "story_id": "td_1932_02_a010",
-    "issue": "td_1932_02",
-    "tok": [
-     348,
-     355
-    ],
-    "len": 7,
-    "text": "a lot of energy and a lot"
-   }
-  ]
- },
- {
-  "witnesses": 3,
-  "witnesses_collapsed": 2,
-  "issues": 2,
-  "occurrences": 3,
-  "max_len": 7,
-  "representative": {
-   "story_id": "td_1932_02_a001",
-   "tok": [
-    31930,
-    31937
-   ],
-   "text": "That is why I want you to"
-  },
-  "members": [
-   {
-    "story_id": "td_1932_02_a001",
-    "issue": "td_1932_02",
-    "tok": [
-     31930,
-     31937
-    ],
-    "len": 7,
-    "text": "That is why I want you to"
-   },
-   {
-    "story_id": "ws_1937_02_a044",
-    "issue": "ws_1937_02",
-    "tok": [
-     5633,
-     5640
-    ],
-    "len": 7,
-    "text": "That is why I want you to"
-   },
-   {
-    "story_id": "td_1932_02_a006",
-    "issue": "td_1932_02",
-    "tok": [
-     5481,
-     5488
-    ],
-    "len": 7,
-    "text": "That is why I want you to"
-   }
-  ]
- },
- {
-  "witnesses": 3,
-  "witnesses_collapsed": 2,
-  "issues": 2,
-  "occurrences": 3,
-  "max_len": 7,
-  "representative": {
-   "story_id": "td_1932_02_a001",
-   "tok": [
-    56789,
-    56796
-   ],
-   "text": "on the other side of the street"
-  },
-  "members": [
-   {
-    "story_id": "td_1932_02_a001",
-    "issue": "td_1932_02",
-    "tok": [
-     56789,
-     56796
-    ],
-    "len": 7,
-    "text": "on the other side of the street"
-   },
-   {
-    "story_id": "ws_1937_02_a070",
-    "issue": "ws_1937_02",
-    "tok": [
-     1795,
-     1802
-    ],
-    "len": 7,
-    "text": "on the other side of the street"
+    "text": "at the other end of the wire"
    },
    {
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     2074,
-     2081
+     4837,
+     4844
     ],
     "len": 7,
-    "text": "on the other side of the street"
+    "text": "at the other end of the wire"
+   },
+   {
+    "story_id": "ast_1930_01_a022",
+    "issue": "ast_1930_01",
+    "tok": [
+     3464,
+     3471
+    ],
+    "len": 7,
+    "text": "at the other end of the wire"
+   },
+   {
+    "story_id": "ast_1930_01_a022",
+    "issue": "ast_1930_01",
+    "tok": [
+     3775,
+     3782
+    ],
+    "len": 7,
+    "text": "at the other end of the wire"
    }
   ]
  },
@@ -623,30 +157,30 @@
   "occurrences": 2,
   "max_len": 10,
   "representative": {
-   "story_id": "ast_1930_01_a028",
+   "story_id": "ast_1930_01_a019",
    "tok": [
-    1150,
-    1160
+    9825,
+    9835
    ],
    "text": "no more than a minute or two had passed since"
   },
   "members": [
    {
-    "story_id": "ast_1930_01_a028",
+    "story_id": "ast_1930_01_a019",
     "issue": "ast_1930_01",
     "tok": [
-     1150,
-     1160
+     9825,
+     9835
     ],
     "len": 10,
     "text": "no more than a minute or two had passed since"
    },
    {
-    "story_id": "ast_1930_03_a002",
+    "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     21739,
-     21749
+     21554,
+     21564
     ],
     "len": 10,
     "text": "No more than a minute or two had passed since"
@@ -660,7 +194,7 @@
   "occurrences": 2,
   "max_len": 8,
   "representative": {
-   "story_id": "ast_1930_01_a022",
+   "story_id": "ast_1930_01_a017",
    "tok": [
     35,
     43
@@ -669,7 +203,7 @@
   },
   "members": [
    {
-    "story_id": "ast_1930_01_a022",
+    "story_id": "ast_1930_01_a017",
     "issue": "ast_1930_01",
     "tok": [
      35,
@@ -679,11 +213,11 @@
     "text": "Operative Carnes of the United States Secret Service"
    },
    {
-    "story_id": "ast_1930_03_a001",
+    "story_id": "ast_1930_03_a014",
     "issue": "ast_1930_03",
     "tok": [
-     372,
-     380
+     290,
+     298
     ],
     "len": 8,
     "text": "Operative Carnes of the United States Secret Service"
@@ -695,46 +229,9 @@
   "witnesses_collapsed": 2,
   "issues": 2,
   "occurrences": 2,
-  "max_len": 8,
-  "representative": {
-   "story_id": "ast_1930_01_a103",
-   "tok": [
-    154,
-    162
-   ],
-   "text": "it won't do you a bit of good"
-  },
-  "members": [
-   {
-    "story_id": "ast_1930_01_a103",
-    "issue": "ast_1930_01",
-    "tok": [
-     154,
-     162
-    ],
-    "len": 8,
-    "text": "it won't do you a bit of good"
-   },
-   {
-    "story_id": "gal_1952_03_a004",
-    "issue": "gal_1952_03",
-    "tok": [
-     1916,
-     1924
-    ],
-    "len": 8,
-    "text": "It won't do you a bit of good"
-   }
-  ]
- },
- {
-  "witnesses": 2,
-  "witnesses_collapsed": 2,
-  "issues": 2,
-  "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "wt_1925_11_a007",
+   "story_id": "wt_1925_11_a015",
    "tok": [
     938,
     945
@@ -743,7 +240,7 @@
   },
   "members": [
    {
-    "story_id": "wt_1925_11_a007",
+    "story_id": "wt_1925_11_a015",
     "issue": "wt_1925_11",
     "tok": [
      938,
@@ -753,11 +250,11 @@
     "text": "was at a loss to account for"
    },
    {
-    "story_id": "ws_1937_02_a069",
+    "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     1510,
-     1517
+     6685,
+     6692
     ],
     "len": 7,
     "text": "was at a loss to account for"
@@ -773,8 +270,45 @@
   "representative": {
    "story_id": "wt_1925_11_a027",
    "tok": [
-    8239,
-    8246
+    1319,
+    1326
+   ],
+   "text": "Try as he would, he could not"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     1319,
+     1326
+    ],
+    "len": 7,
+    "text": "Try as he would, he could not"
+   },
+   {
+    "story_id": "td_1932_02_a014",
+    "issue": "td_1932_02",
+    "tok": [
+     2874,
+     2881
+    ],
+    "len": 7,
+    "text": "try as he would he could not"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    9135,
+    9142
    ],
    "text": "You have been very good to me"
   },
@@ -783,18 +317,18 @@
     "story_id": "wt_1925_11_a027",
     "issue": "wt_1925_11",
     "tok": [
-     8239,
-     8246
+     9135,
+     9142
     ],
     "len": 7,
     "text": "You have been very good to me"
    },
    {
-    "story_id": "td_1932_02_a001",
+    "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     12131,
-     12138
+     13265,
+     13272
     ],
     "len": 7,
     "text": "You have been very good to me"
@@ -810,8 +344,8 @@
   "representative": {
    "story_id": "wt_1925_11_a027",
    "tok": [
-    10945,
-    10952
+    11835,
+    11842
    ],
    "text": "it. It was at this point that"
   },
@@ -820,18 +354,18 @@
     "story_id": "wt_1925_11_a027",
     "issue": "wt_1925_11",
     "tok": [
-     10945,
-     10952
+     11835,
+     11842
     ],
     "len": 7,
     "text": "it. It was at this point that"
    },
    {
-    "story_id": "ws_1937_02_a060",
+    "story_id": "ws_1937_02_a046",
     "issue": "ws_1937_02",
     "tok": [
-     1406,
-     1413
+     4399,
+     4406
     ],
     "len": 7,
     "text": "it. It was at this point that"
@@ -845,30 +379,178 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "wt_1934_05_a015",
+   "story_id": "wt_1925_11_a027",
    "tok": [
-    593,
-    600
+    13064,
+    13071
+   ],
+   "text": "on the back of a chair with"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     13064,
+     13071
+    ],
+    "len": 7,
+    "text": "on the back of a chair with"
+   },
+   {
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
+    "tok": [
+     8568,
+     8575
+    ],
+    "len": 7,
+    "text": "on the back of a chair with"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a029",
+   "tok": [
+    2780,
+    2787
+   ],
+   "text": "If I can get there in time"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a029",
+    "issue": "wt_1925_11",
+    "tok": [
+     2780,
+     2787
+    ],
+    "len": 7,
+    "text": "If I can get there in time"
+   },
+   {
+    "story_id": "www_1936_02_a055",
+    "issue": "www_1936_02",
+    "tok": [
+     10959,
+     10966
+    ],
+    "len": 7,
+    "text": "If I can get there in time"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a029",
+   "tok": [
+    3453,
+    3460
+   ],
+   "text": "Every moment he expected to feel the"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a029",
+    "issue": "wt_1925_11",
+    "tok": [
+     3453,
+     3460
+    ],
+    "len": 7,
+    "text": "Every moment he expected to feel the"
+   },
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     2801,
+     2808
+    ],
+    "len": 7,
+    "text": "Every moment he expected to feel the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1934_05_a007",
+   "tok": [
+    6396,
+    6403
+   ],
+   "text": "he had opened his eyes to find"
+  },
+  "members": [
+   {
+    "story_id": "wt_1934_05_a007",
+    "issue": "wt_1934_05",
+    "tok": [
+     6396,
+     6403
+    ],
+    "len": 7,
+    "text": "he had opened his eyes to find"
+   },
+   {
+    "story_id": "td_1932_02_a016",
+    "issue": "td_1932_02",
+    "tok": [
+     281,
+     288
+    ],
+    "len": 7,
+    "text": "he had opened his eyes to find"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1934_05_a007",
+   "tok": [
+    7634,
+    7641
    ],
    "text": "For the barest fraction of a second"
   },
   "members": [
    {
-    "story_id": "wt_1934_05_a015",
+    "story_id": "wt_1934_05_a007",
     "issue": "wt_1934_05",
     "tok": [
-     593,
-     600
+     7634,
+     7641
     ],
     "len": 7,
     "text": "For the barest fraction of a second"
    },
    {
-    "story_id": "td_1932_02_a001",
+    "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     17103,
-     17110
+     18509,
+     18516
     ],
     "len": 7,
     "text": "for the barest fraction of a second"
@@ -882,30 +564,30 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "wt_1934_05_a022",
+   "story_id": "wt_1934_05_a009",
    "tok": [
-    2844,
-    2851
+    9160,
+    9167
    ],
    "text": "table in the center of the room"
   },
   "members": [
    {
-    "story_id": "wt_1934_05_a022",
+    "story_id": "wt_1934_05_a009",
     "issue": "wt_1934_05",
     "tok": [
-     2844,
-     2851
+     9160,
+     9167
     ],
     "len": 7,
     "text": "table in the center of the room"
    },
    {
-    "story_id": "ast_1930_03_a003",
+    "story_id": "ast_1930_03_a018",
     "issue": "ast_1930_03",
     "tok": [
-     7799,
-     7806
+     8351,
+     8358
     ],
     "len": 7,
     "text": "table in the center of the room"
@@ -919,30 +601,30 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "wt_1934_05_a030",
+   "story_id": "wt_1934_05_a015",
    "tok": [
-    3180,
-    3187
+    3179,
+    3186
    ],
    "text": "The next thing I knew I was"
   },
   "members": [
    {
-    "story_id": "wt_1934_05_a030",
+    "story_id": "wt_1934_05_a015",
     "issue": "wt_1934_05",
     "tok": [
-     3180,
-     3187
+     3179,
+     3186
     ],
     "len": 7,
     "text": "The next thing I knew I was"
    },
    {
-    "story_id": "ast_1930_01_a035",
+    "story_id": "ast_1930_01_a020",
     "issue": "ast_1930_01",
     "tok": [
-     3690,
-     3697
+     4685,
+     4692
     ],
     "len": 7,
     "text": "The next thing I knew I was"
@@ -956,67 +638,30 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "ast_1930_01_a007",
+   "story_id": "ast_1930_01_a016",
    "tok": [
-    287,
-    294
-   ],
-   "text": "at the Post Office at New York"
-  },
-  "members": [
-   {
-    "story_id": "ast_1930_01_a007",
-    "issue": "ast_1930_01",
-    "tok": [
-     287,
-     294
-    ],
-    "len": 7,
-    "text": "at the Post Office at New York"
-   },
-   {
-    "story_id": "www_1936_02_a020",
-    "issue": "www_1936_02",
-    "tok": [
-     66,
-     73
-    ],
-    "len": 7,
-    "text": "at the Post Office at New York"
-   }
-  ]
- },
- {
-  "witnesses": 2,
-  "witnesses_collapsed": 2,
-  "issues": 2,
-  "occurrences": 2,
-  "max_len": 7,
-  "representative": {
-   "story_id": "ast_1930_01_a021",
-   "tok": [
-    29,
-    36
+    13621,
+    13628
    ],
    "text": "Once or twice he thought he heard"
   },
   "members": [
    {
-    "story_id": "ast_1930_01_a021",
+    "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     29,
-     36
+     13621,
+     13628
     ],
     "len": 7,
     "text": "Once or twice he thought he heard"
    },
    {
-    "story_id": "ast_1930_03_a003",
+    "story_id": "ast_1930_03_a018",
     "issue": "ast_1930_03",
     "tok": [
-     6068,
-     6075
+     5973,
+     5980
     ],
     "len": 7,
     "text": "once or twice he thought he heard"
@@ -1030,30 +675,30 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "ast_1930_01_a027",
+   "story_id": "ast_1930_01_a019",
    "tok": [
-    2114,
-    2121
+    7359,
+    7366
    ],
    "text": "to the base of his neck. He"
   },
   "members": [
    {
-    "story_id": "ast_1930_01_a027",
+    "story_id": "ast_1930_01_a019",
     "issue": "ast_1930_01",
     "tok": [
-     2114,
-     2121
+     7359,
+     7366
     ],
     "len": 7,
     "text": "to the base of his neck. He"
    },
    {
-    "story_id": "ast_1930_03_a002",
+    "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     5103,
-     5110
+     4930,
+     4937
     ],
     "len": 7,
     "text": "to the base of his neck. He"
@@ -1067,30 +712,30 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "ast_1930_01_a036",
+   "story_id": "ast_1930_01_a020",
    "tok": [
-    1824,
-    1831
+    9542,
+    9549
    ],
    "text": "a man he had never seen before"
   },
   "members": [
    {
-    "story_id": "ast_1930_01_a036",
+    "story_id": "ast_1930_01_a020",
     "issue": "ast_1930_01",
     "tok": [
-     1824,
-     1831
+     9542,
+     9549
     ],
     "len": 7,
     "text": "a man he had never seen before"
    },
    {
-    "story_id": "ws_1937_02_a064",
+    "story_id": "ws_1937_02_a049",
     "issue": "ws_1937_02",
     "tok": [
-     2499,
-     2506
+     2717,
+     2724
     ],
     "len": 7,
     "text": "A man he had never seen before"
@@ -1104,30 +749,30 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "ast_1930_01_a045",
+   "story_id": "ast_1930_01_a024",
    "tok": [
-    5140,
-    5147
+    5099,
+    5106
    ],
    "text": "For the first time in his life"
   },
   "members": [
    {
-    "story_id": "ast_1930_01_a045",
+    "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     5140,
-     5147
+     5099,
+     5106
     ],
     "len": 7,
     "text": "For the first time in his life"
    },
    {
-    "story_id": "ws_1937_02_a061",
+    "story_id": "ws_1937_02_a047",
     "issue": "ws_1937_02",
     "tok": [
-     3167,
-     3174
+     3154,
+     3161
     ],
     "len": 7,
     "text": "For the first time in his life"
@@ -1141,33 +786,33 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "gal_1952_03_a029",
+   "story_id": "ast_1930_03_a019",
    "tok": [
-    9,
-    16
+    1058,
+    1065
    ],
-   "text": "it's just as well that you don't"
+   "text": "On the other side of the room"
   },
   "members": [
    {
-    "story_id": "gal_1952_03_a029",
-    "issue": "gal_1952_03",
+    "story_id": "ast_1930_03_a019",
+    "issue": "ast_1930_03",
     "tok": [
-     9,
-     16
+     1058,
+     1065
     ],
     "len": 7,
-    "text": "it's just as well that you don't"
+    "text": "On the other side of the room"
    },
    {
-    "story_id": "td_1948_12_a030",
-    "issue": "td_1948_12",
+    "story_id": "td_1932_02_a017",
+    "issue": "td_1932_02",
     "tok": [
-     449,
-     456
+     7714,
+     7721
     ],
     "len": 7,
-    "text": "It's just as well that you don't"
+    "text": "on the other side of the room"
    }
   ]
  },
@@ -1178,30 +823,30 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "gal_1952_03_a034",
+   "story_id": "gal_1952_03_a020",
    "tok": [
-    6100,
-    6107
+    6088,
+    6095
    ],
    "text": "The hand is quicker than the eye"
   },
   "members": [
    {
-    "story_id": "gal_1952_03_a034",
+    "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     6100,
-     6107
+     6088,
+     6095
     ],
     "len": 7,
     "text": "The hand is quicker than the eye"
    },
    {
-    "story_id": "www_1936_02_a086",
+    "story_id": "www_1936_02_a053",
     "issue": "www_1936_02",
     "tok": [
-     1000,
-     1007
+     984,
+     991
     ],
     "len": 7,
     "text": "the hand is quicker than the eye"
@@ -1215,33 +860,33 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "gal_1952_04_a001",
+   "story_id": "gal_1952_04_a014",
    "tok": [
-    11872,
-    11879
+    2480,
+    2487
    ],
-   "text": "what are you going to do with"
+   "text": "a lot of energy and a lot"
   },
   "members": [
    {
-    "story_id": "gal_1952_04_a001",
+    "story_id": "gal_1952_04_a014",
     "issue": "gal_1952_04",
     "tok": [
-     11872,
-     11879
+     2480,
+     2487
     ],
     "len": 7,
-    "text": "what are you going to do with"
+    "text": "a lot of energy and a lot"
    },
    {
-    "story_id": "td_1948_12_a083",
-    "issue": "td_1948_12",
+    "story_id": "td_1932_02_a017",
+    "issue": "td_1932_02",
     "tok": [
-     2023,
-     2030
+     345,
+     352
     ],
     "len": 7,
-    "text": "what are you going to do with"
+    "text": "a lot of energy and a lot"
    }
   ]
  },
@@ -1252,30 +897,30 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "gal_1952_04_a018",
+   "story_id": "gal_1952_04_a016",
    "tok": [
-    6337,
-    6344
+    6328,
+    6335
    ],
    "text": "and then he was diving through the"
   },
   "members": [
    {
-    "story_id": "gal_1952_04_a018",
+    "story_id": "gal_1952_04_a016",
     "issue": "gal_1952_04",
     "tok": [
-     6337,
-     6344
+     6328,
+     6335
     ],
     "len": 7,
     "text": "and then he was diving through the"
    },
    {
-    "story_id": "td_1948_12_a033",
+    "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     1596,
-     1603
+     14757,
+     14764
     ],
     "len": 7,
     "text": "and then he was diving through the"
@@ -1289,30 +934,141 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "td_1948_12_a030",
+   "story_id": "td_1932_02_a013",
    "tok": [
-    154,
-    161
+    3947,
+    3954
+   ],
+   "text": "with the speed of a striking snake"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     3947,
+     3954
+    ],
+    "len": 7,
+    "text": "with the speed of a striking snake"
+   },
+   {
+    "story_id": "www_1936_02_a050",
+    "issue": "www_1936_02",
+    "tok": [
+     3970,
+     3977
+    ],
+    "len": 7,
+    "text": "with the speed of a striking snake"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "td_1932_02_a015",
+   "tok": [
+    5433,
+    5440
+   ],
+   "text": "That is why I want you to"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
+    "tok": [
+     5433,
+     5440
+    ],
+    "len": 7,
+    "text": "That is why I want you to"
+   },
+   {
+    "story_id": "ws_1937_02_a044",
+    "issue": "ws_1937_02",
+    "tok": [
+     11007,
+     11014
+    ],
+    "len": 7,
+    "text": "That is why I want you to"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "td_1932_02_a021",
+   "tok": [
+    2032,
+    2039
+   ],
+   "text": "on the other side of the street"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     2032,
+     2039
+    ],
+    "len": 7,
+    "text": "on the other side of the street"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     8884,
+     8891
+    ],
+    "len": 7,
+    "text": "on the other side of the street"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "td_1948_12_a019",
+   "tok": [
+    10214,
+    10221
    ],
    "text": "sat on the edge of the bed"
   },
   "members": [
    {
-    "story_id": "td_1948_12_a030",
+    "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     154,
-     161
+     10214,
+     10221
     ],
     "len": 7,
     "text": "sat on the edge of the bed"
    },
    {
-    "story_id": "www_1936_02_a076",
+    "story_id": "www_1936_02_a050",
     "issue": "www_1936_02",
     "tok": [
-     441,
-     448
+     6467,
+     6474
     ],
     "len": 7,
     "text": "sat on the edge of the bed"
@@ -1326,30 +1082,30 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
-   "story_id": "ws_1937_02_a067",
+   "story_id": "ws_1937_02_a051",
    "tok": [
-    1524,
-    1531
+    4241,
+    4248
    ],
    "text": "he knew that he would have to"
   },
   "members": [
    {
-    "story_id": "ws_1937_02_a067",
+    "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     1524,
-     1531
+     4241,
+     4248
     ],
     "len": 7,
     "text": "he knew that he would have to"
    },
    {
-    "story_id": "www_1936_02_a069",
+    "story_id": "www_1936_02_a047",
     "issue": "www_1936_02",
     "tok": [
-     3771,
-     3778
+     10777,
+     10784
     ],
     "len": 7,
     "text": "He knew that he would have to"

@@ -24,6 +24,17 @@ other lab members' vLLM models — never free "someone else's" memory,
 never remove docker images or containers you do not own, and expect the
 disk to be tight (it has filled to 100% twice; docker holds most of it).
 
+Storage on the main server (since 2026-09-02): the root disk is 1.8 TB
+and was 96% full when two 3.6 TB disks arrived (/mnt/sda, /mnt/sdb,
+ext4, empty, root-owned). Decision: no mirror; project data goes on
+/mnt/sda/pulp, and `data/pages` and `data/thumbs` are symbolic links to
+/mnt/sda/pulp/pages and /mnt/sda/pulp/thumbs, so the pipeline and the
+site keep their paths. Everything the pipeline writes for the full
+corpus (page images, layout, text stages) belongs under /mnt/sda/pulp;
+/mnt/sdb is unassigned. Docker on the root disk held about a terabyte
+of stopped containers and unused images; pruning is done per container
+and image, never blindly (the rule below).
+
 THE BACKUP SERVER is a Mac Studio (no GPU — website only, no pipeline).
 Setup and switchover: `docs/backup-server.md` and
 `scripts/backup_server_setup.sh` / `scripts/serve_backup.sh`.
@@ -65,9 +76,10 @@ what broke the workbench once (see the journal, 2026-08-22).
 
 ## Public access — the tunnel
 
-A Cloudflare tunnel named `cihd-site` runs on the main server in the
-tmux session `tunnel` and carries BOTH `causal.digihumeng.org` and
-`pulp.digihumeng.org` (to 127.0.0.1:8092). Two hard rules. Never restart
+A Cloudflare tunnel named `cihd-site` runs on the main server in a
+tmux session (`tunnel`; after the September 2026 reboot it was started
+as `tunnel2` — check `tmux ls`) and carries BOTH `causal.digihumeng.org`
+and `pulp.digihumeng.org` (to 127.0.0.1:8092). Two hard rules. Never restart
 it by sending Ctrl-C into the tmux session — the session is
 command-form, Ctrl-C kills the whole session and takes BOTH sites down
 (public error 1033). Restart is: `tmux kill-session -t tunnel` then
@@ -138,13 +150,20 @@ The standard deploy, after editing `webapp/app.py` (bump `APP_VERSION`):
       rtx update pulp_fiction_corpus
     Then restart and verify (Mac):
       ssh rtx6000 'bash -s' <<'EOS'
-      for p in $(pgrep -f "webapp/app.py"); do
+      for p in $(pgrep -f "app.py --port 8092"); do
         if readlink /proc/$p/exe 2>/dev/null | grep -q python; then kill $p; fi
       done
-      sleep 6
-      pgrep -af "webapp/app.py" | grep -v "while true" || echo "SITE-NOT-RUNNING"
+      sleep 8
+      pgrep -af "app.py --port 8092" | grep -v "while true" || echo "SITE-NOT-RUNNING"
       curl -s https://pulp.digihumeng.org/ | grep -o "v[0-9][0-9.]*" | head -1
       EOS
+
+The loop (webapp/serve_pulp.sh) changes into webapp/ and runs
+`python3 app.py --port 8092`, so the python process's command line is
+`app.py --port 8092`, not `webapp/app.py` — match on that. The
+explorer database (data/explorer.sqlite) rebuilds itself when a source
+file changes; after a pull that changes explore_pages.py, `python3
+webapp/explore_pages.py --build` makes the first request fast.
 
 The printed version must match the new `APP_VERSION`.
 
