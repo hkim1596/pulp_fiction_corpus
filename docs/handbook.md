@@ -91,13 +91,14 @@ change, delete, or approve anything.
                                               fragment keys, unsorted,
                                               furniture, roles, and every
                                               box with its owner
-    /api/<token>/index                        what the explorer index holds
-                                              and every result file
+    /api/<token>/index                        what the explorer database
+                                              holds and every result file
     /api/<token>/story/<id>  /pair/<a>/<b>    the same JSON the explorer's
     /api/<token>/author/<slug> /issue/<id>    raw pages show (v0.10.0):
     /api/<token>/magazine/<slug>              export record, live article,
     /api/<token>/authors /magazines           matches, alignments, pair
-    /api/<token>/stories /pairs               row, annotation events, lists
+    /api/<token>/stories /pairs               row, annotation events; the
+                                              lists take ?page=N&limit=M
     /api/<token>/locate/<story>?text=<words>  where a passage sits in the
                                               article now: region key,
                                               page, surrounding words
@@ -221,6 +222,24 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     pages → data/articles/<id>/articles.json + index.
                     --force re-assembles and archives that issue's
                     human annotations to .bak first — use with care.
+    s08_assemble_rules   assembly v2, the rules engine (2026-09-02):
+                    contents page, folios, running heads, display title
+                    with by-line, chapter heads, teaser, fillers,
+                    "continued from" notices → data/assembly_v2/rules/
+                    <id>/articles.json (+ analysis.json: what the rules
+                    saw on every page) and .../rules_on_model/. Never
+                    touches data/articles. Seconds per issue.
+    s09_assembly_eval    the assembly harness: every candidate (model,
+                    rules, rules-on-model) against the human-verified
+                    records, the contents page, and structural checks
+                    → data/assembly_v2/eval.json; the /assembly page of
+                    the site shows it. --yardstick <archive> replays the
+                    annotations over an archived assembly after a switch.
+    scripts/switch_assembly.py   makes a v2 candidate the live assembly,
+                    moving the old assembly and the annotation logs to
+                    data/assembly_archive/<stamp>/ (nothing deleted;
+                    README.txt says how to undo). Run r00 again after.
+                    docs/assembly-v2.md has the rules and the results.
 
 ## The text-reuse pipeline (the r-series) and the reuse pages
 
@@ -321,24 +340,70 @@ Each file has `--selftest`. Outputs are small JSON and travel with the
 repository (data/reuse is the one data folder git tracks); the site on
 the Studio gets them by `git pull`.
 
-The explorer (webapp/explore_pages.py, v0.10.0) is the service side
-of the site: `/overview` (charts: author reuse network, magazine grid,
-time axis, census, background curve, progress), lists (`/authors`,
-`/magazines`, `/issues`, `/stories`, `/pairs`), entity pages
-(`/author/<key>`, `/magazine/<slug>`, `/issue/<id>` with provenance
-from the Internet Archive item record, `/story/<id>`, `/pair/<a>/<b>`),
-and the raw layer (`/raw/story/<id>`, `/raw/pair/<a>/<b>`,
-`/raw/author/<slug>`, `/raw/issue/<id>`, `/raw/magazine/<slug>`,
-`/raw/index`, `/raw/file?path=<under data/>`; add `.json` for the file
-itself). It keeps one in-memory index built from the export, the reuse
-outputs, the pair table, the annotation logs and the archive metadata,
-rebuilt when any of those files changes. The data door serves the same
-records (`/api/<token>/story/<id>` and the other entity paths, plus
-`/api/<token>/index`), so an automated reader can read everything the
-pages show. `/method` quotes the protocol verbatim step by step
+The explorer (webapp/explore_pages.py, v0.11.0) is the service side
+of the site: `/overview` (sliceable by decade, genre or magazine —
+`?decade=1930&genre=weird&mag=weird-tales` — with stories per year by
+genre, the share of story pairs sharing text by decade and genre by
+genre, the author reuse ring, the magazine grid, the time axis, the
+census, the background curve, and what the explorer covers), lists
+(`/authors`, `/magazines`, `/issues`, `/stories`, `/pairs`, one hundred
+rows a page with `?page=N`), entity pages (`/author/<key>`,
+`/magazine/<slug>`, `/issue/<id>` with provenance from the Internet
+Archive item record and the state of every process step, `/story/<id>`
+with the teaser and the date with its source, `/pair/<a>/<b>`), and the
+raw layer (`/raw/story/<id>`, `/raw/pair/<a>/<b>`, `/raw/author/<slug>`,
+`/raw/issue/<id>`, `/raw/magazine/<slug>`, `/raw/index`,
+`/raw/file?path=<under data/>`; add `.json` for the file itself; the
+raw lists take `?page=N&limit=M`, up to 5000 a page, and carry a `next`
+field).
+
+Built for the whole corpus: the pages read from one SQLite file,
+`data/explorer.sqlite` (tables issues, records, authors, author_links,
+magazines, mag_links, issue_links, matches, aligns, events, pairs,
+meta — the data dictionary on `/method` describes them), which the
+module rebuilds from the export, the reuse outputs, the pair table, the
+annotation logs, the archive metadata and the stage folders whenever
+one of them changes (checked every 20 s; the first build blocks the
+request, later rebuilds happen in whichever request notices while
+others keep reading the old file). By hand: `python3
+webapp/explore_pages.py --build`; at corpus scale set
+`PULP_EXPLORER_STATIC=1` in the site's environment so the file is only
+ever built by hand. The database is derived data: delete it and it is
+rebuilt; it is not in git. Author names are shown in title case
+(`display_author`; the printed forms are in fine print on the author's
+page and in the raw record). Only COMPLETE issues — assembled into
+records by the machine (an export proves an assembly) — appear on the
+explorer side; the workroom's `/reuse/progress` shows every selected
+issue at every step (archive record, page images, layout OCR, text
+stages, assembly, export, annotation, verification) against the
+archive's 27,973 items. Drawings of individual entities are made only
+for slices small enough to read (80 authors, 40 magazines, 120 issues);
+above that a table of the top entries stands in. The data door serves
+the same records (`/api/<token>/story/<id>` and the other entity paths,
+plus `/api/<token>/index`), so an automated reader can read everything
+the pages show. `/method` quotes the protocol verbatim step by step
 (docs/method-reuse.md) with the implementation after each step, and
 generates the parameter table, data dictionary and file list from the
 result files.
+
+The workroom's `/assembly` page (v0.11.1) shows the assembly harness's
+output — the comparison table and, per issue and candidate, every
+contents-page piece and every human-corrected record with its score —
+from data/assembly_v2/eval.json. The site reads the machine's own
+region roles from a v2 assembly (title, subtitle, author, teaser), so a
+v2 record opens on the workbench with those sections filled; human
+role actions still override them. Raw files under data/assembly_v2 are
+reachable through /raw/file.
+
+Feedback (v0.11.0): the box at the foot of every page is prefilled with
+the member's name, and sending keeps the reader on the page. On
+`/feedback` an admin sees every entry with edit and done/reopen
+controls; a member sees and can edit only their own entries; every edit
+keeps the earlier text in the entry's `history`. Marking a by-line
+segment as author strips a leading "By"; the teaser role keeps a
+story's printed blurb as metadata (never story text) and r00 exports
+it with the record, together with `date` and `date_source` ("issue"
+until other evidence is recorded).
 
 The reuse pages (webapp/reuse_pages.py, v0.9.0): `/reuse` overview
 with server-drawn SVG charts (no libraries), `/reuse/clusters` with
@@ -346,8 +411,9 @@ filters, `/reuse/cluster/<set>/<kind>/<k>/<n>` with witnesses grouped
 by story and located live in the current article text ("open on
 workbench" is the article page with `?sel=<region key>`, which
 highlights that region), `/reuse/progress` with annotation progress,
-the pipeline status board and the corpus-building board. Member login
-required, like the rest of the site.
+the pipeline status board and the process board (every issue at every
+step, from explore_pages.process_board_html). Member login required,
+like the rest of the site.
 
 Two facts the first run established (details in docs/pilot-results.md
 and the journal): the machine assembly lists some scan regions under

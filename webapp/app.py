@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.10.0"
+APP_VERSION = "0.11.1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -46,6 +46,66 @@ API_TOKEN_FILE = os.environ.get(
     os.path.expanduser("~/shared/khj/.pulp_api_token"))
 ANNDIR = os.path.join(DATA, "annotations")
 FEEDBACK = os.path.join(DATA, "feedback.jsonl")
+FEEDBACK_LOCK = threading.Lock()
+
+
+def feedback_id(ts, user):
+    return hashlib.sha1(f"{ts}|{user or ''}".encode("utf-8")).hexdigest()[:12]
+
+
+def feedback_items():
+    """Every feedback entry, oldest first, each with a stable id (entries
+    written before ids existed get one derived from their time and name)."""
+    items = []
+    if os.path.exists(FEEDBACK):
+        for line in open(FEEDBACK, encoding="utf-8"):
+            try:
+                it = json.loads(line)
+            except Exception:
+                continue
+            if not it.get("id"):
+                it["id"] = hashlib.sha1(
+                    f"{it.get('ts')}|{it.get('name')}|{(it.get('comment') or '')[:40]}".encode("utf-8")
+                ).hexdigest()[:12]
+            it.setdefault("done", False)
+            it.setdefault("history", [])
+            items.append(it)
+    return items
+
+
+def feedback_owner(item, user):
+    """An entry belongs to a member when it carries their username, or, for
+    entries written before usernames were stored, their display name."""
+    if not user or user == "guest":
+        return False
+    return item.get("user") == user or (
+        not item.get("user") and item.get("name") == display_name(user))
+
+
+def feedback_update(fid, user, admin, comment=None, done=None):
+    """Edit in place with history kept; the whole file is rewritten under
+    the lock. Members may edit their own entries, admins any; only admins
+    set the done mark."""
+    with FEEDBACK_LOCK:
+        items = feedback_items()
+        hit = next((it for it in items if it["id"] == fid), None)
+        if not hit or not (admin or feedback_owner(hit, user)):
+            return False
+        ts = time.strftime("%Y-%m-%dT%H:%M:%S")
+        if comment is not None and comment != hit.get("comment"):
+            hit["history"].append({"ts": ts, "user": user, "comment": hit.get("comment", "")})
+            hit["comment"] = comment
+            hit["edited"] = ts
+        if done is not None and admin:
+            hit["done"] = bool(done)
+            hit["done_by"] = user if done else None
+            hit["done_at"] = ts if done else None
+        tmp = FEEDBACK + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            for it in items:
+                f.write(json.dumps(it, ensure_ascii=False) + "\n")
+        os.replace(tmp, FEEDBACK)
+        return True
 COOKIE_DAYS = 45
 CONTACT = "hkim1596@knu.ac.kr"
 
@@ -589,7 +649,13 @@ def effective_doc(iid):
     byid = {a["article_id"]: a for a in arts}
     user_furniture = []
     overrides = {}
+    # roles the machine assigned (assembly v2: title, subtitle, author, teaser, chapter, caption,
+    # heading); human role events replayed below override them
     roles = {}
+    for a in arts:
+        for k, role in (a.get("roles") or {}).items():
+            if role in ("title", "subtitle", "author", "teaser"):
+                roles[k] = role
     n_manual = 0
     uns = []
     for u in doc.get("unsorted", []):
@@ -599,7 +665,7 @@ def effective_doc(iid):
                 uns.append({"page": u["page"], "region_ids": [r]})
     mach_furn = []
     for u in doc.get("furniture", []):
-        segs = u.get("segments") or []
+        segs = u.get("segments") or ([u["idx"]] if u.get("idx") is not None else [])     # s07 units / s08 regions
         if u.get("page") is not None:
             for r in segs:
                 mach_furn.append({"page": u["page"], "region_ids": [r]})
@@ -740,8 +806,11 @@ def effective_doc(iid):
                 continue
             if role:
                 roles[k] = role
-                if role in ("title", "subtitle", "author"):
+                if role in ("title", "subtitle", "author", "teaser"):
                     val = " ".join(frag_text(iid, fr2, overrides).split())
+                    if role == "author":
+                        # the field holds the name; the segment keeps "By"
+                        val = re.sub(r"^\s*by[\s:.]+", "", val, flags=re.I).strip()
                     a2[role] = val or None
             else:
                 roles.pop(k, None)
@@ -776,7 +845,7 @@ def effective_doc(iid):
         # the running text
         body_frs = [fr for fr in a["fragments"]
                     if roles.get(fragkey(fr)) not in
-                    ("title", "subtitle", "author")]
+                    ("title", "subtitle", "author", "teaser")]
         a["text"] = (a["text_override"] if a["text_override"] is not None
                      else assemble_text(iid, body_frs, overrides))
         if a["verified_at"] and a["verified_at"] >= a["last_mod"]:
@@ -878,6 +947,7 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .d_del{background:#f6d7d3;text-decoration:line-through}
 .pgnav a{margin-right:10px}
 .fb{margin-top:34px;border-top:1px solid #d8cfc0;padding-top:12px;font-size:14px}
+.flash{background:#e3efe3;border:1px solid #7fae81;padding:6px 10px;margin:0 0 8px;font-size:14px}
 .fb input[type=text]{width:180px} .fb textarea{width:100%;height:60px}
 .fb input,.fb textarea,.fb button{font-family:inherit;font-size:14px;border:1px solid #b8a88e;background:#fff;padding:5px}
 .chip{font-size:11.5px;padding:1px 8px;border:1px solid;border-radius:9px;letter-spacing:.4px}
@@ -919,6 +989,9 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .secbar.secT{background:#7a3020}
 .secbar.secA{background:#2c5e2e}
 .secbar.secB{background:#1c1a17}
+.secbar.secZ{background:#8a6d1f}
+.card.rZ{border-left:6px solid #8a6d1f}
+.rolechip.z{background:#8a6d1f}
 .card.rT{border-left:6px solid #7a3020}
 .card.rA{border-left:6px solid #2c5e2e}
 .card.rB{border-left:6px solid #1c1a17}
@@ -953,7 +1026,7 @@ def esc(s):
     return html.escape(str(s), quote=True)
 
 
-def page(title, body, member=True, path="/", admin=False):
+def page(title, body, member=True, path="/", admin=False, user_name="", flash=""):
     userslink = "<a href='/users'>users</a>" if admin else ""
     nav = ("<span class='nav'>"
            "<span class='navgrp'>explore</span>"
@@ -963,15 +1036,16 @@ def page(title, body, member=True, path="/", admin=False):
            "<a href='/reuse'>reuse</a><a href='/method'>method</a>"
            "<span class='navgrp'>workroom</span>"
            "<a href='/guide'>guide</a><a href='/articles'>workbench</a>"
-           "<a href='/reuse/progress'>progress</a>"
+           "<a href='/reuse/progress'>progress</a><a href='/assembly'>assembly</a>"
            "<a href='/timing'>timing</a><a href='/activity'>activity</a>"
            f"<a href='/feedback'>feedback</a>{userslink}"
            "<a href='/logout'>log out</a></span>") if member else ""
     fb = ("<div class='fb'><form method='POST' action='/feedback'>"
           f"<input type='hidden' name='path' value='{esc(path)}'>"
-          "<div class='muted'>Leave feedback on this page — it goes to the "
-          "project log with a link back here.</div>"
-          "<p>Name <input type='text' name='name'></p>"
+          + (f"<div class='flash'>{esc(flash)}</div>" if flash else "")
+          + "<div class='muted'>Leave feedback on this page — it goes to the "
+          "project log with a link back here; you stay on this page.</div>"
+          f"<p>Name <input type='text' name='name' value='{esc(user_name)}'></p>"
           "<p><textarea name='comment' placeholder='What should change?'></textarea></p>"
           "<p><button>Send feedback</button></p></form></div>") if member else ""
     return f"""<!doctype html><html><head><meta charset='utf-8'>
@@ -1124,8 +1198,10 @@ class H(BaseHTTPRequestHandler):
         return self.user is not None
 
     def _page(self, title, body, path="/"):
-        return page(title, body, member=True, path=path,
-                    admin=is_admin(getattr(self, "user", None)))
+        u = getattr(self, "user", None)
+        return page(title, body, member=True, path=path, admin=is_admin(u),
+                    user_name=(display_name(u) if u and u != "guest" else ""),
+                    flash=getattr(self, "flash", ""))
 
     def log_message(self, fmt, *args):
         pass  # quiet; serve script logs restarts
@@ -1214,7 +1290,7 @@ class H(BaseHTTPRequestHandler):
                               "application/json")
         m = re.fullmatch(r"(index|authors|magazines|stories|pairs)", rest)
         if m:
-            text = EX.raw_json(m.group(1), None)
+            text = EX.raw_json(m.group(1), None, qs)
             return self._send(200, text, "application/json")
         m = re.fullmatch(r"(story|author|issue|magazine)/([\w\-]+)", rest)
         if m:
@@ -1238,13 +1314,13 @@ class H(BaseHTTPRequestHandler):
                                               ensure_ascii=False), "application/json")
         return self._send(404, "unknown api call", "text/plain")
 
-    def _raw(self, kind, arg, as_json):
+    def _raw(self, kind, arg, as_json, qs=None):
         if as_json:
-            text = EX.raw_json(kind, arg)
+            text = EX.raw_json(kind, arg, qs)
             if text is None:
                 return self._send(404, "no such record", "text/plain")
             return self._send(200, text, "application/json")
-        return self._send(200, EX.raw_page(kind, arg, render=self._page))
+        return self._send(200, EX.raw_page(kind, arg, render=self._page, qs=qs))
 
     def _thumb(self, iid, nn):
         """Small JPEG preview of one page scan, for the workbench page strip.
@@ -1282,6 +1358,8 @@ class H(BaseHTTPRequestHandler):
     def do_GET(self):
         path = urllib.parse.urlparse(self.path).path
         qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        self.flash = {"sent": "Thank you — your feedback is saved (see the feedback page to edit it).",
+                      "saved": "Saved."}.get(qs.get("fb", [""])[0], "")
         if path == "/healthz":
             return self._send(200, "ok", "text/plain")
         if path.startswith("/api/"):
@@ -1335,21 +1413,21 @@ class H(BaseHTTPRequestHandler):
             text = "\n\n".join(page_text(iid, stage, i) for i in range(1, n + 1)).strip()
             return self._send(200, text, "text/plain; charset=utf-8")
         if path == "/overview":
-            return self._send(200, EX.overview(render=self._page))
+            return self._send(200, EX.overview(qs, render=self._page))
         if path == "/authors":
             return self._send(200, EX.authors_page(qs, render=self._page))
         if path == "/magazines":
-            return self._send(200, EX.magazines_page(render=self._page))
+            return self._send(200, EX.magazines_page(qs, render=self._page))
         if path == "/stories":
             return self._send(200, EX.stories_page(qs, render=self._page))
         if path == "/pairs":
             return self._send(200, EX.pairs_page(qs, render=self._page))
         m = re.fullmatch(r"/author/([\w\-]+)", path)
         if m:
-            return self._send(200, EX.author_page(m.group(1), render=self._page))
+            return self._send(200, EX.author_page(m.group(1), render=self._page, qs=qs))
         m = re.fullmatch(r"/magazine/([\w\-]+)", path)
         if m:
-            return self._send(200, EX.magazine_page(m.group(1), render=self._page))
+            return self._send(200, EX.magazine_page(m.group(1), render=self._page, qs=qs))
         m = re.fullmatch(r"/story/([\w\-]+)", path)
         if m:
             return self._send(200, EX.story_page(m.group(1), render=self._page))
@@ -1364,7 +1442,7 @@ class H(BaseHTTPRequestHandler):
             return self._raw("pair", (m.group(1), m.group(2)), bool(m.group(3)))
         m = re.fullmatch(r"/raw/(index|authors|magazines|stories|pairs)(\.json)?", path)
         if m:
-            return self._raw(m.group(1), None, bool(m.group(2)))
+            return self._raw(m.group(1), None, bool(m.group(2)), qs)
         if path == "/raw/file":
             p = EX.raw_file_path(qs.get("path", [""])[0])
             if not p:
@@ -1376,6 +1454,8 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, RP.overview(render=self._page))
         if path == "/reuse/clusters":
             return self._send(200, RP.clusters_page(qs, render=self._page))
+        if path == "/assembly":
+            return self._send(200, RP.assembly_page(qs, render=self._page))
         if path == "/reuse/progress":
             return self._send(200, RP.progress_page(render=self._page))
         m = re.fullmatch(r"/reuse/cluster/(\w+)/(exact|para)/(\d+)/(\d+)", path)
@@ -1426,15 +1506,28 @@ class H(BaseHTTPRequestHandler):
                 return self._send(403, "admins only", "text/plain")
             return self.do_users_action(get)
         if path == "/feedback":
+            back = get("path")[:300] or "/"
+            if not get("comment"):
+                return self._redirect(back)
+            ts = time.strftime("%Y-%m-%dT%H:%M:%S")
             os.makedirs(DATA, exist_ok=True)
-            with open(FEEDBACK, "a", encoding="utf-8") as f:
+            with FEEDBACK_LOCK, open(FEEDBACK, "a", encoding="utf-8") as f:
                 f.write(json.dumps({
-                    "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
-                    "path": get("path")[:300],
+                    "id": feedback_id(ts, self.user),
+                    "ts": ts, "path": back,
                     "name": get("name")[:80] or display_name(self.user),
-                    "user": self.user,
+                    "user": self.user, "done": False, "history": [],
                     "comment": get("comment")[:4000]}, ensure_ascii=False) + "\n")
-            return self._redirect("/feedback")
+            sep = "&" if "?" in back else "?"
+            return self._redirect(f"{back}{sep}fb=sent")
+        if path == "/feedback/edit":
+            fid, text = get("id"), get("comment")[:4000]
+            ok = feedback_update(fid, self.user, is_admin(self.user), comment=text)
+            return self._redirect("/feedback?fb=saved" if ok else "/feedback")
+        if path == "/feedback/done":
+            if is_admin(self.user):
+                feedback_update(get("id"), self.user, True, done=(get("done") == "1"))
+            return self._redirect("/feedback?fb=saved")
         if path == "/annotate":
             if self.user == "guest":
                 return self._send(403, self._page("No", howto(
@@ -2063,7 +2156,7 @@ click first.</p></div>"""
         per_page, ids = issue_frag_map(iid, doc)
         overrides = doc.get("frag_overrides", {})
         roles = doc.get("frag_roles", {})
-        ROLE_SEC = {"title": "T", "subtitle": "T", "author": "A"}
+        ROLE_SEC = {"title": "T", "subtitle": "T", "author": "A", "teaser": "Z"}
         CHAPTER_ROLES = ("chapter_number", "chapter_title")
 
         def artopt(o):
@@ -2230,7 +2323,7 @@ click first.</p></div>"""
                      if roles.get(fragkey(fr)) not in
                      ("title", "subtitle", "author")]
         n_body = len(body_keys)
-        sec = {"T": "", "A": "", "B": ""}
+        sec = {"T": "", "A": "", "B": "", "Z": ""}
         n_manual_lbl = 0
         body_pos = 0
         for fr in art.get("fragments", []):
@@ -2274,7 +2367,9 @@ click first.</p></div>"""
                              + mini("chapter no.", act="role", frag=k,
                                     role="chapter_number")
                              + mini("chapter title", act="role", frag=k,
-                                    role="chapter_title"))
+                                    role="chapter_title")
+                             + mini("teaser", act="role", frag=k,
+                                    role="teaser"))
                 btns += (mini("not story text", act="furniture", frag=k)
                          + mini("detach", act="detach", frag=k))
                 if others:
@@ -2293,6 +2388,7 @@ click first.</p></div>"""
                              f"<button>move to</button></form>")
             rc = ("<span class='rolechip"
                   + (" t" if role in ("title", "subtitle") else "")
+                  + (" z" if role == "teaser" else "")
                   + (" c" if role in CHAPTER_ROLES else "")
                   + f"'>{esc(role.replace('_', ' '))}</span>") if role else ""
             drag = " draggable=true" if (can and in_body) else ""
@@ -2325,11 +2421,16 @@ click first.</p></div>"""
                  "'subtitle' on a body segment below</div>")
         hintA = ("<div class='sechint'>none yet — press 'author' on the "
                  "by-line segment below</div>")
+        hintZ = ("<div class='sechint'>none — press 'teaser' on the blurb "
+                 "printed on the story's first page (kept as metadata, "
+                 "not story text)</div>")
         sections = (
             "<div class='secbar secT'>TITLE &amp; SUBTITLE</div>"
             + (sec["T"] or hintT)
             + "<div class='secbar secA'>AUTHOR</div>"
             + (sec["A"] or hintA)
+            + "<div class='secbar secZ'>TEASER</div>"
+            + (sec["Z"] or hintZ)
             + f"<div class='secbar secB'>BODY TEXT · {n_body} segments in "
             f"reading order</div>"
             + "<div id='cards'>" + sec["B"] + "</div>"
@@ -2546,9 +2647,15 @@ us how to make the automatic step better.</p>
 <a href='/issues'>issues</a>, <a href='/stories'>records</a> and
 <a href='/pairs'>story pairs</a>, the <a href='/reuse'>text-reuse
 results</a>, and the <a href='/method'>method</a>; every page links one
-layer down until you reach the scan and the raw record. WORKROOM is the
-working side: the <a href='/articles'>workbench</a> where articles are
-repaired, and the progress, timing, activity and feedback pages.</p>
+layer down until you reach the scan and the raw record. The overview can
+be sliced by decade, genre or magazine, lists come a hundred rows a page,
+and only complete issues (assembled into records by the machine) appear
+on that side. WORKROOM is the working side: the
+<a href='/articles'>workbench</a> where articles are repaired, the
+<a href='/reuse/progress'>progress</a> page with every issue at every step
+of the process, and the timing, activity and feedback pages. Feedback is
+sent from any page and stays there; you can edit your own entries later,
+and the project lead marks them done.</p>
 
 <h2>The words we use</h2>
 <p>An issue is one magazine (for example Astounding, January
@@ -2685,28 +2792,55 @@ an answer that everyone else benefits from too.</p>"""
         return self._page("Timing", body, path="/timing")
 
     def feedback_page(self):
-        items = []
-        if os.path.exists(FEEDBACK):
-            for line in open(FEEDBACK, encoding="utf-8"):
-                try:
-                    items.append(json.loads(line))
-                except Exception:
-                    pass
-        rows = "".join(
-            f"<tr><td class='muted'>{esc(i['ts'])}</td>"
-            f"<td>{esc(i.get('name') or 'anonymous')}</td>"
-            f"<td><a href='{esc(i.get('path','/'))}'>{esc(i.get('path','/'))}</a></td>"
-            f"<td>{esc(i.get('comment',''))}</td></tr>"
-            for i in reversed(items))
+        admin = is_admin(self.user)
+        items = feedback_items()
+        mine = [it for it in items if feedback_owner(it, self.user)]
+        shown = items if admin else mine
+        rows = []
+        for it in reversed(shown):
+            own = admin or feedback_owner(it, self.user)
+            hist = ""
+            if it.get("history"):
+                hist = ("<details><summary class='muted'>earlier wording "
+                        f"({len(it['history'])})</summary>" + "".join(
+                            f"<div class='muted' style='font-size:12.5px;margin:4px 0'>{esc(h.get('ts', ''))} · "
+                            f"{esc(display_name(h.get('user') or '?'))}: {esc(h.get('comment', ''))}</div>"
+                            for h in it["history"]) + "</details>")
+            editor = ""
+            if own:
+                editor = (f"<details><summary class='muted'>edit</summary>"
+                          f"<form method='POST' action='/feedback/edit'>"
+                          f"<input type='hidden' name='id' value='{esc(it['id'])}'>"
+                          f"<textarea name='comment' style='width:100%;height:90px;font-family:inherit;font-size:13.5px'>"
+                          f"{esc(it.get('comment', ''))}</textarea>"
+                          f"<p><button>save</button></p></form></details>")
+            done = ""
+            if admin:
+                done = (f"<form method='POST' action='/feedback/done' class='mini'>"
+                        f"<input type='hidden' name='id' value='{esc(it['id'])}'>"
+                        f"<input type='hidden' name='done' value='{0 if it.get('done') else 1}'>"
+                        f"<button>{'reopen' if it.get('done') else 'mark done'}</button></form>")
+            elif it.get("done"):
+                done = "<span class='chip stV'>done</span>"
+            rows.append(
+                f"<tr{' style=opacity:.6' if it.get('done') else ''}><td class='muted'>{esc(it['ts'])}"
+                + (f"<br><span style='font-size:11.5px'>edited {esc(it['edited'])}</span>" if it.get("edited") else "")
+                + f"</td><td>{esc(it.get('name') or 'anonymous')}</td>"
+                f"<td><a href='{esc(it.get('path', '/'))}'>{esc(it.get('path', '/'))}</a></td>"
+                f"<td>{esc(it.get('comment', ''))}{hist}{editor}</td>"
+                f"<td>{('done' if it.get('done') else 'open') if admin else ''}{done}</td></tr>")
+        who = ("every entry, from everyone, with edit and done controls (you are an admin)" if admin
+               else "your own entries; you can edit them, and an admin can mark them done")
         body = (howto(
-            "Everything collaborators have sent through the feedback boxes, "
-            "newest first, each linked to the page it was written on. This "
-            "list drives revisions during development.")
-            + f"<h1>Feedback ({len(items)})</h1>"
-            + ("<table><tr><th>when</th><th>who</th><th>page</th>"
-               "<th>comment</th></tr>" + rows + "</table>" if items else
-               "<div class='empty'>No feedback yet. Every members page has a "
-               "feedback box at the bottom.</div>"))
+            "Feedback written into the boxes at the bottom of the pages, newest first, each "
+            f"linked to the page it was written on. You see {who}. Edits keep the earlier "
+            "wording inside the entry. This list drives revisions during development.")
+            + f"<h1>Feedback ({len(shown)}{'' if admin else ' of yours'})</h1>"
+            + (f"<p class='muted'>{sum(1 for it in items if not it.get('done'))} open, "
+               f"{sum(1 for it in items if it.get('done'))} done, {len(items)} in all.</p>" if admin else "")
+            + ("<table><tr><th>when</th><th>who</th><th>page</th><th>comment</th><th>state</th></tr>"
+               + "".join(rows) + "</table>" if rows else
+               "<div class='empty'>Nothing here yet. Every members page has a feedback box at the bottom.</div>"))
         return self._page("Feedback", body, path="/feedback")
 
 

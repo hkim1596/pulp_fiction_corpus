@@ -52,6 +52,8 @@ annotator's name; the machine's output is never overwritten.
     webapp/explore_pages.py  the explorer: overview, lists, entity pages, raw layer
     webapp/reuse_pages.py    the text-reuse pages of the site (/reuse…)
     pipeline/s01…s07         the corpus-building stages, in order
+    pipeline/s08, s09        assembly v2 (the rules engine) and the
+                             assembly harness; docs/assembly-v2.md
     pipeline/r00…r05         the text-reuse analysis stages (protocol
                              sections 3–4), rehearsed on the pilot
     scripts/                 setup, deploy helpers, backup server scripts
@@ -62,7 +64,8 @@ annotator's name; the machine's output is never overwritten.
                              pilot results, implementation plan; also
                              method-reuse.md (the protocol quoted step by
                              step with the implementation) and decisions.md,
-                             both rendered live at /method
+                             both rendered live at /method; assembly-v2.md
+                             (the rules and how the methods compare)
     METHOD.md                the method text, rendered live at /method
 
 The processed data itself (scans, text stages, articles, annotations)

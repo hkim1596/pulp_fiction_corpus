@@ -91,6 +91,39 @@ assembly (0.2's rule 7), which the reuse inventory neutralises by
 collapsing such records, but which assembly v2 must fix at the
 source.
 
+0.7 The site at corpus scale (done 2026-09-02 for the explorer,
+v0.11.0). The feedback of 2 September asked that every page be
+designed for the whole corpus — roughly 4 million pages, 2 million
+records, a million story records, 30–60 thousand author keys and a
+thousand magazines. The explorer now reads from one SQLite file
+built from the pipeline's outputs (rebuilt by hand at scale), lists
+are paged, the overview is sliced by decade, genre and magazine, and
+entity drawings are made only for readable slices. Only complete
+issues appear on that side; the workroom shows every issue at every
+step. What remains for scale: the pair table cannot be all pairs
+(the protocol's matched-plus-sampled design takes over at 1.4/4.1),
+the export becomes per-issue files rather than one JSONL, and the
+database build moves into the pipeline as its own stage.
+
+0.8 Assembly v2 (built 2026-09-02; docs/assembly-v2.md). Rules from
+the annotators' reports on the workbench — continuation stays with
+the open story record until a new by-line; the contents page as the
+issue's checklist with the printed-folio offset; the by-line test;
+a coverage check for unassigned boxes; one region, one record;
+title and author from section headers and by-lines rather than
+display lettering; chapter apparatus tagged, not cut; the teaser as
+metadata; "continued from" notices followed — built as a rules
+engine (pipeline/s08_assemble_rules.py) and scored by a harness
+(s09) against the human-corrected records and the contents pages.
+On the ten pilot issues the rules start all 108 listed pieces on
+their pages with agreeing titles (the model: 96 and 73), leave no
+region double-owned or unowned (1,785 and 1,352), and reproduce
+the one fully verified record exactly. The rules go into the corpus
+path; the human corrections are archived as the yardstick
+(scripts/switch_assembly.py) and the machine starts clean. Still to
+run: the model with the rules as constraints on the main server,
+for pages with no anchor; r00–r05 again on the new records.
+
 ## Phase 1 — corpus construction (protocol section 2)
 
 Starts at acceptance. Everything is a scaled-up version of machinery

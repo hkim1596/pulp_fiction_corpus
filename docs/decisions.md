@@ -37,3 +37,38 @@ Dropbox share carries the full context of each.
 - 2026-08-31 — Only one story was human-verified at the time of the
   first run, so the second story set is "corrected" (verified or
   modified) until the correction sprint delivers more.
+- 2026-09-02 — Feedback of 2 September (site): design for the whole
+  corpus, not the pilot ("Can this overview design hold hundreds and
+  thousands of stories, authors, magazines? Redesign it."): the explorer
+  reads from a database, lists are paged, the overview is sliced by
+  decade and genre, and drawings of individual entities are made only
+  for slices small enough to read.
+- 2026-09-02 — Story dates: "unless we have other evidence to conjecture
+  composition dates of stories, default dates are associated with issue
+  dates" — every record carries date and date_source ("issue").
+- 2026-09-02 — A complete issue is one assembled into records by the
+  machine; only complete issues appear on the explorer side; the
+  workroom progress board shows every issue at every step of the
+  process (download, layout OCR, text stages, assembly, export,
+  annotation, verification).
+- 2026-09-02 — Feedback entries: admins see and edit all and mark them
+  done; each member sees and edits only their own; edits keep history.
+  The feedback box is prefilled with the member's name and sending
+  keeps the reader on the page.
+- 2026-09-02 — Author names are shown in title case; the forms as
+  printed live in fine print on the author's page and in the raw record.
+- 2026-09-02 — The printed teaser on a story's first page is metadata,
+  never story text (teaser role on the workbench; exported by r00).
+- 2026-09-02 — Assembly v2: "Archive corrections and start clean. Keep
+  comparing human-touched correction and automated correction so
+  automation can reach the accuracy of human correction." Methods are
+  compared against the human-corrected records: "I want to see which
+  method is most accurate. Compare them."
+- 2026-09-02 — The main server's new disks (/mnt/sda, /mnt/sdb): decide
+  their use after seeing sizes; the site and tunnel go back to the main
+  server now, the Studio stays on standby with its ssh path open.
+- 2026-09-02 — Assembly: the rules engine (s08) replaces the model
+  assembly in the corpus path on the pilot's evidence (docs/assembly-
+  v2.md); the human-corrected records stay the yardstick in
+  data/assembly_archive; the model-with-rules variant is tried later
+  on the main server for pages the rules cannot anchor.

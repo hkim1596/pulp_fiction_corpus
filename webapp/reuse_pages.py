@@ -10,7 +10,7 @@ Three levels, as decided 2026-08-31:
   /reuse/cluster/<set>/<kind>/<k>/<n>   one cluster, witnesses side by side
 plus
   /reuse/progress              annotation progress, pipeline status board,
-                               corpus-building board
+                               process board (every issue at every step)
 
 The module is bound to the site's helpers with bind(globals()) from app.py,
 so it uses the same page frame, escaping, and data access.
@@ -983,8 +983,10 @@ def progress_page(render=None):
         "Three boards. Annotation progress comes live from the annotation logs: what each "
         "annotator did per day, and how the count of verified and modified stories grew. "
         "The pipeline board lists every result file the reuse pipeline has produced on this "
-        "server, with its settings and time. The corpus-building board is the frame for the "
-        "full study after protocol acceptance; today it holds the pilot's ten issues."),
+        "server, with its settings and time. The process board shows every selected issue at "
+        "every step — download, page images, layout OCR, text stages, assembly, export, "
+        "annotation, verification — against the whole archive; the explorer side counts only "
+        "the complete issues."),
         "<h1>Progress</h1>"]
     # ---- annotation
     out.append("<h2>Annotation progress</h2>")
@@ -1048,38 +1050,90 @@ def progress_page(render=None):
     # ---- pipeline board
     out.append("<h2>Pipeline status board</h2>")
     out.append(status_table(runs))
-    # ---- corpus-building board
-    out.append("<h2>Corpus-building board</h2>")
-    cfg = _G["cfg"]()
-    issues = cfg.get("issues", [])
-    n_issue = len(issues)
-    n_pages = sum(len(_G["pages_of"](i["id"])) for i in issues)
-    n_text = sum(1 for i in issues if _G["stages_of"](i["id"]))
-    n_art = sum(1 for i in issues if _G["articles_of"](i["id"]))
-    verified_issues = 0
-    verified_stories = 0
-    for i in issues:
+    # ---- the whole process, every issue at every step (explorer database)
+    out.append("<h2>The whole process</h2>")
+    EX = _G.get("EX")
+    if EX is not None:
         try:
-            doc = _G["effective_doc"](i["id"])
-        except Exception:
-            doc = None
-        if not doc:
-            continue
-        stories = [a for a in doc["articles"] if (a.get("type") or "") in ("story", "serial_part")]
-        v = sum(1 for a in stories if a.get("status") == "verified")
-        verified_stories += v
-        if stories and v == len(stories):
-            verified_issues += 1
-    archive_total = 27973
-    rows = [("archive items (protocol count, at time of collection)", archive_total, ""),
-            ("issues surveyed and selected", n_issue, "pilot development set"),
-            ("issues downloaded (page images on disk)", sum(1 for i in issues if _G["pages_of"](i["id"])), f"{n_pages:,} pages"),
-            ("issues read (OCR text present)", n_text, ""),
-            ("issues assembled into articles", n_art, ""),
-            ("stories verified by a person", verified_stories, f"{verified_issues} issue(s) verified end to end")]
-    out.append("<table><tr><th>step</th><th class='num'>count</th><th>note</th></tr>"
-               + "".join(f"<tr><td>{_esc(a)}</td><td class='num'>{b:,}</td><td class='muted'>{_esc(c)}</td></tr>" for a, b, c in rows)
-               + "</table><p class='muted'>The full-study rows (survey of the whole archive, rolling download, "
-               "reading, assembly, the stratified verification sample) fill in after protocol acceptance; the "
-               "frame is here so the same page keeps working.</p>")
+            out.append(EX.process_board_html())
+        except Exception as e:      # the board must never take the page down
+            out.append(f"<div class='empty'>Process board unavailable: {_esc(str(e))}</div>")
+    else:
+        out.append("<div class='empty'>Explorer not loaded.</div>")
     return _render(render, "Progress", "".join(out), "/reuse/progress")
+
+
+# ---------------------------------------------------------------- assembly comparison (workroom)
+
+def assembly_page(qs, render=None):
+    """The assembly harness (pipeline/s09_assembly_eval.py): every way of
+    assembling an issue into records, scored against the human-verified
+    records, the contents page, and the structural checks."""
+    D = _G["DATA"]
+    ev = None
+    p = os.path.join(D, "assembly_v2", "eval.json")
+    if os.path.exists(p):
+        try:
+            ev = json.load(open(p, encoding="utf-8"))
+        except Exception:
+            ev = None
+    out = [_howto(
+        "Assembly v2 is compared against three yardsticks: the records a person verified on the workbench "
+        "(scan regions, title, author), the contents page of each issue (every piece it lists, with the page "
+        "it starts on), and checks that need no yardstick (regions owned by two records, text owned by none, "
+        "story records that begin with a chapter head). Three candidates: the live assembly (model, s07), the "
+        "rules engine (s08), and the rules inside the printed range with the model's advertisement pages. "
+        "The rules' records are not the live records yet; the workbench still shows the live assembly."),
+        "<h1>Assembly: which method is most accurate</h1>"]
+    if not ev:
+        out.append("<div class='empty'>No harness output on this server yet: run pipeline/s08_assemble_rules.py --all "
+                   "and pipeline/s09_assembly_eval.py --all.</div>")
+        return _render(render, "Assembly", "".join(out), "/assembly")
+    out.append(f"<p class='muted'>Harness run {_esc(ev.get('generated', ''))} · "
+               f"<a href='/raw/file?path=assembly_v2/eval.json'>eval.json</a> · how to read the columns is under the table.</p>")
+    out.append(f"<pre style='font-family:Menlo,Consolas,monospace;font-size:12px;overflow-x:auto'>{_esc(ev.get('table', ''))}</pre>")
+    which = (qs.get("issue", [""]) or [""])[0]
+    variant = (qs.get("variant", ["rules"]) or ["rules"])[0]
+    issues = [r["issue"] for r in ev.get("issues", [])]
+    sel = lambda name, val, opts: f"<select name='{name}'>" + "".join(
+        f"<option value='{_esc(v)}'{' selected' if v == val else ''}>{_esc(l)}</option>" for v, l in opts) + "</select>"
+    out.append("<form method='GET' action='/assembly' class='pgjump' style='display:flex;gap:12px;align-items:center;flex-wrap:wrap'>"
+               f"<label>issue {sel('issue', which, [('', 'choose')] + [(i, i) for i in issues])}</label>"
+               f"<label>candidate {sel('variant', variant, [(v, v) for v in ev.get('variants', [])])}</label><button>show</button></form>")
+    res = next((r for r in ev.get("issues", []) if r["issue"] == which), None)
+    if res and variant in res["variants"]:
+        v = res["variants"][variant]
+        out.append(f"<h2>{_esc(which)} — {_esc(variant)} ({_esc(v.get('backend') or '')}, built {_esc(v.get('built') or '')})</h2>")
+        rows = ["<table><tr><th>contents page says</th><th>author</th><th>type</th><th class='num'>starts on scan p.</th><th>record found</th>"
+                "<th>title agrees</th><th>author agrees</th><th class='num'>pages covered</th><th class='num'>story starts inside</th><th>runs over</th></tr>"]
+        for t in v["contents"]:
+            ok = t["start_found"] and t["title_ok"] and not t["runs_over"] and not t["extra_starts_inside"]
+            rows.append(f"<tr style='{'' if ok else 'background:#fbe9e0'}'><td>{_esc(t['title'])}</td><td>{_esc(t.get('author') or '')}</td>"
+                        f"<td>{_esc(t.get('type') or '')}</td><td class='num'><a href='/issue/{_esc(which)}/p/{t['scan']}'>{t['scan']}</a></td>"
+                        f"<td>{_esc(t.get('record_title') or ('—' if not t['start_found'] else ''))}</td>"
+                        f"<td>{'yes' if t['title_ok'] else 'no'}</td><td>{'' if t['author_ok'] is None else ('yes' if t['author_ok'] else 'no')}</td>"
+                        f"<td class='num'>{t['coverage']:.2f}</td><td class='num'>{t['extra_starts_inside']}</td><td>{'yes' if t['runs_over'] else ''}</td></tr>")
+        rows.append("</table>")
+        out.append("<h3 style='font-weight:normal;font-size:16px'>Against the contents page</h3>" + "".join(rows))
+        hs = v.get("human", [])
+        if hs:
+            rows = ["<table><tr><th>human record</th><th>status</th><th class='num'>regions</th><th>best candidate</th><th class='num'>recall</th>"
+                    "<th class='num'>precision</th><th class='num'>Jaccard</th><th>exact</th><th>title</th><th>author</th></tr>"]
+            for h in hs:
+                rows.append(f"<tr><td><a href='/article/{_esc(h['article_id'])}'>{_esc(h.get('title') or h['article_id'])}</a></td><td>{_esc(h['status'])}</td>"
+                            f"<td class='num'>{h['n_regions']}</td><td>{_esc(h.get('match_title') or h.get('match') or '—')}</td>"
+                            f"<td class='num'>{h.get('recall', '')}</td><td class='num'>{h.get('precision', '')}</td><td class='num'>{h.get('jaccard', '')}</td>"
+                            f"<td>{'yes' if h.get('exact') else ''}</td><td>{'' if h.get('title_ok') is None else ('yes' if h['title_ok'] else 'no')}</td>"
+                            f"<td>{'' if h.get('author_ok') is None else ('yes' if h['author_ok'] else 'no')}</td></tr>")
+            rows.append("</table>")
+            out.append("<h3 style='font-weight:normal;font-size:16px'>Against the human-corrected records</h3>" + "".join(rows)
+                       + "<p class='muted'>Verified records are finished repairs; modified ones are partial, so a low score there "
+                         "can mean the person had not finished, not that the candidate is wrong.</p>")
+        st = v["summary"]["structure"]
+        out.append("<h3 style='font-weight:normal;font-size:16px'>Structure</h3><p>" + ", ".join(
+            f"{_esc(k.replace('_', ' '))} {v_ if not isinstance(v_, dict) else _esc(str(v_))}" for k, v_ in st.items()) + ".</p>")
+        if variant != "model":
+            out.append(f"<p class='muted'>{_esc(variant)} records and the page analysis: "
+                       f"<a href='/raw/file?path=assembly_v2/{_esc(variant)}/{_esc(which)}/articles.json'>articles.json</a> · "
+                       f"<a href='/raw/file?path=assembly_v2/rules/{_esc(which)}/analysis.json'>analysis.json</a></p>")
+    return _render(render, "Assembly", "".join(out), "/assembly")

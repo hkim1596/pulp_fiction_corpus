@@ -223,7 +223,8 @@ def build_pair_table(units, set_name, log=print):
                 "a": ua["story_id"], "b": ub["story_id"],
                 "issue_a": ua["issue"], "issue_b": ub["issue"],
                 "same_issue": int(ua["issue"] == ub["issue"]),
-                "shared_regions": len(ua["fragments"] & ub["fragments"]),
+                # region keys are page:region within an issue, so only same-issue pairs can share one
+                "shared_regions": (len(ua["fragments"] & ub["fragments"]) if ua["issue"] == ub["issue"] else 0),
                 "same_family": int(ua["family"] == ub["family"]),
                 "tokens_a": len(ua["tokens"]), "tokens_b": len(ub["tokens"]),
                 "magazine_a": ma["magazine"], "magazine_b": mb["magazine"],
