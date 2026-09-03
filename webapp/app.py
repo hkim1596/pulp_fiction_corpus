@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.12.0"
+APP_VERSION = "0.12.1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -589,6 +589,52 @@ def ann_events(iid):
                 out.append(json.loads(line))
             except Exception:
                 pass
+    return out
+
+
+ARCHDIR = os.path.join(DATA, "assembly_archive")
+
+
+def archived_ann_events():
+    """Every human action made on an assembly that was later replaced
+    (scripts/switch_assembly.py moves the logs to
+    data/assembly_archive/<stamp>/annotations/). Each event carries
+    _archive = the stamp. The article ids in these events name records of
+    the archived assembly, not the live one, so they are shown on the
+    boards as work done, never linked to a live record."""
+    out = []
+    if not os.path.isdir(ARCHDIR):
+        return out
+    for stamp in sorted(os.listdir(ARCHDIR)):
+        d = os.path.join(ARCHDIR, stamp, "annotations")
+        if not os.path.isdir(d):
+            continue
+        for f in sorted(os.listdir(d)):
+            if not f.endswith(".jsonl") or f.startswith("._"):
+                continue
+            for line in open(os.path.join(d, f), encoding="utf-8"):
+                try:
+                    e = json.loads(line)
+                except Exception:
+                    continue
+                e["_archive"] = stamp
+                out.append(e)
+    return out
+
+
+def all_ann_events():
+    """Live events (every issue) plus the archived ones, oldest first."""
+    out = []
+    if os.path.isdir(ANNDIR):
+        for f in os.listdir(ANNDIR):
+            if f.endswith(".jsonl") and not f.startswith("._"):
+                for line in open(os.path.join(ANNDIR, f), encoding="utf-8"):
+                    try:
+                        out.append(json.loads(line))
+                    except Exception:
+                        pass
+    out += archived_ann_events()
+    out.sort(key=lambda e: e.get("ts", ""))
     return out
 
 
@@ -2811,33 +2857,48 @@ click first.</p></div>"""
 
 
     def activity_page(self):
-        events = []
-        if os.path.isdir(ANNDIR):
-            for f in os.listdir(ANNDIR):
-                if f.endswith(".jsonl"):
-                    for line in open(os.path.join(ANNDIR, f),
-                                     encoding="utf-8"):
-                        try:
-                            events.append(json.loads(line))
-                        except Exception:
-                            pass
+        events = all_ann_events()
         events.sort(key=lambda e: e.get("ts", ""), reverse=True)
+        n_arch = sum(1 for e in events if e.get("_archive"))
+
+        def art_cell(e):
+            aid = esc(e.get("article_id", ""))
+            if e.get("_archive"):
+                return (f"{aid} <span class='muted' style='font-size:12px'>on the archived assembly "
+                        f"({esc(e['_archive'])})</span>")
+            return f"<a href='/article/{aid}'>{aid}</a>"
         rows = "".join(
-            f"<tr><td class='muted'>{esc(e.get('ts', ''))}</td>"
+            f"<tr{' style=' + chr(39) + 'background:#f4efe6' + chr(39) if e.get('_archive') else ''}>"
+            f"<td class='muted'>{esc(e.get('ts', ''))}</td>"
             f"<td>{esc(display_name(e.get('user', '?')))}</td>"
             f"<td>{esc(e.get('action', ''))}</td>"
-            f"<td><a href='/article/{esc(e.get('article_id', ''))}'>"
-            f"{esc(e.get('article_id', ''))}</a></td>"
+            f"<td>{art_cell(e)}</td>"
             f"<td class='muted'>{esc(str(e.get('frag') or e.get('into_id') or e.get('to_id') or ''))}</td></tr>"
-            for e in events[:400])
+            for e in events[:600])
+        per_user = {}
+        for e in events:
+            u = e.get("user", "?")
+            pu = per_user.setdefault(u, [0, 0])
+            pu[1 if e.get("_archive") else 0] += 1
+        who = "; ".join(f"{esc(display_name(u))} {a + b:,}" + (f" (of which {b:,} on the archived assembly)" if b else "")
+                        for u, (a, b) in sorted(per_user.items(), key=lambda t: -(t[1][0] + t[1][1])))
         body = (howto(
             "The complete annotation record, newest first: who verified or "
             "changed which article, when, and how. The machine output is "
             "never edited in place, so the original and every human action "
-            "are both preserved.")
-            + f"<h1>Annotation activity ({len(events)})</h1>"
+            "are both preserved. Rows on a shaded background were made on "
+            "an assembly that has since been replaced (the switch of 2 "
+            "September 2026 archived the model's assembly and every action "
+            "on it; those actions remain the yardstick on the assembly page "
+            "and are counted here as work done, but their article ids name "
+            "records of the archived assembly, so they do not open on the "
+            "workbench).")
+            + f"<h1>Annotation activity ({len(events):,}"
+            + (f", of which {n_arch:,} on the archived assembly" if n_arch else "") + ")</h1>"
+            + (f"<p class='muted'>By annotator: {who}.</p>" if per_user else "")
             + ("<table><tr><th>when</th><th>who</th><th>action</th>"
                "<th>article</th><th>detail</th></tr>" + rows + "</table>"
+               + (f"<p class='muted'>First {min(600, len(events))} of {len(events):,}.</p>" if len(events) > 600 else "")
                if events else
                "<div class='empty'>No annotations yet. Corrections and "
                "verifications made on article pages appear here.</div>"))

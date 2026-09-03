@@ -1,4 +1,4 @@
-"""The explorer (service side of the site, v0.12.0): every piece of data
+"""The explorer (service side of the site, v0.12.1): every piece of data
 the server holds, in layers, each layer one click from the next and the
 last layer the raw record itself.
 
@@ -181,6 +181,7 @@ def _sources():
     files += glob.glob(os.path.join(D, "reuse", "machine_k*_sameissue.jsonl"))
     files += glob.glob(os.path.join(D, "reuse", "para", "machine_w50s25_k10_*.jsonl"))
     files += glob.glob(os.path.join(D, "annotations", "*.jsonl"))
+    files += glob.glob(os.path.join(D, "assembly_archive", "*", "annotations", "*.jsonl"))
     files += glob.glob(os.path.join(D, "raw", "*", "meta.json"))
     files += glob.glob(os.path.join(D, "articles", "*", "articles.json"))
     # directories whose contents mark a stage of the process (their mtime moves when files are added)
@@ -220,7 +221,7 @@ CREATE TABLE issues(id TEXT PRIMARY KEY, magazine TEXT, mag_slug TEXT, cover_dat
   genre TEXT, format TEXT, ia_identifier TEXT, why TEXT, gold INTEGER, publisher TEXT, publisher_group TEXT,
   publisher_source TEXT, ia TEXT, ia_item_size INTEGER, ia_files TEXT, records INTEGER, stories INTEGER,
   words INTEGER, n_authors INTEGER, verified INTEGER, modified INTEGER, pages INTEGER, layout_pages INTEGER,
-  text_stages TEXT, assembled INTEGER, exported INTEGER, events INTEGER, complete INTEGER);
+  text_stages TEXT, assembled INTEGER, exported INTEGER, events INTEGER, complete INTEGER, events_archived INTEGER);
 CREATE TABLE records(id TEXT PRIMARY KEY, issue TEXT, magazine TEXT, mag_slug TEXT, cover_date TEXT, year REAL,
   decade INTEGER, genre TEXT, format TEXT, type TEXT, title TEXT, author TEXT, display_author TEXT, author_key TEXT,
   teaser TEXT, date TEXT, date_source TEXT, pages TEXT, first_page INTEGER, status TEXT, verified_by TEXT,
@@ -252,7 +253,7 @@ CREATE INDEX m_len ON matches(k, same_issue, len);
 CREATE TABLE aligns(idx INTEGER, a TEXT, b TEXT, cols INTEGER, identity REAL, score REAL, text_a TEXT, text_b TEXT, raw TEXT);
 CREATE INDEX ag_a ON aligns(a);
 CREATE INDEX ag_b ON aligns(b);
-CREATE TABLE events(ts TEXT, user TEXT, issue TEXT, article_id TEXT, action TEXT, raw TEXT);
+CREATE TABLE events(ts TEXT, user TEXT, issue TEXT, article_id TEXT, action TEXT, raw TEXT, archive TEXT);
 CREATE INDEX ev_art ON events(article_id);
 CREATE INDEX ev_issue ON events(issue);
 """
@@ -336,7 +337,7 @@ def build_db(sig, path, log=None):
             "downloaded": 1 if md else 0,
             "records": 0, "stories": 0, "words": 0, "authors": set(), "verified": 0, "modified": 0,
             "pages": pages, "layout_pages": layout_pages, "text_stages": stages, "assembled": n_assembled,
-            "exported": 0, "events": 0, "complete": 0,
+            "exported": 0, "events": 0, "complete": 0, "events_archived": 0,
         }
     # ---- records from the export
     authors = {}
@@ -447,27 +448,39 @@ def build_db(sig, path, log=None):
                       json.dumps(sorted(a["genres"])), (min(a["years"]) if a["years"] else None),
                       (max(a["years"]) if a["years"] else None), degree.get(k, 0),
                       last_name(display_author(a["names"].most_common(1)[0][0]))) for k, a in authors.items()])
-    # ---- annotation events
+    # ---- annotation events: the live logs, and the logs an assembly switch archived
+    # (data/assembly_archive/<stamp>/annotations/; their article ids name records of that assembly)
     erows = []
     for f in glob.glob(os.path.join(D, "annotations", "*.jsonl")):
+        if os.path.basename(f).startswith("._"):
+            continue
         for e in _jsonl(f):
             erows.append((e.get("ts", ""), e.get("user"), e.get("issue"), e.get("article_id"), e.get("action"),
-                          json.dumps(e, ensure_ascii=False)))
+                          json.dumps(e, ensure_ascii=False), None))
             if e.get("issue") in issues:
                 issues[e["issue"]]["events"] += 1
-    erows.sort()
-    con.executemany("INSERT INTO events VALUES (?,?,?,?,?,?)", erows)
+    for f in glob.glob(os.path.join(D, "assembly_archive", "*", "annotations", "*.jsonl")):
+        if os.path.basename(f).startswith("._"):
+            continue
+        stamp = os.path.basename(os.path.dirname(os.path.dirname(f)))
+        for e in _jsonl(f):
+            erows.append((e.get("ts", ""), e.get("user"), e.get("issue"), e.get("article_id"), e.get("action"),
+                          json.dumps(e, ensure_ascii=False), stamp))
+            if e.get("issue") in issues:
+                issues[e["issue"]]["events_archived"] += 1
+    erows.sort(key=lambda r: (r[0], r[6] or ""))
+    con.executemany("INSERT INTO events VALUES (?,?,?,?,?,?,?)", erows)
     # ---- issues and magazines
     mags = {}
     for iid, i in issues.items():
         # complete = assembled into records by the machine (an export proves an assembly too)
         i["complete"] = 1 if (i["assembled"] or i["exported"]) else 0
-        con.execute("INSERT INTO issues VALUES (" + ",".join("?" * 30) + ")",
+        con.execute("INSERT INTO issues VALUES (" + ",".join("?" * 31) + ")",
                     (iid, i["magazine"], i["mag_slug"], i["cover_date"], i["year"], i["decade"], i["genre"], i["format"],
                      i["ia_identifier"], i["why"], i["gold"], i["publisher"], i["publisher_group"], i["publisher_source"],
                      json.dumps(i["ia"], ensure_ascii=False), i["ia_item_size"], json.dumps(i["ia_files"]), i["records"],
                      i["stories"], i["words"], len(i["authors"]), i["verified"], i["modified"], i["pages"], i["layout_pages"],
-                     json.dumps(i["text_stages"]), i["assembled"], i["exported"], i["events"], i["complete"]))
+                     json.dumps(i["text_stages"]), i["assembled"], i["exported"], i["events"], i["complete"], i["events_archived"]))
         m = mags.setdefault(i["magazine"], {"name": i["magazine"], "slug": i["mag_slug"], "genre": i["genre"], "format": i["format"],
                                             "publisher_group": i["publisher_group"], "publishers": set(), "issues": [],
                                             "records": 0, "stories": 0, "words": 0, "authors": set(), "verified": 0, "years": []})
@@ -522,6 +535,7 @@ def build_db(sig, path, log=None):
               "exact_matches": {str(k): sum(1 for r in mrows if r[0] == k and r[8] == 0) for k in (6, 7, 8)},
               "same_issue_matches": {str(k): sum(1 for r in mrows if r[0] == k and r[8] == 1) for k in (6, 7, 8)},
               "paraphrase_alignments": len(arows), "pairs": n_pairs, "events": len(erows),
+              "events_archived": sum(1 for r in erows if r[6]),
               "author_links": len(author_links), "magazine_links": len(mag_links),
               "ad_classes": dict(Counter(row[27] or "?" for row in rec_rows if row[9] == "ad")),
               "house_excerpts": sum(1 for row in rec_rows if row[29])}
@@ -532,7 +546,7 @@ def build_db(sig, path, log=None):
             "summary": json.dumps(_json(os.path.join(D, "reuse", "background", "summary_machine.json")) or {}),
             "overlap": json.dumps(_json(os.path.join(D, "reuse", "machine_region_overlap.json")) or {}),
             "survey": json.dumps(_json(os.path.join(D, "survey", "summary.json")) or {}),
-            "version": "0.12.0"}
+            "version": "0.12.1"}
     con.executemany("INSERT INTO meta VALUES (?,?)", list(meta.items()))
     con.commit()
     con.close()
@@ -569,8 +583,15 @@ def ensure_db(force=False):
     if BUILD_LOCK.acquire(blocking=(force or not exists)):
         try:
             if force or not os.path.exists(path) or h != _DB["sig"]:
-                build_db(sig, path)
-                _DB["sig"] = h
+                try:
+                    build_db(sig, path)
+                    _DB["sig"] = h
+                except Exception as e:
+                    # a source file half-written by a running pipeline stage: keep serving the old
+                    # database and try again after CHECK_EVERY seconds; with no database at all, fail
+                    if not os.path.exists(path) or force:
+                        raise
+                    print(f"[explorer] rebuild failed, old database kept: {e}", file=sys.stderr)
         finally:
             BUILD_LOCK.release()
 
@@ -1077,7 +1098,7 @@ def overview(qs=None, render=None):
                 ("words in stories", n_words, f"/stories?sort=words{tail}"),
                 ("named authors", n_authors, f"/authors?{sq}" if sq else "/authors"),
                 ("verified stories", n_verified, f"/stories?status=verified{tail}"),
-                ("annotation actions", n_events, "/activity"),
+                ("annotation actions (archived logs included)", n_events, "/activity"),
                 ("shared passages (seed 6, across issues)", n_shared, "/reuse/clusters"),
                 ("paraphrase alignments", n_para, "/reuse/clusters?kind=para&k=10"),
                 ("cross-issue story pairs in the table", n_pairs, f"/pairs?{sq}" if sq else "/pairs")])]
@@ -1338,7 +1359,8 @@ def process_board_html():
              ("assembled into records (complete)", sum(1 for i in iss if i["assembled"] or i["exported"]), of,
               f"{sum(i['assembled'] for i in iss):,} records in the assemblies"),
              ("exported for the reuse run", sum(1 for i in iss if i["exported"]), of, f"{sum(i['exported'] for i in iss):,} records"),
-             ("touched by an annotator", sum(1 for i in iss if i["events"]), of, f"{sum(i['events'] for i in iss):,} actions"),
+             ("touched by an annotator (live or archived logs)", sum(1 for i in iss if i["events"] or i["events_archived"]), of,
+              f"{sum(i['events'] for i in iss):,} actions on the live assembly, {sum(i['events_archived'] for i in iss):,} on the archived one"),
              ("with verified stories", sum(1 for i in iss if i["verified"]), of, f"{sum(i['verified'] for i in iss):,} stories verified"),
              ("fully verified", sum(1 for i in iss if i["stories"] and i["verified"] == i["stories"]), of, "")]
     rows = []
@@ -1358,13 +1380,16 @@ def process_board_html():
         stages = _j(i["text_stages"], [])
         done = "yes" if i["complete"] else "—"
         irows.append([_issue_link(con, i["id"], i), N(i["pages"]), N(i["layout_pages"]), _esc(", ".join(stages)) or "—",
-                      N(i["assembled"] or ""), N(i["exported"] or ""), N(i["stories"] or ""), N(i["events"] or ""),
+                      N(i["assembled"] or ""), N(i["exported"] or ""), N(i["stories"] or ""),
+                      N(i["events"] or "") + (f" <span class='muted'>+{i['events_archived']:,} archived</span>" if i["events_archived"] else ""),
                       N(i["modified"] or ""), N(i["verified"] or ""), done])
     out.append("<h3 style='font-weight:normal;font-size:16px'>Every issue, every step</h3>")
     out.append(_table(["issue", "#pages", "#layout pages", "text stages", "#assembled", "#exported", "#stories", "#actions",
                        "#modified", "#verified", "complete"], irows))
     out.append("<p class='muted'>Complete = assembled into records by the machine; such issues appear on the explorer "
-               "side. The survey is metadata only (decision of 2026-09-03: allowed before protocol acceptance); the downloader's "
+               "side. Archived actions are the corrections made on the model's assembly before the switch of 2 September 2026 "
+               "(data/assembly_archive/…/annotations); they are the yardstick on the assembly page and are not repeated on the "
+               "rules' records. The survey is metadata only (decision of 2026-09-03: allowed before protocol acceptance); the downloader's "
                "gate is untouched. The full-study rows (rolling download, reading, assembly, the stratified verification sample) "
                "fill in after acceptance; the board keeps the same shape.</p>")
     return "".join(out)
@@ -1828,7 +1853,7 @@ def story_page(sid, render=None):
             other = p["b"] if p["a"] == sid else p["a"]
             nrows.append([N(round(p["topic_tfidf"], 3)), _story_link(con, other), _esc(_fmt(p["years_apart"])),
                           N(int(p["exact_k6_longest"] or 0)), f"<a href='/pair/{_esc(sid)}/{_esc(other)}'>pair</a>"])
-    events = [_j(e["raw"], {}) for e in _rows(con, "SELECT raw FROM events WHERE article_id=? ORDER BY ts", (sid,))]
+    events = [_j(e["raw"], {}) for e in _rows(con, "SELECT raw FROM events WHERE article_id=? AND archive IS NULL ORDER BY ts", (sid,))]
     surprise = []
     s = meta_json(con, "summary", {}) or {}
     for name in ("exact_k6", "para_k10"):
@@ -2365,7 +2390,7 @@ DICTIONARY = [
         ("records", "the export records plus display_author (title case), decade, first_page, n_exact, n_para, and the v2.1 fields (ad_class, advertiser, contains_excerpt, excerpt_of, n_chapters, chapters, announces, title_as_printed, author_as_printed, subtitle, title_source, author_source, flags)"),
         ("authors, author_links", "normalized by-lines with display name, printed forms, last_name (sort key), counts; author pairs sharing passages"),
         ("magazines, mag_links, issue_links", "magazines with counts; magazine and issue pairs sharing passages"),
-        ("matches, aligns, events", "exact matches (all seeds, cross- and same-issue), paraphrase alignments, annotation events, each with the original record as JSON"),
+        ("matches, aligns, events", "exact matches (all seeds, cross- and same-issue), paraphrase alignments, annotation events (live logs, archive NULL; logs archived by an assembly switch carry the archive stamp — their article ids name records of that assembly), each with the original record as JSON"),
         ("pairs", "the pair table (below) plus genre_a, genre_b, decade_a, decade_b"), ("meta", "signature of the sources, build time, counts, the background summary, the survey summary")]),
     ("data/survey/ — the survey of the archive's collection (s00; metadata only, decision of 2026-09-03)", [
         ("items.jsonl", "one archive item per line as the search API gave it (identifier, title, date, year, language, collection, imagecount, item_size, publicdate …) plus the derived lang_class (english · other · unmarked), kind (fiction magazine · dime novel · film or general magazine · comic magazine · other), genre (the sub-collection's genre in the pilot's vocabulary), year_derived, magazine (the name read from the title)"),

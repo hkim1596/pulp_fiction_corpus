@@ -968,26 +968,34 @@ def cluster_page(set_, kind, k, idx, render=None):
 
 def progress_page(render=None):
     runs = _runs()
-    events = []
-    anndir = _G["ANNDIR"]
-    if os.path.isdir(anndir):
-        for f in os.listdir(anndir):
-            if f.endswith(".jsonl"):
-                for line in open(os.path.join(anndir, f), encoding="utf-8"):
-                    try:
-                        events.append(json.loads(line))
-                    except Exception:
-                        pass
-    events.sort(key=lambda e: e.get("ts", ""))
+    # every human action: the live logs and the ones archived by an assembly switch
+    # (app.all_ann_events; archived events carry _archive = the stamp)
+    if _G.get("all_ann_events"):
+        events = _G["all_ann_events"]()
+    else:
+        events = []
+        anndir = _G["ANNDIR"]
+        if os.path.isdir(anndir):
+            for f in os.listdir(anndir):
+                if f.endswith(".jsonl"):
+                    for line in open(os.path.join(anndir, f), encoding="utf-8"):
+                        try:
+                            events.append(json.loads(line))
+                        except Exception:
+                            pass
+        events.sort(key=lambda e: e.get("ts", ""))
+    n_arch = sum(1 for e in events if e.get("_archive"))
+    stamps = sorted({e["_archive"] for e in events if e.get("_archive")})
     out = [_howto(
         "Three boards. The process board comes first: the archive's whole pulp collection as the "
         "survey found it (every language; the working corpus is English or unmarked, fiction "
         "magazines), and every selected issue at every step — download, page images, layout OCR, "
         "text stages, assembly, export, annotation, verification — measured against it; the "
-        "explorer side counts only the complete issues. Annotation progress comes live from the "
-        "annotation logs: what each annotator did per day, and how the count of verified and "
-        "modified stories grew. The pipeline board lists every result file the reuse pipeline has "
-        "produced on this server, with its settings and time."),
+        "explorer side counts only the complete issues. Annotation progress comes from the "
+        "annotation logs, the live ones and those archived by an assembly switch: what each "
+        "annotator did per day, and how the count of verified and modified records grew. The "
+        "pipeline board lists every result file the reuse pipeline has produced on this server, "
+        "with its settings and time."),
         "<h1>Progress</h1>"]
     # ---- the whole process, every issue at every step (explorer database), against the survey
     out.append("<h2>The whole process, against the archive's collection</h2>")
@@ -1005,7 +1013,8 @@ def progress_page(render=None):
         by_day_user = defaultdict(lambda: defaultdict(int))
         verified, modified = set(), set()
         cum_v, cum_m, days = [], [], []
-        per_user = defaultdict(lambda: {"actions": 0, "articles": set(), "verified": set(), "last": ""})
+        per_user = defaultdict(lambda: {"actions": 0, "archived": 0, "articles": set(), "verified": set(), "last": ""})
+        live_verified, live_modified = set(), set()
         cur_day = None
         for e in events:
             d = (e.get("ts") or "")[:10]
@@ -1013,16 +1022,25 @@ def progress_page(render=None):
             by_day_user[d][u] += 1
             pu = per_user[u]
             pu["actions"] += 1
-            pu["articles"].add(e.get("article_id"))
+            if e.get("_archive"):
+                pu["archived"] += 1
+            # a record is one of an assembly: the same id string means a different record after a switch
+            rid = (e.get("_archive") or "live", e.get("article_id"))
+            pu["articles"].add(rid)
             pu["last"] = e.get("ts", "")
             act = e.get("action")
             if act == "verify":
-                verified.add(e.get("article_id"))
-                pu["verified"].add(e.get("article_id"))
+                verified.add(rid)
+                pu["verified"].add(rid)
+                if not e.get("_archive"):
+                    live_verified.add(rid)
             elif act == "unverify":
-                verified.discard(e.get("article_id"))
+                verified.discard(rid)
+                live_verified.discard(rid)
             elif act not in ("verify", "unverify"):
-                modified.add(e.get("article_id"))
+                modified.add(rid)
+                if not e.get("_archive"):
+                    live_modified.add(rid)
             if d != cur_day:
                 if cur_day is not None:
                     days.append(cur_day)
@@ -1035,12 +1053,14 @@ def progress_page(render=None):
         users = sorted(per_user, key=lambda u: -per_user[u]["actions"])[:4]
         dlist = sorted(by_day_user)[-21:]
         series = [(_G["display_name"](u), [by_day_user[d].get(u, 0) for d in dlist]) for u in users]
-        tbl = ["<table><tr><th>annotator</th><th class='num'>actions</th><th class='num'>articles touched</th>"
-               "<th class='num'>verified</th><th>last active</th></tr>"]
+        tbl = ["<table><tr><th>annotator</th><th class='num'>actions</th>"
+               + ("<th class='num'>of which on the archived assembly</th>" if n_arch else "")
+               + "<th class='num'>articles touched</th><th class='num'>verified</th><th>last active</th></tr>"]
         for u in sorted(per_user, key=lambda u: -per_user[u]["actions"]):
             pu = per_user[u]
-            tbl.append(f"<tr><td>{_esc(_G['display_name'](u))}</td><td class='num'>{pu['actions']}</td>"
-                       f"<td class='num'>{len(pu['articles'])}</td><td class='num'>{len(pu['verified'])}</td>"
+            tbl.append(f"<tr><td>{_esc(_G['display_name'](u))}</td><td class='num'>{pu['actions']:,}</td>"
+                       + (f"<td class='num'>{pu['archived']:,}</td>" if n_arch else "")
+                       + f"<td class='num'>{len(pu['articles'])}</td><td class='num'>{len(pu['verified'])}</td>"
                        f"<td class='muted'>{_esc(pu['last'])}</td></tr>")
         tbl.append("</table>")
         out.append(_chart_row(svg_bars([d[5:] for d in dlist], series, "Annotation actions per day (last 21 active days)"),
@@ -1053,9 +1073,14 @@ def progress_page(render=None):
             "<table><tr><th>day</th><th class='num'>verified</th><th class='num'>modified</th></tr>"
             + "".join(f"<tr><td>{_esc(d)}</td><td class='num'>{v}</td><td class='num'>{m}</td></tr>"
                       for d, v, m in list(zip(days, cum_v, cum_m))[-15:]) + "</table>"))
-        out.append(f"<p class='muted'>Now: {len(verified)} verified stories, {len(modified)} stories with at least "
-                   f"one human change, {len(events)} recorded actions. Target for the correction sprint "
-                   f"(implementation plan 0.1): 20–30 verified stories including one full issue.</p>")
+        out.append(f"<p class='muted'>Work done: {len(verified)} records verified and {len(modified)} records with at least "
+                   f"one human change, {len(events):,} recorded actions in all"
+                   + (f" — of which {n_arch:,} on the assembly archived by the switch of 2 September 2026 "
+                      f"(data/assembly_archive/{_esc(', '.join(stamps))}): those corrections were made on the model's "
+                      f"records, remain the yardstick the rules are measured against (<a href='/assembly'>assembly</a>), "
+                      f"and are not repeated on the rules' records. On the live assembly now: {len(live_verified)} verified, "
+                      f"{len(live_modified)} with a human change" if n_arch else "")
+                   + ". Target for the correction sprint (implementation plan 0.1): 20–30 verified stories including one full issue.</p>")
     else:
         out.append("<div class='empty'>No annotation events on this server yet.</div>")
     # ---- pipeline board

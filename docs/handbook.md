@@ -80,6 +80,18 @@ the replay: title/subtitle/author/teaser as they are, chapter as
 chapter_number or chapter_title by the region's text, heading as
 section.
 
+Archived logs (v0.12.1, 2026-09-03): the boards count the annotation
+logs an assembly switch moved to data/assembly_archive/<stamp>/annotations/
+as work done — the progress page's per-annotator table has an "of which
+on the archived assembly" column and its "work done" line separates the
+live counts; the activity page shades archived rows and names the stamp;
+the explorer's events table has an `archive` column (NULL = live) and
+issues carry events_archived. Archived article ids name records of the
+archived assembly, so they are never linked to live records and a
+record's own annotation history shows live events only. A rebuild of
+the explorer that fails on a half-written source file (a pipeline stage
+still running) keeps the old database and retries.
+
 Routes since v0.12.0: /issues is the explorer's paged issue list (built
 for the whole corpus, filters by magazine, decade, genre, completeness);
 the workroom's old table of the ten pilot issues with their processing
@@ -188,6 +200,20 @@ file changes; after a pull that changes explore_pages.py, `python3
 webapp/explore_pages.py --build` makes the first request fast.
 
 The printed version must match the new `APP_VERSION`.
+
+If the server has itself run a pipeline stage whose outputs git tracks
+(the r-series writes data/reuse), `git checkout -B main origin/main`
+refuses with "Your local changes … would be overwritten" and the rest
+of the paste runs on the OLD code (2026-09-03). Put the server's copies
+aside first and compare them with the commit:
+
+      git stash push -m "server data/reuse before pNN" -- data/reuse
+      git checkout -B main origin/main && git log --oneline -1
+      if git diff --quiet stash@{0} -- data/reuse; then git stash drop && echo STASH-SAME-DROPPED; else echo STASH-KEPT-DIFFERS; git diff --stat stash@{0} -- data/reuse | tail -3; fi
+
+STASH-SAME-DROPPED means the server's files were already committed from
+the Mac (the usual case); STASH-KEPT-DIFFERS means the server holds a
+newer run that still needs to travel to the Mac and be committed.
 
 While the Studio is the live server (main server down), the deploy is
 a GitHub round trip — the repository is public, so the Studio pulls
