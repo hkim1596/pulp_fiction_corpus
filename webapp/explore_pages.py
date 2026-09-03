@@ -1,4 +1,4 @@
-"""The explorer (service side of the site, v0.11.0): every piece of data
+"""The explorer (service side of the site, v0.12.0): every piece of data
 the server holds, in layers, each layer one click from the next and the
 last layer the raw record itself.
 
@@ -46,7 +46,7 @@ import reuse_pages as RP
 _G = {}
 _DB = {"path": None, "sig": None, "checked": 0.0}
 BUILD_LOCK = threading.Lock()
-ARCHIVE_TOTAL = 27973          # items in the archive's pulp collection, protocol count
+ARCHIVE_TOTAL = 27973          # items in the archive's pulp collection, protocol count (the survey, data/survey/summary.json, supersedes it when present)
 PER_PAGE = 100                 # rows per page in every list
 DRAW_LIMITS = {"authors": 80, "magazines": 40, "issues": 120}   # entity drawings above this become tables
 CHECK_EVERY = 20               # seconds between looks at the source files
@@ -149,12 +149,30 @@ def display_author(printed):
     return " ".join(out)
 
 
+SUFFIXES = {"jr", "jr.", "sr", "sr.", "ii", "iii", "iv", "2nd", "3rd"}
+
+
+def last_name(display):
+    """The surname to sort by: the last word that is not a suffix (Jr., III);
+    a particle before it stays with it ('van Vogt' sorts under V, as the
+    alphabet of the pulps' own indexes has it)."""
+    ws = [w for w in (display or "").replace(",", " ").split() if w]
+    while ws and ws[-1].lower() in SUFFIXES:
+        ws.pop()
+    if not ws:
+        return ""
+    last = ws[-1]
+    if len(ws) >= 2 and ws[-2].lower().rstrip(".") in ("st", "ste", "de", "van", "von", "la", "le", "du", "del", "della", "der", "den", "di", "da", "mac", "mc", "o"):
+        last = ws[-2] + " " + last                  # 'St. Clair', 'van Vogt', 'de Camp' sort as one name
+    return re.sub(r"[^A-Za-z' \-]", "", last).lower()
+
+
 # ---------------------------------------------------------------- sources
 
 def _sources():
     """(path, mtime, size) of every file or directory the database depends on."""
     D = _G["DATA"]
-    files = [os.path.join(D, "pilot_stories.jsonl"), _G["CONFIG"],
+    files = [os.path.join(D, "pilot_stories.jsonl"), _G["CONFIG"], os.path.join(D, "survey", "summary.json"),
              os.path.join(D, "reuse", "machine_region_overlap.json"),
              os.path.join(D, "reuse", "background", "pairs_machine.csv.gz"),
              os.path.join(D, "reuse", "background", "summary_machine.json"),
@@ -207,12 +225,16 @@ CREATE TABLE records(id TEXT PRIMARY KEY, issue TEXT, magazine TEXT, mag_slug TE
   decade INTEGER, genre TEXT, format TEXT, type TEXT, title TEXT, author TEXT, display_author TEXT, author_key TEXT,
   teaser TEXT, date TEXT, date_source TEXT, pages TEXT, first_page INTEGER, status TEXT, verified_by TEXT,
   modified_by TEXT, n_regions INTEGER, fragments TEXT, n_words INTEGER, text_sha1 TEXT, is_story INTEGER,
-  n_exact INTEGER, n_para INTEGER);
+  n_exact INTEGER, n_para INTEGER, ad_class TEXT, advertiser TEXT, contains_excerpt INTEGER, excerpt_of TEXT,
+  n_chapters INTEGER, chapters TEXT, announces TEXT, title_as_printed TEXT, author_as_printed TEXT, subtitle TEXT,
+  title_source TEXT, author_source TEXT, flags TEXT);
+CREATE INDEX rec_adclass ON records(ad_class);
 CREATE INDEX rec_issue ON records(issue);
 CREATE INDEX rec_author ON records(author_key);
 CREATE INDEX rec_story ON records(is_story, year);
 CREATE TABLE authors(key TEXT PRIMARY KEY, slug TEXT, display TEXT, names TEXT, n_stories INTEGER, n_words INTEGER,
-  n_issues INTEGER, magazines TEXT, genres TEXT, first_year REAL, last_year REAL, degree INTEGER);
+  n_issues INTEGER, magazines TEXT, genres TEXT, first_year REAL, last_year REAL, degree INTEGER, last_name TEXT);
+CREATE INDEX au_last ON authors(last_name);
 CREATE INDEX au_stories ON authors(n_stories);
 CREATE TABLE author_links(ka TEXT, kb TEXT, n INTEGER, longest INTEGER, pairs TEXT, stories TEXT);
 CREATE INDEX al_a ON author_links(ka);
@@ -335,7 +357,12 @@ def build_db(sig, path, log=None):
                          r.get("date_source") or "issue", json.dumps(pages), (pages[0] if pages else None),
                          r.get("status", "auto"), r.get("verified_by"), json.dumps(r.get("modified_by") or []),
                          len(r.get("fragments") or []), json.dumps(r.get("fragments") or []), r.get("n_words", 0),
-                         r.get("text_sha1"), is_story))
+                         r.get("text_sha1"), is_story,
+                         r.get("ad_class"), r.get("advertiser"), 1 if r.get("contains_excerpt") else 0,
+                         (json.dumps(r["excerpt_of"], ensure_ascii=False) if isinstance(r.get("excerpt_of"), dict) else (r.get("excerpt_of") or None)),
+                         len(r.get("chapters") or []), json.dumps(r.get("chapters") or [], ensure_ascii=False),
+                         json.dumps(r.get("announces") or [], ensure_ascii=False), r.get("title_as_printed"), r.get("author_as_printed"),
+                         r.get("subtitle"), r.get("title_source"), r.get("author_source"), json.dumps(r.get("flags") or [], ensure_ascii=False)))
         n_rec += 1
         story_meta[sid] = (r["issue"], key, r.get("magazine"), r.get("genre"), _decade(y), y, is_story)
         if iss is not None:
@@ -402,8 +429,8 @@ def build_db(sig, path, log=None):
         n_para[a["a"]] += 1
         n_para[a["b"]] += 1
     con.executemany("INSERT INTO aligns VALUES (?,?,?,?,?,?,?,?,?)", arows)
-    con.executemany("INSERT INTO records VALUES (" + ",".join("?" * 29) + ")",
-                    [row + (n_exact.get(row[0], 0), n_para.get(row[0], 0)) for row in rec_rows])
+    con.executemany("INSERT INTO records VALUES (" + ",".join("?" * 42) + ")",
+                    [row[:27] + (n_exact.get(row[0], 0), n_para.get(row[0], 0)) + row[27:] for row in rec_rows])
     degree = Counter()
     for (ka, kb), L in author_links.items():
         degree[ka] += L["n"]
@@ -414,11 +441,12 @@ def build_db(sig, path, log=None):
     con.executemany("INSERT INTO mag_links VALUES (?,?,?,?,?)",
                     [(ma, mb, L["n"], L["longest"], json.dumps(sorted(L["pairs"]))) for (ma, mb), L in mag_links.items()])
     con.executemany("INSERT INTO issue_links VALUES (?,?,?)", [(ia, ib, n) for (ia, ib), n in issue_links.items()])
-    con.executemany("INSERT INTO authors VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+    con.executemany("INSERT INTO authors VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     [(k, author_slug(k), display_author(a["names"].most_common(1)[0][0]), json.dumps(dict(a["names"]), ensure_ascii=False),
                       len(a["stories"]), a["words"], len(a["issues"]), json.dumps(sorted(a["magazines"])),
                       json.dumps(sorted(a["genres"])), (min(a["years"]) if a["years"] else None),
-                      (max(a["years"]) if a["years"] else None), degree.get(k, 0)) for k, a in authors.items()])
+                      (max(a["years"]) if a["years"] else None), degree.get(k, 0),
+                      last_name(display_author(a["names"].most_common(1)[0][0]))) for k, a in authors.items()])
     # ---- annotation events
     erows = []
     for f in glob.glob(os.path.join(D, "annotations", "*.jsonl")):
@@ -494,14 +522,17 @@ def build_db(sig, path, log=None):
               "exact_matches": {str(k): sum(1 for r in mrows if r[0] == k and r[8] == 0) for k in (6, 7, 8)},
               "same_issue_matches": {str(k): sum(1 for r in mrows if r[0] == k and r[8] == 1) for k in (6, 7, 8)},
               "paraphrase_alignments": len(arows), "pairs": n_pairs, "events": len(erows),
-              "author_links": len(author_links), "magazine_links": len(mag_links)}
+              "author_links": len(author_links), "magazine_links": len(mag_links),
+              "ad_classes": dict(Counter(row[27] or "?" for row in rec_rows if row[9] == "ad")),
+              "house_excerpts": sum(1 for row in rec_rows if row[29])}
     meta = {"signature": _signature(sig), "built": time.strftime("%Y-%m-%d %H:%M:%S"),
             "build_seconds": round(time.time() - t0, 2), "counts": json.dumps(counts),
             "sources": json.dumps([os.path.relpath(p, _G["ROOT"]) for p, _, _ in sig]),
             "pair_cols": json.dumps(pair_cols),
             "summary": json.dumps(_json(os.path.join(D, "reuse", "background", "summary_machine.json")) or {}),
             "overlap": json.dumps(_json(os.path.join(D, "reuse", "machine_region_overlap.json")) or {}),
-            "version": "0.11.0"}
+            "survey": json.dumps(_json(os.path.join(D, "survey", "summary.json")) or {}),
+            "version": "0.12.0"}
     con.executemany("INSERT INTO meta VALUES (?,?)", list(meta.items()))
     con.commit()
     con.close()
@@ -1199,18 +1230,56 @@ def overview(qs=None, render=None):
     return _render(render, "Overview", "".join(out), "/overview")
 
 
+def survey_frame(con):
+    """The counts the boards are measured against: the survey of the archive's
+    collection (data/survey/summary.json) when it has run, else the protocol
+    count."""
+    sv = meta_json(con, "survey", {}) or {}
+    w = sv.get("working_corpus") or {}
+    if sv.get("total_items"):
+        return {"have": True, "generated": sv.get("generated", ""), "total": sv["total_items"],
+                "by_class": sv.get("by_language_class", {}), "english": sv.get("by_language_class", {}).get("english", 0),
+                "unmarked": sv.get("by_language_class", {}).get("unmarked", 0), "other": sv.get("by_language_class", {}).get("other", 0),
+                "working": w.get("items", 0), "working_pages": w.get("page_images", 0), "fiction": w.get("fiction_items", 0),
+                "fiction_pages": w.get("fiction_page_images", 0), "fiction_magazines": w.get("fiction_magazines", 0),
+                "by_kind": sv.get("by_kind", {}), "working_by_kind": w.get("by_kind", {}),
+                "fiction_by_decade": w.get("fiction_by_decade", {}), "fiction_by_genre": w.get("fiction_by_genre", {}),
+                "magazines_distinct": sv.get("magazines_distinct", 0), "pages_total": sv.get("page_images_total", 0),
+                "top": w.get("fiction_magazines_top", [])}
+    return {"have": False, "total": ARCHIVE_TOTAL, "working": ARCHIVE_TOTAL, "fiction": ARCHIVE_TOTAL, "fiction_magazines": None}
+
+
+def _bar(v, of, width=560, height=14):
+    pct = (100 * v / of) if of else 0
+    return (f"<div style='background:#eee5d5;height:{height}px;max-width:{width}px;border:1px solid #d8cfc0'>"
+            f"<div style='background:{RP.PALETTE[0]};height:100%;width:{min(100, pct):.2f}%'></div></div>")
+
+
 def explore_progress_html(con=None):
-    """Complete issues against the selected set: the explorer's own progress
+    """Complete issues against the working corpus: the explorer's own progress
     line (the workroom board has every step)."""
     con = con or db()
     n_all = _val(con, "SELECT COUNT(*) FROM issues") or 0
     comp = _rows(con, "SELECT id, magazine, cover_date, stories, verified, records, events FROM issues WHERE complete=1 ORDER BY year, id")
     pend = _rows(con, "SELECT id, magazine, cover_date, pages, layout_pages, text_stages FROM issues WHERE complete=0 ORDER BY year, id")
     n_c = len(comp)
-    bar = (f"<div style='background:#eee5d5;height:14px;max-width:560px;border:1px solid #d8cfc0'>"
-           f"<div style='background:{RP.PALETTE[0]};height:100%;width:{(100 * n_c / n_all) if n_all else 0:.1f}%'></div></div>")
-    out = [f"<p>{n_c} of {n_all} selected issues are complete (assembled into records by the machine, human corrections "
-           f"applied as they come) and appear in the explorer; the archive's pulp collection holds {ARCHIVE_TOTAL:,} items.</p>", bar]
+    fr = survey_frame(con)
+    out = []
+    if fr["have"]:
+        out.append(f"<p>{n_c:,} of the {n_all:,} selected issues are complete (assembled into records by the machine, human "
+                   f"corrections applied as they come) and appear in the explorer. Measured against the collection: the archive's "
+                   f"pulp collection holds {fr['total']:,} items, {fr['working']:,} of them in English or with no language given "
+                   f"(the working corpus; {fr['other']:,} in other languages are left out), and {fr['fiction']:,} of those are "
+                   f"fiction magazines — the frame the complete-issue count is drawn against below.</p>")
+        out.append(_bar(n_c, fr["fiction"]))
+        out.append(f"<p class='muted' style='font-size:12.5px'>{n_c:,} complete of {fr['fiction']:,} fiction-magazine items "
+                   f"({_fmt(100 * n_c / fr['fiction'] if fr['fiction'] else 0)}%). Survey of {_esc(fr['generated'])}, metadata only "
+                   f"(pipeline/s00_survey.py).</p>")
+    else:
+        out.append(f"<p>{n_c} of {n_all} selected issues are complete (assembled into records by the machine, human corrections "
+                   f"applied as they come) and appear in the explorer; the archive's pulp collection holds {ARCHIVE_TOTAL:,} items "
+                   f"(protocol count; the survey has not run on this server).</p>")
+        out.append(_bar(n_c, n_all))
     if pend:
         out.append("<p class='muted'>Not yet complete: " + ", ".join(
             f"<a href='/issue/{_esc(p['id'])}'>{_esc(p['magazine'])} {_esc(p['cover_date'])}</a>" for p in pend[:20])
@@ -1223,30 +1292,67 @@ def explore_progress_html(con=None):
 # ---------------------------------------------------------------- workroom process board
 
 def process_board_html():
-    """Every issue at every step of the process, and the corpus counts
-    against the archive: for the workroom progress page."""
+    """Every step of the process against the archive's collection, and every
+    issue at every step: for the workroom progress page. The frame is the
+    survey (data/survey/summary.json): all items, English and not; the
+    complete bar is drawn against the working corpus (English or unmarked),
+    fiction magazines only."""
     con = db()
     iss = _rows(con, "SELECT * FROM issues ORDER BY year, id")
     n = len(iss)
-    steps = [("archive items (protocol count)", ARCHIVE_TOTAL, ARCHIVE_TOTAL, ""),
-             ("issues selected", n, ARCHIVE_TOTAL, "the pilot development set"),
-             ("downloaded (archive record on disk)", sum(1 for i in iss if _j(i["ia"], {}).get("title") or i["pages"]), n, ""),
-             ("page images on disk", sum(1 for i in iss if i["pages"]), n, f"{sum(i['pages'] for i in iss):,} pages"),
-             ("read by layout OCR (layout records)", sum(1 for i in iss if i["layout_pages"]), n, f"{sum(i['layout_pages'] for i in iss):,} pages"),
-             ("text stages present", sum(1 for i in iss if _j(i["text_stages"], [])), n, ""),
-             ("assembled into records", sum(1 for i in iss if i["assembled"] or i["exported"]), n,
+    fr = survey_frame(con)
+    counts = meta_json(con, "counts", {}) or {}
+    out = []
+    if fr["have"]:
+        bk = fr["by_kind"]
+        wbk = fr["working_by_kind"]
+        out.append(f"<h3 style='font-weight:normal;font-size:16px'>The collection (survey of {_esc(fr['generated'])}, metadata only)</h3>")
+        crows = [["archive items in the collection, every language", N(fr["total"]), _bar(fr["total"], fr["total"], 220),
+                  f"<span class='muted'>{fr['pages_total']:,} page images; {fr['magazines_distinct']:,} magazine names as the archive titles them</span>"],
+                 ["marked English", N(fr["english"]), _bar(fr["english"], fr["total"], 220), ""],
+                 ["no language given (taken as English)", N(fr["unmarked"]), _bar(fr["unmarked"], fr["total"], 220), ""],
+                 ["other languages (left out)", N(fr["other"]), _bar(fr["other"], fr["total"], 220),
+                  "<span class='muted'>Spanish, French, Italian … — the protocol's corpus is English</span>"],
+                 ["working corpus: English or unmarked", N(fr["working"]), _bar(fr["working"], fr["total"], 220),
+                  f"<span class='muted'>{fr['working_pages']:,} page images</span>"],
+                 ["of which fiction magazines (pulps and digests)", N(fr["fiction"]), _bar(fr["fiction"], fr["total"], 220),
+                  f"<span class='muted'>{fr['fiction_pages']:,} page images, {fr['fiction_magazines']:,} magazine names; the rest: "
+                  + ", ".join(f"{k} {v:,}" for k, v in wbk.items() if k != "fiction magazine") + "</span>"]]
+        out.append(_table(["the collection", "#items", "share of the collection", "note"], crows))
+        dec = fr["fiction_by_decade"]
+        if dec:
+            cats = [d for d in dec if d != "no year"]
+            out.append(RP._chart_row(RP.svg_bars(cats, [("fiction-magazine items", [dec[d] for d in cats])],
+                                                 "Fiction magazines in the working corpus, by decade"),
+                                     "<p class='muted' style='font-size:12.5px'>By genre, as the archive files them: "
+                                     + ", ".join(f"{_esc(k)} {v:,}" for k, v in fr["fiction_by_genre"].items())
+                                     + f". {dec.get('no year', 0):,} items carry no year. Every magazine name with its item count: "
+                                       "<a href='/raw/file?path=survey/magazines.json'>survey/magazines.json</a>.</p>"))
+    of = fr["fiction"]
+    steps = [("surveyed (metadata from the archive)", fr["total"] if fr["have"] else 0, fr["total"], "every item, every language"),
+             ("issues selected for processing", n, of, "the pilot development set; the full-study sample after protocol acceptance"),
+             ("downloaded (archive record on disk)", sum(1 for i in iss if _j(i["ia"], {}).get("title") or i["pages"]), of, ""),
+             ("page images on disk", sum(1 for i in iss if i["pages"]), of, f"{sum(i['pages'] for i in iss):,} pages"),
+             ("read by layout OCR (layout records)", sum(1 for i in iss if i["layout_pages"]), of, f"{sum(i['layout_pages'] for i in iss):,} pages"),
+             ("text stages present", sum(1 for i in iss if _j(i["text_stages"], [])), of, ""),
+             ("assembled into records (complete)", sum(1 for i in iss if i["assembled"] or i["exported"]), of,
               f"{sum(i['assembled'] for i in iss):,} records in the assemblies"),
-             ("exported for the reuse run", sum(1 for i in iss if i["exported"]), n, f"{sum(i['exported'] for i in iss):,} records"),
-             ("touched by an annotator", sum(1 for i in iss if i["events"]), n, f"{sum(i['events'] for i in iss):,} actions"),
-             ("with verified stories", sum(1 for i in iss if i["verified"]), n, f"{sum(i['verified'] for i in iss):,} stories verified"),
-             ("fully verified", sum(1 for i in iss if i["stories"] and i["verified"] == i["stories"]), n, "")]
+             ("exported for the reuse run", sum(1 for i in iss if i["exported"]), of, f"{sum(i['exported'] for i in iss):,} records"),
+             ("touched by an annotator", sum(1 for i in iss if i["events"]), of, f"{sum(i['events'] for i in iss):,} actions"),
+             ("with verified stories", sum(1 for i in iss if i["verified"]), of, f"{sum(i['verified'] for i in iss):,} stories verified"),
+             ("fully verified", sum(1 for i in iss if i["stories"] and i["verified"] == i["stories"]), of, "")]
     rows = []
-    for label, v, of, note in steps:
-        pct = (100 * v / of) if of else 0
-        bar = (f"<div style='background:#eee5d5;height:12px;width:220px;border:1px solid #d8cfc0;display:inline-block;vertical-align:middle'>"
-               f"<div style='background:{RP.PALETTE[0]};height:100%;width:{min(100, pct):.1f}%'></div></div>")
-        rows.append([_esc(label), N(v), bar + f" <span class='muted' style='font-size:12px'>{_fmt(pct)}% of {of:,}</span>", f"<span class='muted'>{_esc(note)}</span>"])
-    out = [_table(["step", "#issues", "share", "note"], rows)]
+    for label, v, den, note in steps:
+        pct = (100 * v / den) if den else 0
+        rows.append([_esc(label), N(v), _bar(v, den, 220, 12).replace("max-width:220px", "width:220px;display:inline-block;vertical-align:middle")
+                     + f" <span class='muted' style='font-size:12px'>{_fmt(pct)}% of {den:,}</span>", f"<span class='muted'>{_esc(note)}</span>"])
+    out.append("<h3 style='font-weight:normal;font-size:16px'>The process, issue by issue, against the working corpus's fiction magazines</h3>")
+    out.append(_table(["step", "#issues", "share", "note"], rows))
+    out.append(f"<p class='muted'>What the explorer holds now: {counts.get('magazines', 0):,} magazines, {counts.get('complete_issues', 0):,} "
+               f"complete issues, {counts.get('records', 0):,} records of all kinds, {counts.get('stories', 0):,} stories, "
+               f"{counts.get('authors', 0):,} named authors"
+               + (f"; advertisements by class: " + ", ".join(f"{_esc(k)} {v:,}" for k, v in (counts.get("ad_classes") or {}).items())
+                  + f"; {counts.get('house_excerpts', 0):,} house announcements quoting a story" if counts.get("ad_classes") else "") + ".</p>")
     irows = []
     for i in iss:
         stages = _j(i["text_stages"], [])
@@ -1258,8 +1364,9 @@ def process_board_html():
     out.append(_table(["issue", "#pages", "#layout pages", "text stages", "#assembled", "#exported", "#stories", "#actions",
                        "#modified", "#verified", "complete"], irows))
     out.append("<p class='muted'>Complete = assembled into records by the machine; such issues appear on the explorer "
-               "side. The full-study rows (survey of the whole archive, rolling download, reading, assembly, the stratified "
-               "verification sample) fill in after protocol acceptance; the board keeps the same shape.</p>")
+               "side. The survey is metadata only (decision of 2026-09-03: allowed before protocol acceptance); the downloader's "
+               "gate is untouched. The full-study rows (rolling download, reading, assembly, the stratified verification sample) "
+               "fill in after acceptance; the board keeps the same shape.</p>")
     return "".join(out)
 
 
@@ -1268,7 +1375,7 @@ def process_board_html():
 def authors_page(qs, render=None):
     con = db()
     q = _g(qs, "q").strip().lower()
-    sort = _g(qs, "sort", "stories") or "stories"
+    sort = _g(qs, "sort", "name") or "name"
     sl = _slice(qs)
     conds, args = [], []
     if q:
@@ -1284,8 +1391,9 @@ def authors_page(qs, render=None):
         conds.append("key IN (SELECT DISTINCT author_key FROM records WHERE is_story=1 AND decade=?)")
         args.append(sl["decade"])
     where = (" WHERE " + " AND ".join(conds)) if conds else ""
-    order = {"stories": "n_stories DESC, display", "words": "n_words DESC, display", "shared": "degree DESC, n_stories DESC, display",
-             "name": "display", "first": "first_year, display"}.get(sort, "display")
+    order = {"stories": "n_stories DESC, last_name, display", "words": "n_words DESC, last_name, display",
+             "shared": "degree DESC, n_stories DESC, last_name, display",
+             "name": "last_name, display", "first": "first_year, last_name, display"}.get(sort, "last_name, display")
     total = _val(con, f"SELECT COUNT(*) FROM authors{where}", args)
     pager, lim, off = _pager(qs, total, "/authors")
     items = _rows(con, f"SELECT * FROM authors{where} ORDER BY {order} LIMIT ? OFFSET ?", args + [lim, off])
@@ -1293,7 +1401,7 @@ def authors_page(qs, render=None):
     for a in items:
         mags = _j(a["magazines"], [])
         rows.append([_author_link_key(a["key"], a["display"]), N(a["n_stories"]), N(a["n_words"]), N(a["n_issues"]),
-                     _esc(", ".join(mag_abbr(m) for m in mags)), _esc(", ".join(_j(a["genres"], []))),
+                     ", ".join(_mag_link(m) for m in mags), _esc(", ".join(_j(a["genres"], []))),
                      _esc(f"{int(a['first_year'])}–{int(a['last_year'])}" if a["first_year"] and a["last_year"] and int(a["first_year"]) != int(a["last_year"])
                           else (str(int(a["first_year"])) if a["first_year"] else "")), N(a["degree"])])
     decades = [r["decade"] for r in _rows(con, "SELECT DISTINCT decade FROM issues WHERE complete=1 AND decade IS NOT NULL ORDER BY decade")]
@@ -1303,15 +1411,15 @@ def authors_page(qs, render=None):
             f"<label>name contains <input name='q' value='{_esc(q)}' style='width:140px'></label>"
             f"<label>decade {_sel('decade', sl['decade'] if sl['decade'] is not None else '', [('', 'all')] + [(d, f'{d}s') for d in decades])}</label>"
             f"<label>genre {_sel('genre', sl['genre'] or '', [('', 'all')] + [(g, g) for g in genres])}</label>"
-            f"<label>magazine {_sel('mag', sl['mag'] or '', [('', 'all')] + [(m['slug'], mag_abbr(m['name'])) for m in mags_all])}</label>"
-            f"<label>sort by {_sel('sort', sort, [('stories', 'stories'), ('words', 'words'), ('shared', 'shared passages'), ('name', 'name'), ('first', 'first year')])}</label>"
+            f"<label>magazine {_sel('mag', sl['mag'] or '', [('', 'all')] + [(m['slug'], m['name']) for m in mags_all])}</label>"
+            f"<label>sort by {_sel('sort', sort, [('name', 'last name'), ('stories', 'stories'), ('words', 'words'), ('shared', 'shared passages'), ('first', 'first year')])}</label>"
             f"<button>show</button></form>")
     unnamed = _val(con, "SELECT COUNT(*) FROM records WHERE is_story=1 AND author_key IS NULL")
     body = (_howto("Layer 1: every printed by-line, normalized (case, punctuation, and titles such as "
                    "'Captain' removed; pseudonyms NOT resolved — that is implementation-plan item 0.4), shown in "
-                   "title case; the forms as printed are on each author's page. 'Shared passages' counts exact "
-                   "six-word matches between this author's stories and stories by other authors in other issues. "
-                   "One hundred authors a page.")
+                   "title case and listed in alphabetical order of last names; the forms as printed are on each "
+                   "author's page. 'Shared passages' counts exact six-word matches between this author's stories "
+                   "and stories by other authors in other issues. One hundred authors a page.")
             + f"<h1>Authors ({total:,})</h1>" + form + pager
             + _table(["author", "#stories", "#words", "#issues", "magazines", "genres", "years", "#shared passages"], rows)
             + pager + f"<p class='muted'>{unnamed:,} stories carry no usable by-line and appear only under their issues. "
@@ -1396,16 +1504,22 @@ def magazines_page(qs=None, render=None):
     mags = _rows(con, f"SELECT * FROM magazines{where} ORDER BY {order} LIMIT ? OFFSET ?", args + [lim, off])
     rows = []
     for m in mags:
-        partners = _rows(con, "SELECT ma, mb, n FROM mag_links WHERE ma=? OR mb=? ORDER BY n DESC LIMIT 4", (m["name"], m["name"]))
+        partners = _rows(con, "SELECT ma, mb, n FROM mag_links WHERE ma=? OR mb=? ORDER BY n DESC LIMIT 3", (m["name"], m["name"]))
         issues = _j(m["issues"], [])
-        ilinks = " · ".join(_issue_link(con, i) for i in issues[:6]) + (f" · <a href='/magazine/{_esc(m['slug'])}'>all {len(issues)}</a>" if len(issues) > 6 else "")
         span = (f"{int(m['first_year'])}–{int(m['last_year'])}" if m["first_year"] and m["last_year"] and int(m["first_year"]) != int(m["last_year"])
                 else (str(int(m["first_year"])) if m["first_year"] else ""))
-        rows.append([_mag_link(m["name"], m["slug"]), _esc(span), N(m["n_issues"]), ilinks,
-                     N(m["records"]), N(m["stories"]), N(m["words"]), N(m["n_authors"]), N(m["verified"]),
-                     _esc(m["genre"] or ""), _esc(m["format"] or ""),
-                     _esc(m["publisher_group"] or "") + (f" <span class='muted'>({_esc('; '.join(_j(m['publishers'], [])))})</span>" if _j(m["publishers"], []) else ""),
-                     "; ".join(f"{_esc(mag_abbr(p['mb'] if p['ma'] == m['name'] else p['ma']))} {p['n']}" for p in partners)])
+        about = (_esc(m["genre"] or "") + (f" · {_esc(m['format'])}" if m.get("format") else "")
+                 + (f"<br><span class='muted'>{_esc(m['publisher_group'])}</span>" if m.get("publisher_group") else "")
+                 + (f"<br><span class='muted' style='font-size:12px'>{_esc('; '.join(_j(m['publishers'], [])))}</span>" if _j(m["publishers"], []) else ""))
+        shares = "<br>".join(
+            (f"{_mag_link(p['mb'] if p['ma'] == m['name'] else p['ma'])}" if (p['mb'] if p['ma'] == m['name'] else p['ma']) != m["name"]
+             else "another issue of the same magazine") + f" <span class='muted'>{p['n']:,} passages</span>"
+            for p in partners) or "<span class='muted'>none</span>"
+        counts = (f"{m['n_issues']:,} issues · {m['records']:,} records · <b>{m['stories']:,} stories</b><br>"
+                  f"<span class='muted'>{m['words']:,} words · {m['n_authors']:,} authors · {m['verified']:,} verified</span>")
+        rows.append([f"{_mag_link(m['name'], m['slug'])}<br><span class='muted'>{_esc(span)}</span> · "
+                     f"<a href='/issues?mag={_esc(m['slug'])}' class='muted'>issues</a>",
+                     about, counts, shares])
     decades = [r["decade"] for r in _rows(con, "SELECT DISTINCT decade FROM issues WHERE decade IS NOT NULL ORDER BY decade")]
     genres = [r["genre"] for r in _rows(con, "SELECT DISTINCT genre FROM magazines WHERE genre IS NOT NULL ORDER BY genre")]
     form = (f"<form method='GET' action='/magazines' class='pgjump' style='display:flex;gap:12px;flex-wrap:wrap;align-items:center'>"
@@ -1414,13 +1528,13 @@ def magazines_page(qs=None, render=None):
             f"<label>genre {_sel('genre', sl['genre'] or '', [('', 'all')] + [(g, g) for g in genres])}</label>"
             f"<label>sort by {_sel('sort', sort, [('first', 'first year'), ('name', 'name'), ('issues', 'issues'), ('stories', 'stories'), ('words', 'words')])}</label>"
             f"<button>show</button></form>")
-    body = (_howto("Layer 1: the magazines, with their issues and the counts that roll up from the stories. "
-                   "Publisher names come from pipeline/publishers.json (masthead or reference; the file says "
-                   "which). 'Shares with' counts six-word passages shared with stories in other magazines. "
+    body = (_howto("Layer 1: the magazines, with the counts that roll up from their stories. Names are given in "
+                   "full everywhere. Publisher names come from pipeline/publishers.json (masthead or reference; the file "
+                   "says which). 'Shares passages with' lists the three magazines whose stories share most six-word "
+                   "passages with this one's, one per line; the magazine's own page has the full list and its issues. "
                    "One hundred magazines a page.")
             + f"<h1>Magazines ({total:,})</h1>" + form + pager
-            + _table(["magazine", "years", "#issues", "issues", "#records", "#stories", "#words", "#authors", "#verified",
-                      "genre", "format", "publisher", "shares with"], rows)
+            + _table(["magazine", "genre · format · publisher", "what the explorer holds", "shares passages with"], rows)
             + pager + f"<p class='muted'>{_raw_link('/raw/magazines', 'raw list')}</p>")
     return _render(render, "Magazines", body, "/magazines")
 
@@ -1458,6 +1572,75 @@ def magazine_page(slug, render=None, qs=None):
             + "<h2>Shares passages with</h2>" + (_table(["magazine", "#passages", "#longest", ""], partners) if partners
                                                  else "<div class='empty'>None.</div>"))
     return _render(render, m["name"], body, f"/magazine/{slug}")
+
+
+# ---------------------------------------------------------------- issues (the explorer's list)
+
+def issues_page(qs=None, render=None):
+    """Every issue the explorer holds, paged, with filters: built for the
+    whole corpus (the workroom's list of the pilot's ten issues with their
+    processing stages is /workroom/issues)."""
+    qs = qs or {}
+    con = db()
+    q = _g(qs, "q").strip().lower()
+    sort = _g(qs, "sort", "date") or "date"
+    complete = _g(qs, "complete", "1")
+    sl = _slice(qs)
+    conds, args = [], []
+    if complete == "1":
+        conds.append("complete=1")
+    elif complete == "0":
+        conds.append("complete=0")
+    if q:
+        conds.append("(LOWER(magazine) LIKE ? OR LOWER(id) LIKE ? OR LOWER(cover_date) LIKE ? OR LOWER(ia_identifier) LIKE ?)")
+        args += [f"%{q}%"] * 4
+    sc, sa = _slice_sql(sl)
+    conds += sc
+    args += sa
+    where = (" WHERE " + " AND ".join(conds)) if conds else ""
+    order = {"date": "year, id", "magazine": "magazine, year, id", "stories": "stories DESC, year, id",
+             "words": "words DESC, year, id", "verified": "verified DESC, year, id", "pages": "pages DESC, year, id"}.get(sort, "year, id")
+    total = _val(con, f"SELECT COUNT(*) FROM issues{where}", args)
+    pager, lim, off = _pager(qs, total, "/issues")
+    items = _rows(con, f"SELECT * FROM issues{where} ORDER BY {order} LIMIT ? OFFSET ?", args + [lim, off])
+    rows = []
+    for i in items:
+        rows.append([_issue_link(con, i["id"], i), _mag_link(i["magazine"], i["mag_slug"]), _esc(i["cover_date"] or ""),
+                     _esc(i["genre"] or ""), _esc(i["format"] or ""), N(i["pages"]), N(i["records"]), N(i["stories"]), N(i["words"]),
+                     N(i["n_authors"]), N(i["verified"]), "yes" if i["complete"] else "—",
+                     f"<a href='https://archive.org/details/{_esc(i['ia_identifier'])}' class='muted'>{_esc(i['ia_identifier'])}</a>" if i.get("ia_identifier") else ""])
+    decades = [r["decade"] for r in _rows(con, "SELECT DISTINCT decade FROM issues WHERE decade IS NOT NULL ORDER BY decade")]
+    genres = [r["genre"] for r in _rows(con, "SELECT DISTINCT genre FROM issues WHERE genre IS NOT NULL ORDER BY genre")]
+    mags_all = _rows(con, "SELECT name, slug FROM magazines ORDER BY name")
+    form = (f"<form method='GET' action='/issues' class='pgjump' style='display:flex;gap:12px;flex-wrap:wrap;align-items:center'>"
+            f"<label>magazine {_sel('mag', sl['mag'] or '', [('', 'all')] + [(m['slug'], m['name']) for m in mags_all])}</label>"
+            f"<label>decade {_sel('decade', sl['decade'] if sl['decade'] is not None else '', [('', 'all')] + [(d, f'{d}s') for d in decades])}</label>"
+            f"<label>genre {_sel('genre', sl['genre'] or '', [('', 'all')] + [(g, g) for g in genres])}</label>"
+            f"<label>{_sel('complete', complete, [('1', 'complete issues'), ('0', 'not yet complete'), ('all', 'all selected issues')])}</label>"
+            f"<label>text <input name='q' value='{_esc(q)}' style='width:140px'></label>"
+            f"<label>sort {_sel('sort', sort, [('date', 'cover date'), ('magazine', 'magazine'), ('stories', 'stories'), ('words', 'words'), ('verified', 'verified'), ('pages', 'pages')])}</label>"
+            f"<button>show</button></form>")
+    n_all = _val(con, "SELECT COUNT(*) FROM issues") or 0
+    n_c = _val(con, "SELECT COUNT(*) FROM issues WHERE complete=1") or 0
+    sv = meta_json(con, "survey", {}) or {}
+    frame = ""
+    if sv.get("total_items"):
+        w = sv.get("working_corpus", {})
+        frame = (f"<p class='muted'>The frame: the archive's pulp collection holds {sv['total_items']:,} items "
+                 f"(survey of {_esc(sv.get('generated', ''))}); {w.get('items', 0):,} are marked English or unmarked, of which "
+                 f"{w.get('fiction_items', 0):,} are fiction magazines in {w.get('fiction_magazines', 0):,} magazine names. "
+                 f"{n_c:,} of the {n_all:,} issues selected so far are complete and listed here; the whole process against "
+                 f"the collection is on <a href='/reuse/progress'>progress</a>.</p>")
+    body = (_howto("Layer 1: the issues the explorer holds — complete ones by default (assembled into records by the "
+                   "machine, human corrections applied as they come). Built for the whole corpus: one hundred issues a page, "
+                   "filters by magazine, decade, genre and completeness, a text search over magazine, id, date and archive "
+                   "item. Each issue opens on its page (scans, records, provenance). The workroom's list of the pilot's "
+                   "issues with their processing stages is <a href='/workroom/issues'>workroom/issues</a>.")
+            + f"<h1>Issues ({total:,})</h1>" + frame + form + pager
+            + _table(["issue", "magazine", "cover date", "genre", "format", "#pages", "#records", "#stories", "#words",
+                      "#authors", "#verified", "complete", "archive item"], rows)
+            + pager + f"<p class='muted'>{_raw_link('/raw/index', 'raw index')}</p>")
+    return _render(render, "Issues", body, "/issues")
 
 
 # ---------------------------------------------------------------- issue extras
@@ -1536,11 +1719,15 @@ def stories_page(qs, render=None):
     except ValueError:
         year = None
     conds, args = [], []
+    ad_class = _g(qs, "ad_class")
     if typ == "story":
         conds.append("is_story=1")
     elif typ != "all":
         conds.append("type=?")
         args.append(typ)
+    if ad_class:
+        conds.append("ad_class=?")
+        args.append(ad_class)
     if mag or sl["mag"]:
         conds.append("(mag_slug=? OR magazine=?)")
         args += [mag or sl["mag"], mag or sl["mag"]]
@@ -1574,7 +1761,7 @@ def stories_page(qs, render=None):
     total = _val(con, f"SELECT COUNT(*) FROM records{where}", args)
     pager, lim, off = _pager(qs, total, "/stories")
     recs = _rows(con, f"SELECT * FROM records{where} ORDER BY {order} LIMIT ? OFFSET ?", args + [lim, off])
-    types = ["story", "all"] + [r["type"] for r in _rows(con, "SELECT DISTINCT type FROM records WHERE type<>'story' ORDER BY type")]
+    types = ["story", "all"] + [r["type"] for r in _rows(con, "SELECT DISTINCT type FROM records WHERE type<>'story' AND type IS NOT NULL ORDER BY type")]
     mags_all = _rows(con, "SELECT name, slug FROM magazines ORDER BY name")
     issues_all = [r["id"] for r in _rows(con, "SELECT id FROM issues ORDER BY id")]
     decades = [r["decade"] for r in _rows(con, "SELECT DISTINCT decade FROM issues WHERE decade IS NOT NULL ORDER BY decade")]
@@ -1587,6 +1774,7 @@ def stories_page(qs, render=None):
             + (f"<label>issue {_sel('issue', issue, [('', 'all')] + [(i, i) for i in issues_all])}</label>" if len(issues_all) <= 200
                else f"<label>issue <input name='issue' value='{_esc(issue)}' style='width:120px'></label>")
             + f"<label>status {_sel('status', status, [('', 'any'), ('auto', 'automatic'), ('modified', 'modified'), ('verified', 'verified')])}</label>"
+            + f"<label>ad class {_sel('ad_class', ad_class, [('', 'any')] + [(c, c) for c in ('house_next_issue', 'house_self', 'house_sibling', 'house_form', 'trade', 'classified')])}</label>"
             f"<label>min words <input name='min' value='{min_w}' style='width:56px'></label>"
             f"<label>text <input name='q' value='{_esc(q)}' style='width:140px'></label>"
             f"<label>sort {_sel('sort', sort, [('issue', 'issue'), ('words', 'words'), ('title', 'title'), ('shared', 'shared passages'), ('para', 'paraphrase alignments')])}</label>"
@@ -1595,7 +1783,9 @@ def stories_page(qs, render=None):
     rows = []
     for r in recs:
         pages = _j(r["pages"], [])
-        rows.append([_story_link(con, r["id"], rec=r), _esc(r["type"]), _issue_link(con, r["issue"]), _esc(r["date"] or ""),
+        typ_txt = _esc(r["type"]) + (f" <span class='muted'>· {_esc(r['ad_class'])}</span>" if r["type"] == "ad" and r["ad_class"] else "") \
+            + (" <span class='muted'>· quotes a story</span>" if r["contains_excerpt"] else "")
+        rows.append([_story_link(con, r["id"], rec=r), typ_txt, _issue_link(con, r["issue"]), _esc(r["date"] or ""),
                      _esc(",".join(str(p) for p in pages[:3]) + ("…" if len(pages) > 3 else "")),
                      N(r["n_words"]), N(r["n_regions"]), _esc(r["status"]), N(r["n_exact"]), N(r["n_para"]),
                      f"<a href='/article/{_esc(r['id'])}' class='muted'>workbench</a>"])
@@ -1659,6 +1849,31 @@ def story_page(sid, render=None):
             + (f" · verified by {_esc(r['verified_by'])}" if r.get("verified_by") else "")
             + (f" · modified by {_esc(', '.join(_j(r['modified_by'], [])))}" if _j(r.get("modified_by"), []) else "")
             + (f" · workbench title now: {_esc(live_title)}" if live_title and live_title != r["title"] else "") + "</p>"]
+    facts = []
+    if r.get("title_as_printed") or r.get("author_as_printed") or r.get("title_source"):
+        facts.append("title" + (f" from the {_esc(r['title_source'])}" if r.get("title_source") else "")
+                     + (f", printed on the page as '{_esc(r['title_as_printed'])}'" if r.get("title_as_printed") else "")
+                     + (f"; author printed on the page as '{_esc(r['author_as_printed'])}'" if r.get("author_as_printed") else ""))
+    if r.get("subtitle"):
+        facts.append(f"subtitle '{_esc(r['subtitle'])}'")
+    if r.get("ad_class"):
+        facts.append(f"advertisement class <b>{_esc(r['ad_class'])}</b>" + (f", advertiser {_esc(r['advertiser'])}" if r.get("advertiser") else ""))
+    ann = _j(r.get("announces"), [])
+    if ann:
+        facts.append("announces " + "; ".join(_esc(x.get("title") or "?") + (f" by {_esc(display_author(x['author']))}" if x.get("author") else "") for x in ann[:8]))
+    if r.get("contains_excerpt"):
+        eo = _j(r.get("excerpt_of"), None) if (r.get("excerpt_of") or "").startswith("{") else r.get("excerpt_of")
+        eo_txt = (eo.get("title", "") + (f" by {display_author(eo['author'])}" if eo.get("author") else "")) if isinstance(eo, dict) else (eo or "")
+        facts.append("<b>quotes a story verbatim</b>" + (f": {_esc(eo_txt)}" if eo_txt else "") + " — left out of the reuse inventory")
+    chs = _j(r.get("chapters"), [])
+    if chs:
+        facts.append(f"{len(chs)} chapters: " + "; ".join(
+            ((c.get("number") or "") + (" " if c.get("number") and c.get("title") else "") + (c.get("title") or "")).strip() for c in chs[:30]))
+    flags = _j(r.get("flags"), [])
+    if flags:
+        facts.append("machine notes: " + "; ".join(_esc(f) for f in flags[:8]))
+    if facts:
+        body.append("<p class='muted' style='font-size:12.5px'>" + " · ".join(facts) + "</p>")
     if r.get("teaser"):
         body.append(f"<p style='font-style:italic;border-left:3px solid #8a6d1f;padding-left:10px'>{_esc(r['teaser'])} "
                     f"<span class='muted' style='font-style:normal;font-size:12px'>— teaser as printed (metadata, not story text)</span></p>")
@@ -2031,7 +2246,7 @@ def raw_list(kind, qs=None):
     return {"source_files": srcs, "total": total, "page": page, "limit": limit, "next": nxt, kind if kind != "stories" else "records": rows}
 
 
-RAW_ROOTS = ("reuse", "raw", "articles", "annotations", "layout", "text", "gold", "assembly_v2", "metrics.json", "timings.jsonl",
+RAW_ROOTS = ("reuse", "raw", "articles", "annotations", "layout", "text", "gold", "assembly_v2", "survey", "metrics.json", "timings.jsonl",
              "pilot_stories.jsonl", "pilot_stories.jsonl.gz", "feedback.jsonl", "explorer.sqlite")
 
 
@@ -2134,17 +2349,28 @@ DICTIONARY = [
         ("type", "story · serial_part · feature · poem · letters · ad · toc · other (machine typing, human-correctable)"),
         ("title, author", "as printed, as they stood at export (human corrections included)"),
         ("teaser", "the printed blurb on a story's first page, when an annotator marked it (metadata, never story text)"),
+        ("subtitle, title_as_printed, author_as_printed", "the page's own forms when the title or author came from the contents page (assembly v2.1: the contents page has authority; decision of 2026-09-03)"),
+        ("title_source, author_source", "'contents' or 'page'"),
+        ("ad_class, advertiser", "advertisements only: house_next_issue · house_self · house_sibling · house_form · trade · classified; the advertiser's name when read"),
+        ("announces", "house advertising only: the works it names [{title, author, page}]"),
+        ("contains_excerpt, excerpt_of", "a house announcement quoting a story verbatim, and which story; such records stay out of the reuse inventory"),
+        ("chapters", "[{number, n, title, page}] — the chapter heads, number and title apart (n is the number's value)"),
+        ("flags", "the assembler's notes for a person to look at"),
         ("date, date_source", "the story's date; 'issue' = the issue's cover date, the default until other evidence is recorded"),
         ("pages", "page numbers the record spans"), ("status", "auto · modified · verified"),
         ("verified_by, modified_by", "annotator usernames"), ("fragments", "scan region keys page:region, in reading order"),
         ("n_words, text_sha1, text", "word count, checksum, reading text")]),
     ("data/explorer.sqlite — the explorer's database, rebuilt from the files above (site)", [
         ("issues", "one row per selected issue with its archive record, counts, and the state of every step (pages, layout_pages, text_stages, assembled, exported, events, complete)"),
-        ("records", "the export records plus display_author (title case), decade, first_page, n_exact, n_para"),
-        ("authors, author_links", "normalized by-lines with display name, printed forms, counts; author pairs sharing passages"),
+        ("records", "the export records plus display_author (title case), decade, first_page, n_exact, n_para, and the v2.1 fields (ad_class, advertiser, contains_excerpt, excerpt_of, n_chapters, chapters, announces, title_as_printed, author_as_printed, subtitle, title_source, author_source, flags)"),
+        ("authors, author_links", "normalized by-lines with display name, printed forms, last_name (sort key), counts; author pairs sharing passages"),
         ("magazines, mag_links, issue_links", "magazines with counts; magazine and issue pairs sharing passages"),
         ("matches, aligns, events", "exact matches (all seeds, cross- and same-issue), paraphrase alignments, annotation events, each with the original record as JSON"),
-        ("pairs", "the pair table (below) plus genre_a, genre_b, decade_a, decade_b"), ("meta", "signature of the sources, build time, counts, the background summary")]),
+        ("pairs", "the pair table (below) plus genre_a, genre_b, decade_a, decade_b"), ("meta", "signature of the sources, build time, counts, the background summary, the survey summary")]),
+    ("data/survey/ — the survey of the archive's collection (s00; metadata only, decision of 2026-09-03)", [
+        ("items.jsonl", "one archive item per line as the search API gave it (identifier, title, date, year, language, collection, imagecount, item_size, publicdate …) plus the derived lang_class (english · other · unmarked), kind (fiction magazine · dime novel · film or general magazine · comic magazine · other), genre (the sub-collection's genre in the pilot's vocabulary), year_derived, magazine (the name read from the title)"),
+        ("summary.json", "total_items, by_language_class, by_kind, by_decade, by_subcollection, and working_corpus (English or unmarked: items, page_images, fiction_items, fiction_by_decade, fiction_by_genre, fiction_magazines, fiction_magazines_top)"),
+        ("magazines.json", "one entry per magazine name: items, pages, working_items, fiction_items, years, kind, genre, languages, subcollections, pilot_issues")]),
     ("data/reuse/<set>_k<k>_matches.jsonl — one exact match (r02)", [
         ("a, b", "story ids (a sorts before b)"), ("len", "length in words"), ("a_tok, b_tok", "token intervals [start, end)"),
         ("a_char, b_char", "character intervals into the canonical text"), ("a_issue, b_issue", "issue ids"),
@@ -2172,7 +2398,7 @@ DICTIONARY = [
         ("sampler_check", "weighted-sample errors against the full table"), ("models", "two-part model fits: fixed effects, story effect sd")]),
     ("data/annotations/<issue>.jsonl — one human action (site)", [
         ("ts, user, issue, article_id, action", "when, who, where, what"),
-        ("frag, role, to_id, into_id, order, text, …", "action details; replayed in order over the machine output; role may be title, subtitle, author, teaser, body")]),
+        ("frag, role, to_id, into_id, order, text, frags, …", "action details; replayed in order over the machine output; role may be title, subtitle, author, teaser, chapter_number, chapter_title, section; new_article (v0.12.0) makes one record from several boxes (frags, type, title, from_id); set_meta may also carry ad_class, advertiser, excerpt_of, contains_excerpt")]),
     ("data/feedback.jsonl — one feedback entry (site)", [
         ("id, ts, path, name, user", "entry id, when, the page it was written on, the display name, the account"),
         ("comment, history", "the text as it stands; earlier versions with their timestamps when it was edited"),

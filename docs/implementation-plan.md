@@ -123,6 +123,25 @@ path; the human corrections are archived as the yardstick
 (scripts/switch_assembly.py) and the machine starts clean. Still to
 run: the model with the rules as constraints on the main server,
 for pages with no anchor; r00–r05 again on the new records.
+v2.1 (2026-09-03, the second round of feedback): the contents page
+has authority over title and author; chapters listed with number
+and title apart; advertisements classified (house_next_issue,
+house_self, house_sibling, house_form, trade, classified) with the
+advertiser, the works a house announcement names and the excerpt it
+may quote (kept out of the reuse inventory); ballots and coupons
+their own record; a new run goes live with --refresh, ids and
+annotation logs kept.
+
+0.9 The survey of the archive's collection (done 2026-09-03,
+pipeline/s00_survey.py; decision: metadata only, before acceptance).
+28,286 items; 22,332 English or unmarked; 14,424 of those fiction
+magazines in 2,432 magazine names, 822,836 page images. The site's
+progress board and the explorer's issues page measure the project
+against these counts; the protocol's corpus definition (which kinds
+and genres count, how "unmarked" is treated) is Dennis's to fix, and
+the survey's derived fields (lang_class, kind, genre) are there for
+that decision, not a substitute for it. Rerun the survey when the
+protocol is accepted and before the rolling download starts.
 
 ## Phase 1 — corpus construction (protocol section 2)
 

@@ -980,14 +980,25 @@ def progress_page(render=None):
                         pass
     events.sort(key=lambda e: e.get("ts", ""))
     out = [_howto(
-        "Three boards. Annotation progress comes live from the annotation logs: what each "
-        "annotator did per day, and how the count of verified and modified stories grew. "
-        "The pipeline board lists every result file the reuse pipeline has produced on this "
-        "server, with its settings and time. The process board shows every selected issue at "
-        "every step — download, page images, layout OCR, text stages, assembly, export, "
-        "annotation, verification — against the whole archive; the explorer side counts only "
-        "the complete issues."),
+        "Three boards. The process board comes first: the archive's whole pulp collection as the "
+        "survey found it (every language; the working corpus is English or unmarked, fiction "
+        "magazines), and every selected issue at every step — download, page images, layout OCR, "
+        "text stages, assembly, export, annotation, verification — measured against it; the "
+        "explorer side counts only the complete issues. Annotation progress comes live from the "
+        "annotation logs: what each annotator did per day, and how the count of verified and "
+        "modified stories grew. The pipeline board lists every result file the reuse pipeline has "
+        "produced on this server, with its settings and time."),
         "<h1>Progress</h1>"]
+    # ---- the whole process, every issue at every step (explorer database), against the survey
+    out.append("<h2>The whole process, against the archive's collection</h2>")
+    EX = _G.get("EX")
+    if EX is not None:
+        try:
+            out.append(EX.process_board_html())
+        except Exception as e:      # the board must never take the page down
+            out.append(f"<div class='empty'>Process board unavailable: {_esc(str(e))}</div>")
+    else:
+        out.append("<div class='empty'>Explorer not loaded.</div>")
     # ---- annotation
     out.append("<h2>Annotation progress</h2>")
     if events:
@@ -1050,16 +1061,6 @@ def progress_page(render=None):
     # ---- pipeline board
     out.append("<h2>Pipeline status board</h2>")
     out.append(status_table(runs))
-    # ---- the whole process, every issue at every step (explorer database)
-    out.append("<h2>The whole process</h2>")
-    EX = _G.get("EX")
-    if EX is not None:
-        try:
-            out.append(EX.process_board_html())
-        except Exception as e:      # the board must never take the page down
-            out.append(f"<div class='empty'>Process board unavailable: {_esc(str(e))}</div>")
-    else:
-        out.append("<div class='empty'>Explorer not loaded.</div>")
     return _render(render, "Progress", "".join(out), "/reuse/progress")
 
 
@@ -1081,9 +1082,12 @@ def assembly_page(qs, render=None):
         "Assembly v2 is compared against three yardsticks: the records a person verified on the workbench "
         "(scan regions, title, author), the contents page of each issue (every piece it lists, with the page "
         "it starts on), and checks that need no yardstick (regions owned by two records, text owned by none, "
-        "story records that begin with a chapter head). Three candidates: the live assembly (model, s07), the "
-        "rules engine (s08), and the rules inside the printed range with the model's advertisement pages. "
-        "The rules' records are not the live records yet; the workbench still shows the live assembly."),
+        "story records that begin with a chapter head). Three candidates: the live assembly (what the workbench "
+        "shows: the model's records, s07, until 2 September 2026; the rules' records since — the backend in the "
+        "heading says which), the rules engine's newest run (s08), and the rules inside the printed range with "
+        "the model's advertisement pages. When the live records are an older run of the rules, the table shows "
+        "what the newest run changes; scripts/switch_assembly.py --refresh makes it live without touching the "
+        "annotation logs."),
         "<h1>Assembly: which method is most accurate</h1>"]
     if not ev:
         out.append("<div class='empty'>No harness output on this server yet: run pipeline/s08_assemble_rules.py --all "
@@ -1132,7 +1136,7 @@ def assembly_page(qs, render=None):
         st = v["summary"]["structure"]
         out.append("<h3 style='font-weight:normal;font-size:16px'>Structure</h3><p>" + ", ".join(
             f"{_esc(k.replace('_', ' '))} {v_ if not isinstance(v_, dict) else _esc(str(v_))}" for k, v_ in st.items()) + ".</p>")
-        if variant != "model":
+        if variant != "live":
             out.append(f"<p class='muted'>{_esc(variant)} records and the page analysis: "
                        f"<a href='/raw/file?path=assembly_v2/{_esc(variant)}/{_esc(which)}/articles.json'>articles.json</a> · "
                        f"<a href='/raw/file?path=assembly_v2/rules/{_esc(which)}/analysis.json'>analysis.json</a></p>")

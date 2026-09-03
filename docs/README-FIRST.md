@@ -51,6 +51,8 @@ annotator's name; the machine's output is never overwritten.
     webapp/app.py            the website (no frameworks; routes, workbench, viewer)
     webapp/explore_pages.py  the explorer: overview, lists, entity pages, raw layer
     webapp/reuse_pages.py    the text-reuse pages of the site (/reuse…)
+    pipeline/s00_survey.py   the survey of the archive's collection
+                             (metadata only; data/survey/)
     pipeline/s01…s07         the corpus-building stages, in order
     pipeline/s08, s09        assembly v2 (the rules engine) and the
                              assembly harness; docs/assembly-v2.md

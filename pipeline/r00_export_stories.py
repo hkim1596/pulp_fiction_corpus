@@ -12,7 +12,9 @@ server, or the Studio while it is the live server):
 
 Output: data/pilot_stories.jsonl — every article of every type (stories,
 serial parts, poems, features, letters, advertisements, contents pages),
-with its metadata and reading text. Later stages select by type. Nothing
+with its metadata and reading text. Later stages select by type; a record
+with contains_excerpt (a house announcement quoting a story) is an
+advertisement and stays out of the reuse inventory by that rule. Nothing
 here touches the machine output or the annotation logs; it only reads.
 """
 import hashlib
@@ -51,6 +53,20 @@ def main():
                     "title": a.get("title"),
                     "author": a.get("author"),
                     "teaser": a.get("teaser"),
+                    "subtitle": a.get("subtitle"),
+                    "title_as_printed": a.get("title_as_printed"),
+                    "author_as_printed": a.get("author_as_printed"),
+                    "title_source": a.get("title_source"),
+                    "author_source": a.get("author_source"),
+                    # advertisements (assembly v2.1): class, advertiser, the works a house
+                    # announcement names, and whether it quotes one of them verbatim
+                    "ad_class": a.get("ad_class"),
+                    "advertiser": a.get("advertiser"),
+                    "announces": a.get("announces") or [],
+                    "contains_excerpt": bool(a.get("contains_excerpt")),
+                    "excerpt_of": a.get("excerpt_of"),
+                    "chapters": [{k: c.get(k) for k in ("number", "n", "title", "page")} for c in (a.get("chapters") or [])],
+                    "flags": a.get("flags") or [],
                     "date": meta.get("cover_date"),
                     "date_source": "issue",
                     "pages": a.get("pages") or [],

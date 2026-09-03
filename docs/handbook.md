@@ -66,6 +66,28 @@ verify) is one JSON line with username and time in
 `data/annotations/<issue>.jsonl`, and the site replays those events over
 the machine output on every page view. Deleting an annotation file
 returns that issue to the pure machine state; nothing else changes.
+Events as of v0.12.0 (2026-09-03): set_meta (title, author, type, and
+the record facts ad_class, advertiser, excerpt_of, contains_excerpt),
+set_text, set_frag_order, move_frag (to_id "new" makes one record per
+box), new_article (several boxes into ONE new record: frags, type,
+title, from_id — used by "make a NEW record from them", "move them to a
+NEW record" and "take them out"), frag_furniture, edit_frag_text,
+set_role (title, subtitle, author, teaser, chapter_number,
+chapter_title, section), add_manual, merge, verify, unverify. The
+workbench's "attach pages N to M" writes one move_frag per box (page
+furniture left out, at most 30 pages). Machine roles are seeded into
+the replay: title/subtitle/author/teaser as they are, chapter as
+chapter_number or chapter_title by the region's text, heading as
+section.
+
+Routes since v0.12.0: /issues is the explorer's paged issue list (built
+for the whole corpus, filters by magazine, decade, genre, completeness);
+the workroom's old table of the ten pilot issues with their processing
+stages lives at /workroom/issues (linked from the guide and from the
+explorer's issues page). Author names are stored as printed and shown
+in title case everywhere (explore_pages.display_author); the workbench
+shows the printed form in fine print next to the name, with the page's
+own form when the contents page supplied the name.
 
 Page images: full scans are served at `/img/...` (2–5 MB each), small
 cached previews at `/thumb/...` (built on demand into `data/thumbs/`,
@@ -207,6 +229,21 @@ resumable, and writes timing rows to `data/timings.jsonl`. Server tmux
 sessions started with `rtx run` do NOT read `~/shared/khj/.pulp_env`;
 the stages load it themselves (`timing_util.load_pulp_env`).
 
+    s00_survey      the survey of the archive's collection (2026-09-03):
+                    metadata only, through the search API — one record
+                    per item of collection:pulpmagazinearchive (28,286
+                    items; 19,457 marked English, 2,875 unmarked, 5,954
+                    other languages; the working corpus = English or
+                    unmarked = 22,332, of which 14,424 fiction magazines)
+                    → data/survey/items.jsonl, summary.json, magazines.json.
+                    Derived fields: lang_class, kind (fiction magazine /
+                    dime novel / film or general magazine / comic magazine),
+                    genre (the archive sub-collection's genre in the
+                    pilot's vocabulary), year_derived, magazine (name read
+                    from the title). The site's boards read summary.json.
+                    About a minute; rerun any time (--run; --summary
+                    recomputes from items.jsonl). Downloads nothing; the
+                    downloader's gate is untouched (decision of 2026-09-03).
     s01_download    IA metadata, Archive OCR text, positional OCR, JP2 scans
                     → data/raw/<id>/, working PNGs → data/pages/<id>/.
                     REFUSES to run unless config/pilot_issues.json has
@@ -241,24 +278,51 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     pages → data/articles/<id>/articles.json + index.
                     --force re-assembles and archives that issue's
                     human annotations to .bak first — use with care.
-    s08_assemble_rules   assembly v2, the rules engine (2026-09-02):
-                    contents page, folios, running heads, display title
-                    with by-line, chapter heads, teaser, fillers,
-                    "continued from" notices → data/assembly_v2/rules/
-                    <id>/articles.json (+ analysis.json: what the rules
-                    saw on every page) and .../rules_on_model/. Never
-                    touches data/articles. Seconds per issue.
-    s09_assembly_eval    the assembly harness: every candidate (model,
-                    rules, rules-on-model) against the human-verified
-                    records, the contents page, and structural checks
-                    → data/assembly_v2/eval.json; the /assembly page of
-                    the site shows it. --yardstick <archive> replays the
-                    annotations over an archived assembly after a switch.
+    s08_assemble_rules   assembly v2, the rules engine (2026-09-02;
+                    v2.1 on 2026-09-03): contents page, folios, running
+                    heads, display title with by-line, chapter heads,
+                    teaser, fillers, "continued from" notices →
+                    data/assembly_v2/rules/<id>/articles.json (+
+                    analysis.json: what the rules saw on every page) and
+                    .../rules_on_model/. Never touches data/articles.
+                    Seconds per issue. v2.1: the contents page has
+                    authority over title and author (the page's forms are
+                    kept as title_as_printed / author_as_printed, with
+                    title_source / author_source); chapters listed with
+                    number and title apart; advertisements classified
+                    (ad_class house_next_issue · house_self · house_sibling
+                    · house_form · trade · classified, advertiser) with
+                    the works a house announcement names (announces) and
+                    the excerpt it may quote (contains_excerpt, excerpt_of
+                    — such records stay out of the reuse inventory);
+                    ballots and coupons are their own record; a plain
+                    advertisement page inside a piece suspends the piece;
+                    matter under a "continued on" / "[turn page]" notice
+                    is advertising; subheadings inside a piece carry the
+                    role heading (the site shows it as "section").
+    s09_assembly_eval    the assembly harness: every candidate (live —
+                    whatever data/articles holds, the rules' records
+                    since the switch —, rules, rules-on-model) against
+                    the human-verified records, the contents page, and
+                    structural checks → data/assembly_v2/eval.json; the
+                    /assembly page of the site shows it. --yardstick
+                    <archive> replays the annotations over an archived
+                    assembly after a switch.
     scripts/switch_assembly.py   makes a v2 candidate the live assembly,
                     moving the old assembly and the annotation logs to
                     data/assembly_archive/<stamp>/ (nothing deleted;
                     README.txt says how to undo). Run r00 again after.
-                    docs/assembly-v2.md has the rules and the results.
+                    --refresh (2026-09-03): a new run of the same rules
+                    replaces the live records and KEEPS the annotation
+                    logs — every candidate record takes the id of the
+                    live record with the same regions (or the best
+                    overlap ≥ 0.5), new records get fresh ids; an issue
+                    whose annotated records would change regions is
+                    refused unless --force (the replay re-places moved
+                    regions by key). The old live file is kept under
+                    data/assembly_archive/<stamp>_refresh/. Always
+                    --dry-run first; run r00 and rebuild the explorer
+                    after. docs/assembly-v2.md has the rules and results.
 
 ## The text-reuse pipeline (the r-series) and the reuse pages
 

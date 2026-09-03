@@ -19,8 +19,9 @@ Three yardsticks, from the strongest to the widest:
      records, text regions owned by none, story records that begin with a
      chapter head, story records with no author, records per type.
 
-Candidates compared: the live assembly (s07, model), rules-only (s08) and
-rules-on-model (s08). Output: data/assembly_v2/eval.json and a plain-text
+Candidates compared: the live assembly (data/articles: s07's model output
+until the switch of 2026-09-02, the rules' records since — the backend
+field says which), rules-only (s08) and rules-on-model (s08). Output: data/assembly_v2/eval.json and a plain-text
 table; docs/assembly-v2.md carries the discussion.
 
     python3 pipeline/s09_assembly_eval.py --all
@@ -41,7 +42,7 @@ from s08_assemble_rules import sim, norm, chapter_head, load_pages, region_text 
 
 PIECE_TYPES = ("story", "serial_part", "poem", "letters", "feature")
 STORY_TYPES = ("story", "serial_part")
-VARIANTS = [("model", "data/articles/{iid}/articles.json"),
+VARIANTS = [("live", "data/articles/{iid}/articles.json"),          # whatever is live: s07 until 2026-09-02, the rules since
             ("rules", "data/assembly_v2/rules/{iid}/articles.json"),
             ("rules_on_model", "data/assembly_v2/rules_on_model/{iid}/articles.json")]
 

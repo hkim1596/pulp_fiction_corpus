@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.11.1"
+APP_VERSION = "0.12.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -270,6 +270,9 @@ def article_by_id(aid):
     return None, None
 
 
+CHAPTER_HEAD_RE = re.compile(r"^\s*(?:CHAPTER|Chapter|CHAP\.|PART|Part)\s+[IVXLC\d]+\b|^\s*[IVXL]{1,6}\.?\s*$|^\s*\d{1,2}\.?\s*$|"
+                             r"^\s*(?:[IVXL]{1,6}|\d{1,2})\.\s+[A-Z][^\n]{2,60}$")
+
 STATUS_CHIP = {
     "auto": "<span class='chip stA'>automatic</span>",
     "modified": "<span class='chip stM'>modified</span>",
@@ -330,10 +333,23 @@ function toggleSel(g){
 function addSelected(){
   if(SEL.length)post({act:'moveto_many',frags:SEL.join(','),to_id:AID});
 }
+function newFromSelected(){
+  if(SEL.length)post({act:'new_from',frags:SEL.join(','),type:'story'});
+}
 function clearSel(){
   SEL=[];
   document.querySelectorAll('.selbox').forEach(function(e){e.classList.remove('selbox');});
   updSelbar();
+}
+function pickedKeys(){
+  return [].map.call(document.querySelectorAll('.pick:checked'),function(c){return c.getAttribute('data-key');});
+}
+function updCardbar(){
+  var b=document.getElementById('cardbar');
+  if(!b)return;
+  var n=pickedKeys().length;
+  document.getElementById('cb_n').textContent=n;
+  b.style.display=n?'block':'none';
 }
 document.addEventListener('click',function(ev){
   var t=ev.target.closest('[data-selkey]');
@@ -368,8 +384,20 @@ window.addEventListener('load',function(){
   if(cl)cl.onclick=function(){document.getElementById('inclpanel').style.display='none';return false;};
   var sb=document.getElementById('sb_add');
   if(sb)sb.onclick=addSelected;
+  var sn=document.getElementById('sb_new');
+  if(sn)sn.onclick=newFromSelected;
   var sc=document.getElementById('sb_clear');
   if(sc)sc.onclick=clearSel;
+  document.querySelectorAll('.pick').forEach(function(c){
+    c.addEventListener('click',function(e){e.stopPropagation();});
+    c.addEventListener('change',updCardbar);
+  });
+  var cn=document.getElementById('cb_new');
+  if(cn)cn.onclick=function(){var k=pickedKeys();if(k.length)post({act:'new_from',frags:k.join(','),type:'story'});};
+  var co=document.getElementById('cb_out');
+  if(co)co.onclick=function(){var k=pickedKeys();if(k.length)post({act:'remove_frags',frags:k.join(',')});};
+  var cc=document.getElementById('cb_clear');
+  if(cc)cc.onclick=function(){document.querySelectorAll('.pick:checked').forEach(function(c){c.checked=false;});updCardbar();};
 });
 function showIncl(g){
   var p=document.getElementById('inclpanel');
@@ -401,6 +429,9 @@ if(CAN){
   var cards=document.getElementById('cards');
   if(cards){
     var dragging=null;
+    cards.querySelectorAll('.pick').forEach(function(ck){
+      ck.addEventListener('mousedown',function(e){e.stopPropagation();});
+    });
     cards.querySelectorAll('.card').forEach(function(c){
       c.addEventListener('dragstart',function(){dragging=c;c.classList.add('dragging');});
       c.addEventListener('dragend',function(){c.classList.remove('dragging');dragging=null;});
@@ -650,12 +681,24 @@ def effective_doc(iid):
     user_furniture = []
     overrides = {}
     # roles the machine assigned (assembly v2: title, subtitle, author, teaser, chapter, caption,
-    # heading); human role events replayed below override them
+    # heading); human role events replayed below override them. The workbench's names: a chapter
+    # region is chapter_number when it is the numbered line, else chapter_title; a heading inside
+    # the piece (a letter's title in The Eyrie) is a section
     roles = {}
     for a in arts:
         for k, role in (a.get("roles") or {}).items():
-            if role in ("title", "subtitle", "author", "teaser"):
+            if role in ("title", "subtitle", "author", "teaser", "caption"):
                 roles[k] = role
+            elif role == "chapter":
+                try:
+                    pno, r = k.split(":")
+                    regs = page_regions(iid, int(pno))
+                    txt = (regs[int(r)].get("text") or "") if 0 <= int(r) < len(regs) else ""
+                except Exception:
+                    txt = ""
+                roles[k] = "chapter_number" if CHAPTER_HEAD_RE.match(txt.strip().split("\n")[0] if txt.strip() else "") else "chapter_title"
+            elif role == "heading":
+                roles[k] = "section"
     n_manual = 0
     uns = []
     for u in doc.get("unsorted", []):
@@ -727,10 +770,42 @@ def effective_doc(iid):
         aid = ev.get("article_id")
         a = byid.get(aid)
         if act == "set_meta" and a:
-            for k in ("title", "author", "type"):
+            for k in ("title", "author", "type", "ad_class", "advertiser", "excerpt_of", "n_items"):
                 if k in ev:
                     a[k] = ev[k] or None
+            if "contains_excerpt" in ev:
+                a["contains_excerpt"] = bool(ev["contains_excerpt"])
             touch(a, ev)
+        elif act == "new_article":
+            # several boxes into one new record at once (a story the machine never started, or
+            # boxes taken out of a record and kept aside as one loose record)
+            n_user += 1
+            na = {"article_id": f"{iid}_u{n_user:03d}", "type": ev.get("type") or "story",
+                  "title": ev.get("title") or None, "author": None, "pages": [],
+                  "fragments": [], "text": "", "status": "auto",
+                  "verified_by": None, "verified_at": None,
+                  "modified_by": [], "text_override": None, "last_mod": "",
+                  "flags": (["loose boxes taken out of " + ev["from_id"]] if ev.get("from_id") else [])}
+            for k in ev.get("frags") or []:
+                fr = None
+                for a2 in arts:
+                    hits = [f2 for f2 in a2["fragments"] if fragkey(f2) == k]
+                    if hits:
+                        for f2 in hits:
+                            a2["fragments"].remove(f2)
+                        fr = hits[0]
+                        touch(a2, ev)
+                for f2 in [f2 for f2 in uns if fragkey(f2) == k]:
+                    uns.remove(f2)
+                    if fr is None:
+                        fr = f2
+                if fr is None:
+                    fr = synth(k)
+                if fr is not None:
+                    na["fragments"].insert(insert_pos(na["fragments"], fr), fr)
+            arts.append(na)
+            byid[na["article_id"]] = na
+            touch(na, ev)
         elif act == "set_text" and a:
             a["text_override"] = ev.get("text", "")
             touch(a, ev)
@@ -1020,6 +1095,19 @@ input.pw{font-size:16px;padding:6px;border:1px solid #b8a88e}
 button.go{font-size:15px;padding:6px 16px;border:1px solid #1c1a17;background:#1c1a17;color:#faf7f2}
 .boxlabel{font-size:11px;fill:#7a3020}
 """
+
+
+def _excerpt_of_text(v, display=False):
+    """excerpt_of is a dict {title, author} from the machine or a plain title typed by hand."""
+    if not v:
+        return ""
+    if isinstance(v, dict):
+        t = v.get("title") or ""
+        a = v.get("author") or ""
+        if display and a:
+            a = EX.display_author(a)
+        return t + (f" by {a}" if a else "")
+    return str(v)
 
 
 def esc(s):
@@ -1384,6 +1472,8 @@ class H(BaseHTTPRequestHandler):
         if path == "/activity":
             return self._send(200, self.activity_page())
         if path == "/issues":
+            return self._send(200, EX.issues_page(qs, render=self._page))
+        if path == "/workroom/issues":
             return self._send(200, self.issues_page())
         if path == "/articles":
             return self._send(200, self.articles_page(qs))
@@ -1691,6 +1781,49 @@ administrator approves them.</p>
             ann_append(iid, self.user, "set_meta",
                        {"article_id": aid, "title": get("title"),
                         "author": get("author"), "type": get("type")})
+        elif act == "facts" and art:
+            # the record's facts beyond title/author/type: advertisement class and advertiser,
+            # the work a house announcement quotes (assembly v2.1 fields, correctable by hand)
+            ann_append(iid, self.user, "set_meta",
+                       {"article_id": aid, "type": get("type") or art.get("type"),
+                        "ad_class": get("ad_class"), "advertiser": get("advertiser"),
+                        "excerpt_of": get("excerpt_of"),
+                        "contains_excerpt": bool(get("contains_excerpt"))})
+        elif act == "new_from" and get("frags"):
+            # a new record from the chosen boxes (a story the machine never started)
+            frags = [k.strip() for k in get("frags").split(",") if k.strip()]
+            ann_append(iid, self.user, "new_article",
+                       {"article_id": aid, "frags": frags, "type": get("type") or "story",
+                        "title": get("title") or None})
+            doc2 = effective_doc(iid)
+            newest = max((a["article_id"] for a in doc2["articles"] if "_u" in a["article_id"]),
+                         key=lambda x: int(x.rsplit("_u", 1)[-1]), default=None)
+            back = f"/article/{newest}" if newest else back
+        elif act == "remove_frags" and art and get("frags"):
+            # take the chosen boxes out of this record and keep them aside as one loose record
+            frags = [k.strip() for k in get("frags").split(",") if k.strip()]
+            ann_append(iid, self.user, "new_article",
+                       {"article_id": aid, "frags": frags, "type": "other",
+                        "title": f"loose boxes from {aid}", "from_id": aid})
+        elif act == "attach_pages" and art and get("from_page"):
+            # every box on pages N..M (page furniture left out; boxes already here skipped)
+            per_page, _ids = issue_frag_map(iid, doc)
+            try:
+                p0 = int(get("from_page"))
+                p1 = int(get("to_page") or p0)
+            except ValueError:
+                p0 = p1 = None
+            if p0 is not None:
+                p1 = max(p0, min(p1, p0 + 30))
+                for pno in sorted(p for p in per_page if p0 <= p <= p1):
+                    for e in per_page[pno]:
+                        if e["kind"] == "furniture":
+                            continue
+                        if e["kind"] == "article" and e["owner"] == aid:
+                            continue
+                        ann_append(iid, self.user, "move_frag",
+                                   {"article_id": aid, "frag": e["key"],
+                                    "to_id": aid})
         elif act == "text" and art:
             ann_append(iid, self.user, "set_text",
                        {"article_id": aid, "text": get("text")})
@@ -1872,11 +2005,14 @@ click first.</p></div>"""
             "accuracy measurement. Click an issue to see its pages, every "
             "processing stage, and downloads.")
             + f"<h1>Pilot issues ({n_dl} of {len(c['issues'])} downloaded)</h1>"
+            + "<p class='muted'>This is the workroom's list of the pilot's ten issues with their processing stages. "
+              "The explorer's issue list, built for the whole corpus, is <a href='/issues'>issues</a>; every step "
+              "against the archive's collection is on <a href='/reuse/progress'>progress</a>.</p>"
             + state
             + "<table><tr><th>issue</th><th>genre</th><th>pages</th>"
               "<th>gold</th><th>stages present</th></tr>"
             + "".join(rows) + "</table>")
-        return self._page("Issues", body, path="/issues")
+        return self._page("Pilot issues (workroom)", body, path="/workroom/issues")
 
     def issue_page(self, iid):
         info = issue_by_id(iid)
@@ -1928,7 +2064,7 @@ click first.</p></div>"""
         rows = "".join(
             f"<tr><td><a href='/article/{a['article_id']}'>"
             f"{esc(a.get('title') or '(untitled)')}</a></td>"
-            f"<td>{esc(a.get('author') or '')}</td>"
+            f"<td>{esc(EX.display_author(a.get('author') or ''))}</td>"
             f"<td>{esc(a.get('type') or '')}</td>"
             f"<td>{STATUS_CHIP.get(a.get('status'), '')}</td>"
             f"<td class='num'>{a['pages'][0] if a['pages'] else '?'}–"
@@ -2118,7 +2254,7 @@ click first.</p></div>"""
             info = cfgmap.get(r["issue"], {})
             trows += (f"<tr><td><a href='/article/{r['article_id']}'>"
                       f"{esc(r.get('title') or '(untitled)')}</a></td>"
-                      f"<td>{esc(r.get('author') or '')}</td>"
+                      f"<td>{esc(EX.display_author(r.get('author') or ''))}</td>"
                       f"<td>{esc(r.get('type') or '')}</td>"
                       f"<td>{STATUS_CHIP.get(r.get('status'), '')}</td>"
                       f"<td><a href='/issue/{r['issue']}'>"
@@ -2138,7 +2274,7 @@ click first.</p></div>"""
             "annotator account, to fix and verify it.")
             + f"<h1>Articles ({len(rows)} of {total} · {nv} verified)</h1>"
             + form
-            + ("<table><tr><th>title as printed</th><th>author as printed"
+            + ("<table><tr><th>title as printed</th><th>author"
                "</th><th>type</th><th>status</th><th>issue</th><th>pages"
                "</th><th>words</th></tr>" + trows + "</table>" if trows else
                "<div class='empty'>0 articles match. If the whole table is "
@@ -2157,7 +2293,8 @@ click first.</p></div>"""
         overrides = doc.get("frag_overrides", {})
         roles = doc.get("frag_roles", {})
         ROLE_SEC = {"title": "T", "subtitle": "T", "author": "A", "teaser": "Z"}
-        CHAPTER_ROLES = ("chapter_number", "chapter_title")
+        CHAPTER_ROLES = ("chapter_number", "chapter_title", "section")
+        AD_CLASSES = ("house_next_issue", "house_self", "house_sibling", "house_form", "trade", "classified")
 
         def artopt(o):
             """Readable dropdown label: short id, page range, title."""
@@ -2226,6 +2363,28 @@ click first.</p></div>"""
                         f"placeholder='author as printed'> "
                         f"<select name='type'>{topts}</select> "
                         f"<button>save title / author / type</button></form>")
+            copts = "".join(
+                f"<option value='{c}' {'selected' if c == (art.get('ad_class') or '') else ''}>{c or '(none)'}</option>"
+                for c in ("",) + AD_CLASSES)
+            metaform += ("<details style='margin:0 0 8px'><summary class='muted' style='cursor:pointer'>"
+                         "record facts: advertisement class, advertiser, quoted work</summary>"
+                         "<form class='annform' method='POST' action='/annotate' style='margin:6px 0'>"
+                         + hidden(act="facts")
+                         + f"<input type='hidden' name='type' value='{esc(art.get('type') or 'other')}'>"
+                         f"<label>class <select name='ad_class'>{copts}</select></label> "
+                         f"<label>advertiser <input type='text' name='advertiser' size='24' "
+                         f"value='{esc(art.get('advertiser') or '')}' placeholder='company or magazine'></label> "
+                         f"<label>quotes the work <input type='text' name='excerpt_of' size='24' "
+                         f"value='{esc(_excerpt_of_text(art.get('excerpt_of')))}' placeholder='title of the quoted story'></label> "
+                         f"<label><input type='checkbox' name='contains_excerpt' value='1' "
+                         f"{'checked' if art.get('contains_excerpt') else ''}> contains a verbatim excerpt "
+                         "(kept out of the reuse inventory)</label> "
+                         "<button>save facts</button></form>"
+                         "<p class='muted' style='font-size:12px;margin:2px 0'>Classes: house_next_issue = the magazine "
+                         "announcing its next issue; house_self = subscriptions, back numbers, the magazine about itself; "
+                         "house_sibling = the publisher's other magazines; house_form = the magazine's own ballot or coupon; "
+                         "trade = an outside advertiser; classified = a block of small classified advertisements.</p>"
+                         "</details>")
 
         # LEFT: every page of the ISSUE (lazy-loaded), so missing segments
         # anywhere can be found and pulled in; opens at the story's first page
@@ -2368,6 +2527,8 @@ click first.</p></div>"""
                                     role="chapter_number")
                              + mini("chapter title", act="role", frag=k,
                                     role="chapter_title")
+                             + mini("section", act="role", frag=k,
+                                    role="section")
                              + mini("teaser", act="role", frag=k,
                                     role="teaser"))
                 btns += (mini("not story text", act="furniture", frag=k)
@@ -2392,9 +2553,11 @@ click first.</p></div>"""
                   + (" c" if role in CHAPTER_ROLES else "")
                   + f"'>{esc(role.replace('_', ' '))}</span>") if role else ""
             drag = " draggable=true" if (can and in_body) else ""
+            pick = (f"<input type='checkbox' class='pick' data-key='{k}' title='choose this segment "
+                    f"(then: move the chosen segments to a new record, or take them out)'> " if (can and not manual) else "")
             sec[s_key] += (
                 f"<div class='card r{s_key}' data-key='{k}'{drag}>"
-                f"<div class='ch'>"
+                f"<div class='ch'>{pick}"
                 f"<span class='idchip' data-selkey='{k}'>{fid}</span>{rc}"
                 f"<span class='muted'>"
                 + ("added by annotator" if manual else f"page {fr['page']}")
@@ -2501,16 +2664,46 @@ click first.</p></div>"""
                 f"{art['pages'][-1] if art['pages'] else '?'} · "
                 f"{len((art.get('text') or '').split())} words · assembled "
                 f"by {esc(doc.get('backend', '?'))}")
+        facts = []
+        if art.get("ad_class"):
+            facts.append(f"advertisement class <b>{esc(art['ad_class'])}</b>")
+        if art.get("advertiser"):
+            facts.append(f"advertiser {esc(art['advertiser'])}")
+        if art.get("n_items"):
+            facts.append(f"{art['n_items']} items")
+        if art.get("announces"):
+            facts.append("announces " + "; ".join(
+                esc(x.get("title") or "?") + (f" by {esc(EX.display_author(x['author']))}" if x.get("author") else "")
+                for x in art["announces"][:8]))
+        if art.get("contains_excerpt"):
+            facts.append("<b>contains a verbatim excerpt</b>"
+                         + (f" of {esc(_excerpt_of_text(art.get('excerpt_of'), display=True))}" if art.get("excerpt_of") else "")
+                         + " — left out of the reuse inventory")
+        if art.get("chapters"):
+            facts.append("chapters: " + "; ".join(
+                (esc(c.get("number") or "") + (" " if c.get("number") and c.get("title") else "") + esc(c.get("title") or "")).strip()
+                + (f" (p.{c['page']})" if c.get("page") else "") for c in art["chapters"][:40]))
+        if art.get("flags"):
+            facts.append("machine notes: " + "; ".join(esc(f) for f in art["flags"][:10]))
+        facts_html = (f"<p class='muted' style='font-size:12.5px'>{' · '.join(facts)}</p>" if facts else "")
         guestnote = ("" if can else
                      "<p class='muted'>You are viewing as guest — log in "
                      "with an annotator account to correct or verify.</p>")
         artlinks = " ".join(
             f"<a href='#' onclick='scrollLeftTo({p});return false'>{p}</a>"
             for p in art["pages"][:20])
+        attach = ""
+        if can:
+            attach = ("<form class='mini' method='POST' action='/annotate' style='display:inline' "
+                      "title='every box on these pages joins this article (page furniture left out; at most 30 pages)'>"
+                      + hidden(act="attach_pages")
+                      + " · attach pages <input type='number' name='from_page' min='1' style='width:54px'> to "
+                      "<input type='number' name='to_page' min='1' style='width:54px'> "
+                      "<button>attach</button></form>")
         pjump = (f"<div class='pgjump'>whole issue, {len(allpages)} pages · "
                  f"go to page <input id='pgjump' type='number' min='1' "
                  f"max='{allpages[-1] if allpages else 1}'> "
-                 f"<button onclick='return pgjump()'>go</button>"
+                 f"<button onclick='return pgjump()'>go</button>" + attach
                  + (f" · this article: {artlinks}" if artlinks else "")
                  + "<br><span class='muted'>solid = this article (red tint "
                  "= title, green = author) · long dash = other articles · "
@@ -2543,7 +2736,13 @@ click first.</p></div>"""
                "<span id='sb_n'>0</span> boxes chosen · "
                "<button class='go' id='sb_add'>add them all to this "
                "article</button> "
+               "<button class='go' id='sb_new'>make a NEW record from them</button> "
                "<button id='sb_clear'>clear choice</button></div>"
+               "<div id='cardbar' class='selbar' style='display:none'>"
+               "<span id='cb_n'>0</span> of this article's segments chosen · "
+               "<button class='go' id='cb_new'>move them to a NEW record</button> "
+               "<button class='go' id='cb_out'>take them out (kept aside as loose boxes)</button> "
+               "<button id='cb_clear'>clear choice</button></div>"
                if can else ""))
         script = ("<script>"
                   + WB_JS.replace("__ISSUE__", iid).replace("__AID__", aid)
@@ -2571,9 +2770,17 @@ click first.</p></div>"""
             "all: 'not story text'. A segment that belongs to a "
             "different story: 'this segment belongs in'. A whole record "
             "that is really a piece of this one: 'pull it into this "
-            "article' at the bottom. Clicking a segment's id shows its "
-            "box on the scan. The page remembers where you were after "
-            "every action. When everything is right, press 'mark as "
+            "article' at the bottom. A STORY THE MACHINE NEVER STARTED: "
+            "click its boxes on the scans, then 'make a NEW record from "
+            "them'. TO TAKE SEGMENTS OUT: tick their boxes on the cards, "
+            "then 'take them out' (they wait as one loose record) or 'move "
+            "them to a NEW record'. TO ATTACH WHOLE PAGES: 'attach pages N "
+            "to M' at the top of the scans. 'section' marks a subheading "
+            "inside a piece (a letter's title in a readers' column). The "
+            "record's advertisement class and the work an announcement "
+            "quotes are under 'record facts'. Clicking a segment's id "
+            "shows its box on the scan. The page remembers where you were "
+            "after every action. When everything is right, press 'mark as "
             "verified'. Every action is recorded under your name; the "
             "machine's output is never overwritten, so nothing you do "
             "can destroy anything. Full walkthrough: the guide page in "
@@ -2581,8 +2788,16 @@ click first.</p></div>"""
             + f"<h1>{esc(art.get('title') or '(untitled)')}</h1>"
             + (f"<p class='subtitleline'>{esc(art['subtitle'])}</p>"
                if art.get("subtitle") else "")
-            + (f"<p>by {esc(art['author'])}</p>" if art.get("author") else "")
+            + (f"<p>by {esc(EX.display_author(art['author']))}"
+               + (f" <span class='muted' style='font-size:12px'>(stored as printed: {esc(art['author'])}"
+                  + (f"; the page prints '{esc(art['author_as_printed'])}'" if art.get("author_as_printed") else "")
+                  + (f"; from the {esc(art['author_source'])}" if art.get("author_source") else "") + ")</span>")
+               + "</p>" if art.get("author") else "")
+            + (f"<p class='muted' style='font-size:12.5px'>title from the {esc(art['title_source'])}"
+               + (f"; the page prints '{esc(art['title_as_printed'])}'" if art.get("title_as_printed") else "") + "</p>"
+               if art.get("title_source") else "")
             + f"<p class='muted'>{meta}</p>"
+            + facts_html
             + f"<p>{stline}</p>" + guestnote + metaform
             + "<div class='wb'><div class='wbleft'>" + pjump + left + "</div>"
             + "<div class='wbright'>" + sections
@@ -2700,15 +2915,32 @@ reading order is right. Press title / subtitle /
 author on the segments that show those words as printed
 &mdash; that fills the article's name fields. Mark chapter headings
 with chapter no. / chapter title (they stay in the text,
-just labeled). Expel anything that is not story text. Double-click a
-card's text to fix reading errors.</p>
+just labeled), and a subheading inside a piece (a letter's title in a
+readers' column) with section. Expel anything that is not story
+text. Double-click a card's text to fix reading errors.</p>
+<p>4b. Three shortcuts added on 3 September 2026. A story the machine
+never started: click its boxes on the scans (several pages if need
+be), then press make a NEW record from them on the dark bar.
+Segments that do not belong here: tick the boxes on their cards, then
+take them out (they wait as one loose record, findable on the
+articles list) or move them to a NEW record. A story that runs
+over many pages: attach pages N to M at the top of the scans
+takes every box on those pages in one go. Advertisements carry a
+class (house_next_issue, house_self, house_sibling, house_form, trade,
+classified) and an advertiser, and a house announcement that quotes a
+story is marked contains a verbatim excerpt so that the quoted
+text stays out of the reuse inventory; all of these are under record
+facts at the top of the page and can be corrected there.</p>
 <p>5. When the article reads correctly from start to finish, press
 mark as verified. Done &mdash; the record now carries your name
 and the time, and verify, then next unverified takes you
 straight to the next one.</p>
 
 <h2>What the other pages are for</h2>
-<p><a href='/issues'>issues</a>: the ten pilot magazines; each opens
+<p><a href='/issues'>issues</a>: every complete issue in the explorer
+(built for the whole corpus: paged, with filters); the workroom's own
+list of the ten pilot issues with their processing stages is
+<a href='/workroom/issues'>workroom/issues</a>. Each issue opens
 page by page with the scan next to the text at every cleaning stage.
 <a href='/articles'>articles</a>: every printed unit found so far,
 searchable by title and author. <a href='/method'>method</a>: exactly

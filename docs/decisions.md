@@ -79,3 +79,33 @@ Dropbox share carries the full context of each.
 - 2026-09-02 — The site went back to the main server the same day
   (hand-back through the MacBook; docs/backup-server.md); the Studio
   keeps its tunnel for ssh and returns to the nightly pull.
+- 2026-09-03 — The metadata survey of the archive's collection may run
+  before protocol acceptance ("Yes, metadata only, now"): one record per
+  item through the search API, no page images, no text; the
+  downloader's gate is untouched. The site's boards show the whole
+  collection, English and not, and the project's progress against the
+  working corpus (English or unmarked, fiction magazines).
+- 2026-09-03 — Advertisements carry an ad_class rather than new top-level
+  types, as Sujin Kang proposed (house_next_issue, house_self,
+  house_sibling, trade, classified with n_items) plus house_form for the
+  magazine's own ballots and coupons, and an advertiser field; a house
+  announcement that quotes a story verbatim is marked contains_excerpt
+  / excerpt_of and stays out of the reuse inventory, with the author
+  field empty (the announced works are in `announces`).
+- 2026-09-03 — Author values are stored as printed and shown in title
+  case everywhere; the workbench shows the printed form in fine print.
+- 2026-09-03 — The contents page has authority over a story's title and
+  author ("Titles and authors on the table of contents should have more
+  authority than on each story's own page"); the page's own forms are
+  kept as title_as_printed / author_as_printed, and a strong
+  disagreement is flagged for a person. The same words in a better
+  type case (the page's mixed case against the contents page's
+  capitals) are not a disagreement.
+- 2026-09-03 — /issues becomes the explorer's list, built for the whole
+  corpus; the workroom's table of the ten pilot issues moves to
+  /workroom/issues.
+- 2026-09-03 — A new run of the rules goes live through
+  scripts/switch_assembly.py --refresh, which keeps record ids and the
+  annotation logs (an annotated record whose regions changed refuses
+  the issue unless --force); the plain switch, which archives the
+  logs, is for a change of method, not of version.

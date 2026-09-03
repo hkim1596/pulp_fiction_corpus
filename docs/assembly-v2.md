@@ -168,6 +168,112 @@ the harness runs in seconds.
     python3 scripts/switch_assembly.py --variant rules --dry-run
     python3 scripts/switch_assembly.py --variant rules    # archive and go live (decision of 2026-09-02)
     python3 pipeline/s09_assembly_eval.py --all --yardstick data/assembly_archive/<stamp>
+    python3 scripts/switch_assembly.py --variant rules --refresh --dry-run   # a new run of the same rules,
+    python3 scripts/switch_assembly.py --variant rules --refresh             # ids and annotation logs kept
 
 Both stages have --selftest / --issue forms; the site's /assembly page
 shows eval.json, per issue and per piece, with links to the scans.
+
+## v2.1 (3 September 2026): the contents page's authority, chapters, advertisements
+
+The second round of feedback (Heejin Kim and Sujin Kang, 2–3 September)
+asked for four things of the assembler, and v2.1 does them.
+
+The contents page has authority over title and author. Where v2.0
+weighed the page's display lettering against the contents page by the
+issue's own vocabulary, v2.1 takes the contents page's words whenever a
+record is matched to an entry, and keeps the page's forms beside them
+(title_as_printed, author_as_printed; title_source and author_source
+say "contents" or "page"). The same words set in a better type case —
+"The Beetle Horde" on the page against THE BEETLE HORDE on the
+contents page — are not a disagreement, and the page's case is kept.
+A strong disagreement (similarity under 0.55 for a title, 0.6 for an
+author) is flagged for a person. When two entries by one author fall on
+one page (a story and a poem), the entry whose title the page prints
+is the match.
+
+Chapters are listed. A chapter head's number and title are split by a
+text rule on the region — "CHAPTER II" with "The Thing in the Vault" on
+the next line, or "IV. The Coming of the Beast" on one line — into
+`chapters: [{number, n, title, page}]`; the regions keep the chapter
+role and stay in the text. Subheadings inside a piece that are not
+chapter heads (the letter titles in The Eyrie) carry the role heading,
+which the workbench shows and sets as "section".
+
+Advertisements carry a class and an advertiser, as Sujin proposed:
+house_next_issue (the magazine announcing its next issue: "Coming Next
+Month", "In the Next Issue"), house_self (subscriptions, back numbers,
+the cover strip and title page, the magazine about itself),
+house_sibling (the publisher's other magazines: a magazine name that is
+not this one, with sale words, and no company), house_form (the
+magazine's own ballot or coupon — "My favorite stories in the May WEIRD
+TALES are:", the Eyrie ballot, cut apart from the department around it;
+a trade coupon joins the advertisement above it), classified (four or
+more category headers with four or more addresses; n_items), and trade
+(everything else; the advertiser is the company's signature line —
+"Co.", "Inc.", "Institute", "School", "Laboratories" … — read from the
+copy, or the name before "Dept."). A house announcement's works are
+listed in `announces` (the title and by-line pairs the analysis had
+rejected as starts inside the block, and "TITLE, by Author" lines in
+the copy); when the block carries 120 or more words of narrative prose
+it quotes a story — `contains_excerpt`, with `excerpt_of` the announced
+work whose title follows the prose — and the record stays out of the
+reuse inventory. Advertisement records have no author; the announced
+authors are in `announces`.
+
+Four rules changed with these. An announcement block that begins on a
+page with no filler header of its own (the title, the by-line, the blurb
+and the quoted excerpt) is house advertising to the end of the page,
+and so is the block under a "Coming Next Month" header that the
+excerpt follows; before, the excerpt's prose sent the rest of the page
+back to the department (Weird Tales 1934-05, page 123). A ballot or
+coupon closes an advertisement block, and prose that starts
+mid-sentence resumes the piece after it. A page of advertising inside a
+piece that paused mid-sentence suspends the piece when the page has no
+narrative prose and many selling words (the music school page inside
+Headquarters in Thrilling Detective 1948-12, the subscription page
+inside The Eyrie); the piece resumes on the next page with prose. What
+is printed under a "continued on page N" or "[Turn page]" notice is
+advertising, one record per display header (Thrilling Detective's
+continuation pages); two display lines with nothing between them are
+one headline. A filler header above a title ("NEXT MONTH") stops the
+title walk-up, so the announcement's by-line is rejected as a start
+rather than taken as a subtitle.
+
+Results on the ten pilot issues, the live v2.0 records against v2.1
+(the harness's "live" row is whatever data/articles holds):
+
+    issue        variant         pieces found title author clean cover xstart over | recs  dbl unas chap noauth
+    ALL          live (v2.0)        108   108   108  87/88   103  0.95      5    0 |  549    0    0    0      4
+    ALL          rules (v2.1)       108   108   108  88/88   105  0.95      3    0 |  559    0    0    0      4
+
+Two of the five "story starts inside a piece" were announcements typed
+as stories (Wizard's Isle on the last page of The Eyrie; Let's Have
+Some Murder under Next Issue's Headliners) and are advertisements now;
+one signed piece more gets its author from the contents page. Across
+the ten issues 559 records: 370 trade, 24 house_self, 21
+house_next_issue, 17 classified, 1 house_form; one house announcement
+quotes a story (The Colossus of Ylourgne, Weird Tales 1934-05). The
+verified Cave of Horror is still reproduced exactly. Coverage moves a
+little because advertisement pages inside a piece's span no longer
+count as the piece's pages — the metric's limitation, not a loss.
+
+Known limits of the classifier, for the next round: an advertisement
+that quotes the magazine's name in a blurb ("Readers of this magazine
+will want to buy this book" — a university press advertisement in
+Galaxy) reads as house_self; a book advertisement with several display
+lines is cut into several records; the pilot has few sibling-magazine
+advertisements to test house_sibling on; small classified blocks after
+an announcement can read as "classified" when they are three unrelated
+advertisements. The workbench's record facts form corrects all of these
+by hand, and the harness will say when the rules catch up.
+
+Going live: the plain switch of 2 September archived the annotation
+logs because the method changed; a new version of the same rules goes
+live with `scripts/switch_assembly.py --refresh`, which keeps the record
+ids (same regions, or the best overlap) and the logs, and refuses an
+issue whose annotated records would change regions unless --force. On 3
+September the one annotated record (The Stolen Body, Weird Tales
+1925-11: three actions by Heejin) lost page 133's six regions to a
+house advertisement that v2.1 reads correctly; the refresh was forced
+and the replay re-placed the annotated region by its key.
