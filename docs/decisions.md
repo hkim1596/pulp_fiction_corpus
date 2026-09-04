@@ -109,3 +109,87 @@ Dropbox share carries the full context of each.
   annotation logs (an annotated record whose regions changed refuses
   the issue unless --force); the plain switch, which archives the
   logs, is for a change of method, not of version.
+- 2026-09-04 — A record a person has verified is never changed by a
+  machine run. scripts/switch_assembly.py --refresh carries a verified
+  record (a verify event with no unverify after it) into the new file
+  as it is and takes its regions away from the candidate; there is no
+  flag to override this — to let the machine at it, unverify on the
+  site first. Every other annotated record whose regions would change
+  is reported, forced or not. Made after the forced refresh of 4
+  September changed two verified records (A Loaf of Bifield, The
+  Stolen Body) and the last page of The Demolished Man.
+- 2026-09-04 — The credit line under a by-line ("Author of 'Men Like
+  Gods,' etc.") carries the teaser role on the workbench (Heejin: as he
+  marked it on The Stolen Body); it is never reading text nor page
+  furniture, the record's teaser field keeps the blurb, and the credit
+  text is exported as author_credit.
+- 2026-09-04 — Page furniture stays outside the record: running heads,
+  page numbers, printer's marks and illustration captions (the machine's
+  and the verified records' convention). Sujin, who had been keeping
+  captions inside the story record, is told in the guide; her records
+  are not changed.
+- 2026-09-04 — The roles above a story head follow Sujin's records: a
+  second setting of the title is title, the blurb is teaser, a kicker
+  or type label is subtitle, a synopsis heading ("The Story Thus Far")
+  is heading. Inside a story a display line that is not a chapter head
+  has no role (the author's typography stays in the text); section is
+  for the headings of departments (The Eyrie's letters, a feature's
+  topics). "PART ONE" and "I.—THE MURDER CLUB" are chapter heads.
+- 2026-09-04 — The Stolen Body keeps its verified state including the
+  two Next Month lines on p. 132 that belong to the announcement of
+  Tenants of Broussac; Heejin takes them out on the workbench and
+  verifies again ("I will, on the workbench").
+- 2026-09-04 (round 3) — The types gain house and lose serial_part, as
+  Sujin Kang proposed on 3 September: house is the publisher's own
+  matter (next-issue announcements, story excerpts, coupons and
+  ballots, subscription appeals, the masthead), told from ad, an
+  outside advertiser's copy; the six advertisement classes stay as a
+  field derived by rule. A serial instalment is a story with serial
+  fields (part_label, part_n, part_total, source, the work's title
+  without the marker) — a relation between issues, not a kind of unit;
+  the machine links instalments across issues when both are in the
+  corpus (Heejin: "combine these two parts into one once both stories
+  are processed"). The old dropdown item replays as story with the
+  annotator as the serial's source. Text reuse leaves out house and ad
+  by type.
+- 2026-09-04 (round 3) — The workbench follows Heejin's hierarchy: at
+  the top, the contents page, an article (listed on the contents page)
+  or a non-article; then the type; then, for a story, Title, Subtitle,
+  Author, Body text, Chapter info (chapter no., chapter title, section)
+  and Paratext. Paratext is one group with three kinds, as Sujin needs
+  them told apart: teaser (editorial text about the story, kept as
+  metadata), synopsis (the recap of earlier instalments — the story's
+  own earlier text, left out of the reading text and of the reuse
+  inventory; the machine marks it, a person corrects it) and note
+  (credits, "Illustrated by", a tail line). The credit line's role is
+  therefore note from now on (the teaser role of the morning's decision
+  is kept on the records people had already marked). Any role button
+  replaces the current role in one step; several chosen cards take one
+  role at once; the title, subtitle, author and teaser fields hold the
+  words of every box with that role, in reading order.
+- 2026-09-04 (round 3) — Chapter titles: a display line inside a story
+  is a chapter title when it belongs to a series of the same form on
+  different pages (Wild West Weekly's "STAMPEDE OF THE Z BAR L."), never
+  when several sit together on one page (Bester's "Consternation /
+  Alarm / Conviction", a quoted headline). The local language model may
+  later judge the leftover cases from the surrounding boxes as an
+  optional stage (Heejin: "LLM should read context from the surrounding
+  text boxes"); planned, not built.
+- 2026-09-04 (round 3) — "Text in picture" is a kind of page furniture:
+  words the scan read inside a drawing (an illustration page's garbled
+  lines, a text box inside a picture box). The machine marks it; the
+  workbench has a button for it.
+- 2026-09-04 (round 3) — Departments: config/departments.json lists each
+  magazine's standing departments with a type and the usual conductor;
+  a record whose title names one gets the department field and that
+  type. A letters page must hold signed letters (name, city, state);
+  an editor-voiced column with readers quoted inline is a feature
+  (Sujin: Headquarters, The Round-up).
+- 2026-09-04 (round 3) — Sentence case everywhere on the site (menus,
+  buttons, table headers); log-in times on the activity page; the
+  articles list shows stories first, the verified and the modified ones
+  first among them, with a distinct colour for "modified"; the overview
+  charts stories by year and by genre separately; the progress pages
+  draw one bar for the whole collection (28,286 items) with the working
+  corpus, its fiction magazines, and the issues downloaded, processed
+  and fully verified in their own colours.

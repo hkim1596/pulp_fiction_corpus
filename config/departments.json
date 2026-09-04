@@ -1,0 +1,44 @@
+{
+  "_about": "The standing departments of each magazine (feedback of 2026-09-03, Sujin Kang: 'Add a department field … filled from a per-magazine list of department names'). Keys are magazine names as config/pilot_issues.json spells them (matched loosely; '*' applies to every magazine). Each entry: name (as the contents page prints it), also (other spellings), type (feature · letters · house), author (the usual conductor, when the page does not print one). A record whose title names a department gets department = name and, unless the annotators say otherwise, the type given here. Extend this list as magazines are added; the rules never invent departments.",
+  "Weird Tales": [
+    {"name": "The Eyrie", "type": "letters"},
+    {"name": "Weird Story Reprint", "type": "feature"},
+    {"name": "Coming Next Month", "also": ["Next Month"], "type": "house"}
+  ],
+  "Astounding Stories of Super-Science": [
+    {"name": "Editorial", "also": ["The Editor's Page"], "type": "feature", "author": "The Editor"},
+    {"name": "The Readers' Corner", "also": ["Readers' Corner"], "type": "letters"},
+    {"name": "In the Next Issue", "also": ["Next Issue"], "type": "house"}
+  ],
+  "Galaxy Science Fiction": [
+    {"name": "Editor's Page", "also": ["Editorial"], "type": "feature", "author": "H. L. Gold"},
+    {"name": "For Your Information", "type": "feature", "author": "Willy Ley"},
+    {"name": "Galaxy's Five Star Shelf", "also": ["Galaxy's 5 Star Shelf", "Five Star Shelf"], "type": "feature", "author": "Groff Conklin"},
+    {"name": "Coming Up", "also": ["Coming Up . . .", "Coming Up..."], "type": "house"},
+    {"name": "Next Question", "type": "house"}
+  ],
+  "Thrilling Detective": [
+    {"name": "Headquarters", "type": "feature", "author": "The Editor"},
+    {"name": "Famous Crimes", "type": "feature"},
+    {"name": "Baffler Contest", "also": ["The Baffler"], "type": "feature"},
+    {"name": "Coming Next Month", "also": ["Next Month", "Don't Fail to Read These Thrillers!", "In Next Month's Thrilling Detective"], "type": "house"}
+  ],
+  "Western Story Magazine": [
+    {"name": "The Round-up", "also": ["The Roundup", "Round-up"], "type": "feature", "author": "The Editors"},
+    {"name": "Mines and Mining", "type": "feature", "author": "J. A. Thompson"},
+    {"name": "The Hollow Tree", "type": "letters", "author": "Helen Rivers"},
+    {"name": "Where to Go and How to Get There", "type": "feature", "author": "John North"},
+    {"name": "Guns and Gunners", "type": "feature", "author": "Lieut. Charles E. Chapel"},
+    {"name": "Missing", "type": "feature"},
+    {"name": "Interesting and True", "type": "feature"},
+    {"name": "Coming Next Week", "also": ["Next Week", "In Next Week's Issue"], "type": "house"}
+  ],
+  "Wild West Weekly": [
+    {"name": "Fiddlin' Joe's Song Corral", "also": ["Song Corral"], "type": "feature"},
+    {"name": "The Wranglers Corner", "also": ["The Wranglers' Corner", "Wranglers Corner"], "type": "feature", "author": "The Range Boss"},
+    {"name": "Comin' Next Week!", "also": ["Comin' Next Week", "Coming Next Week", "Next Week"], "type": "house"}
+  ],
+  "*": [
+    {"name": "Coming Next Month", "also": ["Next Month", "Coming Next Issue", "In the Next Issue", "Next Issue"], "type": "house"}
+  ]
+}

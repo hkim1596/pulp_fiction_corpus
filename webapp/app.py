@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.12.1"
+APP_VERSION = "0.13.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -283,11 +283,22 @@ STATUS_CHIP = {
 WB_JS = r"""
 var ISSUE="__ISSUE__", AID="__AID__", CAN=__CAN__, FIRSTPG=__FIRSTPG__;
 var SEL=[];
+function leftPage(){
+  var wl=document.querySelector('.wbleft');
+  if(!wl)return null;
+  var top=wl.getBoundingClientRect().top,best=null;
+  document.querySelectorAll('.wbleft .scanwrap').forEach(function(el){
+    var r=el.getBoundingClientRect();
+    if(best===null&&r.bottom>top+4){best={pg:el.id.replace('pg',''),d:top-r.top};}
+  });
+  return best;
+}
 function saveScroll(){
   try{
     var wl=document.querySelector('.wbleft'),wr=document.querySelector('.wbright');
+    var lp=leftPage();
     sessionStorage.setItem('pulpwb:'+location.pathname,JSON.stringify({
-      w:window.scrollY,l:wl?wl.scrollTop:0,r:wr?wr.scrollTop:0}));
+      w:window.scrollY,l:wl?wl.scrollTop:0,r:wr?wr.scrollTop:0,pg:lp?lp.pg:null,d:lp?lp.d:0}));
   }catch(e){}
 }
 function post(params){params.issue=ISSUE;params.article_id=AID;
@@ -374,9 +385,17 @@ window.addEventListener('load',function(){
   try{saved=JSON.parse(sessionStorage.getItem('pulpwb:'+location.pathname));}catch(e){}
   if(saved){
     var wl=document.querySelector('.wbleft'),wr=document.querySelector('.wbright');
-    if(wl)wl.scrollTop=saved.l||0;
+    if(wl){
+      var el=saved.pg?document.getElementById('pg'+saved.pg):null;
+      if(el){wl.scrollTop=0;wl.scrollTop=el.getBoundingClientRect().top-wl.getBoundingClientRect().top+(saved.d||0);}
+      else{wl.scrollTop=saved.l||0;}
+    }
     if(wr)wr.scrollTop=saved.r||0;
     window.scrollTo(0,saved.w||0);
+    setTimeout(function(){
+      var el2=saved.pg?document.getElementById('pg'+saved.pg):null;
+      if(el2&&wl){wl.scrollTop=0;wl.scrollTop=el2.getBoundingClientRect().top-wl.getBoundingClientRect().top+(saved.d||0);}
+    },300);
   }else if(typeof FIRSTPG!=='undefined'&&FIRSTPG){scrollLeftTo(FIRSTPG);}
   var selq=new URLSearchParams(location.search).get('sel');
   if(selq){setTimeout(function(){selKey(selq);},60);}
@@ -394,6 +413,8 @@ window.addEventListener('load',function(){
   });
   var cn=document.getElementById('cb_new');
   if(cn)cn.onclick=function(){var k=pickedKeys();if(k.length)post({act:'new_from',frags:k.join(','),type:'story'});};
+  var cr=document.getElementById('cb_role_go');
+  if(cr)cr.onclick=function(){var k=pickedKeys();if(k.length)post({act:'role_many',frags:k.join(','),role:document.getElementById('cb_role').value});};
   var co=document.getElementById('cb_out');
   if(co)co.onclick=function(){var k=pickedKeys();if(k.length)post({act:'remove_frags',frags:k.join(',')});};
   var cc=document.getElementById('cb_clear');
@@ -638,6 +659,31 @@ def all_ann_events():
     return out
 
 
+LOGINS = os.path.join(DATA, "logins.jsonl")
+
+
+def log_login(user):
+    """One line per successful login (feedback of 2026-09-04: 'User log should show
+    log in time as well'); shown on the activity page."""
+    try:
+        os.makedirs(DATA, exist_ok=True)
+        with open(LOGINS, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "user": user, "action": "login"}) + "\n")
+    except Exception:
+        pass
+
+
+def login_events():
+    out = []
+    if os.path.exists(LOGINS):
+        for line in open(LOGINS, encoding="utf-8"):
+            try:
+                out.append(json.loads(line))
+            except Exception:
+                pass
+    return out
+
+
 def ann_append(iid, user, action, payload):
     os.makedirs(ANNDIR, exist_ok=True)
     with open(os.path.join(ANNDIR, f"{iid}.jsonl"), "a",
@@ -733,7 +779,7 @@ def effective_doc(iid):
     roles = {}
     for a in arts:
         for k, role in (a.get("roles") or {}).items():
-            if role in ("title", "subtitle", "author", "teaser", "caption"):
+            if role in ("title", "subtitle", "author", "teaser", "caption", "note", "synopsis"):
                 roles[k] = role
             elif role == "chapter":
                 try:
@@ -757,7 +803,7 @@ def effective_doc(iid):
         segs = u.get("segments") or ([u["idx"]] if u.get("idx") is not None else [])     # s07 units / s08 regions
         if u.get("page") is not None:
             for r in segs:
-                mach_furn.append({"page": u["page"], "region_ids": [r]})
+                mach_furn.append({"page": u["page"], "region_ids": [r], "why": u.get("why")})
     n_user = 0
 
     def synth(k):
@@ -816,9 +862,26 @@ def effective_doc(iid):
         aid = ev.get("article_id")
         a = byid.get(aid)
         if act == "set_meta" and a:
-            for k in ("title", "author", "type", "ad_class", "advertiser", "excerpt_of", "n_items"):
+            for k in ("title", "author", "type", "ad_class", "advertiser", "excerpt_of", "n_items", "department",
+                      "part_label", "part_n", "part_total", "illustrator"):
                 if k in ev:
-                    a[k] = ev[k] or None
+                    if k in ("part_label", "part_n", "part_total"):
+                        ser = a.get("serial") or {"part_label": None, "part_n": None, "part_total": None, "source": "annotator"}
+                        v = ev[k]
+                        if k != "part_label":
+                            try:
+                                v = int(v) if str(v).strip() else None
+                            except ValueError:
+                                v = None
+                        ser[k] = v or None
+                        ser["source"] = "annotator"
+                        a["serial"] = ser if any(ser.get(x) for x in ("part_label", "part_n", "part_total")) else None
+                    else:
+                        a[k] = ev[k] or None
+            if a.get("type") == "serial_part":
+                # the old dropdown item: an instalment is a story with serial fields (decision of 2026-09-04)
+                a["type"] = "story"
+                a["serial"] = a.get("serial") or {"part_label": None, "part_n": None, "part_total": None, "source": "annotator"}
             if "contains_excerpt" in ev:
                 a["contains_excerpt"] = bool(ev["contains_excerpt"])
             touch(a, ev)
@@ -912,7 +975,7 @@ def effective_doc(iid):
                     src["fragments"].remove(fr)
                     touch(src, ev)
                 user_furniture.append({"frag": ev.get("frag"),
-                                       "by": ev["user"], "ts": ev["ts"]})
+                                       "by": ev["user"], "ts": ev["ts"], "why": ev.get("why") or ""})
         elif act == "edit_frag_text":
             k = ev.get("frag", "")
             overrides[k] = ev.get("text", "")
@@ -925,16 +988,32 @@ def effective_doc(iid):
             a2, fr2 = findfrag(k)
             if not fr2 or a2 == "unsorted":
                 continue
+            old_role = roles.get(k)
             if role:
                 roles[k] = role
-                if role in ("title", "subtitle", "author", "teaser"):
-                    val = " ".join(frag_text(iid, fr2, overrides).split())
-                    if role == "author":
-                        # the field holds the name; the segment keeps "By"
-                        val = re.sub(r"^\s*by[\s:.]+", "", val, flags=re.I).strip()
-                    a2[role] = val or None
             else:
                 roles.pop(k, None)
+            fields = {x for x in (role, old_role) if x in ("title", "subtitle", "author", "teaser")}
+            if fields:
+                # the field holds the words of EVERY box with that role, in reading order (Sujin's note of
+                # 2026-09-03: a title set in two boxes was overwritten by the box pressed last)
+                for fld in fields:
+                    parts = []
+                    seen_norm = set()
+                    for fr3 in sorted(a2["fragments"], key=readpos):
+                        if roles.get(fragkey(fr3)) == fld:
+                            t3 = " ".join(frag_text(iid, fr3, overrides).split())
+                            n3 = re.sub(r"[^a-z0-9 ]+", " ", t3.lower()).strip()
+                            if n3 in seen_norm:
+                                continue                      # the title set twice (display and text sizes): once
+                            seen_norm.add(n3)
+                            parts.append(t3)
+                    val = " ".join(x for x in parts if x)
+                    if fld == "author":
+                        # the field holds the name; the segments keep "By" / "Conducted by"
+                        val = re.sub(r"^\s*(?:conducted |edited |compiled |arranged )?by[\s:.]+", "", val, flags=re.I).strip()
+                        val = re.sub(r"\s+(?:conducted |edited |compiled |arranged )?by[\s:.]+", " ", val, flags=re.I).strip()
+                    a2[fld] = val or None
             touch(a2, ev)
         elif act == "add_manual" and a:
             n_manual += 1
@@ -966,7 +1045,7 @@ def effective_doc(iid):
         # the running text
         body_frs = [fr for fr in a["fragments"]
                     if roles.get(fragkey(fr)) not in
-                    ("title", "subtitle", "author", "teaser")]
+                    ("title", "subtitle", "author", "teaser", "note", "synopsis")]
         a["text"] = (a["text_override"] if a["text_override"] is not None
                      else assemble_text(iid, body_frs, overrides))
         if a["verified_at"] and a["verified_at"] >= a["last_mod"]:
@@ -991,8 +1070,8 @@ def issue_frag_map(iid, doc):
             k = fragkey(fr)
             if k not in art_of:     # machine double-assignments: first wins
                 art_of[k] = (a["article_id"], a.get("title"))
-    ufurn = {u.get("frag") for u in doc.get("user_furniture", [])}
-    mfurn = {fragkey(fr) for fr in doc.get("machine_furniture", [])}
+    ufurn = {u.get("frag"): (u.get("why") or "") for u in doc.get("user_furniture", [])}
+    mfurn = {fragkey(fr): (fr.get("why") or "") for fr in doc.get("machine_furniture", [])}
     unsrt = {fragkey(fr) for fr in doc.get("unsorted", [])}
 
     per_page, ids = {}, {}
@@ -1015,8 +1094,12 @@ def issue_frag_map(iid, doc):
                 kind = "article"
             elif key in ufurn or key in mfurn:
                 kind = "furniture"
-                title = ("marked not story text" if key in ufurn
-                         else "page furniture")
+                why = ufurn.get(key) if key in ufurn else mfurn.get(key)
+                if why and "picture" in why or (why and "illustration" in why):
+                    title = "text in picture"
+                else:
+                    title = ("marked not story text" if key in ufurn
+                             else ("page furniture" + (f" ({why})" if why else "")))
             elif key in unsrt:
                 kind = "unsorted"
                 title = "unsorted"
@@ -1038,7 +1121,7 @@ a{color:#7a3020}
 .brand{font-size:22px;letter-spacing:.4px}
 .brand a{text-decoration:none;color:#1c1a17}
 .nav a{margin-left:12px;font-size:14px}
-.nav .navgrp{margin-left:18px;font-size:10.5px;letter-spacing:1.4px;color:#75695a;text-transform:uppercase}
+.nav .navgrp{margin-left:18px;font-size:11px;letter-spacing:.6px;color:#75695a}
 .nav .navgrp:first-child{margin-left:0}
 h1{font-size:26px;font-weight:normal;margin:8px 0 14px}
 h2{font-size:19px;font-weight:normal;margin:20px 0 8px;border-bottom:1px solid #d8cfc0;padding-bottom:3px}
@@ -1073,7 +1156,7 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .fb input,.fb textarea,.fb button{font-family:inherit;font-size:14px;border:1px solid #b8a88e;background:#fff;padding:5px}
 .chip{font-size:11.5px;padding:1px 8px;border:1px solid;border-radius:9px;letter-spacing:.4px}
 .stA{color:#75695a;border-color:#b8a88e;background:#f3ead9}
-.stM{color:#7a5220;border-color:#c99b4e;background:#f7ecd4}
+.stM{color:#faf7f2;border-color:#8a6d1f;background:#b8860b}
 .stV{color:#2c5e2e;border-color:#7fae81;background:#e3efe3}
 .mini{display:inline}
 .mini button{font-size:11.5px;padding:1px 6px;border:1px solid #b8a88e;background:#fff;cursor:pointer;font-family:inherit}
@@ -1115,6 +1198,10 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .rolechip.z{background:#8a6d1f}
 .card.rT{border-left:6px solid #7a3020}
 .card.rA{border-left:6px solid #2c5e2e}
+.card.rB{border-left:6px solid #b8a88e}
+.card.rC{border-left:6px solid #5b3b8a}
+.rgrp{display:inline-block;margin-left:8px;padding-left:6px;border-left:1px solid #d8cfc0}
+.mini.cur{display:inline-block;font-size:11px;padding:1px 6px;background:#1c1a17;color:#faf7f2;margin-right:3px}
 .card.rB{border-left:6px solid #1c1a17}
 .sechint{font-size:12.5px;color:#75695a;border:1px dashed #b8a88e;background:#fff;padding:8px 10px;margin:0 0 10px}
 .pgjump{font-size:13px;margin:0 0 10px;background:#f3ead9;border:1px solid #d8cfc0;padding:6px 10px}
@@ -1161,19 +1248,19 @@ def esc(s):
 
 
 def page(title, body, member=True, path="/", admin=False, user_name="", flash=""):
-    userslink = "<a href='/users'>users</a>" if admin else ""
+    userslink = "<a href='/users'>Users</a>" if admin else ""
     nav = ("<span class='nav'>"
-           "<span class='navgrp'>explore</span>"
-           "<a href='/overview'>overview</a><a href='/authors'>authors</a>"
-           "<a href='/magazines'>magazines</a><a href='/issues'>issues</a>"
-           "<a href='/stories'>records</a><a href='/pairs'>pairs</a>"
-           "<a href='/reuse'>reuse</a><a href='/method'>method</a>"
-           "<span class='navgrp'>workroom</span>"
-           "<a href='/guide'>guide</a><a href='/articles'>workbench</a>"
-           "<a href='/reuse/progress'>progress</a><a href='/assembly'>assembly</a>"
-           "<a href='/timing'>timing</a><a href='/activity'>activity</a>"
-           f"<a href='/feedback'>feedback</a>{userslink}"
-           "<a href='/logout'>log out</a></span>") if member else ""
+           "<span class='navgrp'>Explore</span>"
+           "<a href='/overview'>Overview</a><a href='/authors'>Authors</a>"
+           "<a href='/magazines'>Magazines</a><a href='/issues'>Issues</a>"
+           "<a href='/stories'>Records</a><a href='/pairs'>Pairs</a>"
+           "<a href='/reuse'>Reuse</a><a href='/method'>Method</a>"
+           "<span class='navgrp'>Workroom</span>"
+           "<a href='/guide'>Guide</a><a href='/articles'>Workbench</a>"
+           "<a href='/reuse/progress'>Progress</a><a href='/assembly'>Assembly</a>"
+           "<a href='/timing'>Timing</a><a href='/activity'>Activity</a>"
+           f"<a href='/feedback'>Feedback</a>{userslink}"
+           "<a href='/logout'>Log out</a></span>") if member else ""
     fb = ("<div class='fb'><form method='POST' action='/feedback'>"
           f"<input type='hidden' name='path' value='{esc(path)}'>"
           + (f"<div class='flash'>{esc(flash)}</div>" if flash else "")
@@ -1612,11 +1699,12 @@ class H(BaseHTTPRequestHandler):
         path = urllib.parse.urlparse(self.path).path
         ln = int(self.headers.get("Content-Length", 0))
         form = urllib.parse.parse_qs(self.rfile.read(ln).decode("utf-8"))
-        get = lambda k: form.get(k, [""])[0].strip()
+        get = lambda k, default="": (form.get(k, [default])[0].strip() if k in form else default)
         if path == "/login":
             uname, pword = get("username"), get("password")
             if uname and check_user(uname, pword):
                 tok = make_token(uname)
+                log_login(uname)
                 return self._redirect("/overview",
                     cookie=f"pfauth={urllib.parse.quote(tok)}; "
                            f"Max-Age={COOKIE_DAYS*86400}; Path=/; HttpOnly")
@@ -1624,6 +1712,7 @@ class H(BaseHTTPRequestHandler):
             if (not uname and pw is not None
                     and hmac.compare_digest(get("passcode"), pw)):
                 tok = make_token("guest")
+                log_login("guest")
                 return self._redirect("/overview",
                     cookie=f"pfauth={urllib.parse.quote(tok)}; "
                            f"Max-Age={COOKIE_DAYS*86400}; Path=/; HttpOnly")
@@ -1779,19 +1868,19 @@ administrator approves them.</p>
                          f"<input type='hidden' name='username' "
                          f"value='{esc(uname)}'>"
                          f"<input type='hidden' name='act' value='approve'>"
-                         f"<button>approve</button></form> ")
+                         f"<button>Approve</button></form> ")
             elif rec.get("role") != "admin":
                 acts += (f"<form class='mini' method='POST' action='/users'>"
                          f"<input type='hidden' name='username' "
                          f"value='{esc(uname)}'>"
                          f"<input type='hidden' name='act' value='make_admin'>"
-                         f"<button>make admin</button></form> ")
+                         f"<button>Make admin</button></form> ")
             if uname != self.user:
                 acts += (f"<form class='mini' method='POST' action='/users'>"
                          f"<input type='hidden' name='username' "
                          f"value='{esc(uname)}'>"
                          f"<input type='hidden' name='act' value='remove'>"
-                         f"<button>remove</button></form>")
+                         f"<button>Remove</button></form>")
             approved = (f"approved by {esc(display_name(rec['approved_by']))}"
                         if rec.get("approved_by") else "")
             rows += (f"<tr><td>{esc(uname)}</td><td>{esc(rec.get('name', ''))}"
@@ -1807,8 +1896,8 @@ administrator approves them.</p>
             "does not remove the annotations it already made — those stay "
             "in the log under its name.")
             + f"<h1>Users ({len(u)} · {npend} pending)</h1>"
-            + ("<table><tr><th>username</th><th>name</th><th>role</th>"
-               "<th>note</th><th>history</th><th>actions</th></tr>"
+            + ("<table><tr><th>Username</th><th>Name</th><th>Role</th>"
+               "<th>Note</th><th>History</th><th>Actions</th></tr>"
                + rows + "</table>" if rows else
                "<div class='empty'>No accounts yet.</div>"))
         return self._page("Users", body, path="/users")
@@ -1830,11 +1919,13 @@ administrator approves them.</p>
         elif act == "facts" and art:
             # the record's facts beyond title/author/type: advertisement class and advertiser,
             # the work a house announcement quotes (assembly v2.1 fields, correctable by hand)
-            ann_append(iid, self.user, "set_meta",
-                       {"article_id": aid, "type": get("type") or art.get("type"),
-                        "ad_class": get("ad_class"), "advertiser": get("advertiser"),
-                        "excerpt_of": get("excerpt_of"),
-                        "contains_excerpt": bool(get("contains_excerpt"))})
+            payload = {"article_id": aid, "type": get("type") or art.get("type")}
+            for k in ("ad_class", "advertiser", "excerpt_of", "department", "part_label", "part_n", "part_total", "illustrator"):
+                if get(k, None) is not None:
+                    payload[k] = get(k)
+            if get("ad_class", None) is not None:
+                payload["contains_excerpt"] = bool(get("contains_excerpt"))
+            ann_append(iid, self.user, "set_meta", payload)
         elif act == "new_from" and get("frags"):
             # a new record from the chosen boxes (a story the machine never started)
             frags = [k.strip() for k in get("frags").split(",") if k.strip()]
@@ -1944,12 +2035,19 @@ administrator approves them.</p>
             ann_append(iid, self.user, "set_role",
                        {"article_id": aid, "frag": get("frag"),
                         "role": get("role")})
+        elif act == "role_many" and get("frags"):
+            # one role for several chosen segments at once (Sujin's note of 2026-09-03)
+            for k in get("frags").split(","):
+                k = k.strip()
+                if k:
+                    ann_append(iid, self.user, "set_role",
+                               {"article_id": aid, "frag": k, "role": get("role")})
         elif act == "add_manual" and art and get("text"):
             ann_append(iid, self.user, "add_manual",
                        {"article_id": aid, "text": get("text")})
         elif act == "furniture" and art:
             ann_append(iid, self.user, "frag_furniture",
-                       {"article_id": aid, "frag": get("frag")})
+                       {"article_id": aid, "frag": get("frag"), "why": get("why")})
         elif act == "merge" and art and get("into_id"):
             ann_append(iid, self.user, "merge",
                        {"article_id": aid, "into_id": get("into_id")})
@@ -2055,8 +2153,8 @@ click first.</p></div>"""
               "The explorer's issue list, built for the whole corpus, is <a href='/issues'>issues</a>; every step "
               "against the archive's collection is on <a href='/reuse/progress'>progress</a>.</p>"
             + state
-            + "<table><tr><th>issue</th><th>genre</th><th>pages</th>"
-              "<th>gold</th><th>stages present</th></tr>"
+            + "<table><tr><th>Issue</th><th>Genre</th><th>Pages</th>"
+              "<th>Gold</th><th>Stages present</th></tr>"
             + "".join(rows) + "</table>")
         return self._page("Pilot issues (workroom)", body, path="/workroom/issues")
 
@@ -2094,8 +2192,8 @@ click first.</p></div>"""
             + (f"<h2>Pages ({len(pngs)})</h2><p class='pgnav'>{grid}</p>" if pngs else "")
             + self.issue_articles_html(iid)
             + (f"<h2>Downloads (full text per stage)</h2><p>{dls}</p>" if sts else "")
-            + ("<h2>Timing so far</h2><table><tr><th>stage</th><th>pages</th>"
-               "<th>seconds</th><th>sec/page</th><th>note</th></tr>"
+            + ("<h2>Timing so far</h2><table><tr><th>Stage</th><th>Pages</th>"
+               "<th>Seconds</th><th>Sec/page</th><th>Note</th></tr>"
                + trows + "</table>" if t else
                "<div class='empty'>No timing rows for this issue yet.</div>")
             + EX.issue_extra_html(iid))
@@ -2123,8 +2221,8 @@ click first.</p></div>"""
                  f"by annotators · {len(doc.get('unsorted', []))} segments "
                  f"unsorted, kept for review</p>")
         return (f"<h2>Articles in this issue ({len(doc['articles'])})</h2>"
-                "<table><tr><th>title as printed</th><th>author</th>"
-                "<th>type</th><th>status</th><th>pages</th></tr>"
+                "<table><tr><th>Title as printed</th><th>Author</th>"
+                "<th>Type</th><th>Status</th><th>Pages</th></tr>"
                 + rows + "</table>" + extra)
 
     def viewer(self, iid, n, qs):
@@ -2278,6 +2376,11 @@ click first.</p></div>"""
             rows = [r for r in rows if (r.get("type") or "other") == typ]
         if stat:
             rows = [r for r in rows if r.get("status") == stat]
+        # stories first, and among them the verified and the modified ones (Heejin, 2026-09-04); then the
+        # other pieces, then the publisher's matter and the advertising; the file order inside each group
+        type_rank = {"story": 0, "serial_part": 0, "poem": 1, "feature": 2, "letters": 3, "other": 4, "toc": 5, "house": 6, "ad": 7}
+        stat_rank = {"verified": 0, "modified": 1, "auto": 2}
+        rows.sort(key=lambda r: (type_rank.get(r.get("type") or "other", 4), stat_rank.get(r.get("status"), 2)))
         topts = "<option value=''>all types</option>" + "".join(
             f"<option value='{esc(t)}' {'selected' if t == typ else ''}>"
             f"{esc(t)}</option>" for t in sorted(types))
@@ -2293,7 +2396,7 @@ click first.</p></div>"""
                 f"{topts}</select> "
                 f"<select name='status' style='font-size:14px;padding:4px'>"
                 f"{sopts}</select> "
-                f"<button style='font-size:14px;padding:4px 10px'>find"
+                f"<button style='font-size:14px;padding:4px 10px'>Find"
                 f"</button></form>")
         trows = ""
         for r in rows:
@@ -2320,9 +2423,9 @@ click first.</p></div>"""
             "annotator account, to fix and verify it.")
             + f"<h1>Articles ({len(rows)} of {total} · {nv} verified)</h1>"
             + form
-            + ("<table><tr><th>title as printed</th><th>author"
-               "</th><th>type</th><th>status</th><th>issue</th><th>pages"
-               "</th><th>words</th></tr>" + trows + "</table>" if trows else
+            + ("<table><tr><th>Title as printed</th><th>Author"
+               "</th><th>Type</th><th>Status</th><th>Issue</th><th>Pages"
+               "</th><th>Words</th></tr>" + trows + "</table>" if trows else
                "<div class='empty'>0 articles match. If the whole table is "
                "empty, the assembly stage (s07) has not run yet.</div>"))
         return self._page("Articles", body, path="/articles")
@@ -2338,9 +2441,11 @@ click first.</p></div>"""
         per_page, ids = issue_frag_map(iid, doc)
         overrides = doc.get("frag_overrides", {})
         roles = doc.get("frag_roles", {})
-        ROLE_SEC = {"title": "T", "subtitle": "T", "author": "A", "teaser": "Z"}
+        ROLE_SEC = {"title": "T", "subtitle": "T", "author": "A", "teaser": "Z", "synopsis": "Z", "note": "Z"}
         CHAPTER_ROLES = ("chapter_number", "chapter_title", "section")
+        PARATEXT_ROLES = ("teaser", "synopsis", "note")
         AD_CLASSES = ("house_next_issue", "house_self", "house_sibling", "house_form", "trade", "classified")
+        TYPES = ("story", "poem", "feature", "letters", "ad", "house", "toc", "other")
 
         def artopt(o):
             """Readable dropdown label: short id, page range, title."""
@@ -2377,7 +2482,7 @@ click first.</p></div>"""
                        f"{esc(display_name(art['verified_by']))} at "
                        f"{esc(art['verified_at'])}</span>")
             if can:
-                stline += " " + mini("remove verification", act="unverify")
+                stline += " " + mini("Remove verification", act="unverify")
         else:
             if art.get("modified_by"):
                 stline += (" <span class='muted'>changed by "
@@ -2385,19 +2490,21 @@ click first.</p></div>"""
                                            for u in art["modified_by"]))
                            + "</span>")
             if can:
-                stline += " " + mini("mark as verified", act="verify")
+                stline += " " + mini("Mark as verified", act="verify")
                 if nxt:
-                    stline += mini("verify, then next unverified",
+                    stline += mini("Verify, then next unverified",
                                    act="verify", back=f"/article/{nxt}")
 
         metaform = ""
+        cur_type = art.get("type") or "other"
+        if cur_type == "serial_part":
+            cur_type = "story"
         if can:
             topts = "".join(
                 f"<option value='{t}' "
-                f"{'selected' if t == (art.get('type') or 'other') else ''}>"
+                f"{'selected' if t == cur_type else ''}>"
                 f"{t}</option>"
-                for t in ("story", "serial_part", "poem", "feature",
-                          "letters", "toc", "ad", "other"))
+                for t in TYPES)
             metaform = ("<form class='annform' method='POST' "
                         "action='/annotate' style='margin:8px 0'>"
                         + hidden(act="meta")
@@ -2408,29 +2515,48 @@ click first.</p></div>"""
                         f"value='{esc(art.get('author') or '')}' "
                         f"placeholder='author as printed'> "
                         f"<select name='type'>{topts}</select> "
-                        f"<button>save title / author / type</button></form>")
+                        f"<button>Save title / author / type</button></form>")
+            # the facts panel is confirm-or-override (Sujin's note of 2026-09-03): the machine's readings stand
+            # in the fields; a person changes only what is wrong. The excerpt flag is the machine's (set when
+            # the text matches a story record); the quoted work is chosen from the corpus's story records.
             copts = "".join(
                 f"<option value='{c}' {'selected' if c == (art.get('ad_class') or '') else ''}>{c or '(none)'}</option>"
                 for c in ("",) + AD_CLASSES)
+            ex_cur = _excerpt_of_text(art.get("excerpt_of"))
+            story_opts = "".join(
+                f"<option value='{esc(o.get('title') or '')}' {'selected' if (o.get('title') or '') == ex_cur.split(' by ')[0] else ''}>"
+                f"{esc((o.get('title') or '?')[:50])}{(' — ' + esc(EX.display_author(o['author']))) if o.get('author') else ''}</option>"
+                for o in doc["articles"] if o.get("type") in ("story", "serial_part") and o["article_id"] != aid)
+            ser = art.get("serial") or {}
+            is_story = cur_type in ("story", "poem", "feature", "letters")
             metaform += ("<details style='margin:0 0 8px'><summary class='muted' style='cursor:pointer'>"
-                         "record facts: advertisement class, advertiser, quoted work</summary>"
+                         "Record facts — the machine's readings; change only what is wrong</summary>"
                          "<form class='annform' method='POST' action='/annotate' style='margin:6px 0'>"
                          + hidden(act="facts")
-                         + f"<input type='hidden' name='type' value='{esc(art.get('type') or 'other')}'>"
-                         f"<label>class <select name='ad_class'>{copts}</select></label> "
-                         f"<label>advertiser <input type='text' name='advertiser' size='24' "
-                         f"value='{esc(art.get('advertiser') or '')}' placeholder='company or magazine'></label> "
-                         f"<label>quotes the work <input type='text' name='excerpt_of' size='24' "
-                         f"value='{esc(_excerpt_of_text(art.get('excerpt_of')))}' placeholder='title of the quoted story'></label> "
-                         f"<label><input type='checkbox' name='contains_excerpt' value='1' "
-                         f"{'checked' if art.get('contains_excerpt') else ''}> contains a verbatim excerpt "
-                         "(kept out of the reuse inventory)</label> "
-                         "<button>save facts</button></form>"
-                         "<p class='muted' style='font-size:12px;margin:2px 0'>Classes: house_next_issue = the magazine "
-                         "announcing its next issue; house_self = subscriptions, back numbers, the magazine about itself; "
-                         "house_sibling = the publisher's other magazines; house_form = the magazine's own ballot or coupon; "
-                         "trade = an outside advertiser; classified = a block of small classified advertisements.</p>"
-                         "</details>")
+                         + f"<input type='hidden' name='type' value='{esc(cur_type)}'>"
+                         + (f"<label>department <input type='text' name='department' size='22' value='{esc(art.get('department') or '')}' "
+                            f"placeholder='standing department, if any'></label> " if is_story else "")
+                         + (f"<label>serial: part label <input type='text' name='part_label' size='12' value='{esc(ser.get('part_label') or '')}' placeholder='Part One'></label> "
+                            f"<label>part no. <input type='text' name='part_n' size='2' value='{esc(ser.get('part_n') or '')}'></label> "
+                            f"<label>of <input type='text' name='part_total' size='2' value='{esc(ser.get('part_total') or '')}'></label> "
+                            if cur_type == "story" else "")
+                         + (f"<label>illustrator <input type='text' name='illustrator' size='16' value='{esc(art.get('illustrator') or '')}'></label> " if is_story else "")
+                         + (f"<label>class <select name='ad_class'>{copts}</select> <span class='muted'>(read from the text by rule)</span></label> "
+                            f"<label>advertiser <input type='text' name='advertiser' size='22' "
+                            f"value='{esc(art.get('advertiser') or '')}' placeholder='company or magazine'></label> "
+                            f"<label>quotes the story <select name='excerpt_of'><option value=''>(none)</option>{story_opts}</select></label> "
+                            f"<label><input type='checkbox' name='contains_excerpt' value='1' "
+                            f"{'checked' if art.get('contains_excerpt') else ''}> contains a verbatim excerpt "
+                            "<span class='muted'>(set by the machine when the text matches a story; kept out of the reuse inventory)</span></label> "
+                            if cur_type in ("ad", "house", "other") else "")
+                         + "<button>Save facts</button></form>"
+                         + ("<p class='muted' style='font-size:12px;margin:2px 0'>Classes: house_next_issue = the magazine "
+                            "announcing its next issue; house_self = subscriptions, back numbers, the magazine about itself; "
+                            "house_sibling = the publisher's other magazines; house_form = the magazine's own ballot or coupon; "
+                            "trade = an outside advertiser; classified = a block of small classified advertisements. "
+                            "A record of type house is the publisher's own matter; ad is an outside advertiser's.</p>"
+                            if cur_type in ("ad", "house", "other") else "")
+                         + "</details>")
 
         # LEFT: every page of the ISSUE (lazy-loaded), so missing segments
         # anywhere can be found and pulled in; opens at the story's first page
@@ -2561,24 +2687,21 @@ click first.</p></div>"""
                     btns += (f"<select class='posdd' data-key='{k}' "
                              f"title='move to position'>{posopts}"
                              f"</select> ")
-                if role:
-                    btns += mini("clear role", act="role", frag=k, role="")
-                else:
-                    btns += (mini("title", act="role", frag=k, role="title")
-                             + mini("subtitle", act="role", frag=k,
-                                    role="subtitle")
-                             + mini("author", act="role", frag=k,
-                                    role="author")
-                             + mini("chapter no.", act="role", frag=k,
-                                    role="chapter_number")
-                             + mini("chapter title", act="role", frag=k,
-                                    role="chapter_title")
-                             + mini("section", act="role", frag=k,
-                                    role="section")
-                             + mini("teaser", act="role", frag=k,
-                                    role="teaser"))
-                btns += (mini("not story text", act="furniture", frag=k)
-                         + mini("detach", act="detach", frag=k))
+                # every role button is always there, the current one marked: a role is replaced in one
+                # step (Sujin's note of 2026-09-03), and the groups follow Heejin's hierarchy of 2026-09-04
+                def rb(label, r_):
+                    if r_ == role:
+                        return f"<span class='mini cur' title='the current role'>{label}</span> "
+                    return mini(label, act="role", frag=k, role=r_)
+                btns += ("<span class='rgrp'>" + rb("Title", "title") + rb("Subtitle", "subtitle") + rb("Author", "author") + "</span>"
+                         "<span class='rgrp' title='Chapter info'>" + rb("Chapter no.", "chapter_number") + rb("Chapter title", "chapter_title")
+                         + rb("Section", "section") + "</span>"
+                         "<span class='rgrp' title='Paratext: editorial text about the story, never story text'>"
+                         + rb("Teaser", "teaser") + rb("Synopsis", "synopsis") + rb("Note", "note") + "</span>"
+                         + (mini("Body text", act="role", frag=k, role="") if role else ""))
+                btns += ("<span class='rgrp'>" + mini("Not story text", act="furniture", frag=k)
+                         + mini("Text in picture", act="furniture", frag=k, why="text in picture")
+                         + mini("Detach", act="detach", frag=k) + "</span>")
                 if others:
                     opts = "".join(
                         f"<option value='{o['article_id']}'>"
@@ -2592,17 +2715,18 @@ click first.</p></div>"""
                              + "<span class='muted'>this segment "
                              "belongs in:</span> "
                              + f"<select name='to_id'>{opts}</select>"
-                             f"<button>move to</button></form>")
+                             f"<button>Move to</button></form>")
             rc = ("<span class='rolechip"
                   + (" t" if role in ("title", "subtitle") else "")
-                  + (" z" if role == "teaser" else "")
+                  + (" z" if role in PARATEXT_ROLES else "")
                   + (" c" if role in CHAPTER_ROLES else "")
                   + f"'>{esc(role.replace('_', ' '))}</span>") if role else ""
+            card_cls = ("rC" if role in CHAPTER_ROLES else s_key)
             drag = " draggable=true" if (can and in_body) else ""
             pick = (f"<input type='checkbox' class='pick' data-key='{k}' title='choose this segment "
                     f"(then: move the chosen segments to a new record, or take them out)'> " if (can and not manual) else "")
             sec[s_key] += (
-                f"<div class='card r{s_key}' data-key='{k}'{drag}>"
+                f"<div class='card r{card_cls}' data-key='{k}'{drag}>"
                 f"<div class='ch'>{pick}"
                 f"<span class='idchip' data-selkey='{k}'>{fid}</span>{rc}"
                 f"<span class='muted'>"
@@ -2623,25 +2747,29 @@ click first.</p></div>"""
                          "action='/annotate'>" + hidden(act="add_manual")
                          + "<textarea name='text' placeholder='the missing "
                          "text, exactly as printed'></textarea>"
-                         "<p><button>add segment</button></p></form>"
+                         "<p><button>Add segment</button></p></form>"
                          "</details>")
 
-        hintT = ("<div class='sechint'>none yet — press 'title' or "
-                 "'subtitle' on a body segment below</div>")
-        hintA = ("<div class='sechint'>none yet — press 'author' on the "
+        hintT = ("<div class='sechint'>none yet — press 'Title' or "
+                 "'Subtitle' on a body segment below</div>")
+        hintA = ("<div class='sechint'>none yet — press 'Author' on the "
                  "by-line segment below</div>")
-        hintZ = ("<div class='sechint'>none — press 'teaser' on the blurb "
-                 "printed on the story's first page (kept as metadata, "
-                 "not story text)</div>")
+        hintZ = ("<div class='sechint'>none — the teaser (the blurb), the synopsis (the recap on a later "
+                 "instalment) and notes (credits, 'Illustrated by', a tail line) are editorial text about the "
+                 "story, kept as metadata, never story text</div>")
+        level1 = ("Article — on the contents page" if art.get("toc") or art.get("title_source") == "contents"
+                  else ("Contents page" if art.get("type") == "toc" else "Non-article — not on the contents page"))
         sections = (
-            "<div class='secbar secT'>TITLE &amp; SUBTITLE</div>"
+            f"<div class='muted' style='font-size:12px;margin:0 0 6px'>{level1} · type {esc(cur_type)}"
+            + (f" · department {esc(art['department'])}" if art.get("department") else "") + "</div>"
+            "<div class='secbar secT'>Title and subtitle</div>"
             + (sec["T"] or hintT)
-            + "<div class='secbar secA'>AUTHOR</div>"
+            + "<div class='secbar secA'>Author</div>"
             + (sec["A"] or hintA)
-            + "<div class='secbar secZ'>TEASER</div>"
+            + "<div class='secbar secZ'>Paratext — teaser · synopsis · note</div>"
             + (sec["Z"] or hintZ)
-            + f"<div class='secbar secB'>BODY TEXT · {n_body} segments in "
-            f"reading order</div>"
+            + f"<div class='secbar secB'>Body text · {n_body} segments in "
+            f"reading order (chapter info in purple)</div>"
             + "<div id='cards'>" + sec["B"] + "</div>"
             + addmanual)
 
@@ -2664,7 +2792,7 @@ click first.</p></div>"""
                 else:
                     owner = "not assigned by the machine"
                 lab = esc(e.get("label") or "")
-                add = (mini("add to this article", act="moveto",
+                add = (mini("Add to this article", act="moveto",
                             frag=e["key"], to_id=aid) if can else "")
                 oth += (f"<div class='othercard card' data-key='{e['key']}'>"
                         f"<div class='ch'><span class='idchip other' "
@@ -2688,13 +2816,13 @@ click first.</p></div>"""
                 f"<input type='hidden' name='act' value='merge'>"
                 f"<input type='hidden' name='into_id' value='{aid}'>"
                 f"<select name='article_id'>{pullopts}</select>"
-                f"<button>pull it into this article</button></form>"
+                f"<button>Pull it into this article</button></form>"
                 "<br><span class='muted'>or send THIS whole article into "
                 "another one:</span> "
                 "<form class='mini' method='POST' action='/annotate'>"
                 + hidden(act="merge")
                 + f"<select name='into_id'>{opts}</select>"
-                f"<button>merge this article into it</button></form>")
+                f"<button>Merge this article into it</button></form>")
 
         textblock = ("<details><summary class='muted' "
                      "style='cursor:pointer'>assembled reading text "
@@ -2745,11 +2873,11 @@ click first.</p></div>"""
                       + hidden(act="attach_pages")
                       + " · attach pages <input type='number' name='from_page' min='1' style='width:54px'> to "
                       "<input type='number' name='to_page' min='1' style='width:54px'> "
-                      "<button>attach</button></form>")
+                      "<button>Attach</button></form>")
         pjump = (f"<div class='pgjump'>whole issue, {len(allpages)} pages · "
                  f"go to page <input id='pgjump' type='number' min='1' "
                  f"max='{allpages[-1] if allpages else 1}'> "
-                 f"<button onclick='return pgjump()'>go</button>" + attach
+                 f"<button onclick='return pgjump()'>Go</button>" + attach
                  + (f" · this article: {artlinks}" if artlinks else "")
                  + "<br><span class='muted'>solid = this article (red tint "
                  "= title, green = author) · long dash = other articles · "
@@ -2763,32 +2891,38 @@ click first.</p></div>"""
             "close</a></span></div>"
             "<div class='cardtext' id='ip_snip'></div>"
             "<div style='padding:7px 10px'>"
-            + ("<button class='go' id='ip_add'>add to this article</button> "
+            + ("<button class='go' id='ip_add'>Add to this article</button> "
                if can else "")
             + "<a id='ip_openowner' href='#' style='display:none'>open its "
             "article</a>"
             + (("<div id='ip_addsel_row' style='display:none;margin-top:6px'>"
-                "<button class='go' id='ip_addsel'>add all "
+                "<button class='go' id='ip_addsel'>Add all "
                 "<span id='ip_addsel_n'>0</span> chosen boxes</button>"
                 "</div>"
                 "<div style='margin-top:6px' class='muted'>"
                 "or claim this box and everything after it, through page "
                 "<input id='ip_thru' size='3' style='width:44px'> "
-                "<button class='go' id='ip_range'>claim range</button>"
+                "<button class='go' id='ip_range'>Claim range</button>"
                 "<br>(reading order; page furniture is left out)"
                 "</div>") if can else "")
             + "</div></div>"
             + ("<div id='selbar' class='selbar' style='display:none'>"
                "<span id='sb_n'>0</span> boxes chosen · "
-               "<button class='go' id='sb_add'>add them all to this "
+               "<button class='go' id='sb_add'>Add them all to this "
                "article</button> "
-               "<button class='go' id='sb_new'>make a NEW record from them</button> "
-               "<button id='sb_clear'>clear choice</button></div>"
+               "<button class='go' id='sb_new'>Make a NEW record from them</button> "
+               "<button id='sb_clear'>Clear choice</button></div>"
                "<div id='cardbar' class='selbar' style='display:none'>"
                "<span id='cb_n'>0</span> of this article's segments chosen · "
-               "<button class='go' id='cb_new'>move them to a NEW record</button> "
-               "<button class='go' id='cb_out'>take them out (kept aside as loose boxes)</button> "
-               "<button id='cb_clear'>clear choice</button></div>"
+               "<select id='cb_role'><option value=''>Body text (no role)</option><option value='title'>Title</option>"
+               "<option value='subtitle'>Subtitle</option><option value='author'>Author</option>"
+               "<option value='chapter_number'>Chapter no.</option><option value='chapter_title'>Chapter title</option>"
+               "<option value='section'>Section</option><option value='teaser'>Teaser</option>"
+               "<option value='synopsis'>Synopsis</option><option value='note'>Note</option></select> "
+               "<button class='go' id='cb_role_go'>Give them this role</button> · "
+               "<button class='go' id='cb_new'>Move them to a NEW record</button> "
+               "<button class='go' id='cb_out'>Move to non-article (kept aside as loose boxes)</button> "
+               "<button id='cb_clear'>Clear choice</button></div>"
                if can else ""))
         script = ("<script>"
                   + WB_JS.replace("__ISSUE__", iid).replace("__AID__", aid)
@@ -2838,6 +2972,8 @@ click first.</p></div>"""
                + (f" <span class='muted' style='font-size:12px'>(stored as printed: {esc(art['author'])}"
                   + (f"; the page prints '{esc(art['author_as_printed'])}'" if art.get("author_as_printed") else "")
                   + (f"; from the {esc(art['author_source'])}" if art.get("author_source") else "") + ")</span>")
+               + (f"<br><span class='muted' style='font-size:12.5px'>credit line: {esc(art['author_credit'])}</span>"
+                  if art.get("author_credit") else "")
                + "</p>" if art.get("author") else "")
             + (f"<p class='muted' style='font-size:12.5px'>title from the {esc(art['title_source'])}"
                + (f"; the page prints '{esc(art['title_as_printed'])}'" if art.get("title_as_printed") else "") + "</p>"
@@ -2858,17 +2994,22 @@ click first.</p></div>"""
 
     def activity_page(self):
         events = all_ann_events()
+        logins = login_events()
+        events = events + logins                      # log-in times beside the actions (Heejin, 2026-09-04)
         events.sort(key=lambda e: e.get("ts", ""), reverse=True)
         n_arch = sum(1 for e in events if e.get("_archive"))
+        n_login = len(logins)
 
         def art_cell(e):
             aid = esc(e.get("article_id", ""))
+            if e.get("action") == "login":
+                return "<span class='muted'>logged in</span>"
             if e.get("_archive"):
                 return (f"{aid} <span class='muted' style='font-size:12px'>on the archived assembly "
                         f"({esc(e['_archive'])})</span>")
             return f"<a href='/article/{aid}'>{aid}</a>"
         rows = "".join(
-            f"<tr{' style=' + chr(39) + 'background:#f4efe6' + chr(39) if e.get('_archive') else ''}>"
+            f"<tr{' style=' + chr(39) + 'background:#f4efe6' + chr(39) if e.get('_archive') else (' style=' + chr(39) + 'background:#eef3ee' + chr(39) if e.get('action') == 'login' else '')}>"
             f"<td class='muted'>{esc(e.get('ts', ''))}</td>"
             f"<td>{esc(display_name(e.get('user', '?')))}</td>"
             f"<td>{esc(e.get('action', ''))}</td>"
@@ -2876,11 +3017,16 @@ click first.</p></div>"""
             f"<td class='muted'>{esc(str(e.get('frag') or e.get('into_id') or e.get('to_id') or ''))}</td></tr>"
             for e in events[:600])
         per_user = {}
+        last_login = {}
         for e in events:
             u = e.get("user", "?")
+            if e.get("action") == "login":
+                last_login.setdefault(u, e.get("ts", ""))
+                continue
             pu = per_user.setdefault(u, [0, 0])
             pu[1 if e.get("_archive") else 0] += 1
         who = "; ".join(f"{esc(display_name(u))} {a + b:,}" + (f" (of which {b:,} on the archived assembly)" if b else "")
+                        + (f", last logged in {esc(last_login[u])}" if last_login.get(u) else "")
                         for u, (a, b) in sorted(per_user.items(), key=lambda t: -(t[1][0] + t[1][1])))
         body = (howto(
             "The complete annotation record, newest first: who verified or "
@@ -2893,11 +3039,12 @@ click first.</p></div>"""
             "and are counted here as work done, but their article ids name "
             "records of the archived assembly, so they do not open on the "
             "workbench).")
-            + f"<h1>Annotation activity ({len(events):,}"
-            + (f", of which {n_arch:,} on the archived assembly" if n_arch else "") + ")</h1>"
+            + f"<h1>Annotation activity ({len(events) - n_login:,} actions"
+            + (f", of which {n_arch:,} on the archived assembly" if n_arch else "")
+            + (f"; {n_login:,} log-ins, on the green rows, since 4 September 2026" if n_login else "") + ")</h1>"
             + (f"<p class='muted'>By annotator: {who}.</p>" if per_user else "")
-            + ("<table><tr><th>when</th><th>who</th><th>action</th>"
-               "<th>article</th><th>detail</th></tr>" + rows + "</table>"
+            + ("<table><tr><th>When</th><th>Who</th><th>Action</th>"
+               "<th>Article</th><th>Detail</th></tr>" + rows + "</table>"
                + (f"<p class='muted'>First {min(600, len(events))} of {len(events):,}.</p>" if len(events) > 600 else "")
                if events else
                "<div class='empty'>No annotations yet. Corrections and "
@@ -2992,6 +3139,35 @@ classified) and an advertiser, and a house announcement that quotes a
 story is marked contains a verbatim excerpt so that the quoted
 text stays out of the reuse inventory; all of these are under record
 facts at the top of the page and can be corrected there.</p>
+<p>4c. The house conventions (settled on 4 September 2026 so that
+everyone's records match). Every box on a scan is, at the top level,
+part of the <em>contents page</em>, of an <em>article</em> (a piece
+the contents page lists) or of a <em>non-article</em> (anything it does
+not list: advertising, the publisher's own notices, loose matter); the
+workbench says which above the cards. The second level is the type:
+story (a serial instalment is a story with its part number in the
+record facts), poem, feature, letters, house (the publisher's own
+matter: next-issue announcements, story excerpts, coupons and ballots,
+subscription appeals, the masthead), ad (an outside advertiser), toc,
+other. The third level, for a story, is the role of each box: Title
+(press it on every setting of the title), Subtitle (a kicker or a type
+label such as "A Complete Novelette", or "Part Two"), Author (the
+by-line, "Conducted by" included), Body text (no role), Chapter info
+(chapter no., chapter title, section), and Paratext — editorial text
+about the story that is never story text: the <em>teaser</em> (the
+blurb), the <em>synopsis</em> (the recap printed on a later
+instalment; the machine marks it, you correct it) and a <em>note</em>
+(the credit line "Author of …", "Illustrated by …", a tail line such
+as "Watch for the next story"). Any button replaces the current role
+in one step; tick several cards and give them one role from the bar at
+the foot. <em>Page furniture stays outside the record</em>: running
+heads, page numbers, printer's marks and the captions under
+illustrations are not story text and are not pulled in; "Text in
+picture" marks words the scan read inside a drawing. Inside a story a
+display line that is not a chapter head has no role (the author's own
+typography stays in the text); Section is for the headings of a
+department. The machine follows these rules itself, and a record you
+have verified is never changed by a later machine run.</p>
 <p>5. When the article reads correctly from start to finish, press
 mark as verified. Done &mdash; the record now carries your name
 and the time, and verify, then next unverified takes you
@@ -3077,9 +3253,9 @@ an answer that everyone else benefits from too.</p>"""
             "hardware, single process. It answers the pilot's second "
             "question: is the method affordable at full scale?")
             + "<h1>Timing</h1>"
-            + ("<table><tr><th>stage</th><th>runs</th><th>pages</th>"
-               "<th>seconds</th><th>sec/page</th>"
-               "<th>full corpus, hours (projected)</th></tr>" + rows + "</table>"
+            + ("<table><tr><th>Stage</th><th>Runs</th><th>Pages</th>"
+               "<th>Seconds</th><th>Sec/page</th>"
+               "<th>Full corpus, hours (projected)</th></tr>" + rows + "</table>"
                if rows else
                "<div class='empty'>0 timing rows — no stage has run yet.</div>"))
         return self._page("Timing", body, path="/timing")
@@ -3106,7 +3282,7 @@ an answer that everyone else benefits from too.</p>"""
                           f"<input type='hidden' name='id' value='{esc(it['id'])}'>"
                           f"<textarea name='comment' style='width:100%;height:90px;font-family:inherit;font-size:13.5px'>"
                           f"{esc(it.get('comment', ''))}</textarea>"
-                          f"<p><button>save</button></p></form></details>")
+                          f"<p><button>Save</button></p></form></details>")
             done = ""
             if admin:
                 done = (f"<form method='POST' action='/feedback/done' class='mini'>"
@@ -3131,7 +3307,7 @@ an answer that everyone else benefits from too.</p>"""
             + f"<h1>Feedback ({len(shown)}{'' if admin else ' of yours'})</h1>"
             + (f"<p class='muted'>{sum(1 for it in items if not it.get('done'))} open, "
                f"{sum(1 for it in items if it.get('done'))} done, {len(items)} in all.</p>" if admin else "")
-            + ("<table><tr><th>when</th><th>who</th><th>page</th><th>comment</th><th>state</th></tr>"
+            + ("<table><tr><th>When</th><th>Who</th><th>Page</th><th>Comment</th><th>State</th></tr>"
                + "".join(rows) + "</table>" if rows else
                "<div class='empty'>Nothing here yet. Every members page has a feedback box at the bottom.</div>"))
         return self._page("Feedback", body, path="/feedback")

@@ -66,19 +66,29 @@ verify) is one JSON line with username and time in
 `data/annotations/<issue>.jsonl`, and the site replays those events over
 the machine output on every page view. Deleting an annotation file
 returns that issue to the pure machine state; nothing else changes.
-Events as of v0.12.0 (2026-09-03): set_meta (title, author, type, and
-the record facts ad_class, advertiser, excerpt_of, contains_excerpt),
-set_text, set_frag_order, move_frag (to_id "new" makes one record per
-box), new_article (several boxes into ONE new record: frags, type,
-title, from_id — used by "make a NEW record from them", "move them to a
-NEW record" and "take them out"), frag_furniture, edit_frag_text,
-set_role (title, subtitle, author, teaser, chapter_number,
-chapter_title, section), add_manual, merge, verify, unverify. The
-workbench's "attach pages N to M" writes one move_frag per box (page
-furniture left out, at most 30 pages). Machine roles are seeded into
-the replay: title/subtitle/author/teaser as they are, chapter as
-chapter_number or chapter_title by the region's text, heading as
-section.
+Events as of v0.13.0 (2026-09-04): set_meta (title, author, type, and
+the record facts ad_class, advertiser, excerpt_of, contains_excerpt,
+department, part_label, part_n, part_total, illustrator; a type
+serial_part from the old dropdown replays as story with the annotator
+as the serial's source), set_text, set_frag_order, move_frag (to_id
+"new" makes one record per box), new_article (several boxes into ONE
+new record: frags, type, title, from_id — used by "Make a NEW record
+from them", "Move them to a NEW record" and "Move to non-article"),
+frag_furniture (with why = "text in picture" for words read inside a
+drawing), edit_frag_text, set_role (title, subtitle, author, teaser,
+synopsis, note, chapter_number, chapter_title, section; the workbench
+act role_many writes one set_role per chosen card), add_manual, merge,
+verify, unverify. The workbench's "Attach pages N to M" writes one
+move_frag per box (page furniture left out, at most 30 pages). Machine
+roles are seeded into the replay: title/subtitle/author/teaser/note/
+synopsis/caption as they are, chapter as chapter_number or
+chapter_title by the region's text, heading as section. The title,
+subtitle, author and teaser fields hold the words of every box with
+that role in reading order (a title set in two boxes is joined; the
+same words set twice count once). Log-ins are written to
+data/logins.jsonl (ts, user) and shown on the activity page; the
+reading text of a record leaves out title, subtitle, author, teaser,
+note and synopsis.
 
 Archived logs (v0.12.1, 2026-09-03): the boards count the annotation
 logs an assembly switch moved to data/assembly_archive/<stamp>/annotations/
@@ -247,6 +257,15 @@ this'`. Never put placeholder text in a paste — "PUT-YOUR-PASSCODE-HERE"
 once became the actual site passcode; bake real values in or use
 `read -p`. For one-line config files prefer `echo value > file` over
 nano. Put a quoted STOP line before any step that needs a human choice.
+Long runs go into a tmux session whose command ends with `echo
+REUSE-DONE; sleep 86400` — the sleep keeps the pane readable for a day
+(`tmux capture-pane -pt <name> | grep -v "^$" | tail -2`: a pane with
+fewer lines than its height ends in blank lines, so a plain `tail -2`
+shows nothing — seen on 2026-09-04); a session that has already
+ended is not "still running", so never guard a paste on the pane's
+absence (2026-09-03: a guard read a finished run as running). The
+result files' own timestamps, reachable through the data door, are the
+sure sign that a run finished.
 
 ## The pipeline, stage by stage
 
@@ -326,6 +345,45 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     matter under a "continued on" / "[turn page]" notice
                     is advertising; subheadings inside a piece carry the
                     role heading (the site shows it as "section").
+                    v2.1.1 (3 September, evening): the fixes the audit
+                    (s10) asked for. v2.2 (2026-09-04, the third round of
+                    feedback): types house (ad_class house_*) and no
+                    serial_part — an instalment is a story with serial
+                    {part_label, part_n, part_total, source, prev, next}
+                    and work_title / work_id, linked across issues by the
+                    cross_issue pass that runs after --all (or alone with
+                    --link-only; it also sets contains_excerpt / excerpt_of
+                    when a house record's 8-word runs occur in a story of
+                    the same magazine); roles note (credits, "Illustrated
+                    by" → illustrator, tail notes) and synopsis (the recap
+                    on a later instalment → the synopsis field, out of the
+                    text); a chapter title is a display line of a series
+                    on different pages; titles split over two boxes or the
+                    facing page are joined from the contents page (the
+                    facing page's first paragraphs come along); "(Poem)"
+                    → poem, capitals → title case; an author's name
+                    repeated at the end is furniture (or the author of an
+                    unsigned column), "The End" and "To be continued" are
+                    furniture; departments from config/departments.json
+                    (department field, type, conductor; a house head
+                    starts a house block whose next display lines are the
+                    title); a letters page needs signed letters; column
+                    advertisements beside a story's text are cut out by
+                    their column (a headline or a priced first line, a
+                    price or postal address, no dialogue or narrative);
+                    illustration pages and text boxes inside picture boxes
+                    are furniture "text inside an illustration".
+                    v2.1.2 (2026-09-04): the roles above
+                    a story head follow the annotators (a second setting
+                    of the title is title, the blurb teaser, a kicker
+                    subtitle, a synopsis heading heading); the credit
+                    line under the by-line ("Author of …") carries the
+                    teaser role and is kept as author_credit (r00 exports
+                    it); inside a story a display line that is not a
+                    chapter head has no role, heading is for departments;
+                    "PART ONE" and "I.—THE MURDER CLUB" are chapter heads;
+                    the page range takes in a trailing leaf the scan has
+                    out of order (Galaxy 1952-03) and flags the record.
     s09_assembly_eval    the assembly harness: every candidate (live —
                     whatever data/articles holds, the rules' records
                     since the switch —, rules, rules-on-model) against
@@ -358,6 +416,31 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     data/assembly_archive/<stamp>_refresh/. Always
                     --dry-run first; run r00 and rebuild the explorer
                     after. docs/assembly-v2.md has the rules and results.
+                    Since 2026-09-04 a VERIFIED record (verify with no
+                    unverify after it) is never changed by a refresh:
+                    its live machine record is carried over as it is, its
+                    regions are taken away from the candidate records
+                    (leftovers that the machine would have added to it go
+                    to the file's `unsorted` list for a person to pull
+                    in), and no flag overrides this — unverify on the
+                    site first. Every other annotated record is reported
+                    one line each (regions unchanged / REGIONS CHANGE
+                    +n −m / kept as verified). --verified-from
+                    data/assembly_archive/<stamp>_refresh takes, for a
+                    record verified BEFORE that stamp, the copy kept
+                    there (what the person saw) instead of the live one —
+                    used once, to undo the forced refresh of 4 September
+                    (see the journal entry of that day).
+    scripts/compare_effective.py   did a machine run change what the
+                    annotators see? Compares the effective records
+                    (machine record + replayed log) of two states —
+                    --before data/assembly_archive/<stamp>_refresh/articles
+                    --after data/articles — for every record a person
+                    touched, region by region with roles; the check to
+                    run after any refresh (verified records must come
+                    out "identical"). --early <kept copy> takes, for a
+                    record verified before that copy's stamp, the
+                    before-state from there (the pair of --verified-from).
 
 ## The text-reuse pipeline (the r-series) and the reuse pages
 

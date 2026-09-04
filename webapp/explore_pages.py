@@ -1,4 +1,4 @@
-"""The explorer (service side of the site, v0.12.1): every piece of data
+"""The explorer (service side of the site, v0.13.0): every piece of data
 the server holds, in layers, each layer one click from the next and the
 last layer the raw record itself.
 
@@ -228,7 +228,8 @@ CREATE TABLE records(id TEXT PRIMARY KEY, issue TEXT, magazine TEXT, mag_slug TE
   modified_by TEXT, n_regions INTEGER, fragments TEXT, n_words INTEGER, text_sha1 TEXT, is_story INTEGER,
   n_exact INTEGER, n_para INTEGER, ad_class TEXT, advertiser TEXT, contains_excerpt INTEGER, excerpt_of TEXT,
   n_chapters INTEGER, chapters TEXT, announces TEXT, title_as_printed TEXT, author_as_printed TEXT, subtitle TEXT,
-  title_source TEXT, author_source TEXT, flags TEXT);
+  title_source TEXT, author_source TEXT, flags TEXT, department TEXT, work_title TEXT, work_id TEXT, part_label TEXT,
+  part_n INTEGER, part_total INTEGER, serial TEXT, illustrator TEXT, author_credit TEXT, synopsis TEXT);
 CREATE INDEX rec_adclass ON records(ad_class);
 CREATE INDEX rec_issue ON records(issue);
 CREATE INDEX rec_author ON records(author_key);
@@ -349,7 +350,7 @@ def build_db(sig, path, log=None):
         iss = issues.get(r["issue"])
         y = _year(r.get("cover_date"))
         key = author_key(r.get("author"))
-        is_story = 1 if (r.get("type") in ("story", "serial_part")) else 0
+        is_story = 1 if (r.get("type") in ("story", "serial_part")) else 0      # serial_part: exports before 2026-09-04
         pages = r.get("pages") or []
         typ = r.get("type") or "other"
         rec_rows.append((sid, r["issue"], r.get("magazine"), mag_slug(r.get("magazine")), r.get("cover_date"), y, _decade(y),
@@ -363,7 +364,11 @@ def build_db(sig, path, log=None):
                          (json.dumps(r["excerpt_of"], ensure_ascii=False) if isinstance(r.get("excerpt_of"), dict) else (r.get("excerpt_of") or None)),
                          len(r.get("chapters") or []), json.dumps(r.get("chapters") or [], ensure_ascii=False),
                          json.dumps(r.get("announces") or [], ensure_ascii=False), r.get("title_as_printed"), r.get("author_as_printed"),
-                         r.get("subtitle"), r.get("title_source"), r.get("author_source"), json.dumps(r.get("flags") or [], ensure_ascii=False)))
+                         r.get("subtitle"), r.get("title_source"), r.get("author_source"), json.dumps(r.get("flags") or [], ensure_ascii=False),
+                         r.get("department"), r.get("work_title"), r.get("work_id"), (r.get("serial") or {}).get("part_label"),
+                         (r.get("serial") or {}).get("part_n"), (r.get("serial") or {}).get("part_total"),
+                         (json.dumps(r["serial"], ensure_ascii=False) if r.get("serial") else None), r.get("illustrator"),
+                         r.get("author_credit"), r.get("synopsis")))
         n_rec += 1
         story_meta[sid] = (r["issue"], key, r.get("magazine"), r.get("genre"), _decade(y), y, is_story)
         if iss is not None:
@@ -430,7 +435,7 @@ def build_db(sig, path, log=None):
         n_para[a["a"]] += 1
         n_para[a["b"]] += 1
     con.executemany("INSERT INTO aligns VALUES (?,?,?,?,?,?,?,?,?)", arows)
-    con.executemany("INSERT INTO records VALUES (" + ",".join("?" * 42) + ")",
+    con.executemany("INSERT INTO records VALUES (" + ",".join("?" * 52) + ")",
                     [row[:27] + (n_exact.get(row[0], 0), n_para.get(row[0], 0)) + row[27:] for row in rec_rows])
     degree = Counter()
     for (ka, kb), L in author_links.items():
@@ -537,7 +542,8 @@ def build_db(sig, path, log=None):
               "paraphrase_alignments": len(arows), "pairs": n_pairs, "events": len(erows),
               "events_archived": sum(1 for r in erows if r[6]),
               "author_links": len(author_links), "magazine_links": len(mag_links),
-              "ad_classes": dict(Counter(row[27] or "?" for row in rec_rows if row[9] == "ad")),
+              "ad_classes": dict(Counter(row[27] or "?" for row in rec_rows if row[9] in ("ad", "house"))),
+              "house": sum(1 for row in rec_rows if row[9] == "house"),
               "house_excerpts": sum(1 for row in rec_rows if row[29])}
     meta = {"signature": _signature(sig), "built": time.strftime("%Y-%m-%d %H:%M:%S"),
             "build_seconds": round(time.time() - t0, 2), "counts": json.dumps(counts),
@@ -546,7 +552,7 @@ def build_db(sig, path, log=None):
             "summary": json.dumps(_json(os.path.join(D, "reuse", "background", "summary_machine.json")) or {}),
             "overlap": json.dumps(_json(os.path.join(D, "reuse", "machine_region_overlap.json")) or {}),
             "survey": json.dumps(_json(os.path.join(D, "survey", "summary.json")) or {}),
-            "version": "0.12.1"}
+            "version": "0.13.0"}
     con.executemany("INSERT INTO meta VALUES (?,?)", list(meta.items()))
     con.commit()
     con.close()
@@ -697,8 +703,13 @@ def _raw_link(path, label="raw data"):
             f"padding:1px 8px;text-decoration:none'>{_esc(label)} ↓</a>")
 
 
+def _sentence(label):
+    """Table headers in sentence case (Heejin, 2026-09-04): the first letter up, the rest as written."""
+    return (label[:1].upper() + label[1:]) if label[:1].islower() else label
+
+
 def _table(headers, rows, cls=""):
-    h = "".join(f"<th{' class=num' if hd.startswith('#') else ''}>{_esc(hd.lstrip('#'))}</th>" for hd in headers)
+    h = "".join(f"<th{' class=num' if hd.startswith('#') else ''}>{_esc(_sentence(hd.lstrip('#')))}</th>" for hd in headers)
     body = "".join("<tr>" + "".join(
         f"<td class='num'>{c[1:]}</td>" if isinstance(c, str) and c.startswith("\x01") else f"<td>{c}</td>"
         for c in r) + "</tr>" for r in rows)
@@ -1128,12 +1139,21 @@ def overview(qs=None, render=None):
             return "/stories?" + urllib.parse.urlencode(q)
         unit = "decade" if by_dec else "year"
         trows = [[_esc(f"{c}s" if by_dec else str(c))] + [N(cells[c].get(g, 0)) for g in top] + [N(sum(cells[c].values()))] for c in cats]
-        out.append(f"<h2>1. Stories by {unit} and genre</h2>")
+        # two charts (Heejin, 2026-09-04): stories by year on its own, stories by genre on its own
+        per_unit = [sum(cells[c].values()) for c in cats]
+        genres_all = sorted(gtot, key=lambda g: -gtot[g])
+        out.append(f"<h2>1. Stories by {unit}</h2>")
+        out.append(RP._chart_row(RP.svg_bars([f"{c}s" if by_dec else str(c) for c in cats], [("stories", per_unit)], f"Stories per {unit}"),
+                                 _table([unit, "#stories"], [[_esc(f"{c}s" if by_dec else str(c)), N(sum(cells[c].values()))] for c in cats][-40:])
+                                 + "<p class='muted' style='font-size:12.5px'>A story's date is its issue's cover date unless "
+                                   "other evidence is recorded (the record's date_source says which).</p>"))
+        out.append("<h2>1b. Stories by genre</h2>")
+        out.append(RP._chart_row(RP.svg_bars([_esc(g) for g in genres_all], [("stories", [gtot[g] for g in genres_all])], "Stories per genre"),
+                                 _table(["genre", "#stories"], [[f"<a href='/stories?genre={urllib.parse.quote(g)}'>{_esc(g)}</a>", N(gtot[g])] for g in genres_all])))
+        out.append(f"<h2>1c. Stories by {unit} and genre</h2>")
         out.append(RP._chart_row(svg_stacked(cats, series, f"Stories per {unit}, by genre", href),
                                  _table([unit] + [f"#{g}" for g in top] + ["#all"], trows[-40:])
-                                 + "<p class='muted' style='font-size:12.5px'>A story's date is its issue's cover date unless "
-                                   "other evidence is recorded (the record's date_source says which). Click a bar segment "
-                                   "for the stories it counts.</p>"))
+                                 + "<p class='muted' style='font-size:12.5px'>Click a bar segment for the stories it counts.</p>"))
     # 2. reuse by decade and genre × genre (from the pair table)
     if has_pairs and n_pairs:
         dec = _rows(con, f"SELECT CAST(later_decade AS INTEGER) AS d, COUNT(*) AS n, SUM(exact_k6_longest>=6) AS s, "
@@ -1276,6 +1296,47 @@ def _bar(v, of, width=560, height=14):
             f"<div style='background:{RP.PALETTE[0]};height:100%;width:{min(100, pct):.2f}%'></div></div>")
 
 
+def collection_bar(fr, downloaded, processed, verified, width=760):
+    """ONE bar for the whole collection (Heejin, 2026-09-04): every archive item
+    left to right — the other-language items greyed out, the working corpus
+    in a light tint, its fiction magazines in a stronger one, and on the left
+    edge the issues downloaded, automatically processed, and fully verified,
+    each in its own colour. At 28,286 items ten issues are a hair's breadth,
+    so each of the three marks is drawn at least 3 px wide; the counts stand
+    in the legend."""
+    total = max(1, fr.get("total") or 1)
+    fiction = fr.get("fiction") or 0
+    working = fr.get("working") or 0
+    other = max(0, total - working)
+
+    def w(v, minpx=0):
+        return f"max({minpx}px,{100 * v / total:.3f}%)"
+    segs = [(f"width:{w(fiction)};background:#c99b4e", f"fiction magazines in the working corpus: {fiction:,}"),
+            (f"width:{w(working - fiction)};background:#eee5d5", f"other items of the working corpus (dime novels, film and general magazines, comics): {working - fiction:,}"),
+            (f"width:{w(other)};background:#cfc8bd;opacity:.6", f"other languages, left out: {other:,}")]
+    marks = [(f"width:{w(downloaded, 3)};background:#2c5e2e", f"downloaded: {downloaded:,}"),
+             (f"width:{w(processed, 3)};background:#7a3020", f"automatically processed (assembled into records): {processed:,}"),
+             (f"width:{w(verified, 3)};background:#1c1a17", f"fully verified by people: {verified:,}")]
+    html = [f"<div style='max-width:{width}px'>"
+            "<div style='display:flex;height:22px;border:1px solid #d8cfc0;background:#fff'>"]
+    for st, ttl in segs:
+        html.append(f"<div title='{_esc(ttl)}' style='{st};height:100%'></div>")
+    html.append("</div>")
+    html.append("<div style='display:flex;height:10px;margin-top:2px'>")
+    for st, ttl in marks:
+        html.append(f"<div title='{_esc(ttl)}' style='{st};height:100%;margin-right:1px'></div>")
+    html.append("</div>")
+    html.append("<p class='muted' style='font-size:12.5px;margin:4px 0 0'>"
+                f"<span style='display:inline-block;width:11px;height:11px;background:#c99b4e;vertical-align:middle'></span> fiction magazines {fiction:,} · "
+                f"<span style='display:inline-block;width:11px;height:11px;background:#eee5d5;border:1px solid #d8cfc0;vertical-align:middle'></span> rest of the working corpus {working - fiction:,} · "
+                f"<span style='display:inline-block;width:11px;height:11px;background:#cfc8bd;opacity:.6;vertical-align:middle'></span> other languages {other:,} (of {total:,} items in the collection)<br>"
+                f"<span style='display:inline-block;width:11px;height:6px;background:#2c5e2e;vertical-align:middle'></span> downloaded {downloaded:,} · "
+                f"<span style='display:inline-block;width:11px;height:6px;background:#7a3020;vertical-align:middle'></span> automatically processed {processed:,} · "
+                f"<span style='display:inline-block;width:11px;height:6px;background:#1c1a17;vertical-align:middle'></span> fully verified {verified:,} "
+                "— the three marks are drawn at least 3 px wide; at this scale the pilot is a sliver.</p></div>")
+    return "".join(html)
+
+
 def explore_progress_html(con=None):
     """Complete issues against the working corpus: the explorer's own progress
     line (the workroom board has every step)."""
@@ -1292,7 +1353,9 @@ def explore_progress_html(con=None):
                    f"pulp collection holds {fr['total']:,} items, {fr['working']:,} of them in English or with no language given "
                    f"(the working corpus; {fr['other']:,} in other languages are left out), and {fr['fiction']:,} of those are "
                    f"fiction magazines — the frame the complete-issue count is drawn against below.</p>")
-        out.append(_bar(n_c, fr["fiction"]))
+        n_dl = _val(con, "SELECT COUNT(*) FROM issues WHERE pages>0") or 0
+        n_fv = _val(con, "SELECT COUNT(*) FROM issues WHERE stories>0 AND verified=stories") or 0
+        out.append(collection_bar(fr, n_dl, n_c, n_fv))
         out.append(f"<p class='muted' style='font-size:12.5px'>{n_c:,} complete of {fr['fiction']:,} fiction-magazine items "
                    f"({_fmt(100 * n_c / fr['fiction'] if fr['fiction'] else 0)}%). Survey of {_esc(fr['generated'])}, metadata only "
                    f"(pipeline/s00_survey.py).</p>")
@@ -1339,6 +1402,8 @@ def process_board_html():
                  ["of which fiction magazines (pulps and digests)", N(fr["fiction"]), _bar(fr["fiction"], fr["total"], 220),
                   f"<span class='muted'>{fr['fiction_pages']:,} page images, {fr['fiction_magazines']:,} magazine names; the rest: "
                   + ", ".join(f"{k} {v:,}" for k, v in wbk.items() if k != "fiction magazine") + "</span>"]]
+        out.append(collection_bar(fr, sum(1 for i in iss if i["pages"]), sum(1 for i in iss if i["assembled"] or i["exported"]),
+                                  sum(1 for i in iss if i["stories"] and i["verified"] == i["stories"])))
         out.append(_table(["the collection", "#items", "share of the collection", "note"], crows))
         dec = fr["fiction_by_decade"]
         if dec:
@@ -1881,6 +1946,26 @@ def story_page(sid, render=None):
                      + (f"; author printed on the page as '{_esc(r['author_as_printed'])}'" if r.get("author_as_printed") else ""))
     if r.get("subtitle"):
         facts.append(f"subtitle '{_esc(r['subtitle'])}'")
+    if r.get("department"):
+        facts.append(f"department <b>{_esc(r['department'])}</b>")
+    ser = _j(r.get("serial"), None) if r.get("serial") else None
+    if ser:
+        part = ser.get("part_label") or (f"part {ser['part_n']}" if ser.get("part_n") else "an instalment")
+        tot = f" of {ser['part_total']}" if ser.get("part_total") else ""
+        links = []
+        for which, lab in (("prev", "previous instalment"), ("next", "next instalment")):
+            ref = ser.get(which)
+            if ref:
+                other = _val(con, "SELECT id FROM records WHERE issue=? AND is_story=1 AND lower(COALESCE(work_title, title))=lower(?) LIMIT 1",
+                             (ref.get("issue"), ref.get("title") or ""))
+                links.append((f"<a href='/story/{_esc(other)}'>{lab}</a>" if other else lab) + f" in {_issue_link(con, ref.get('issue'))}")
+        facts.append(f"serial instalment: <b>{_esc(part)}{tot}</b> of <i>{_esc(r.get('work_title') or r['title'])}</i>"
+                     + (f" ({_esc(ser.get('source'))})" if ser.get("source") else "")
+                     + ((" — " + "; ".join(links)) if links else " — no other instalment in the corpus yet"))
+    if r.get("illustrator"):
+        facts.append(f"illustrated by {_esc(r['illustrator'])}")
+    if r.get("author_credit"):
+        facts.append(f"credit line '{_esc(r['author_credit'])}'")
     if r.get("ad_class"):
         facts.append(f"advertisement class <b>{_esc(r['ad_class'])}</b>" + (f", advertiser {_esc(r['advertiser'])}" if r.get("advertiser") else ""))
     ann = _j(r.get("announces"), [])
@@ -1889,7 +1974,11 @@ def story_page(sid, render=None):
     if r.get("contains_excerpt"):
         eo = _j(r.get("excerpt_of"), None) if (r.get("excerpt_of") or "").startswith("{") else r.get("excerpt_of")
         eo_txt = (eo.get("title", "") + (f" by {display_author(eo['author'])}" if eo.get("author") else "")) if isinstance(eo, dict) else (eo or "")
-        facts.append("<b>quotes a story verbatim</b>" + (f": {_esc(eo_txt)}" if eo_txt else "") + " — left out of the reuse inventory")
+        eo_link = ""
+        if isinstance(eo, dict) and eo.get("issue"):
+            other = _val(con, "SELECT id FROM records WHERE issue=? AND lower(title)=lower(?) LIMIT 1", (eo["issue"], eo.get("title") or ""))
+            eo_link = f" (<a href='/story/{_esc(other)}'>the story</a>, {_issue_link(con, eo['issue'])})" if other else f" ({_issue_link(con, eo['issue'])})"
+        facts.append("<b>quotes a story verbatim</b>" + (f": {_esc(eo_txt)}" if eo_txt else "") + eo_link + " — left out of the reuse inventory")
     chs = _j(r.get("chapters"), [])
     if chs:
         facts.append(f"{len(chs)} chapters: " + "; ".join(
@@ -1902,6 +1991,11 @@ def story_page(sid, render=None):
     if r.get("teaser"):
         body.append(f"<p style='font-style:italic;border-left:3px solid #8a6d1f;padding-left:10px'>{_esc(r['teaser'])} "
                     f"<span class='muted' style='font-style:normal;font-size:12px'>— teaser as printed (metadata, not story text)</span></p>")
+    if r.get("synopsis"):
+        body.append(f"<details style='border-left:3px solid #8a6d1f;padding-left:10px;margin:6px 0'><summary class='muted' style='cursor:pointer'>"
+                    f"synopsis of the earlier instalments, as printed ({len(r['synopsis'].split()):,} words — the story's own earlier text, "
+                    f"left out of the reading text and of the reuse inventory)</summary>"
+                    + "".join(f"<p style='font-style:italic'>{_esc(para)}</p>" for para in r["synopsis"].split("\n\n")[:40]) + "</details>")
     body += [f"<p><a href='/article/{_esc(sid)}'>open on the workbench</a> · "
              + (" · ".join(f"<a href='/issue/{_esc(r['issue'])}/p/{p}'>scan p.{p}</a>" for p in pages[:8]))
              + f" · {_raw_link('/raw/story/' + sid)}</p>",
@@ -2371,9 +2465,12 @@ def params_html():
 DICTIONARY = [
     ("data/pilot_stories.jsonl — one line per record (r00)", [
         ("story_id", "record id, <issue>_a<number>"), ("issue", "issue id"), ("magazine, cover_date, genre, format", "from config/pilot_issues.json"),
-        ("type", "story · serial_part · feature · poem · letters · ad · toc · other (machine typing, human-correctable)"),
+        ("type", "story · poem · feature · letters · house · ad · toc · other (machine typing, human-correctable; house = the publisher's own matter, since 2026-09-04; a serial instalment is a story with serial fields)"),
+        ("department, serial, work_title, work_id", "the standing department a record belongs to (config/departments.json); a serial instalment's part_label / part_n / part_total / source and its prev / next instalment by issue and title; the work's title without the instalment marker; one work_id for every instalment (assembly v2.2, cross-issue pass)"),
+        ("illustrator, synopsis", "'Illustrated by …' as printed; the recap printed on a later instalment (never story text, never in the reuse inventory)"),
         ("title, author", "as printed, as they stood at export (human corrections included)"),
-        ("teaser", "the printed blurb on a story's first page, when an annotator marked it (metadata, never story text)"),
+        ("teaser", "the printed blurb on a story's first page (the machine's since assembly v2, or an annotator's mark; metadata, never story text)"),
+        ("author_credit", "the credit line under the by-line — 'Author of \"Men Like Gods,\" etc.' — never story text (assembly v2.1.2; it carries the teaser role on the workbench, decision of 2026-09-04)"),
         ("subtitle, title_as_printed, author_as_printed", "the page's own forms when the title or author came from the contents page (assembly v2.1: the contents page has authority; decision of 2026-09-03)"),
         ("title_source, author_source", "'contents' or 'page'"),
         ("ad_class, advertiser", "advertisements only: house_next_issue · house_self · house_sibling · house_form · trade · classified; the advertiser's name when read"),

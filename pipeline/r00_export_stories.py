@@ -53,6 +53,13 @@ def main():
                     "title": a.get("title"),
                     "author": a.get("author"),
                     "teaser": a.get("teaser"),
+                    "author_credit": a.get("author_credit"),        # "Author of 'Men Like Gods,' etc." (assembly v2.1.2)
+                    "illustrator": a.get("illustrator"),            # "Illustrated by WILLER" (assembly v2.2)
+                    "synopsis": a.get("synopsis"),                  # the recap on a later instalment: not story text, not in the reuse inventory
+                    "department": a.get("department"),              # the standing department the record belongs to (config/departments.json)
+                    "serial": a.get("serial"),                      # {part_label, part_n, part_total, source, prev, next} for a serial instalment
+                    "work_title": a.get("work_title"),              # the work's title without the instalment marker
+                    "work_id": a.get("work_id"),                    # shared by every instalment of one work (cross_issue pass)
                     "subtitle": a.get("subtitle"),
                     "title_as_printed": a.get("title_as_printed"),
                     "author_as_printed": a.get("author_as_printed"),
@@ -78,15 +85,18 @@ def main():
                     "text_sha1": hashlib.sha1(text.encode("utf-8")).hexdigest(),
                     "text": text,
                 }
+                if rec["type"] == "serial_part":
+                    rec["type"] = "story"                      # instalments are stories with serial fields since 2026-09-04
+                    rec["serial"] = rec.get("serial") or {"part_label": None, "part_n": None, "part_total": None, "source": "annotator"}
                 f.write(json.dumps(rec, ensure_ascii=False) + "\n")
                 n_art += 1
-                if rec["type"] in ("story", "serial_part"):
+                if rec["type"] == "story":
                     n_story += 1
                 if rec["status"] == "verified":
                     n_verified += 1
             print(f"[r00] {iid}: {len(doc['articles'])} articles")
-    print(f"[r00] wrote {OUT}: {n_art} articles, {n_story} stories/serial "
-          f"parts, {n_verified} verified — {time.strftime('%Y-%m-%d %H:%M')}")
+    print(f"[r00] wrote {OUT}: {n_art} articles, {n_story} stories (instalments included), "
+          f"{n_verified} verified — {time.strftime('%Y-%m-%d %H:%M')}")
 
 
 if __name__ == "__main__":

@@ -60,6 +60,7 @@ annotator's name; the machine's output is never overwritten.
                              sections 3–4), rehearsed on the pilot
     scripts/                 setup, deploy helpers, backup server scripts
     config/pilot_issues.json the approved 10-issue development set
+    config/departments.json  each magazine's standing departments (name, type, conductor) — assembly v2.2
     data/reuse/              the reuse pipeline's result files (the one
                              data folder kept in git; small JSON)
     docs/                    you are here — handbook, technical notes,

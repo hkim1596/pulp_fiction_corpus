@@ -159,6 +159,19 @@ def score_toc(toc, records, pages, content_range=None):
     for r in records:
         if r.get("type") in PIECE_TYPES and r["pages"]:
             starts_by_page[r["pages"][0]].append(r)
+    # every piece's own record first, so that a record beginning on the facing page of its own head
+    # (the title set across a two-page spread) is never an "extra start" inside the piece before it
+    own = {}
+    for e in pieces:
+        P = e["scan"]
+        cands = starts_by_page.get(P, []) + starts_by_page.get(P - 1, []) + starts_by_page.get(P + 1, [])
+        best = None
+        for r in cands:
+            sc = max(sim(r.get("title"), e["title"]), sim(r.get("author"), e["author"]) if e.get("author") else 0)
+            if best is None or sc > best[0]:
+                best = (sc, r)
+        if best:
+            own[id(best[1])] = e["title"]
     for n, e in enumerate(pieces):
         P = e["scan"]
         nxt = pieces[n + 1]["scan"] if n + 1 < len(pieces) else None
@@ -183,7 +196,8 @@ def score_toc(toc, records, pages, content_range=None):
             row["coverage"] = round(len(span_pages & set(r["pages"])) / max(1, len(span_pages)), 3)
             row["runs_over"] = bool(nxt) and any(pn >= nxt + 1 for pn in r["pages"] if pn <= (nxt + 3))
         inside = [r for pn, rs in starts_by_page.items() if P + 1 <= pn <= span_end for r in rs
-                  if r.get("type") in STORY_TYPES and r is not (best[1] if best else None)]
+                  if r.get("type") in STORY_TYPES and r is not (best[1] if best else None)
+                  and not (id(r) in own and own[id(r)] != e["title"] and pn == span_end)]
         row["extra_starts_inside"] = len(inside)
         rows.append(row)
     return rows

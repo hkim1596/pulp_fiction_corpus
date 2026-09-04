@@ -255,3 +255,48 @@ inside pieces from 3 to 2.
 
 The audit writes data/assembly_v2/audit.json (every disputed region
 with the machine's and the person's reasons) and prints the report.
+
+## Addendum, 4 September: the refresh that changed annotated records
+
+The refresh that put v2.1.1 live on the main server on 4 September
+(10:02) ran with `--force`, written the day before for one record of
+Heejin's. By then Sujin and Heejin had annotated five issues on the
+rules' records (335 events by 10:30 that day) and verified four
+records; the refresh changed the machine regions under sixteen of the
+records they had touched. Compared as effective records (machine record
+plus replayed log), fourteen were identical or better afterwards — the
+annotators' actions replay by region key — and two verified records
+changed:
+
+    td_1932_02_a021  A Loaf of Bifield   the credit line "Author of 'Three of a Kind,' …" was a teaser; v2.1.1 put it in the reading text
+    wt_1925_11_a015  The Stolen Body     lost 131:2 (the title repeated over the continuation: now furniture) and 132:6–7 (the Next Month lines of Tenants of Broussac: now the announcement's)
+
+The second change was the machine reading the page correctly — the
+verified record contains two lines of an announcement — but a verified
+record must not change under anyone; Heejin restores it and takes the
+two lines out himself. Note that his own correction of 2 September on
+the model assembly (the yardstick's record a007) did not contain the
+three regions: the verified state of 3 September was made without
+noticing them, so against the yardstick The Stolen Body now scores
+J=0.96 instead of exact until he does.
+
+The Demolished Man (gal_1952_03_a020, corrected by Sujin) lost its last
+page for a different reason: the scan has its final leaves out of order
+(printed 156 after 158), and once the Odd John announcement on the
+last page was rightly read as advertising rather than a story start,
+the issue's page range ended before that leaf. v2.1.2 takes such a leaf
+in and flags the record.
+
+Rules v2.1.2 (docs/assembly-v2.md) follow from the comparison and from
+Sujin's newest corrections; the refresh now protects verified records
+and reports every annotated one (docs/handbook.md, switch_assembly.py).
+The counts above this addendum are as of 3 September.
+
+The third round of the same day (rules v2.2, docs/assembly-v2.md) read
+the 335 annotation events of 3–4 September as corrections and built
+rules from them: the paratext roles, the end signatures, the split
+titles, the chapter-title series, the synopsis, the departments, the
+column advertisements, the text inside illustrations. Against the 2
+September yardstick nothing moved (108/108, 88/88, 106 clean, the
+verified Cave of Horror exact); against the newer annotations the
+comparison is scripts/compare_effective.py, run after every refresh.

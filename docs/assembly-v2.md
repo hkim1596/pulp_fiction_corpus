@@ -296,3 +296,164 @@ identical to the machine's: 9 → 16 of 51; contents-page pieces clean
 105 → 106; story starts inside pieces 3 → 2 (a reader's poem inside The
 Eyrie and an unlisted lead novel — neither a split).
 
+
+## v2.1.2 (4 September): after the refresh changed annotated records
+
+The forced refresh of 4 September (v2.1 → v2.1.1) ran while Sujin and
+Heejin had been annotating the rules' records since 3 September, and it
+changed sixteen records they had touched, two of them verified. The
+effective records (machine record plus the replayed log) were compared
+before and after: fourteen came out identical or better because the
+annotators' actions replay by region key; two verified records changed
+(A Loaf of Bifield: the credit line under the by-line fell into the
+reading text; The Stolen Body: three regions the new rules read as
+furniture and as the next-month announcement left it); and The
+Demolished Man lost its last page because a book announcement on the
+issue's last page, now rightly read as advertising, had been the page
+that kept the issue's page range open — the scan prints page 156 after
+158, and the narrowed range left that leaf outside.
+
+What changed in the rules, with the annotators' own conventions as the
+measure (Sujin's records of 3–4 September, Heejin's decisions of 4
+September):
+
+- Above a story head: a second setting of the title is `title` (Sujin
+  marks both settings), the blurb `teaser` (the record's teaser field
+  keeps the first), a kicker or type label `subtitle`, a synopsis
+  heading such as "The Story Thus Far" `heading`; a short sentence with
+  a full stop is the illustration's caption. Before, all of these were
+  `heading`, which is reading text.
+- The credit line under the by-line ("Author of 'Men Like Gods,' etc.")
+  is never reading text nor furniture: it carries the `teaser` role
+  (Heejin's choice; he had marked it so on The Stolen Body) and its
+  text is kept as `author_credit`, which r00 exports. Before, it was the
+  teaser when the story had no blurb, reading text when it had, and
+  furniture when the title was set inside the illustration and the line
+  was labelled a caption (Weird Tales 1925-11).
+- Inside a story, a display line that is not a chapter head has no
+  role — Sujin cleared the machine's `heading` on "Consternation",
+  "ABOLISH:", "EMERGENCY BUSINESS" in The Demolished Man: the author's
+  typography, not sections. `heading` stays for departments (a letter's
+  title in The Eyrie, a topic in a feature) and for synopsis headings
+  and forewords. Sixty-three roles changed on the ten issues.
+- Chapter heads: "PART ONE" (a number word), "I.—THE MURDER CLUB" (a
+  roman number, a dash, the title) and '2. "Smash It, You Fool!"' are
+  chapter heads now; "L. L. COOKE Chief Engineer" no longer is (an
+  initial before a full stop is not a chapter number). Advertisement
+  records no longer carry a chapters list.
+- The page range: a page just past the last numbered page whose printed
+  number belongs a few pages before the end is a leaf the scan has out
+  of order; it is inside the range, and the record holding it is
+  flagged ("the scan has a leaf out of order … the text of this record
+  is in scan order, not reading order").
+
+Harness against the 2 September yardstick: unchanged (108/108 found,
+88/88 authors, 106 clean, cover 0.95, 2 story starts inside pieces); 583
+records (585 before: the two Cooke advertisements on p. 3 of Weird Tales
+1925-11 are one record, and the loose last page of The Demolished Man is
+back in the serial). Twenty-two records carry an author_credit.
+
+The refresh itself changed (scripts/switch_assembly.py): a verified
+record is never changed by a refresh — its live machine record is
+carried over, its regions leave the candidate, leftovers go to
+`unsorted` — and every annotated record is reported one line each,
+forced or not. `--verified-from data/assembly_archive/20260904_100220_refresh`
+restores, for the records verified before that refresh, the copy the
+person saw. Checked in the sandbox on the main server's logs and
+records of 4 September 10:30: every verified record (seven, including
+the three verified after the refresh) comes out identical to what the
+person saw; the annotated records differ only by the intended role
+changes and the last page of The Demolished Man.
+
+## v2.2 (4 September, the third round): what the annotations and the feedback asked for
+
+Thirty-two feedback entries (Sujin's of 3 September, Heejin's of 4
+September) and all 335 annotation events of 3–4 September, each read
+against what the machine had done on that record, gave the rules their
+next version. Decisions of 4 September (docs/decisions.md): the type
+house and no serial_part; Heejin's hierarchy on the workbench with
+Paratext as a group of teaser, synopsis and note; chapter titles by
+series; "text in picture" as a kind of furniture; departments from a
+list; sentence case, log-in times, one collection-wide progress bar.
+
+What the annotations taught the rules, and what changed:
+
+- "Illustrated by WILLER" (Sujin: teaser) → the note role and the
+  illustrator field. "Author of …" → note and author_credit (it was
+  teaser in the morning's v2.1.2; the records people had already marked
+  keep their teaser).
+- "—ROBERT A. HEINLEIN", "—H. B. FYFE" at the end of a story (Sujin:
+  not story text) → furniture "the author's name repeated at the end";
+  "—GROFF CONKLIN" at the end of an unsigned column → the author. "The
+  End." → furniture "end mark". "To be continued in next week's issue."
+  (Sujin: not story text) → furniture "continuation notice", the serial
+  field noted. "Watch for the next story in this thrilling series" →
+  note.
+- "Conducted by / HELEN RIVERS" (Sujin: author, both boxes) → the
+  by-line forms Conducted by, Edited by, Compiled by, Arranged by, As
+  told to, in one box or two.
+- Titles set in two boxes — "THE YEAR" / "OF THE JACKPOT", "DEAD MEN" /
+  "TALK" (across two pages), "Ace Hart" / "Loses His Man", "the" / "7th
+  ORDER" — are joined from the contents page (numerals spelled out for
+  the comparison); on the facing page the illustrator's credit and the
+  story's first paragraphs come along (The Seventh Order begins under a
+  bare "the" a page before its title). "A Complete Book-Length Novel"
+  beside the title's second box → subtitle. "Conclusion" printed as a
+  running head over The Demolished Man → subtitle and the part label.
+- "The Murder Monster [Part I]" → title The Murder Monster, part label
+  Part I, part 1 (Sujin: no part number in the title string); "Braggin'
+  Bill, Fighter (Poem)" → a poem titled Braggin' Bill, Fighter. Titles
+  the contents page sets in capitals → title case (the printed form is
+  kept): The Year of the Jackpot, Catch That Martian, Galaxy's Five Star
+  Shelf.
+- Wild West Weekly's "STAMPEDE OF THE Z BAR L." and its kind (Sujin:
+  chapter title) → chapter titles, by the series rule: display lines of
+  one form (capitals, a full stop) on different pages of a story;
+  Bester's "Consternation / Alarm / Conviction" and the quoted newspaper
+  headlines (Heejin: "Sensation") stay reading text without a role.
+- Desert Pirates part II: the recap between the by-line and "CHAPTER
+  V." (Sujin: not the story; she wants a synopsis role) → synopsis, 197
+  words, out of the reading text; The Demolished Man's synopsis under
+  its "SYNOPSIS" heading, 912 words over three pages, likewise.
+- Headquarters and The Round-up (Sujin: feature, not letters) → feature
+  by config/departments.json, which also names the conductor (The
+  Editor, The Editors, J. A. Thompson …); "Coming Up . . ." / "IN THE
+  APRIL GALAXY" → a house record titled In the April Galaxy in the
+  department Coming Up; "NEXT MONTH / —The— / Tenants of Broussac" →
+  The Tenants of Broussac; "COMIN' NEXT WEEK!", "DON'T FAIL TO READ
+  THESE THRILLERS!" and "NEXT QUESTION" (Sujin: house) → house records
+  cut out of the departments they were printed in.
+- The Rosicrucian and birth-control advertisements in the right column
+  beside The Return of the Undead (Heejin marked ten boxes not story
+  text) → advertisement records by the column rule: a block in a column
+  the piece's prose does not use, opening with a headline or a priced
+  line, carrying a price or a postal address, with no dialogue and no
+  narrative paragraph. Eleven such records on the ten issues, none of
+  them story text; the first versions of the rule took story columns
+  and were tightened on the Cave of Horror (the verified record stays
+  exact).
+- "LOVE MALES DATER ME & MY CLAN" over a drawing (Sujin: loose boxes;
+  Heejin: a category, text in picture) → furniture "text inside an
+  illustration": an illustration page (no prose, a few short lines,
+  most of them not words) or a text box inside a picture box; title
+  pages over a full-page drawing are protected (a by-line or a contents
+  title on the page).
+
+Cross-issue pass (cross_issue, after --all): instalments of one work
+linked across issues by magazine, work title and author (work_id,
+prev/next by issue and title, part numbers from the order of the issues
+when the page gives none, the total when the last is marked as the
+conclusion); house records matched by 8-word runs to the story they
+quote wherever the corpus holds it (the excerpt flag is the machine's).
+The pilot has no two instalments of one work and no quoted story in the
+corpus, so both counts are zero here; the self-test exercises both on
+made-up issues.
+
+Harness against the 2 September yardstick: unchanged (108/108 found,
+88/88 authors, 106 clean, cover 0.95, 2 story starts inside pieces, the
+verified Cave of Horror exact) — the harness now lets a record begin on
+the facing page of its own head. 588 records on the ten issues: 79
+stories, 24 features, 5 poems, 3 letters, 53 house, 411 ad, 11 toc, 2
+other; 38 notes, 32 synopsis regions in 4 records, 11 illustrators, 8
+serial instalments with fields, 37 records with a department, 22 boxes
+of text inside illustrations.

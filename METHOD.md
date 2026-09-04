@@ -89,6 +89,25 @@ carries its type, title, author, page range, assembled and rule-cleaned
 text, and the exact scan regions it was built from, so every sentence can be
 traced back to its place on the page.
 
+Since 4 September 2026 the rules engine (assembly v2.2) also reads the
+units the way the annotators sort them. A record is, at the top level,
+the contents page, an article the contents page lists, or a non-article
+it does not; its type is story, poem, feature, letters, house (the
+publisher's own matter — next-issue announcements, story excerpts,
+coupons and ballots, subscription appeals, the masthead), ad (an outside
+advertiser), toc or other. A serial instalment is a story with serial
+fields (the part label as printed, the part number and total when known,
+the work's title without the marker), and instalments of one work are
+linked across issues when both are in the corpus. Inside a story every
+box carries a role: title, subtitle, author, body text, chapter
+information, or paratext — the teaser (the blurb), the synopsis (the
+recap printed on a later instalment) and notes (credits, "Illustrated
+by", a tail line) — of which only the body text and the chapter
+information are reading text; the synopsis is kept but left out of the
+reading text and of the text-reuse inventory, as the house and
+advertising records are. Standing departments are recognised from a
+per-magazine list, and a letters page must contain signed letters.
+
 ## Human verification: the annotation layer
 
 The machine's assembly is treated as a first draft. Every article page on

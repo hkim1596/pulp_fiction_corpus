@@ -491,8 +491,8 @@ def status_table(runs):
                    f"<td class='muted'>{_esc(d)}</td><td>{_esc(e)}</td>"
                    f"<td class='muted' style='font-size:12px'>{_esc(f)}</td></tr>"
                    for a, b, c, d, e, f in rows)
-    return ("<table><tr><th>stage</th><th>story set</th><th>settings</th><th>generated</th>"
-            "<th>what is in it</th><th>files</th></tr>" + body + "</table>")
+    return ("<table><tr><th>Stage</th><th>Story set</th><th>Settings</th><th>Generated</th>"
+            "<th>What is in it</th><th>Files</th></tr>" + body + "</table>")
 
 
 # ---------------------------------------------------------------- overview
@@ -528,11 +528,11 @@ def overview(render=None):
 
     # ---- exact
     out.append("<h2>1. Exact reuse (r02)</h2>")
-    tbl = ["<table><tr><th>set</th><th>seed</th><th class='num'>stories</th>"
-           "<th class='num'>cross-issue matches</th><th class='num'>longest</th>"
-           "<th class='num'>clusters</th><th class='num'>3+ witnesses (raw / collapsed)</th>"
-           "<th class='num'>stories with a match (raw / collapsed)</th>"
-           "<th class='num'>same-issue (of which shared-region)</th></tr>"]
+    tbl = ["<table><tr><th>Set</th><th>Seed</th><th class='num'>Stories</th>"
+           "<th class='num'>Cross-issue matches</th><th class='num'>Longest</th>"
+           "<th class='num'>Clusters</th><th class='num'>3+ witnesses (raw / collapsed)</th>"
+           "<th class='num'>Stories with a match (raw / collapsed)</th>"
+           "<th class='num'>Same-issue (of which shared-region)</th></tr>"]
     for st in runs["exact"]:
         tbl.append(f"<tr><td>{_esc(st['set'])}</td><td>{st['k']}</td>"
                    f"<td class='num'>{st['stories']}</td><td class='num'>{st['matches']}</td>"
@@ -560,7 +560,7 @@ def overview(render=None):
     series = [(f"seed {st['k']}", [st["length_hist"].get(b, 0) for b in bins])
               for st in runs["exact"] if st["set"] == main_set]
     if series:
-        htbl = ["<table><tr><th>match length (words)</th>" + "".join(f"<th class='num'>{_esc(n)}</th>" for n, _ in series) + "</tr>"]
+        htbl = ["<table><tr><th>Match length (words)</th>" + "".join(f"<th class='num'>{_esc(n)}</th>" for n, _ in series) + "</tr>"]
         for i, b in enumerate(bins):
             htbl.append(f"<tr><td>{b}</td>" + "".join(f"<td class='num'>{vals[i]}</td>" for _, vals in series) + "</tr>")
         htbl.append("</table>")
@@ -580,10 +580,10 @@ def overview(render=None):
     # ---- paraphrase
     out.append("<h2>2. Paraphrase and near-verbatim reuse (r04)</h2>")
     if runs["para"]:
-        tbl = ["<table><tr><th>set</th><th>window / step</th><th>keep rule</th><th>K</th><th class='num'>passages</th>"
-               "<th class='num'>candidate regions</th><th class='num'>alignments kept</th>"
-               "<th class='num'>longest (cols)</th><th class='num'>clusters</th>"
-               "<th>by source</th><th class='num'>same-issue</th></tr>"]
+        tbl = ["<table><tr><th>Set</th><th>Window / step</th><th>Keep rule</th><th>K</th><th class='num'>Passages</th>"
+               "<th class='num'>Candidate regions</th><th class='num'>Alignments kept</th>"
+               "<th class='num'>Longest (cols)</th><th class='num'>Clusters</th>"
+               "<th>By source</th><th class='num'>Same-issue</th></tr>"]
         for st in runs["para"]:
             src = ", ".join(f"{k} {v}" for k, v in sorted(st.get("by_source", {}).items()))
             rule = f"{st.get('min_cols', 20)}c/{int(round(st.get('min_identity', 0.6) * 100))}%"
@@ -630,7 +630,7 @@ def overview(render=None):
                    "copy enters any inventory; it only answers “does the machinery find what we "
                    "know is there?”.</p>")
         kinds = ["verbatim", "near-verbatim", "heavy-edit"]
-        tbl = ["<table><tr><th>stage</th><th>setting</th>" + "".join(f"<th>{k}</th>" for k in kinds) + "</tr>"]
+        tbl = ["<table><tr><th>Stage</th><th>Setting</th>" + "".join(f"<th>{k}</th>" for k in kinds) + "</tr>"]
         series = []
         ex = syn.get("exact", {})
         for kk in ("k6", "k7", "k8"):
@@ -686,7 +686,7 @@ def overview(render=None):
                 if q in {str(k) for k in ex6["by_topic_q"].keys()}:
                     key = q if q in ex6["by_topic_q"] else int(q)
                     series.append((f"topic quartile {q}", [ex6["by_topic_q"][key].get(str(x), ex6["by_topic_q"][key].get(x)) for x in xs]))
-            tbl = ["<table><tr><th>at least L words</th>" + "".join(f"<th class='num'>{_esc(n)}</th>" for n, _ in series) + "</tr>"]
+            tbl = ["<table><tr><th>At least L words</th>" + "".join(f"<th class='num'>{_esc(n)}</th>" for n, _ in series) + "</tr>"]
             for i, x in enumerate(xs):
                 tbl.append(f"<tr><td>{x}</td>" + "".join(f"<td class='num'>{_fmt(v[i]) if v[i] else '0'}</td>" for _, v in series) + "</tr>")
             tbl.append("</table>")
@@ -695,8 +695,8 @@ def overview(render=None):
         # time table
         tt = bg.get("time_table", {}).get("exact_k6")
         if tt:
-            tbl = ["<table><tr><th>later decade | years apart</th><th class='num'>pairs</th>"
-                   "<th class='num'>P(any exact match, seed 6)</th><th class='num'>mean longest, given any</th></tr>"]
+            tbl = ["<table><tr><th>Later decade | years apart</th><th class='num'>Pairs</th>"
+                   "<th class='num'>P(any exact match, seed 6)</th><th class='num'>Mean longest, given any</th></tr>"]
             for key, d in tt.items():
                 tbl.append(f"<tr><td>{_esc(key)}</td><td class='num'>{d['n']:,}</td>"
                            f"<td class='num'>{_fmt(d['p_any'])}</td><td class='num'>{_fmt(d['mean_longest_given_any'])}</td></tr>")
@@ -706,9 +706,9 @@ def overview(render=None):
         # sampler
         sc = s.get("sampler_check", {})
         if sc.get("checks"):
-            tbl = [f"<table><tr><th>reuse definition</th><th class='num'>matched pairs</th><th class='num'>sample size</th>"
-                   "<th>quantity</th><th class='num'>full table</th><th class='num'>weighted sample, mean abs error</th>"
-                   "<th class='num'>worst</th><th class='num'>unweighted error</th></tr>"]
+            tbl = [f"<table><tr><th>Reuse definition</th><th class='num'>Matched pairs</th><th class='num'>Sample size</th>"
+                   "<th>Quantity</th><th class='num'>Full table</th><th class='num'>Weighted sample, mean abs error</th>"
+                   "<th class='num'>Worst</th><th class='num'>Unweighted error</th></tr>"]
             for name, c in sc["checks"].items():
                 first = True
                 for t, v in c["targets"].items():
@@ -739,7 +739,7 @@ def overview(render=None):
                 for part in ("part1_any", "part2_extent"):
                     pm = m.get(part, {})
                     if "fixed" in pm:
-                        tbl = ["<table><tr><th>effect</th><th class='num'>posterior mean</th><th class='num'>sd</th></tr>"]
+                        tbl = ["<table><tr><th>Effect</th><th class='num'>Posterior mean</th><th class='num'>Sd</th></tr>"]
                         for n, d in pm["fixed"].items():
                             tbl.append(f"<tr><td>{_esc(n)}</td><td class='num'>{d['mean']}</td><td class='num'>{d['sd']}</td></tr>")
                         tbl.append(f"<tr><td>story effect sd</td><td class='num'>{pm['story_effect_sd']}</td><td></td></tr></table>")
@@ -753,8 +753,8 @@ def overview(render=None):
         rows = un.get("exact_k6", {}).get("most_unusual", [])[:10]
         if rows:
             meta = _story_meta()
-            tbl = ["<table><tr><th>pair</th><th class='num'>longest</th><th>stratum</th>"
-                   "<th class='num'>P(≥ this) among comparable pairs</th><th>same author</th><th>passage</th></tr>"]
+            tbl = ["<table><tr><th>Pair</th><th class='num'>Longest</th><th>Stratum</th>"
+                   "<th class='num'>P(≥ this) among comparable pairs</th><th>Same author</th><th>Passage</th></tr>"]
             for r in rows:
                 tbl.append(f"<tr><td><a href='/article/{_esc(r['a'])}'>{_esc(_name(r['a'], meta))}</a> · "
                            f"<a href='/article/{_esc(r['b'])}'>{_esc(_name(r['b'], meta))}</a></td>"
@@ -774,8 +774,8 @@ def overview(render=None):
     if ov:
         cats = list(ov.keys())
         vals = [ov[i]["keys_owned_by_2plus"] for i in cats]
-        tbl = ["<table><tr><th>issue</th><th class='num'>stories</th><th class='num'>regions</th>"
-               "<th class='num'>regions owned by 2+ records</th><th class='num'>records involved</th><th>worst pair</th></tr>"]
+        tbl = ["<table><tr><th>Issue</th><th class='num'>Stories</th><th class='num'>Regions</th>"
+               "<th class='num'>Regions owned by 2+ records</th><th class='num'>Records involved</th><th>Worst pair</th></tr>"]
         for i in cats:
             d = ov[i]
             wp = d["worst_pairs"][0] if d["worst_pairs"] else None
@@ -848,7 +848,7 @@ def clusters_page(qs, render=None):
         rows = [m for m in rows if (m.get("len") or m.get("cols", 0)) >= min_len
                 and (not q or q in (m.get("excerpt") or m.get("text_a") or "").lower())]
         rows.sort(key=lambda m: -(m.get("len") or m.get("cols", 0)))
-        tbl = ["<table><tr><th class='num'>length</th><th>cause</th><th>record A</th><th>record B</th><th>passage</th></tr>"]
+        tbl = ["<table><tr><th class='num'>Length</th><th>Cause</th><th>Record A</th><th>Record B</th><th>Passage</th></tr>"]
         for m in rows[:500]:
             L = m.get("len") or m.get("cols")
             tbl.append(f"<tr><td class='num'>{L}</td><td>{_esc(m.get('cause', ''))}"
@@ -869,8 +869,8 @@ def clusters_page(qs, render=None):
         if q and q not in c["representative"]["text"].lower():
             continue
         rows.append((i, c))
-    tbl = ["<table><tr><th>#</th><th class='num'>witnesses (collapsed)</th><th class='num'>issues</th>"
-           "<th class='num'>longest</th><th>passage</th><th>stories</th></tr>"]
+    tbl = ["<table><tr><th>#</th><th class='num'>Witnesses (collapsed)</th><th class='num'>Issues</th>"
+           "<th class='num'>Longest</th><th>Passage</th><th>Stories</th></tr>"]
     for i, c in rows[:400]:
         names = "; ".join(sorted({_name(m["story_id"], meta) for m in c["members"]}))
         tbl.append(f"<tr><td><a href='/reuse/cluster/{_esc(set_)}/{kind}/{k}/{i}'>{i}</a></td>"
@@ -1053,9 +1053,9 @@ def progress_page(render=None):
         users = sorted(per_user, key=lambda u: -per_user[u]["actions"])[:4]
         dlist = sorted(by_day_user)[-21:]
         series = [(_G["display_name"](u), [by_day_user[d].get(u, 0) for d in dlist]) for u in users]
-        tbl = ["<table><tr><th>annotator</th><th class='num'>actions</th>"
-               + ("<th class='num'>of which on the archived assembly</th>" if n_arch else "")
-               + "<th class='num'>articles touched</th><th class='num'>verified</th><th>last active</th></tr>"]
+        tbl = ["<table><tr><th>Annotator</th><th class='num'>Actions</th>"
+               + ("<th class='num'>Of which on the archived assembly</th>" if n_arch else "")
+               + "<th class='num'>Articles touched</th><th class='num'>Verified</th><th>Last active</th></tr>"]
         for u in sorted(per_user, key=lambda u: -per_user[u]["actions"]):
             pu = per_user[u]
             tbl.append(f"<tr><td>{_esc(_G['display_name'](u))}</td><td class='num'>{pu['actions']:,}</td>"
@@ -1070,7 +1070,7 @@ def progress_page(render=None):
             svg_lines(xs, [("verified stories", cum_v), ("modified stories", cum_m)],
                       "Stories verified and modified, cumulative by active day",
                       xlabels=[d[5:] for d in days]),
-            "<table><tr><th>day</th><th class='num'>verified</th><th class='num'>modified</th></tr>"
+            "<table><tr><th>Day</th><th class='num'>Verified</th><th class='num'>Modified</th></tr>"
             + "".join(f"<tr><td>{_esc(d)}</td><td class='num'>{v}</td><td class='num'>{m}</td></tr>"
                       for d, v, m in list(zip(days, cum_v, cum_m))[-15:]) + "</table>"))
         out.append(f"<p class='muted'>Work done: {len(verified)} records verified and {len(modified)} records with at least "
@@ -1133,8 +1133,8 @@ def assembly_page(qs, render=None):
     if res and variant in res["variants"]:
         v = res["variants"][variant]
         out.append(f"<h2>{_esc(which)} — {_esc(variant)} ({_esc(v.get('backend') or '')}, built {_esc(v.get('built') or '')})</h2>")
-        rows = ["<table><tr><th>contents page says</th><th>author</th><th>type</th><th class='num'>starts on scan p.</th><th>record found</th>"
-                "<th>title agrees</th><th>author agrees</th><th class='num'>pages covered</th><th class='num'>story starts inside</th><th>runs over</th></tr>"]
+        rows = ["<table><tr><th>Contents page says</th><th>Author</th><th>Type</th><th class='num'>Starts on scan p.</th><th>Record found</th>"
+                "<th>Title agrees</th><th>Author agrees</th><th class='num'>Pages covered</th><th class='num'>Story starts inside</th><th>Runs over</th></tr>"]
         for t in v["contents"]:
             ok = t["start_found"] and t["title_ok"] and not t["runs_over"] and not t["extra_starts_inside"]
             rows.append(f"<tr style='{'' if ok else 'background:#fbe9e0'}'><td>{_esc(t['title'])}</td><td>{_esc(t.get('author') or '')}</td>"
@@ -1146,8 +1146,8 @@ def assembly_page(qs, render=None):
         out.append("<h3 style='font-weight:normal;font-size:16px'>Against the contents page</h3>" + "".join(rows))
         hs = v.get("human", [])
         if hs:
-            rows = ["<table><tr><th>human record</th><th>status</th><th class='num'>regions</th><th>best candidate</th><th class='num'>recall</th>"
-                    "<th class='num'>precision</th><th class='num'>Jaccard</th><th>exact</th><th>title</th><th>author</th></tr>"]
+            rows = ["<table><tr><th>Human record</th><th>Status</th><th class='num'>Regions</th><th>Best candidate</th><th class='num'>Recall</th>"
+                    "<th class='num'>Precision</th><th class='num'>Jaccard</th><th>Exact</th><th>Title</th><th>Author</th></tr>"]
             for h in hs:
                 rows.append(f"<tr><td><a href='/article/{_esc(h['article_id'])}'>{_esc(h.get('title') or h['article_id'])}</a></td><td>{_esc(h['status'])}</td>"
                             f"<td class='num'>{h['n_regions']}</td><td>{_esc(h.get('match_title') or h.get('match') or '—')}</td>"

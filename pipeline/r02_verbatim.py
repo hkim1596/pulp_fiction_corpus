@@ -41,7 +41,8 @@ from r01_normalize import story_units  # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STORIES = os.path.join(ROOT, "data", "pilot_stories.jsonl")
 OUTDIR = os.path.join(ROOT, "data", "reuse")
-STORY_TYPES = ("story", "serial_part")
+STORY_TYPES = ("story", "serial_part")     # serial_part: exports made before 2026-09-04, when instalments became stories with serial fields;
+                                           # house and ad records (the publisher's own matter, advertising) are never in the inventory
 MIN_TOKENS = 50          # shorter records are fragments, not stories
 MAX_DF = 50              # commonplace-shingle cap (stories per shingle)
 LEN_BINS = [(0, 10, "seed-9"), (10, 20, "10-19"), (20, 50, "20-49"),
