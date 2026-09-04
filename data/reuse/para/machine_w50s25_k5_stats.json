@@ -15,9 +15,9 @@
   "min_len": 5,
   "alternates": 3
  },
- "stories": 82,
- "passages": 25118,
- "candidate_regions": 461518,
+ "stories": 78,
+ "passages": 24998,
+ "candidate_regions": 459689,
  "alignments": 0,
  "same_issue_alignments": 0,
  "same_issue_from_shared_regions": 0,
@@ -35,6 +35,6 @@
  "by_source": {},
  "longest_alignment": 0,
  "stories_with_paraphrase": 0,
- "seconds_total": 45.0,
- "generated": "2026-09-03 00:44"
+ "seconds_total": 198.2,
+ "generated": "2026-09-04 17:18"
 }

@@ -28,8 +28,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     4480,
-     4488
+     4473,
+     4481
     ],
     "len": 8,
     "text": "the door at the end of the hall"
@@ -38,8 +38,8 @@
     "story_id": "td_1948_12_a027",
     "issue": "td_1948_12",
     "tok": [
-     1684,
-     1691
+     1796,
+     1803
     ],
     "len": 7,
     "text": "door at the end of the hall"
@@ -55,8 +55,8 @@
   "representative": {
    "story_id": "wt_1934_05_a014",
    "tok": [
-    2319,
-    2326
+    2302,
+    2309
    ],
    "text": "a little to one side of the"
   },
@@ -65,8 +65,8 @@
     "story_id": "wt_1934_05_a014",
     "issue": "wt_1934_05",
     "tok": [
-     2319,
-     2326
+     2302,
+     2309
     ],
     "len": 7,
     "text": "a little to one side of the"
@@ -75,8 +75,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     11979,
-     11986
+     12007,
+     12014
     ],
     "len": 7,
     "text": "a little to one side of the"
@@ -85,8 +85,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     14663,
-     14670
+     14645,
+     14652
     ],
     "len": 7,
     "text": "A little to one side of the"
@@ -122,8 +122,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     4837,
-     4844
+     4826,
+     4833
     ],
     "len": 7,
     "text": "at the other end of the wire"
@@ -179,8 +179,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     21554,
-     21564
+     21212,
+     21222
     ],
     "len": 10,
     "text": "No more than a minute or two had passed since"
@@ -253,8 +253,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     6685,
-     6692
+     6487,
+     6494
     ],
     "len": 7,
     "text": "was at a loss to account for"
@@ -327,8 +327,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     13265,
-     13272
+     13247,
+     13254
     ],
     "len": 7,
     "text": "You have been very good to me"
@@ -364,8 +364,8 @@
     "story_id": "ws_1937_02_a046",
     "issue": "ws_1937_02",
     "tok": [
-     4399,
-     4406
+     4395,
+     4402
     ],
     "len": 7,
     "text": "it. It was at this point that"
@@ -401,8 +401,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     8568,
-     8575
+     8561,
+     8568
     ],
     "len": 7,
     "text": "on the back of a chair with"
@@ -418,8 +418,8 @@
   "representative": {
    "story_id": "wt_1925_11_a029",
    "tok": [
-    2780,
-    2787
+    2777,
+    2784
    ],
    "text": "If I can get there in time"
   },
@@ -428,8 +428,8 @@
     "story_id": "wt_1925_11_a029",
     "issue": "wt_1925_11",
     "tok": [
-     2780,
-     2787
+     2777,
+     2784
     ],
     "len": 7,
     "text": "If I can get there in time"
@@ -455,8 +455,8 @@
   "representative": {
    "story_id": "wt_1925_11_a029",
    "tok": [
-    3453,
-    3460
+    3450,
+    3457
    ],
    "text": "Every moment he expected to feel the"
   },
@@ -465,8 +465,8 @@
     "story_id": "wt_1925_11_a029",
     "issue": "wt_1925_11",
     "tok": [
-     3453,
-     3460
+     3450,
+     3457
     ],
     "len": 7,
     "text": "Every moment he expected to feel the"
@@ -549,8 +549,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     18509,
-     18516
+     18491,
+     18498
     ],
     "len": 7,
     "text": "for the barest fraction of a second"
@@ -640,8 +640,8 @@
   "representative": {
    "story_id": "ast_1930_01_a016",
    "tok": [
-    13621,
-    13628
+    13649,
+    13656
    ],
    "text": "Once or twice he thought he heard"
   },
@@ -650,8 +650,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     13621,
-     13628
+     13649,
+     13656
     ],
     "len": 7,
     "text": "Once or twice he thought he heard"
@@ -697,8 +697,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     4930,
-     4937
+     4588,
+     4595
     ],
     "len": 7,
     "text": "to the base of his neck. He"
@@ -751,8 +751,8 @@
   "representative": {
    "story_id": "ast_1930_01_a024",
    "tok": [
-    5099,
-    5106
+    5121,
+    5128
    ],
    "text": "For the first time in his life"
   },
@@ -761,8 +761,8 @@
     "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     5099,
-     5106
+     5121,
+     5128
     ],
     "len": 7,
     "text": "For the first time in his life"
@@ -808,8 +808,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     7714,
-     7721
+     7703,
+     7710
     ],
     "len": 7,
     "text": "on the other side of the room"
@@ -825,8 +825,8 @@
   "representative": {
    "story_id": "gal_1952_03_a020",
    "tok": [
-    6088,
-    6095
+    5142,
+    5149
    ],
    "text": "The hand is quicker than the eye"
   },
@@ -835,8 +835,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     6088,
-     6095
+     5142,
+     5149
     ],
     "len": 7,
     "text": "The hand is quicker than the eye"
@@ -860,10 +860,47 @@
   "occurrences": 2,
   "max_len": 7,
   "representative": {
+   "story_id": "gal_1952_04_a006",
+   "tok": [
+    11828,
+    11835
+   ],
+   "text": "what are you going to do with"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_04_a006",
+    "issue": "gal_1952_04",
+    "tok": [
+     11828,
+     11835
+    ],
+    "len": 7,
+    "text": "what are you going to do with"
+   },
+   {
+    "story_id": "td_1948_12_a028",
+    "issue": "td_1948_12",
+    "tok": [
+     4363,
+     4370
+    ],
+    "len": 7,
+    "text": "what are you going to do with"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
    "story_id": "gal_1952_04_a014",
    "tok": [
-    2480,
-    2487
+    2477,
+    2484
    ],
    "text": "a lot of energy and a lot"
   },
@@ -872,8 +909,8 @@
     "story_id": "gal_1952_04_a014",
     "issue": "gal_1952_04",
     "tok": [
-     2480,
-     2487
+     2477,
+     2484
     ],
     "len": 7,
     "text": "a lot of energy and a lot"
@@ -882,8 +919,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     345,
-     352
+     334,
+     341
     ],
     "len": 7,
     "text": "a lot of energy and a lot"
@@ -899,8 +936,8 @@
   "representative": {
    "story_id": "gal_1952_04_a016",
    "tok": [
-    6328,
-    6335
+    6324,
+    6331
    ],
    "text": "and then he was diving through the"
   },
@@ -909,8 +946,8 @@
     "story_id": "gal_1952_04_a016",
     "issue": "gal_1952_04",
     "tok": [
-     6328,
-     6335
+     6324,
+     6331
     ],
     "len": 7,
     "text": "and then he was diving through the"
@@ -936,8 +973,8 @@
   "representative": {
    "story_id": "td_1932_02_a013",
    "tok": [
-    3947,
-    3954
+    3929,
+    3936
    ],
    "text": "with the speed of a striking snake"
   },
@@ -946,8 +983,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     3947,
-     3954
+     3929,
+     3936
     ],
     "len": 7,
     "text": "with the speed of a striking snake"
@@ -973,8 +1010,8 @@
   "representative": {
    "story_id": "td_1932_02_a015",
    "tok": [
-    5433,
-    5440
+    5426,
+    5433
    ],
    "text": "That is why I want you to"
   },
@@ -983,8 +1020,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     5433,
-     5440
+     5426,
+     5433
     ],
     "len": 7,
     "text": "That is why I want you to"
@@ -1030,8 +1067,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     8884,
-     8891
+     8686,
+     8693
     ],
     "len": 7,
     "text": "on the other side of the street"
@@ -1084,8 +1121,8 @@
   "representative": {
    "story_id": "ws_1937_02_a051",
    "tok": [
-    4241,
-    4248
+    4043,
+    4050
    ],
    "text": "he knew that he would have to"
   },
@@ -1094,8 +1131,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     4241,
-     4248
+     4043,
+     4050
     ],
     "len": 7,
     "text": "he knew that he would have to"

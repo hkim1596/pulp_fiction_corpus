@@ -2,10 +2,10 @@
  "set": "machine",
  "k": 8,
  "max_df": 50,
- "stories": 82,
- "tokens": 629059,
+ "stories": 78,
+ "tokens": 625975,
  "issues": 10,
- "region_families": 82,
+ "region_families": 78,
  "matches": 3,
  "same_issue_matches": 3,
  "same_issue_from_shared_regions": 0,
@@ -24,7 +24,7 @@
  "longest_match": 10,
  "stories_with_reuse": 6,
  "stories_with_reuse_collapsed": 6,
- "seconds_index_and_extend": 0.58,
- "seconds_total": 0.58,
- "generated": "2026-09-03 00:43"
+ "seconds_index_and_extend": 0.63,
+ "seconds_total": 0.63,
+ "generated": "2026-09-04 17:15"
 }

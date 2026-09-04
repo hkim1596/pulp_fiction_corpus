@@ -118,6 +118,23 @@ one-day browser cache; all HTML is sent uncacheable. Do not remove the
 preview layer: loading 150 full scans on one page through the tunnel is
 what broke the workbench once (see the journal, 2026-08-22).
 
+Workbench page weight (v0.13.1, 2026-09-04): the page of a record is
+about 1.7 MB for the issue (the region map of every scan page) plus
+what its cards carry. Until v0.13.0 every card carried a "move to
+position" list with one option per body segment and a "belongs in"
+list with one option per record, and every button was a form with
+five hidden inputs — The Demolished Man (1,095 segments) came to 48
+MB and 1.2 million option elements. Now the position list holds its
+own number until it is opened, the record list is written once
+(`TO_OPTS`) and copied into a box when it is opened, and a button is
+`<button class='mb' data-p='{json}'>` posted by one click handler in
+WB_JS (`post(params, to)`; `data-sel` names a sibling select whose
+value is added; `back` in the fields is where the page goes after the
+post, used by "Verify, then next unverified"). The same record is 5 MB
+now. Checked in headless Chromium (Playwright) on the sandbox: lists
+fill on mousedown, focus and touch; role, body text, move to, verify
+and unverify post and reload as before.
+
 ## Public access — the tunnel
 
 A Cloudflare tunnel named `cihd-site` runs on the main server in a
@@ -175,6 +192,13 @@ Heejin diagnostic pastes and waiting for output. With the door, the
 session fetches `…/doc/wt_1925_11` itself and sees exactly what the
 replay engine sees. The duplicate-region bug of 2026-08-22 was the
 first thing verified this way.
+
+Two habits (learned 2026-09-04). Send `-A pulp-dev` — a curl with its
+default User-Agent is turned away in front of the site, before the
+door sees it. A missing path answers 404 with the body "no such
+file"; a fetch loop that saves whatever comes back (`curl -o`) turns
+that into a 12-byte file (two pilot issues have no annotation log and
+got one that way) — use `curl -f`, or check the status, and `ls` first.
 
 ## The site process and the deploy routine
 
@@ -441,6 +465,13 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     out "identical"). --early <kept copy> takes, for a
                     record verified before that copy's stamp, the
                     before-state from there (the pair of --verified-from).
+                    Pass the copy's articles/ folder; the stamp is read
+                    from anywhere in the path (until 4 September 17:30 it
+                    was read from the last path part only, so ".../articles"
+                    gave no stamp and the two restored records were
+                    reported as DIFFERS — the check's mistake, not the
+                    records'; a path without a stamp now stops the script,
+                    and the first line says which stamp it uses).
 
 ## The text-reuse pipeline (the r-series) and the reuse pages
 
@@ -526,7 +557,23 @@ hand-reviewed validation set and then frozen.
 Story sets: `machine` (every assembled story, 50+ words), `verified`
 (human-verified only) and `corrected` (verified or modified). The
 2026-08-31 run used machine and corrected because only one story was
-verified.
+verified; the runs of 2–4 September were machine only (the assembly
+switch had archived the corrections and the workbench started clean);
+from 4 September evening a corrected set of 40 stories exists again
+(12 verified, 28 modified) and the reruns cover both sets.
+
+Each rerun of r04 writes a new embedding cache (data/reuse/para/
+emb_<set>_w50s25_<hash>.npz, 38 MB, one per story-set content) and
+never deletes the old ones — four lay on the main server on 4
+September; the ones whose hash no stats file names any more can be
+deleted. Results travel to the repository through the read-only data
+door (the section above): a walk over `ls` and `get` fetches every
+file under data/reuse but the *.npz caches (119 files, 6 MB on 4
+September; `get` returns the bytes as they are, and the `bytes` field
+of `ls` checks each one); bundle, extract into the Dropbox repository,
+commit from the Mac, then pull on the server with the stash step above
+(STASH-SAME-DROPPED confirms the server's files and the commit are the
+same bytes).
 
 Typical run, in order, on a machine holding the export:
 

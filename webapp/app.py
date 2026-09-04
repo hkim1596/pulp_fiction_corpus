@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.13.0"
+APP_VERSION = "0.13.1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -301,12 +301,38 @@ function saveScroll(){
       w:window.scrollY,l:wl?wl.scrollTop:0,r:wr?wr.scrollTop:0,pg:lp?lp.pg:null,d:lp?lp.d:0}));
   }catch(e){}
 }
-function post(params){params.issue=ISSUE;params.article_id=AID;
+function post(params,to){params.issue=ISSUE;params.article_id=AID;
   saveScroll();
   fetch('/annotate',{method:'POST',
     headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:new URLSearchParams(params)}).then(function(){location.reload();});}
+    body:new URLSearchParams(params)}).then(function(){if(to)location.href=to;else location.reload();});}
 document.addEventListener('submit',function(){saveScroll();},true);
+document.addEventListener('click',function(e){
+  var t=e.target;
+  while(t&&t!==document&&!(t.tagName==='BUTTON'&&t.classList.contains('mb')))t=t.parentNode;
+  if(!t||t===document)return;
+  e.preventDefault();
+  var p=JSON.parse(t.getAttribute('data-p')||'{}');
+  if(t.hasAttribute('data-sel')){
+    var sel=t.previousElementSibling;
+    if(!sel||sel.tagName!=='SELECT'||!sel.value)return;
+    p[t.getAttribute('data-sel')]=sel.value;
+  }
+  post(p,p.back);
+});
+function fillTo(sel){
+  if(sel.options.length>1||typeof TO_OPTS==='undefined')return;
+  TO_OPTS.forEach(function(o){var e=document.createElement('option');e.value=o[0];e.textContent=o[1];sel.appendChild(e);});
+}
+document.addEventListener('mousedown',function(e){
+  if(e.target&&e.target.tagName==='SELECT'&&e.target.classList.contains('todd'))fillTo(e.target);
+},true);
+document.addEventListener('focus',function(e){
+  if(e.target&&e.target.tagName==='SELECT'&&e.target.classList.contains('todd'))fillTo(e.target);
+},true);
+document.addEventListener('touchstart',function(e){
+  if(e.target&&e.target.tagName==='SELECT'&&e.target.classList.contains('todd'))fillTo(e.target);
+},{passive:true,capture:true});
 function selKey(k){
   document.querySelectorAll('.hl').forEach(function(e){e.classList.remove('hl');});
   document.querySelectorAll('[data-key="'+k+'"]').forEach(function(e){
@@ -472,8 +498,18 @@ if(CAN){
     });
     cards.addEventListener('dragover',function(e){e.preventDefault();});
   }
+  function fillPos(sel){
+    var n=parseInt(sel.getAttribute('data-n')||'0');
+    if(sel.options.length>=n)return;
+    var cur=parseInt(sel.getAttribute('data-pos')||'1');
+    sel.innerHTML='';
+    for(var i=1;i<=n;i++){var o=document.createElement('option');o.value=i;o.textContent=i;
+      if(i===cur)o.selected=true;sel.appendChild(o);}
+  }
   document.querySelectorAll('.posdd').forEach(function(sel){
-    sel.addEventListener('mousedown',function(e){e.stopPropagation();});
+    sel.addEventListener('mousedown',function(e){e.stopPropagation();fillPos(sel);});
+    sel.addEventListener('touchstart',function(){fillPos(sel);},{passive:true});
+    sel.addEventListener('focus',function(){fillPos(sel);});
     sel.addEventListener('change',function(){
       var cc=document.getElementById('cards');
       var keys=[].map.call(cc.querySelectorAll('.card'),function(c){
@@ -1159,7 +1195,7 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:
 .stM{color:#faf7f2;border-color:#8a6d1f;background:#b8860b}
 .stV{color:#2c5e2e;border-color:#7fae81;background:#e3efe3}
 .mini{display:inline}
-.mini button{font-size:11.5px;padding:1px 6px;border:1px solid #b8a88e;background:#fff;cursor:pointer;font-family:inherit}
+.mini button,.mb{font-size:11.5px;padding:1px 6px;border:1px solid #b8a88e;background:#fff;cursor:pointer;font-family:inherit}
 .mini select{font-size:11.5px;padding:1px;border:1px solid #b8a88e;font-family:inherit}
 .annform input[type=text]{font-size:14px;padding:3px;border:1px solid #b8a88e;font-family:inherit}
 .annform select,.annform button{font-size:13px;padding:3px 8px;border:1px solid #b8a88e;background:#fff;font-family:inherit}
@@ -2463,8 +2499,10 @@ click first.</p></div>"""
             return s
 
         def mini(label, **kw):
-            return ("<form class='mini' method='POST' action='/annotate'>"
-                    + hidden(**kw) + f"<button>{label}</button></form> ")
+            # one light button; the click handler in WB_JS posts the fields (v0.13.1: as forms
+            # with five hidden inputs each, the buttons of a 1,095-segment record made 7 MB)
+            return (f"<button class='mb' data-p=\"{esc(json.dumps(kw, ensure_ascii=False))}\">"
+                    f"{label}</button> ")
 
         st = art.get("status", "auto")
         stline = STATUS_CHIP.get(st, "")
@@ -2680,12 +2718,11 @@ click first.</p></div>"""
             btns = ""
             if can:
                 if in_body:
-                    posopts = "".join(
-                        f"<option value='{i}'"
-                        f"{' selected' if i == body_pos else ''}>{i}"
-                        f"</option>" for i in range(1, n_body + 1))
-                    btns += (f"<select class='posdd' data-key='{k}' "
-                             f"title='move to position'>{posopts}"
+                    # one option in the HTML; the list of positions is built when the box is
+                    # opened (v0.13.1: a 1,095-segment record carried 1.2 million options, 48 MB)
+                    btns += (f"<select class='posdd' data-key='{k}' data-n='{n_body}' "
+                             f"data-pos='{body_pos}' title='move to position'>"
+                             f"<option value='{body_pos}' selected>{body_pos}</option>"
                              f"</select> ")
                 # every role button is always there, the current one marked: a role is replaced in one
                 # step (Sujin's note of 2026-09-03), and the groups follow Heejin's hierarchy of 2026-09-04
@@ -2703,19 +2740,14 @@ click first.</p></div>"""
                          + mini("Text in picture", act="furniture", frag=k, why="text in picture")
                          + mini("Detach", act="detach", frag=k) + "</span>")
                 if others:
-                    opts = "".join(
-                        f"<option value='{o['article_id']}'>"
-                        f"{esc(artopt(o))}</option>" for o in others)
-                    btns += ("<form class='mini' method='POST' "
-                             "action='/annotate' "
-                             "title='send this one segment to another "
-                             "article: pick the article, then press "
-                             "move to'>"
-                             + hidden(act="moveto", frag=k)
-                             + "<span class='muted'>this segment "
-                             "belongs in:</span> "
-                             + f"<select name='to_id'>{opts}</select>"
-                             f"<button>Move to</button></form>")
+                    # the list of records is written once (TO_OPTS) and copied into the box when
+                    # it is opened (v0.13.1: sixty options on every one of a thousand cards)
+                    btns += ("<span class='mini' title='send this one segment to another article: "
+                             "pick the article, then press move to'>"
+                             "<span class='muted'>this segment belongs in:</span> "
+                             f"<select class='todd' name='to_id'><option value=''>…</option></select>"
+                             f"<button class='mb' data-sel='to_id' data-p=\"{esc(json.dumps({'act': 'moveto', 'frag': k}))}\">"
+                             "Move to</button></span>")
             rc = ("<span class='rolechip"
                   + (" t" if role in ("title", "subtitle") else "")
                   + (" z" if role in PARATEXT_ROLES else "")
@@ -2771,7 +2803,9 @@ click first.</p></div>"""
             + f"<div class='secbar secB'>Body text · {n_body} segments in "
             f"reading order (chapter info in purple)</div>"
             + "<div id='cards'>" + sec["B"] + "</div>"
-            + addmanual)
+            + addmanual
+            + "<script>var TO_OPTS=" + json.dumps([[o["article_id"], artopt(o)] for o in others], ensure_ascii=False)
+            .replace("</", "<\\/") + ";</script>")
 
         # every other box on the same pages, whatever its classification
         oth = ""

@@ -209,3 +209,75 @@ and seed 7 (33 pairs); the paraphrase model is skipped for want of a
 single matched pair. All of it is machinery output on ten issues; the
 numbers change again when a corrected story set exists and when the
 corpus arrives.
+
+## The rehearsal on rules v2.2 (2026-09-04, 17:15–17:22 on the main server)
+
+The records are now the rules v2.2 ones (docs/assembly-v2.md) with
+the annotators' work replayed on top: 589 records exported by r00 (584
+machine records and 5 made by hand on the workbench) — 79 stories
+(instalments included), 25 features, 5 poems, 2 letters pages, 48
+house records, 412 advertisements, 11 contents pages, 7 other. 18
+records are verified (12 of them stories) and 28 more stories were
+modified by hand, so a corrected story set of 40 exists for the first
+time; this rerun is still the machine set only (the corrected set is
+the next run). Against the 2 September run the story set is smaller,
+83 → 79, one rule at a time: v2.1 (3 September) moved two records out
+of the story type, v2.1.1 read the Odd John book announcement on the
+last page of Galaxy 1952-03 as advertising (house matter under v2.2),
+and v2.2 types "Braggin' Bill, Fighter" as the poem it is. One story
+falls under the fifty-word floor — Whitman's "Whispers of Heavenly
+Death", 44 words, printed as a filler in Weird Tales 1925-11 without a
+poem mark. The stages ran in seven minutes (r02 17:15, r04 17:18, r05
+17:22).
+
+Exact matching (78 stories of fifty words or more, 625,975 tokens):
+423 cross-issue matches at seed 6 (211 clusters, 34 with three or more
+witnesses), 36 at seed 7 (30 clusters, 3), 3 at seed 8; the longest is
+still 10 words; 64 of the 78 stories share at least one six-word
+phrase with a story in another issue (40 at seed 7, 6 at seed 8).
+Same-issue duplicates from shared scan regions: none. Planted copy
+(r03, 75 stories, 60 plants): verbatim and near-verbatim plants
+recovered 100% at every seed; heavy edits 90% at seed 6 (70% at 7, 65%
+at 8) — the plants are drawn afresh each run, so the heavy-edit figure
+moves a few points between runs.
+
+Paraphrase (24,998 passages of 50 words, step 25): no alignment at
+K=5, 10 or 20 with the default keep rule, as on 2 September. Planted
+copies: verbatim and near-verbatim 100% recovered at full extent (mean
+cover 1.00 and 0.997), heavy edits 55% (51% of their words) at the
+default rule. The two extra settings from 31 August (the loose rule
+c15i50 and the 100-word window) were not rerun; their files in
+data/reuse/para still describe the first, fragment-based story set
+(287 records) and are kept only as the record of that run.
+
+Background: 3,003 story pairs, 2,681 across issues. 10.7% of cross-
+issue pairs share a six-word phrase (9.5% on 2 September), running
+from 0.6% in the lowest topic-similarity quartile through 3.9% and
+11.9% to 26.6% in the highest; the tf-idf and embedding topic
+measures agree more closely than before (correlation 0.81, was 0.77).
+The sampler check again reproduces the full-table probabilities
+exactly (the largest weighted error is 0.0004, on the mean topic
+similarity of the unmatched pairs). The two-part model
+fits for seed 6 (288 matched pairs; topic similarity +1.4 log-odds per
+standard deviation, same magazine +1.5, same publisher −1.7, the
+story-effect spread 0.67) and seed 7 (34 pairs; topic +1.0, same
+author +2.5 on a wide interval); the paraphrase model is skipped for
+want of a matched pair. The most unusual pairs are again the
+same-author pairs between Astounding 1930-01 and 1930-03 — Ray
+Cummings's "Phantoms of Reality" and "Brigands of the Moon" ("no more
+than a minute or two had passed since", 10 words) and S. P. Meek's
+"The Cave of Horror" and "Cold Light" ("Operative Carnes of the United
+States Secret Service", the series character) — and after them the
+stock phrases of the detective story ("the door at the end of the
+hall": "The Seventh Devil" in Weird Tales 1925-11 against "The Murder
+Monster" in Thrilling Detective 1932-02 and Louis L'Amour's "With
+Death in His Corner" in 1948-12).
+
+Between the 2 September run and this one the main server ran the
+stages once more (4 September 10:02–10:10, on the v2.1.1 records);
+those results were overwritten by this run before they travelled, so
+the repository's data/reuse goes from the 3 September files straight
+to these. Nothing in the picture changed across the three runs: the
+pilot's stories share stock phrases and nothing longer, the planted
+copies are found, and the background machinery runs end to end. The
+numbers change again with the corrected set and with the corpus.

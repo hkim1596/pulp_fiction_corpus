@@ -28,8 +28,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     7714,
-     7721
+     7703,
+     7710
     ],
     "len": 7,
     "text": "on the other side of the room"
@@ -48,8 +48,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     8884,
-     8891
+     8686,
+     8693
     ],
     "len": 7,
     "text": "on the other side of the street"
@@ -98,8 +98,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     8767,
-     8773
+     8756,
+     8762
     ],
     "len": 6,
     "text": "on the other side of the"
@@ -118,8 +118,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     851,
-     857
+     653,
+     659
     ],
     "len": 6,
     "text": "on the other side of the"
@@ -128,8 +128,8 @@
     "story_id": "www_1936_02_a049",
     "issue": "www_1936_02",
     "tok": [
-     4409,
-     4415
+     4403,
+     4409
     ],
     "len": 6,
     "text": "on the other side of the"
@@ -138,8 +138,8 @@
     "story_id": "www_1936_02_a051",
     "issue": "www_1936_02",
     "tok": [
-     85,
-     91
+     89,
+     95
     ],
     "len": 6,
     "text": "on the other side of the"
@@ -148,8 +148,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     18684,
-     18690
+     18666,
+     18672
     ],
     "len": 6,
     "text": "the other side of the room"
@@ -205,8 +205,8 @@
     "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     5896,
-     5902
+     5918,
+     5924
     ],
     "len": 6,
     "text": "in the center of the room"
@@ -215,8 +215,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     23467,
-     23473
+     23125,
+     23131
     ],
     "len": 6,
     "text": "in the center of the room"
@@ -225,8 +225,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     386,
-     392
+     379,
+     385
     ],
     "len": 6,
     "text": "in the center of the room"
@@ -245,11 +245,118 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     14668,
-     14674
+     14650,
+     14656
     ],
     "len": 6,
     "text": "of the room there was a"
+   }
+  ]
+ },
+ {
+  "witnesses": 6,
+  "witnesses_collapsed": 6,
+  "issues": 5,
+  "occurrences": 9,
+  "max_len": 7,
+  "representative": {
+   "story_id": "gal_1952_04_a006",
+   "tok": [
+    11828,
+    11835
+   ],
+   "text": "what are you going to do with"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_04_a006",
+    "issue": "gal_1952_04",
+    "tok": [
+     11828,
+     11835
+    ],
+    "len": 7,
+    "text": "what are you going to do with"
+   },
+   {
+    "story_id": "td_1948_12_a028",
+    "issue": "td_1948_12",
+    "tok": [
+     4363,
+     4370
+    ],
+    "len": 7,
+    "text": "what are you going to do with"
+   },
+   {
+    "story_id": "wt_1934_05_a009",
+    "issue": "wt_1934_05",
+    "tok": [
+     9754,
+     9760
+    ],
+    "len": 6,
+    "text": "what are you going to do"
+   },
+   {
+    "story_id": "gal_1952_03_a020",
+    "issue": "gal_1952_03",
+    "tok": [
+     11822,
+     11828
+    ],
+    "len": 6,
+    "text": "What are you going to do"
+   },
+   {
+    "story_id": "gal_1952_04_a006",
+    "issue": "gal_1952_04",
+    "tok": [
+     5139,
+     5145
+    ],
+    "len": 6,
+    "text": "What are you going to do"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     6714,
+     6720
+    ],
+    "len": 6,
+    "text": "what are you going to do"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     16039,
+     16045
+    ],
+    "len": 6,
+    "text": "What are you going to do"
+   },
+   {
+    "story_id": "ws_1937_02_a044",
+    "issue": "ws_1937_02",
+    "tok": [
+     22040,
+     22046
+    ],
+    "len": 6,
+    "text": "What are you going to do"
+   },
+   {
+    "story_id": "ws_1937_02_a044",
+    "issue": "ws_1937_02",
+    "tok": [
+     27402,
+     27408
+    ],
+    "len": 6,
+    "text": "What are you going to do"
    }
   ]
  },
@@ -262,8 +369,8 @@
   "representative": {
    "story_id": "td_1948_12_a019",
    "tok": [
-    4780,
-    4790
+    4782,
+    4792
    ],
    "text": "Then he sat down on the edge of the bunk"
   },
@@ -272,8 +379,8 @@
     "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     4780,
-     4790
+     4782,
+     4792
     ],
     "len": 10,
     "text": "Then he sat down on the edge of the bunk"
@@ -322,8 +429,8 @@
     "story_id": "gal_1952_03_a008",
     "issue": "gal_1952_03",
     "tok": [
-     1682,
-     1688
+     1676,
+     1682
     ],
     "len": 6,
     "text": "sat down on the edge of"
@@ -349,8 +456,8 @@
   "representative": {
    "story_id": "ws_1937_02_a044",
    "tok": [
-    12946,
-    12953
+    12924,
+    12931
    ],
    "text": "me.\" \"I want to talk to you"
   },
@@ -359,8 +466,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     12946,
-     12953
+     12924,
+     12931
     ],
     "len": 7,
     "text": "me.\" \"I want to talk to you"
@@ -379,8 +486,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     12995,
-     13001
+     12973,
+     12979
     ],
     "len": 6,
     "text": "I want to talk to you"
@@ -389,8 +496,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     11491,
-     11497
+     10545,
+     10551
     ],
     "len": 6,
     "text": "I want to talk to you"
@@ -399,8 +506,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     716,
-     722
+     705,
+     711
     ],
     "len": 6,
     "text": "I want to talk to you"
@@ -446,8 +553,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     3467,
-     3473
+     3495,
+     3501
     ],
     "len": 6,
     "text": "to the other side of the"
@@ -466,8 +573,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     9979,
-     9985
+     9975,
+     9981
     ],
     "len": 6,
     "text": "to the other side of the"
@@ -481,103 +588,6 @@
     ],
     "len": 6,
     "text": "to the other side of the"
-   }
-  ]
- },
- {
-  "witnesses": 5,
-  "witnesses_collapsed": 5,
-  "issues": 5,
-  "occurrences": 8,
-  "max_len": 6,
-  "representative": {
-   "story_id": "wt_1934_05_a009",
-   "tok": [
-    9754,
-    9760
-   ],
-   "text": "what are you going to do"
-  },
-  "members": [
-   {
-    "story_id": "wt_1934_05_a009",
-    "issue": "wt_1934_05",
-    "tok": [
-     9754,
-     9760
-    ],
-    "len": 6,
-    "text": "what are you going to do"
-   },
-   {
-    "story_id": "gal_1952_03_a020",
-    "issue": "gal_1952_03",
-    "tok": [
-     12768,
-     12774
-    ],
-    "len": 6,
-    "text": "What are you going to do"
-   },
-   {
-    "story_id": "gal_1952_04_a006",
-    "issue": "gal_1952_04",
-    "tok": [
-     5143,
-     5149
-    ],
-    "len": 6,
-    "text": "What are you going to do"
-   },
-   {
-    "story_id": "gal_1952_04_a006",
-    "issue": "gal_1952_04",
-    "tok": [
-     11832,
-     11838
-    ],
-    "len": 6,
-    "text": "what are you going to do"
-   },
-   {
-    "story_id": "td_1948_12_a019",
-    "issue": "td_1948_12",
-    "tok": [
-     6712,
-     6718
-    ],
-    "len": 6,
-    "text": "what are you going to do"
-   },
-   {
-    "story_id": "td_1948_12_a019",
-    "issue": "td_1948_12",
-    "tok": [
-     16039,
-     16045
-    ],
-    "len": 6,
-    "text": "What are you going to do"
-   },
-   {
-    "story_id": "ws_1937_02_a044",
-    "issue": "ws_1937_02",
-    "tok": [
-     22062,
-     22068
-    ],
-    "len": 6,
-    "text": "What are you going to do"
-   },
-   {
-    "story_id": "ws_1937_02_a044",
-    "issue": "ws_1937_02",
-    "tok": [
-     27424,
-     27430
-    ],
-    "len": 6,
-    "text": "What are you going to do"
    }
   ]
  },
@@ -620,8 +630,8 @@
     "story_id": "gal_1952_04_a012",
     "issue": "gal_1952_04",
     "tok": [
-     3008,
-     3014
+     3005,
+     3011
     ],
     "len": 6,
     "text": "on the arm of the chair"
@@ -647,8 +657,8 @@
   "representative": {
    "story_id": "gal_1952_04_a008",
    "tok": [
-    2632,
-    2639
+    2628,
+    2635
    ],
    "text": "know what you were going to say"
   },
@@ -657,8 +667,8 @@
     "story_id": "gal_1952_04_a008",
     "issue": "gal_1952_04",
     "tok": [
-     2632,
-     2639
+     2628,
+     2635
     ],
     "len": 7,
     "text": "know what you were going to say"
@@ -667,8 +677,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     24089,
-     24096
+     24067,
+     24074
     ],
     "len": 7,
     "text": "know what you were going to do"
@@ -677,8 +687,8 @@
     "story_id": "gal_1952_03_a011",
     "issue": "gal_1952_03",
     "tok": [
-     673,
-     679
+     773,
+     779
     ],
     "len": 6,
     "text": "what you were going to say"
@@ -687,8 +697,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     15595,
-     15601
+     15591,
+     15597
     ],
     "len": 6,
     "text": "what you were going to do"
@@ -734,8 +744,8 @@
     "story_id": "gal_1952_04_a016",
     "issue": "gal_1952_04",
     "tok": [
-     7372,
-     7378
+     7304,
+     7310
     ],
     "len": 6,
     "text": "at the far end of the"
@@ -781,8 +791,8 @@
     "story_id": "wt_1925_11_a031",
     "issue": "wt_1925_11",
     "tok": [
-     443,
-     449
+     438,
+     444
     ],
     "len": 6,
     "text": "at one end of the room"
@@ -791,8 +801,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     21287,
-     21293
+     21269,
+     21275
     ],
     "len": 6,
     "text": "of the room. For a moment"
@@ -828,8 +838,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     4480,
-     4488
+     4473,
+     4481
     ],
     "len": 8,
     "text": "the door at the end of the hall"
@@ -838,8 +848,8 @@
     "story_id": "td_1948_12_a027",
     "issue": "td_1948_12",
     "tok": [
-     1684,
-     1691
+     1796,
+     1803
     ],
     "len": 7,
     "text": "door at the end of the hall"
@@ -855,8 +865,8 @@
   "representative": {
    "story_id": "gal_1952_04_a006",
    "tok": [
-    661,
-    669
+    657,
+    665
    ],
    "text": "in spite of the fact that he was"
   },
@@ -865,8 +875,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     661,
-     669
+     657,
+     665
     ],
     "len": 8,
     "text": "in spite of the fact that he was"
@@ -902,8 +912,8 @@
   "representative": {
    "story_id": "ws_1937_02_a051",
    "tok": [
-    4241,
-    4249
+    4043,
+    4051
    ],
    "text": "he knew that he would have to make"
   },
@@ -912,8 +922,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     4241,
-     4249
+     4043,
+     4051
     ],
     "len": 8,
     "text": "he knew that he would have to make"
@@ -932,8 +942,8 @@
     "story_id": "gal_1952_03_a009",
     "issue": "gal_1952_03",
     "tok": [
-     2723,
-     2729
+     2720,
+     2726
     ],
     "len": 6,
     "text": "that he would have to make"
@@ -969,8 +979,8 @@
     "story_id": "ws_1937_02_a046",
     "issue": "ws_1937_02",
     "tok": [
-     4399,
-     4406
+     4395,
+     4402
     ],
     "len": 7,
     "text": "it. It was at this point that"
@@ -1006,8 +1016,8 @@
   "representative": {
    "story_id": "td_1932_02_a013",
    "tok": [
-    1290,
-    1297
+    1272,
+    1279
    ],
    "text": "until it seemed as if the whole"
   },
@@ -1016,8 +1026,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     1290,
-     1297
+     1272,
+     1279
     ],
     "len": 7,
     "text": "until it seemed as if the whole"
@@ -1026,8 +1036,8 @@
     "story_id": "wt_1925_11_a029",
     "issue": "wt_1925_11",
     "tok": [
-     4706,
-     4712
+     4703,
+     4709
     ],
     "len": 6,
     "text": "until it seemed as if the"
@@ -1073,8 +1083,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     18509,
-     18516
+     18491,
+     18498
     ],
     "len": 7,
     "text": "for the barest fraction of a second"
@@ -1100,8 +1110,8 @@
   "representative": {
    "story_id": "wt_1934_05_a014",
    "tok": [
-    2319,
-    2326
+    2302,
+    2309
    ],
    "text": "a little to one side of the"
   },
@@ -1110,8 +1120,8 @@
     "story_id": "wt_1934_05_a014",
     "issue": "wt_1934_05",
     "tok": [
-     2319,
-     2326
+     2302,
+     2309
     ],
     "len": 7,
     "text": "a little to one side of the"
@@ -1120,8 +1130,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     11979,
-     11986
+     12007,
+     12014
     ],
     "len": 7,
     "text": "a little to one side of the"
@@ -1130,8 +1140,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     14663,
-     14670
+     14645,
+     14652
     ],
     "len": 7,
     "text": "A little to one side of the"
@@ -1147,8 +1157,8 @@
   "representative": {
    "story_id": "td_1932_02_a013",
    "tok": [
-    2051,
-    2058
+    2033,
+    2040
    ],
    "text": "In a far corner of the room"
   },
@@ -1157,8 +1167,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     2051,
-     2058
+     2033,
+     2040
     ],
     "len": 7,
     "text": "In a far corner of the room"
@@ -1167,8 +1177,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     10649,
-     10655
+     10677,
+     10683
     ],
     "len": 6,
     "text": "in a far corner of the"
@@ -1177,8 +1187,8 @@
     "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     2677,
-     2683
+     2699,
+     2705
     ],
     "len": 6,
     "text": "a far corner of the room"
@@ -1214,8 +1224,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     4837,
-     4844
+     4826,
+     4833
     ],
     "len": 7,
     "text": "at the other end of the wire"
@@ -1281,8 +1291,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     501,
-     507
+     529,
+     535
     ],
     "len": 6,
     "text": "As a matter of fact, it"
@@ -1291,8 +1301,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     5607,
-     5613
+     5589,
+     5595
     ],
     "len": 6,
     "text": "As a matter of fact, it"
@@ -1308,8 +1318,8 @@
   "representative": {
    "story_id": "wt_1934_05_a011",
    "tok": [
-    4918,
-    4924
+    4558,
+    4564
    ],
    "text": "at the foot of the steps"
   },
@@ -1318,8 +1328,8 @@
     "story_id": "wt_1934_05_a011",
     "issue": "wt_1934_05",
     "tok": [
-     4918,
-     4924
+     4558,
+     4564
     ],
     "len": 6,
     "text": "at the foot of the steps"
@@ -1328,8 +1338,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     6472,
-     6478
+     6454,
+     6460
     ],
     "len": 6,
     "text": "At the foot of the steps"
@@ -1338,8 +1348,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     6504,
-     6510
+     6486,
+     6492
     ],
     "len": 6,
     "text": "at the foot of the steps"
@@ -1348,8 +1358,8 @@
     "story_id": "td_1948_12_a027",
     "issue": "td_1948_12",
     "tok": [
-     2532,
-     2538
+     2644,
+     2650
     ],
     "len": 6,
     "text": "at the foot of the steps"
@@ -1365,8 +1375,8 @@
   "representative": {
    "story_id": "ast_1930_01_a016",
    "tok": [
-    102,
-    108
+    130,
+    136
    ],
    "text": "As a matter of fact, the"
   },
@@ -1375,8 +1385,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     102,
-     108
+     130,
+     136
     ],
     "len": 6,
     "text": "As a matter of fact, the"
@@ -1385,8 +1395,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     16979,
-     16985
+     16975,
+     16981
     ],
     "len": 6,
     "text": "As a matter of fact, the"
@@ -1395,8 +1405,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     262,
-     268
+     244,
+     250
     ],
     "len": 6,
     "text": "As a matter of fact, the"
@@ -1620,8 +1630,8 @@
     "story_id": "gal_1952_04_a012",
     "issue": "gal_1952_04",
     "tok": [
-     799,
-     805
+     796,
+     802
     ],
     "len": 6,
     "text": "As a matter of fact, I"
@@ -1667,8 +1677,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     10835,
-     10841
+     10831,
+     10837
     ],
     "len": 6,
     "text": "on the opposite side of the"
@@ -1677,8 +1687,8 @@
     "story_id": "www_1936_02_a051",
     "issue": "www_1936_02",
     "tok": [
-     4728,
-     4734
+     4732,
+     4738
     ],
     "len": 6,
     "text": "On the opposite side of the"
@@ -1714,8 +1724,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     9335,
-     9341
+     8389,
+     8395
     ],
     "len": 6,
     "text": "at the head of the stairs"
@@ -1724,8 +1734,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     12320,
-     12326
+     11374,
+     11380
     ],
     "len": 6,
     "text": "at the head of the stairs"
@@ -1771,8 +1781,8 @@
     "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     801,
-     807
+     803,
+     809
     ],
     "len": 6,
     "text": "on the back of the head"
@@ -1818,8 +1828,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     1927,
-     1933
+     1920,
+     1926
     ],
     "len": 6,
     "text": "at the end of the room"
@@ -1828,8 +1838,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     18544,
-     18550
+     18522,
+     18528
     ],
     "len": 6,
     "text": "at the end of the room"
@@ -1845,8 +1855,8 @@
   "representative": {
    "story_id": "gal_1952_04_a008",
    "tok": [
-    3761,
-    3767
+    3757,
+    3763
    ],
    "text": "it began to look as if"
   },
@@ -1855,8 +1865,8 @@
     "story_id": "gal_1952_04_a008",
     "issue": "gal_1952_04",
     "tok": [
-     3761,
-     3767
+     3757,
+     3763
     ],
     "len": 6,
     "text": "it began to look as if"
@@ -1865,8 +1875,8 @@
     "story_id": "td_1948_12_a025",
     "issue": "td_1948_12",
     "tok": [
-     3293,
-     3299
+     3364,
+     3370
     ],
     "len": 6,
     "text": "It began to look as if"
@@ -1875,8 +1885,8 @@
     "story_id": "td_1948_12_a027",
     "issue": "td_1948_12",
     "tok": [
-     3863,
-     3869
+     3975,
+     3981
     ],
     "len": 6,
     "text": "It began to look as if"
@@ -1912,8 +1922,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     8530,
-     8536
+     8332,
+     8338
     ],
     "len": 6,
     "text": "in the middle of the street"
@@ -1922,8 +1932,8 @@
     "story_id": "www_1936_02_a049",
     "issue": "www_1936_02",
     "tok": [
-     555,
-     561
+     549,
+     555
     ],
     "len": 6,
     "text": "in the middle of the street"
@@ -1959,8 +1969,8 @@
     "story_id": "ws_1937_02_a046",
     "issue": "ws_1937_02",
     "tok": [
-     350,
-     356
+     346,
+     352
     ],
     "len": 6,
     "text": "at the point of a gun"
@@ -1969,8 +1979,8 @@
     "story_id": "td_1948_12_a027",
     "issue": "td_1948_12",
     "tok": [
-     1404,
-     1410
+     1516,
+     1522
     ],
     "len": 6,
     "text": "at the point of a gun"
@@ -2006,8 +2016,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     21554,
-     21564
+     21212,
+     21222
     ],
     "len": 10,
     "text": "No more than a minute or two had passed since"
@@ -2023,8 +2033,8 @@
   "representative": {
    "story_id": "gal_1952_03_a008",
    "tok": [
-    2073,
-    2082
+    2067,
+    2076
    ],
    "text": "I don't know. I don't know. I don't know"
   },
@@ -2033,8 +2043,8 @@
     "story_id": "gal_1952_03_a008",
     "issue": "gal_1952_03",
     "tok": [
-     2073,
-     2082
+     2067,
+     2076
     ],
     "len": 9,
     "text": "I don't know. I don't know. I don't know"
@@ -2043,8 +2053,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     25955,
-     25961
+     25933,
+     25939
     ],
     "len": 6,
     "text": "I don't know, I don't know"
@@ -2117,8 +2127,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     6685,
-     6692
+     6487,
+     6494
     ],
     "len": 7,
     "text": "was at a loss to account for"
@@ -2191,8 +2201,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     13265,
-     13272
+     13247,
+     13254
     ],
     "len": 7,
     "text": "You have been very good to me"
@@ -2228,8 +2238,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     8568,
-     8575
+     8561,
+     8568
     ],
     "len": 7,
     "text": "on the back of a chair with"
@@ -2245,8 +2255,8 @@
   "representative": {
    "story_id": "wt_1925_11_a029",
    "tok": [
-    2780,
-    2787
+    2777,
+    2784
    ],
    "text": "If I can get there in time"
   },
@@ -2255,8 +2265,8 @@
     "story_id": "wt_1925_11_a029",
     "issue": "wt_1925_11",
     "tok": [
-     2780,
-     2787
+     2777,
+     2784
     ],
     "len": 7,
     "text": "If I can get there in time"
@@ -2282,8 +2292,8 @@
   "representative": {
    "story_id": "wt_1925_11_a029",
    "tok": [
-    3453,
-    3460
+    3450,
+    3457
    ],
    "text": "Every moment he expected to feel the"
   },
@@ -2292,8 +2302,8 @@
     "story_id": "wt_1925_11_a029",
     "issue": "wt_1925_11",
     "tok": [
-     3453,
-     3460
+     3450,
+     3457
     ],
     "len": 7,
     "text": "Every moment he expected to feel the"
@@ -2393,8 +2403,8 @@
   "representative": {
    "story_id": "ast_1930_01_a016",
    "tok": [
-    13621,
-    13628
+    13649,
+    13656
    ],
    "text": "Once or twice he thought he heard"
   },
@@ -2403,8 +2413,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     13621,
-     13628
+     13649,
+     13656
     ],
     "len": 7,
     "text": "Once or twice he thought he heard"
@@ -2450,8 +2460,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     4930,
-     4937
+     4588,
+     4595
     ],
     "len": 7,
     "text": "to the base of his neck. He"
@@ -2504,8 +2514,8 @@
   "representative": {
    "story_id": "ast_1930_01_a024",
    "tok": [
-    5099,
-    5106
+    5121,
+    5128
    ],
    "text": "For the first time in his life"
   },
@@ -2514,8 +2524,8 @@
     "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     5099,
-     5106
+     5121,
+     5128
     ],
     "len": 7,
     "text": "For the first time in his life"
@@ -2571,8 +2581,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     14530,
-     14536
+     14508,
+     14514
     ],
     "len": 6,
     "text": "within a few feet of them"
@@ -2581,8 +2591,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     19139,
-     19145
+     19117,
+     19123
     ],
     "len": 6,
     "text": "paused within a few feet of"
@@ -2598,8 +2608,8 @@
   "representative": {
    "story_id": "gal_1952_03_a020",
    "tok": [
-    6088,
-    6095
+    5142,
+    5149
    ],
    "text": "The hand is quicker than the eye"
   },
@@ -2608,8 +2618,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     6088,
-     6095
+     5142,
+     5149
     ],
     "len": 7,
     "text": "The hand is quicker than the eye"
@@ -2635,8 +2645,8 @@
   "representative": {
    "story_id": "gal_1952_04_a014",
    "tok": [
-    2480,
-    2487
+    2477,
+    2484
    ],
    "text": "a lot of energy and a lot"
   },
@@ -2645,8 +2655,8 @@
     "story_id": "gal_1952_04_a014",
     "issue": "gal_1952_04",
     "tok": [
-     2480,
-     2487
+     2477,
+     2484
     ],
     "len": 7,
     "text": "a lot of energy and a lot"
@@ -2655,8 +2665,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     345,
-     352
+     334,
+     341
     ],
     "len": 7,
     "text": "a lot of energy and a lot"
@@ -2672,8 +2682,8 @@
   "representative": {
    "story_id": "gal_1952_04_a016",
    "tok": [
-    6328,
-    6335
+    6324,
+    6331
    ],
    "text": "and then he was diving through the"
   },
@@ -2682,8 +2692,8 @@
     "story_id": "gal_1952_04_a016",
     "issue": "gal_1952_04",
     "tok": [
-     6328,
-     6335
+     6324,
+     6331
     ],
     "len": 7,
     "text": "and then he was diving through the"
@@ -2709,8 +2719,8 @@
   "representative": {
    "story_id": "td_1932_02_a013",
    "tok": [
-    3947,
-    3954
+    3929,
+    3936
    ],
    "text": "with the speed of a striking snake"
   },
@@ -2719,8 +2729,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     3947,
-     3954
+     3929,
+     3936
     ],
     "len": 7,
     "text": "with the speed of a striking snake"
@@ -2746,8 +2756,8 @@
   "representative": {
    "story_id": "td_1932_02_a015",
    "tok": [
-    5433,
-    5440
+    5426,
+    5433
    ],
    "text": "That is why I want you to"
   },
@@ -2756,8 +2766,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     5433,
-     5440
+     5426,
+     5433
     ],
     "len": 7,
     "text": "That is why I want you to"
@@ -2840,8 +2850,8 @@
     "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     4910,
-     4916
+     4932,
+     4938
     ],
     "len": 6,
     "text": "at the base of the brain"
@@ -2877,8 +2887,8 @@
     "story_id": "td_1948_12_a023",
     "issue": "td_1948_12",
     "tok": [
-     8114,
-     8120
+     8097,
+     8103
     ],
     "len": 6,
     "text": "of a sudden there was a"
@@ -2951,8 +2961,8 @@
     "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     1947,
-     1953
+     1949,
+     1955
     ],
     "len": 6,
     "text": "with her back to the door"
@@ -3040,6 +3050,80 @@
   "occurrences": 2,
   "max_len": 6,
   "representative": {
+   "story_id": "wt_1925_11_a022",
+   "tok": [
+    1909,
+    1915
+   ],
+   "text": "have-all the time there is"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a022",
+    "issue": "wt_1925_11",
+    "tok": [
+     1909,
+     1915
+    ],
+    "len": 6,
+    "text": "have-all the time there is"
+   },
+   {
+    "story_id": "wt_1934_05_a012",
+    "issue": "wt_1934_05",
+    "tok": [
+     4173,
+     4179
+    ],
+    "len": 6,
+    "text": "have all the time there is"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a025",
+   "tok": [
+    2363,
+    2369
+   ],
+   "text": "what he was going to do"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a025",
+    "issue": "wt_1925_11",
+    "tok": [
+     2363,
+     2369
+    ],
+    "len": 6,
+    "text": "what he was going to do"
+   },
+   {
+    "story_id": "wt_1934_05_a012",
+    "issue": "wt_1934_05",
+    "tok": [
+     4245,
+     4251
+    ],
+    "len": 6,
+    "text": "what he was going to do"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
    "story_id": "wt_1925_11_a025",
    "tok": [
     3031,
@@ -3079,8 +3163,8 @@
   "representative": {
    "story_id": "wt_1925_11_a026",
    "tok": [
-    1401,
-    1407
+    1396,
+    1402
    ],
    "text": "in the middle of the room"
   },
@@ -3089,8 +3173,8 @@
     "story_id": "wt_1925_11_a026",
     "issue": "wt_1925_11",
     "tok": [
-     1401,
-     1407
+     1396,
+     1402
     ],
     "len": 6,
     "text": "in the middle of the room"
@@ -3099,8 +3183,8 @@
     "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     4900,
-     4906
+     4902,
+     4908
     ],
     "len": 6,
     "text": "in the middle of the room"
@@ -3116,8 +3200,8 @@
   "representative": {
    "story_id": "wt_1925_11_a026",
    "tok": [
-    1671,
-    1677
+    1666,
+    1672
    ],
    "text": "against the far wall of the"
   },
@@ -3126,8 +3210,8 @@
     "story_id": "wt_1925_11_a026",
     "issue": "wt_1925_11",
     "tok": [
-     1671,
-     1677
+     1666,
+     1672
     ],
     "len": 6,
     "text": "against the far wall of the"
@@ -3210,8 +3294,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     13758,
-     13764
+     13575,
+     13581
     ],
     "len": 6,
     "text": "about a mile and a half"
@@ -3338,8 +3422,8 @@
   "representative": {
    "story_id": "wt_1925_11_a029",
    "tok": [
-    1957,
-    1963
+    1954,
+    1960
    ],
    "text": "it was as if he were"
   },
@@ -3348,8 +3432,8 @@
     "story_id": "wt_1925_11_a029",
     "issue": "wt_1925_11",
     "tok": [
-     1957,
-     1963
+     1954,
+     1960
     ],
     "len": 6,
     "text": "it was as if he were"
@@ -3358,8 +3442,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     1041,
-     1047
+     1023,
+     1029
     ],
     "len": 6,
     "text": "It was as if he were"
@@ -3368,8 +3452,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     14935,
-     14941
+     14917,
+     14923
     ],
     "len": 6,
     "text": "It was as if he were"
@@ -3385,8 +3469,8 @@
   "representative": {
    "story_id": "wt_1925_11_a029",
    "tok": [
-    3379,
-    3385
+    3376,
+    3382
    ],
    "text": "With an effort he managed to"
   },
@@ -3395,8 +3479,8 @@
     "story_id": "wt_1925_11_a029",
     "issue": "wt_1925_11",
     "tok": [
-     3379,
-     3385
+     3376,
+     3382
     ],
     "len": 6,
     "text": "With an effort he managed to"
@@ -3422,8 +3506,8 @@
   "representative": {
    "story_id": "wt_1925_11_a029",
    "tok": [
-    3533,
-    3539
+    3530,
+    3536
    ],
    "text": "it, and in a few minutes"
   },
@@ -3432,8 +3516,8 @@
     "story_id": "wt_1925_11_a029",
     "issue": "wt_1925_11",
     "tok": [
-     3533,
-     3539
+     3530,
+     3536
     ],
     "len": 6,
     "text": "it, and in a few minutes"
@@ -3459,8 +3543,8 @@
   "representative": {
    "story_id": "wt_1925_11_a029",
    "tok": [
-    6852,
-    6858
+    6849,
+    6855
    ],
    "text": "the corridor that led to the"
   },
@@ -3469,8 +3553,8 @@
     "story_id": "wt_1925_11_a029",
     "issue": "wt_1925_11",
     "tok": [
-     6852,
-     6858
+     6849,
+     6855
     ],
     "len": 6,
     "text": "the corridor that led to the"
@@ -3516,8 +3600,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     22635,
-     22641
+     22617,
+     22623
     ],
     "len": 6,
     "text": "THEY looked at each other and"
@@ -3533,8 +3617,8 @@
   "representative": {
    "story_id": "wt_1925_11_a031",
    "tok": [
-    369,
-    375
+    364,
+    370
    ],
    "text": "The room in which he was"
   },
@@ -3543,8 +3627,8 @@
     "story_id": "wt_1925_11_a031",
     "issue": "wt_1925_11",
     "tok": [
-     369,
-     375
+     364,
+     370
     ],
     "len": 6,
     "text": "The room in which he was"
@@ -3590,8 +3674,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     3674,
-     3680
+     3702,
+     3708
     ],
     "len": 6,
     "text": "Then he saw that it was"
@@ -3664,8 +3748,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     7177,
-     7183
+     7159,
+     7165
     ],
     "len": 6,
     "text": "if it hadn't been for the"
@@ -3674,8 +3758,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     10364,
-     10370
+     10346,
+     10352
     ],
     "len": 6,
     "text": "if it hadn't been for the"
@@ -3691,8 +3775,8 @@
   "representative": {
    "story_id": "wt_1934_05_a008",
    "tok": [
-    1092,
-    1098
+    1082,
+    1088
    ],
    "text": "He spread it out on the"
   },
@@ -3701,8 +3785,8 @@
     "story_id": "wt_1934_05_a008",
     "issue": "wt_1934_05",
     "tok": [
-     1092,
-     1098
+     1082,
+     1088
     ],
     "len": 6,
     "text": "He spread it out on the"
@@ -3728,8 +3812,8 @@
   "representative": {
    "story_id": "wt_1934_05_a008",
    "tok": [
-    1658,
-    1664
+    1648,
+    1654
    ],
    "text": "he saw that her eyes were"
   },
@@ -3738,8 +3822,8 @@
     "story_id": "wt_1934_05_a008",
     "issue": "wt_1934_05",
     "tok": [
-     1658,
-     1664
+     1648,
+     1654
     ],
     "len": 6,
     "text": "he saw that her eyes were"
@@ -3748,8 +3832,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     4346,
-     4352
+     4374,
+     4380
     ],
     "len": 6,
     "text": "He saw that her eyes were"
@@ -3785,8 +3869,8 @@
     "story_id": "td_1948_12_a025",
     "issue": "td_1948_12",
     "tok": [
-     2447,
-     2453
+     2518,
+     2524
     ],
     "len": 6,
     "text": "For the next few days the"
@@ -3839,8 +3923,8 @@
   "representative": {
    "story_id": "wt_1934_05_a011",
    "tok": [
-    999,
-    1005
+    639,
+    645
    ],
    "text": "From the corner of his eye"
   },
@@ -3849,8 +3933,8 @@
     "story_id": "wt_1934_05_a011",
     "issue": "wt_1934_05",
     "tok": [
-     999,
-     1005
+     639,
+     645
     ],
     "len": 6,
     "text": "From the corner of his eye"
@@ -3859,8 +3943,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     18620,
-     18626
+     18086,
+     18092
     ],
     "len": 6,
     "text": "from the corner of his eye"
@@ -3876,8 +3960,8 @@
   "representative": {
    "story_id": "wt_1934_05_a011",
    "tok": [
-    2195,
-    2201
+    1835,
+    1841
    ],
    "text": "under the influence of the drug"
   },
@@ -3886,8 +3970,8 @@
     "story_id": "wt_1934_05_a011",
     "issue": "wt_1934_05",
     "tok": [
-     2195,
-     2201
+     1835,
+     1841
     ],
     "len": 6,
     "text": "under the influence of the drug"
@@ -3896,8 +3980,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     1556,
-     1562
+     1584,
+     1590
     ],
     "len": 6,
     "text": "under the influence of the drug"
@@ -3913,8 +3997,8 @@
   "representative": {
    "story_id": "wt_1934_05_a011",
    "tok": [
-    3666,
-    3672
+    3306,
+    3312
    ],
    "text": "hand flashed to his belt and"
   },
@@ -3923,8 +4007,8 @@
     "story_id": "wt_1934_05_a011",
     "issue": "wt_1934_05",
     "tok": [
-     3666,
-     3672
+     3306,
+     3312
     ],
     "len": 6,
     "text": "hand flashed to his belt and"
@@ -3950,8 +4034,8 @@
   "representative": {
    "story_id": "wt_1934_05_a011",
    "tok": [
-    6507,
-    6513
+    6147,
+    6153
    ],
    "text": "it was evident that he had"
   },
@@ -3960,8 +4044,8 @@
     "story_id": "wt_1934_05_a011",
     "issue": "wt_1934_05",
     "tok": [
-     6507,
-     6513
+     6147,
+     6153
     ],
     "len": 6,
     "text": "it was evident that he had"
@@ -3970,8 +4054,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     10598,
-     10604
+     10626,
+     10632
     ],
     "len": 6,
     "text": "It was evident that he had"
@@ -3987,8 +4071,8 @@
   "representative": {
    "story_id": "wt_1934_05_a011",
    "tok": [
-    6642,
-    6648
+    6282,
+    6288
    ],
    "text": "He reached into his pocket and"
   },
@@ -3997,8 +4081,8 @@
     "story_id": "wt_1934_05_a011",
     "issue": "wt_1934_05",
     "tok": [
-     6642,
-     6648
+     6282,
+     6288
     ],
     "len": 6,
     "text": "He reached into his pocket and"
@@ -4007,8 +4091,8 @@
     "story_id": "gal_1952_03_a011",
     "issue": "gal_1952_03",
     "tok": [
-     2477,
-     2483
+     2577,
+     2583
     ],
     "len": 6,
     "text": "He reached into his pocket and"
@@ -4061,8 +4145,8 @@
   "representative": {
    "story_id": "wt_1934_05_a014",
    "tok": [
-    2300,
-    2306
+    2283,
+    2289
    ],
    "text": "It seemed to them that the"
   },
@@ -4071,8 +4155,8 @@
     "story_id": "wt_1934_05_a014",
     "issue": "wt_1934_05",
     "tok": [
-     2300,
-     2306
+     2283,
+     2289
     ],
     "len": 6,
     "text": "It seemed to them that the"
@@ -4081,8 +4165,8 @@
     "story_id": "gal_1952_04_a011",
     "issue": "gal_1952_04",
     "tok": [
-     5785,
-     5791
+     5781,
+     5787
     ],
     "len": 6,
     "text": "It seemed to them that the"
@@ -4155,8 +4239,8 @@
     "story_id": "gal_1952_03_a008",
     "issue": "gal_1952_03",
     "tok": [
-     10134,
-     10140
+     10128,
+     10134
     ],
     "len": 6,
     "text": "there was nothing to be seen"
@@ -4192,8 +4276,8 @@
     "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     4265,
-     4271
+     4267,
+     4273
     ],
     "len": 6,
     "text": "He took off his hat and"
@@ -4229,8 +4313,8 @@
     "story_id": "td_1948_12_a027",
     "issue": "td_1948_12",
     "tok": [
-     7158,
-     7164
+     7270,
+     7276
     ],
     "len": 6,
     "text": "I got to my feet and"
@@ -4283,8 +4367,8 @@
   "representative": {
    "story_id": "ast_1930_01_a016",
    "tok": [
-    1895,
-    1901
+    1923,
+    1929
    ],
    "text": "I don't like the look of"
   },
@@ -4293,8 +4377,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     1895,
-     1901
+     1923,
+     1929
     ],
     "len": 6,
     "text": "I don't like the look of"
@@ -4303,8 +4387,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     10178,
-     10184
+     9836,
+     9842
     ],
     "len": 6,
     "text": "I don't like the look of"
@@ -4320,8 +4404,8 @@
   "representative": {
    "story_id": "ast_1930_01_a016",
    "tok": [
-    2718,
-    2724
+    2746,
+    2752
    ],
    "text": "Not more than a thousand feet"
   },
@@ -4330,8 +4414,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     2718,
-     2724
+     2746,
+     2752
     ],
     "len": 6,
     "text": "Not more than a thousand feet"
@@ -4357,8 +4441,8 @@
   "representative": {
    "story_id": "ast_1930_01_a016",
    "tok": [
-    11843,
-    11849
+    11871,
+    11877
    ],
    "text": "opened his mouth to speak, but"
   },
@@ -4367,8 +4451,8 @@
     "story_id": "ast_1930_01_a016",
     "issue": "ast_1930_01",
     "tok": [
-     11843,
-     11849
+     11871,
+     11877
     ],
     "len": 6,
     "text": "opened his mouth to speak, but"
@@ -4377,8 +4461,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     1859,
-     1865
+     1517,
+     1523
     ],
     "len": 6,
     "text": "opened his mouth to speak but"
@@ -4414,8 +4498,8 @@
     "story_id": "gal_1952_04_a012",
     "issue": "gal_1952_04",
     "tok": [
-     3501,
-     3507
+     3498,
+     3504
     ],
     "len": 6,
     "text": "a company of the National Guard"
@@ -4525,8 +4609,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     8736,
-     8742
+     8725,
+     8731
     ],
     "len": 6,
     "text": "and held it to the light"
@@ -4562,8 +4646,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     238,
-     244
+     234,
+     240
     ],
     "len": 6,
     "text": "we ought to be able to"
@@ -4710,8 +4794,8 @@
     "story_id": "td_1948_12_a030",
     "issue": "td_1948_12",
     "tok": [
-     1235,
-     1241
+     1170,
+     1176
     ],
     "len": 6,
     "text": "I don't understand what you mean"
@@ -4747,8 +4831,8 @@
     "story_id": "gal_1952_04_a016",
     "issue": "gal_1952_04",
     "tok": [
-     4284,
-     4290
+     4281,
+     4287
     ],
     "len": 6,
     "text": "stood at the top of a"
@@ -4784,8 +4868,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     28727,
-     28733
+     28705,
+     28711
     ],
     "len": 6,
     "text": "There is nothing we can do"
@@ -4858,8 +4942,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     27814,
-     27820
+     27792,
+     27798
     ],
     "len": 6,
     "text": "which he had brought with him"
@@ -4932,8 +5016,8 @@
     "story_id": "gal_1952_04_a016",
     "issue": "gal_1952_04",
     "tok": [
-     4418,
-     4424
+     4415,
+     4421
     ],
     "len": 6,
     "text": "there was no way of getting"
@@ -4969,8 +5053,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     20904,
-     20910
+     20562,
+     20568
     ],
     "len": 6,
     "text": "There was an instant when I"
@@ -5006,8 +5090,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     10969,
-     10975
+     10965,
+     10971
     ],
     "len": 6,
     "text": "Get out of the way,\" he"
@@ -5080,8 +5164,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     16696,
-     16702
+     16162,
+     16168
     ],
     "len": 6,
     "text": "he was face to face with"
@@ -5117,8 +5201,8 @@
     "story_id": "gal_1952_04_a008",
     "issue": "gal_1952_04",
     "tok": [
-     4123,
-     4129
+     4119,
+     4125
     ],
     "len": 6,
     "text": "but you're not going to get"
@@ -5228,8 +5312,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     12596,
-     12602
+     12578,
+     12584
     ],
     "len": 6,
     "text": "leaned back in his chair and"
@@ -5302,8 +5386,8 @@
     "story_id": "td_1948_12_a023",
     "issue": "td_1948_12",
     "tok": [
-     803,
-     809
+     769,
+     775
     ],
     "len": 6,
     "text": "I used to be a movie"
@@ -5339,8 +5423,8 @@
     "story_id": "gal_1952_03_a011",
     "issue": "gal_1952_03",
     "tok": [
-     4903,
-     4909
+     5003,
+     5009
     ],
     "len": 6,
     "text": "this is a hell of a"
@@ -5356,8 +5440,8 @@
   "representative": {
    "story_id": "ast_1930_01_a024",
    "tok": [
-    1660,
-    1666
+    1682,
+    1688
    ],
    "text": "in the middle of the road"
   },
@@ -5366,8 +5450,8 @@
     "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     1660,
-     1666
+     1682,
+     1688
     ],
     "len": 6,
     "text": "in the middle of the road"
@@ -5376,8 +5460,8 @@
     "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     1670,
-     1676
+     1692,
+     1698
     ],
     "len": 6,
     "text": "in the middle of the road"
@@ -5386,8 +5470,8 @@
     "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     1700,
-     1706
+     1722,
+     1728
     ],
     "len": 6,
     "text": "in the middle of the road"
@@ -5413,8 +5497,8 @@
   "representative": {
    "story_id": "ast_1930_01_a024",
    "tok": [
-    2439,
-    2445
+    2461,
+    2467
    ],
    "text": "at the end of the table"
   },
@@ -5423,8 +5507,8 @@
     "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     2439,
-     2445
+     2461,
+     2467
     ],
     "len": 6,
     "text": "at the end of the table"
@@ -5433,8 +5517,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     6208,
-     6214
+     6197,
+     6203
     ],
     "len": 6,
     "text": "at the end of the table"
@@ -5443,8 +5527,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     6259,
-     6265
+     6248,
+     6254
     ],
     "len": 6,
     "text": "at the end of the table"
@@ -5460,8 +5544,8 @@
   "representative": {
    "story_id": "ast_1930_01_a024",
    "tok": [
-    2880,
-    2886
+    2902,
+    2908
    ],
    "text": "along the opposite side of the"
   },
@@ -5470,8 +5554,8 @@
     "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     2880,
-     2886
+     2902,
+     2908
     ],
     "len": 6,
     "text": "along the opposite side of the"
@@ -5497,8 +5581,8 @@
   "representative": {
    "story_id": "ast_1930_01_a024",
    "tok": [
-    5863,
-    5869
+    5885,
+    5891
    ],
    "text": "and he had the appearance of"
   },
@@ -5507,8 +5591,8 @@
     "story_id": "ast_1930_01_a024",
     "issue": "ast_1930_01",
     "tok": [
-     5863,
-     5869
+     5885,
+     5891
     ],
     "len": 6,
     "text": "and he had the appearance of"
@@ -5554,8 +5638,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     2224,
-     2230
+     2026,
+     2032
     ],
     "len": 6,
     "text": "won't have anything to do with"
@@ -5628,8 +5712,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     27745,
-     27751
+     27723,
+     27729
     ],
     "len": 6,
     "text": "three quarters of an hour the"
@@ -5665,8 +5749,8 @@
     "story_id": "gal_1952_03_a011",
     "issue": "gal_1952_03",
     "tok": [
-     876,
-     882
+     976,
+     982
     ],
     "len": 6,
     "text": "in front of the house and"
@@ -5682,8 +5766,8 @@
   "representative": {
    "story_id": "ast_1930_03_a015",
    "tok": [
-    6536,
-    6542
+    6194,
+    6200
    ],
    "text": "stood in the center of the"
   },
@@ -5692,8 +5776,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     6536,
-     6542
+     6194,
+     6200
     ],
     "len": 6,
     "text": "stood in the center of the"
@@ -5702,8 +5786,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     23,
-     29
+     16,
+     22
     ],
     "len": 6,
     "text": "stood in the center of the"
@@ -5719,8 +5803,8 @@
   "representative": {
    "story_id": "ast_1930_03_a015",
    "tok": [
-    9219,
-    9225
+    8877,
+    8883
    ],
    "text": "one on each side of the"
   },
@@ -5729,8 +5813,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     9219,
-     9225
+     8877,
+     8883
     ],
     "len": 6,
     "text": "one on each side of the"
@@ -5739,8 +5823,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     10472,
-     10478
+     10468,
+     10474
     ],
     "len": 6,
     "text": "one on each side of the"
@@ -5756,8 +5840,8 @@
   "representative": {
    "story_id": "ast_1930_03_a015",
    "tok": [
-    10124,
-    10130
+    9782,
+    9788
    ],
    "text": "I had to do. And it"
   },
@@ -5766,8 +5850,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     10124,
-     10130
+     9782,
+     9788
     ],
     "len": 6,
     "text": "I had to do. And it"
@@ -5776,8 +5860,8 @@
     "story_id": "gal_1952_03_a008",
     "issue": "gal_1952_03",
     "tok": [
-     2768,
-     2774
+     2762,
+     2768
     ],
     "len": 6,
     "text": "I had to do and it"
@@ -5793,8 +5877,8 @@
   "representative": {
    "story_id": "ast_1930_03_a015",
    "tok": [
-    14255,
-    14261
+    13913,
+    13919
    ],
    "text": "she shrank from him in fear"
   },
@@ -5803,8 +5887,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     14255,
-     14261
+     13913,
+     13919
     ],
     "len": 6,
     "text": "she shrank from him in fear"
@@ -5813,8 +5897,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     24037,
-     24043
+     24015,
+     24021
     ],
     "len": 6,
     "text": "She shrank from him in fear"
@@ -5830,8 +5914,8 @@
   "representative": {
    "story_id": "ast_1930_03_a015",
    "tok": [
-    17822,
-    17828
+    17480,
+    17486
    ],
    "text": "had nothing to do with any"
   },
@@ -5840,8 +5924,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     17822,
-     17828
+     17480,
+     17486
     ],
     "len": 6,
     "text": "had nothing to do with any"
@@ -5867,8 +5951,8 @@
   "representative": {
    "story_id": "ast_1930_03_a015",
    "tok": [
-    22833,
-    22839
+    22491,
+    22497
    ],
    "text": "out into the center of the"
   },
@@ -5877,8 +5961,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     22833,
-     22839
+     22491,
+     22497
     ],
     "len": 6,
     "text": "out into the center of the"
@@ -5904,8 +5988,8 @@
   "representative": {
    "story_id": "ast_1930_03_a015",
    "tok": [
-    23214,
-    23220
+    22872,
+    22878
    ],
    "text": "I had him by the throat"
   },
@@ -5914,8 +5998,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     23214,
-     23220
+     22872,
+     22878
     ],
     "len": 6,
     "text": "I had him by the throat"
@@ -5941,8 +6025,8 @@
   "representative": {
    "story_id": "ast_1930_03_a015",
    "tok": [
-    23548,
-    23554
+    23206,
+    23212
    ],
    "text": "finger on the trigger of the"
   },
@@ -5951,8 +6035,8 @@
     "story_id": "ast_1930_03_a015",
     "issue": "ast_1930_03",
     "tok": [
-     23548,
-     23554
+     23206,
+     23212
     ],
     "len": 6,
     "text": "finger on the trigger of the"
@@ -5998,8 +6082,8 @@
     "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     4457,
-     4463
+     4459,
+     4465
     ],
     "len": 6,
     "text": "You act as if you were"
@@ -6368,8 +6452,8 @@
     "story_id": "gal_1952_04_a011",
     "issue": "gal_1952_04",
     "tok": [
-     2947,
-     2953
+     2943,
+     2949
     ],
     "len": 6,
     "text": "and laid it on the table"
@@ -6479,8 +6563,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     3348,
-     3354
+     3344,
+     3350
     ],
     "len": 6,
     "text": "far below the surface of the"
@@ -6516,8 +6600,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     22070,
-     22076
+     22052,
+     22058
     ],
     "len": 6,
     "text": "the shore of Long Island Sound"
@@ -6553,8 +6637,8 @@
     "story_id": "www_1936_02_a051",
     "issue": "www_1936_02",
     "tok": [
-     5481,
-     5487
+     5485,
+     5491
     ],
     "len": 6,
     "text": "it was more than an hour"
@@ -6607,8 +6691,8 @@
   "representative": {
    "story_id": "gal_1952_03_a008",
    "tok": [
-    2163,
-    2169
+    2157,
+    2163
    ],
    "text": "She shook her head. \"No. You"
   },
@@ -6617,8 +6701,8 @@
     "story_id": "gal_1952_03_a008",
     "issue": "gal_1952_03",
     "tok": [
-     2163,
-     2169
+     2157,
+     2163
     ],
     "len": 6,
     "text": "She shook her head. \"No. You"
@@ -6644,8 +6728,8 @@
   "representative": {
    "story_id": "gal_1952_03_a008",
    "tok": [
-    2168,
-    2174
+    2162,
+    2168
    ],
    "text": "You may not believe it, but"
   },
@@ -6654,8 +6738,8 @@
     "story_id": "gal_1952_03_a008",
     "issue": "gal_1952_03",
     "tok": [
-     2168,
-     2174
+     2162,
+     2168
     ],
     "len": 6,
     "text": "You may not believe it, but"
@@ -6664,8 +6748,8 @@
     "story_id": "gal_1952_04_a016",
     "issue": "gal_1952_04",
     "tok": [
-     3696,
-     3702
+     3693,
+     3699
     ],
     "len": 6,
     "text": "You may not believe it, but"
@@ -6681,8 +6765,8 @@
   "representative": {
    "story_id": "gal_1952_03_a008",
    "tok": [
-    12174,
-    12180
+    12168,
+    12174
    ],
    "text": "That was a long time ago"
   },
@@ -6691,8 +6775,8 @@
     "story_id": "gal_1952_03_a008",
     "issue": "gal_1952_03",
     "tok": [
-     12174,
-     12180
+     12168,
+     12174
     ],
     "len": 6,
     "text": "That was a long time ago"
@@ -6718,8 +6802,8 @@
   "representative": {
    "story_id": "gal_1952_03_a009",
    "tok": [
-    268,
-    274
+    265,
+    271
    ],
    "text": "for the opposite side of the"
   },
@@ -6728,8 +6812,8 @@
     "story_id": "gal_1952_03_a009",
     "issue": "gal_1952_03",
     "tok": [
-     268,
-     274
+     265,
+     271
     ],
     "len": 6,
     "text": "for the opposite side of the"
@@ -6755,8 +6839,8 @@
   "representative": {
    "story_id": "gal_1952_03_a009",
    "tok": [
-    2283,
-    2289
+    2280,
+    2286
    ],
    "text": "the house and out into the"
   },
@@ -6765,8 +6849,8 @@
     "story_id": "gal_1952_03_a009",
     "issue": "gal_1952_03",
     "tok": [
-     2283,
-     2289
+     2280,
+     2286
     ],
     "len": 6,
     "text": "the house and out into the"
@@ -6775,8 +6859,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     10125,
-     10131
+     10118,
+     10124
     ],
     "len": 6,
     "text": "the house and out into the"
@@ -6792,8 +6876,8 @@
   "representative": {
    "story_id": "gal_1952_03_a009",
    "tok": [
-    2845,
-    2851
+    2842,
+    2848
    ],
    "text": "he heard footsteps in the hall"
   },
@@ -6802,8 +6886,8 @@
     "story_id": "gal_1952_03_a009",
     "issue": "gal_1952_03",
     "tok": [
-     2845,
-     2851
+     2842,
+     2848
     ],
     "len": 6,
     "text": "he heard footsteps in the hall"
@@ -6829,8 +6913,8 @@
   "representative": {
    "story_id": "gal_1952_03_a009",
    "tok": [
-    3157,
-    3163
+    3154,
+    3160
    ],
    "text": "What has that to do with"
   },
@@ -6839,8 +6923,8 @@
     "story_id": "gal_1952_03_a009",
     "issue": "gal_1952_03",
     "tok": [
-     3157,
-     3163
+     3154,
+     3160
     ],
     "len": 6,
     "text": "What has that to do with"
@@ -6849,8 +6933,8 @@
     "story_id": "gal_1952_03_a009",
     "issue": "gal_1952_03",
     "tok": [
-     4794,
-     4800
+     4791,
+     4797
     ],
     "len": 6,
     "text": "What has that to do with"
@@ -6859,8 +6943,8 @@
     "story_id": "gal_1952_04_a008",
     "issue": "gal_1952_04",
     "tok": [
-     2656,
-     2662
+     2652,
+     2658
     ],
     "len": 6,
     "text": "What has that to do with"
@@ -6876,8 +6960,8 @@
   "representative": {
    "story_id": "gal_1952_03_a009",
    "tok": [
-    4166,
-    4172
+    4163,
+    4169
    ],
    "text": "around the corner of the house"
   },
@@ -6886,8 +6970,8 @@
     "story_id": "gal_1952_03_a009",
     "issue": "gal_1952_03",
     "tok": [
-     4166,
-     4172
+     4163,
+     4169
     ],
     "len": 6,
     "text": "around the corner of the house"
@@ -6913,8 +6997,8 @@
   "representative": {
    "story_id": "gal_1952_03_a009",
    "tok": [
-    4245,
-    4251
+    4242,
+    4248
    ],
    "text": "at the rear of the hall"
   },
@@ -6923,8 +7007,8 @@
     "story_id": "gal_1952_03_a009",
     "issue": "gal_1952_03",
     "tok": [
-     4245,
-     4251
+     4242,
+     4248
     ],
     "len": 6,
     "text": "at the rear of the hall"
@@ -6950,8 +7034,8 @@
   "representative": {
    "story_id": "gal_1952_03_a020",
    "tok": [
-    4028,
-    4034
+    3082,
+    3088
    ],
    "text": "and dropped it to the ground"
   },
@@ -6960,8 +7044,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     4028,
-     4034
+     3082,
+     3088
     ],
     "len": 6,
     "text": "and dropped it to the ground"
@@ -6970,8 +7054,8 @@
     "story_id": "www_1936_02_a049",
     "issue": "www_1936_02",
     "tok": [
-     3078,
-     3084
+     3072,
+     3078
     ],
     "len": 6,
     "text": "and dropped it to the ground"
@@ -6987,8 +7071,8 @@
   "representative": {
    "story_id": "gal_1952_03_a020",
    "tok": [
-    4856,
-    4862
+    3910,
+    3916
    ],
    "text": "The lights went out in the"
   },
@@ -6997,8 +7081,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     4856,
-     4862
+     3910,
+     3916
     ],
     "len": 6,
     "text": "The lights went out in the"
@@ -7007,8 +7091,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     135,
-     141
+     128,
+     134
     ],
     "len": 6,
     "text": "the lights went out in the"
@@ -7024,8 +7108,8 @@
   "representative": {
    "story_id": "gal_1952_03_a020",
    "tok": [
-    7723,
-    7729
+    6777,
+    6783
    ],
    "text": "had nothing to do with it"
   },
@@ -7034,8 +7118,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     7723,
-     7729
+     6777,
+     6783
     ],
     "len": 6,
     "text": "had nothing to do with it"
@@ -7044,8 +7128,8 @@
     "story_id": "td_1948_12_a023",
     "issue": "td_1948_12",
     "tok": [
-     429,
-     435
+     395,
+     401
     ],
     "len": 6,
     "text": "had nothing to do with it"
@@ -7061,8 +7145,8 @@
   "representative": {
    "story_id": "gal_1952_03_a020",
    "tok": [
-    10708,
-    10714
+    9762,
+    9768
    ],
    "text": "man is trying to kill you"
   },
@@ -7071,8 +7155,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     10708,
-     10714
+     9762,
+     9768
     ],
     "len": 6,
     "text": "man is trying to kill you"
@@ -7081,8 +7165,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     17704,
-     17710
+     17682,
+     17688
     ],
     "len": 6,
     "text": "man is trying to kill you"
@@ -7098,8 +7182,8 @@
   "representative": {
    "story_id": "gal_1952_03_a020",
    "tok": [
-    13386,
-    13392
+    12440,
+    12446
    ],
    "text": "I've got to get back to"
   },
@@ -7108,8 +7192,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     13386,
-     13392
+     12440,
+     12446
     ],
     "len": 6,
     "text": "I've got to get back to"
@@ -7118,8 +7202,8 @@
     "story_id": "td_1948_12_a023",
     "issue": "td_1948_12",
     "tok": [
-     4997,
-     5003
+     4980,
+     4986
     ],
     "len": 6,
     "text": "I've got to get back to"
@@ -7135,8 +7219,8 @@
   "representative": {
    "story_id": "gal_1952_03_a020",
    "tok": [
-    13568,
-    13574
+    12622,
+    12628
    ],
    "text": "He put his arm around her"
   },
@@ -7145,8 +7229,8 @@
     "story_id": "gal_1952_03_a020",
     "issue": "gal_1952_03",
     "tok": [
-     13568,
-     13574
+     12622,
+     12628
     ],
     "len": 6,
     "text": "He put his arm around her"
@@ -7155,8 +7239,8 @@
     "story_id": "gal_1952_04_a012",
     "issue": "gal_1952_04",
     "tok": [
-     699,
-     705
+     696,
+     702
     ],
     "len": 6,
     "text": "He put his arm around her"
@@ -7172,8 +7256,8 @@
   "representative": {
    "story_id": "gal_1952_04_a006",
    "tok": [
-    4171,
-    4177
+    4167,
+    4173
    ],
    "text": "what are you doing here?\" \"I"
   },
@@ -7182,8 +7266,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     4171,
-     4177
+     4167,
+     4173
     ],
     "len": 6,
     "text": "what are you doing here?\" \"I"
@@ -7192,8 +7276,8 @@
     "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     431,
-     437
+     433,
+     439
     ],
     "len": 6,
     "text": "What are you doing here?\" \"I"
@@ -7219,8 +7303,8 @@
   "representative": {
    "story_id": "gal_1952_04_a006",
    "tok": [
-    4365,
-    4371
+    4361,
+    4367
    ],
    "text": "get out of here before I"
   },
@@ -7229,8 +7313,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     4365,
-     4371
+     4361,
+     4367
     ],
     "len": 6,
     "text": "get out of here before I"
@@ -7256,8 +7340,8 @@
   "representative": {
    "story_id": "gal_1952_04_a006",
    "tok": [
-    10528,
-    10534
+    10524,
+    10530
    ],
    "text": "what are we going to do"
   },
@@ -7266,8 +7350,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     10528,
-     10534
+     10524,
+     10530
     ],
     "len": 6,
     "text": "what are we going to do"
@@ -7276,8 +7360,8 @@
     "story_id": "td_1948_12_a027",
     "issue": "td_1948_12",
     "tok": [
-     7084,
-     7090
+     7196,
+     7202
     ],
     "len": 6,
     "text": "what are we going to do"
@@ -7293,8 +7377,8 @@
   "representative": {
    "story_id": "gal_1952_04_a006",
    "tok": [
-    17622,
-    17628
+    17618,
+    17624
    ],
    "text": "There was nothing he could do"
   },
@@ -7303,8 +7387,8 @@
     "story_id": "gal_1952_04_a006",
     "issue": "gal_1952_04",
     "tok": [
-     17622,
-     17628
+     17618,
+     17624
     ],
     "len": 6,
     "text": "There was nothing he could do"
@@ -7330,8 +7414,8 @@
   "representative": {
    "story_id": "gal_1952_04_a008",
    "tok": [
-    115,
-    121
+    111,
+    117
    ],
    "text": "back the way they had come"
   },
@@ -7340,8 +7424,8 @@
     "story_id": "gal_1952_04_a008",
     "issue": "gal_1952_04",
     "tok": [
-     115,
-     121
+     111,
+     117
     ],
     "len": 6,
     "text": "back the way they had come"
@@ -7350,8 +7434,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     9027,
-     9033
+     8829,
+     8835
     ],
     "len": 6,
     "text": "back the way they had come"
@@ -7367,8 +7451,8 @@
   "representative": {
    "story_id": "gal_1952_04_a008",
    "tok": [
-    2376,
-    2382
+    2372,
+    2378
    ],
    "text": "came to me and told me"
   },
@@ -7377,8 +7461,8 @@
     "story_id": "gal_1952_04_a008",
     "issue": "gal_1952_04",
     "tok": [
-     2376,
-     2382
+     2372,
+     2378
     ],
     "len": 6,
     "text": "came to me and told me"
@@ -7387,8 +7471,8 @@
     "story_id": "ws_1937_02_a046",
     "issue": "ws_1937_02",
     "tok": [
-     1164,
-     1170
+     1160,
+     1166
     ],
     "len": 6,
     "text": "came to me and told me"
@@ -7404,8 +7488,8 @@
   "representative": {
    "story_id": "gal_1952_04_a008",
    "tok": [
-    4487,
-    4493
+    4483,
+    4489
    ],
    "text": "all you have to do is"
   },
@@ -7414,8 +7498,8 @@
     "story_id": "gal_1952_04_a008",
     "issue": "gal_1952_04",
     "tok": [
-     4487,
-     4493
+     4483,
+     4489
     ],
     "len": 6,
     "text": "all you have to do is"
@@ -7424,8 +7508,8 @@
     "story_id": "td_1948_12_a023",
     "issue": "td_1948_12",
     "tok": [
-     2792,
-     2798
+     2760,
+     2766
     ],
     "len": 6,
     "text": "All you have to do is"
@@ -7441,8 +7525,8 @@
   "representative": {
    "story_id": "gal_1952_04_a011",
    "tok": [
-    2003,
-    2009
+    1999,
+    2005
    ],
    "text": "if that's the way it is"
   },
@@ -7451,8 +7535,8 @@
     "story_id": "gal_1952_04_a011",
     "issue": "gal_1952_04",
     "tok": [
-     2003,
-     2009
+     1999,
+     2005
     ],
     "len": 6,
     "text": "if that's the way it is"
@@ -7478,8 +7562,8 @@
   "representative": {
    "story_id": "gal_1952_04_a014",
    "tok": [
-    3333,
-    3339
+    3330,
+    3336
    ],
    "text": "a hell of a lot of"
   },
@@ -7488,8 +7572,8 @@
     "story_id": "gal_1952_04_a014",
     "issue": "gal_1952_04",
     "tok": [
-     3333,
-     3339
+     3330,
+     3336
     ],
     "len": 6,
     "text": "a hell of a lot of"
@@ -7515,8 +7599,8 @@
   "representative": {
    "story_id": "gal_1952_04_a016",
    "tok": [
-    1935,
-    1941
+    1932,
+    1938
    ],
    "text": "what you're going to do about"
   },
@@ -7525,8 +7609,8 @@
     "story_id": "gal_1952_04_a016",
     "issue": "gal_1952_04",
     "tok": [
-     1935,
-     1941
+     1932,
+     1938
     ],
     "len": 6,
     "text": "what you're going to do about"
@@ -7552,8 +7636,8 @@
   "representative": {
    "story_id": "gal_1952_04_a016",
    "tok": [
-    6557,
-    6563
+    6553,
+    6559
    ],
    "text": "from one end to the other"
   },
@@ -7562,8 +7646,8 @@
     "story_id": "gal_1952_04_a016",
     "issue": "gal_1952_04",
     "tok": [
-     6557,
-     6563
+     6553,
+     6559
     ],
     "len": 6,
     "text": "from one end to the other"
@@ -7572,8 +7656,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     4708,
-     4714
+     4701,
+     4707
     ],
     "len": 6,
     "text": "from one end to the other"
@@ -7589,8 +7673,8 @@
   "representative": {
    "story_id": "td_1932_02_a013",
    "tok": [
-    674,
-    680
+    656,
+    662
    ],
    "text": "a bunch of money on him"
   },
@@ -7599,8 +7683,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     674,
-     680
+     656,
+     662
     ],
     "len": 6,
     "text": "a bunch of money on him"
@@ -7609,8 +7693,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     959,
-     965
+     761,
+     767
     ],
     "len": 6,
     "text": "a bunch of money on him"
@@ -7626,8 +7710,8 @@
   "representative": {
    "story_id": "td_1932_02_a013",
    "tok": [
-    1886,
-    1892
+    1868,
+    1874
    ],
    "text": "come to the end of the"
   },
@@ -7636,8 +7720,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     1886,
-     1892
+     1868,
+     1874
     ],
     "len": 6,
     "text": "come to the end of the"
@@ -7646,8 +7730,8 @@
     "story_id": "td_1948_12_a030",
     "issue": "td_1948_12",
     "tok": [
-     1669,
-     1675
+     1503,
+     1509
     ],
     "len": 6,
     "text": "come to the end of the"
@@ -7663,8 +7747,8 @@
   "representative": {
    "story_id": "td_1932_02_a013",
    "tok": [
-    5871,
-    5877
+    5853,
+    5859
    ],
    "text": "from the side of his mouth"
   },
@@ -7673,8 +7757,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     5871,
-     5877
+     5853,
+     5859
     ],
     "len": 6,
     "text": "from the side of his mouth"
@@ -7683,8 +7767,8 @@
     "story_id": "www_1936_02_a051",
     "issue": "www_1936_02",
     "tok": [
-     728,
-     734
+     732,
+     738
     ],
     "len": 6,
     "text": "from the side of his mouth"
@@ -7700,8 +7784,8 @@
   "representative": {
    "story_id": "td_1932_02_a013",
    "tok": [
-    16242,
-    16248
+    16224,
+    16230
    ],
    "text": "had a gun in his hand"
   },
@@ -7710,8 +7794,8 @@
     "story_id": "td_1932_02_a013",
     "issue": "td_1932_02",
     "tok": [
-     16242,
-     16248
+     16224,
+     16230
     ],
     "len": 6,
     "text": "had a gun in his hand"
@@ -7784,8 +7868,8 @@
   "representative": {
    "story_id": "td_1932_02_a015",
    "tok": [
-    7650,
-    7656
+    7643,
+    7649
    ],
    "text": "and there was no sign of"
   },
@@ -7794,8 +7878,8 @@
     "story_id": "td_1932_02_a015",
     "issue": "td_1932_02",
     "tok": [
-     7650,
-     7656
+     7643,
+     7649
     ],
     "len": 6,
     "text": "and there was no sign of"
@@ -7804,8 +7888,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     20038,
-     20044
+     20016,
+     20022
     ],
     "len": 6,
     "text": "and there was no sign of"
@@ -7821,8 +7905,8 @@
   "representative": {
    "story_id": "td_1932_02_a017",
    "tok": [
-    136,
-    142
+    125,
+    131
    ],
    "text": "he realized that he was in"
   },
@@ -7831,8 +7915,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     136,
-     142
+     125,
+     131
     ],
     "len": 6,
     "text": "he realized that he was in"
@@ -7858,8 +7942,8 @@
   "representative": {
    "story_id": "td_1932_02_a017",
    "tok": [
-    3916,
-    3922
+    3905,
+    3911
    ],
    "text": "in the direction of the sound"
   },
@@ -7868,8 +7952,8 @@
     "story_id": "td_1932_02_a017",
     "issue": "td_1932_02",
     "tok": [
-     3916,
-     3922
+     3905,
+     3911
     ],
     "len": 6,
     "text": "in the direction of the sound"
@@ -7945,8 +8029,8 @@
     "story_id": "www_1936_02_a049",
     "issue": "www_1936_02",
     "tok": [
-     3056,
-     3062
+     3050,
+     3056
     ],
     "len": 6,
     "text": "at the top of his voice"
@@ -7982,8 +8066,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     1041,
-     1047
+     843,
+     849
     ],
     "len": 6,
     "text": "that he was far from feeling"
@@ -8019,8 +8103,8 @@
     "story_id": "www_1936_02_a051",
     "issue": "www_1936_02",
     "tok": [
-     8552,
-     8558
+     8556,
+     8562
     ],
     "len": 6,
     "text": "the door was flung open, and"
@@ -8056,8 +8140,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     19013,
-     19019
+     18991,
+     18997
     ],
     "len": 6,
     "text": "and closed the door behind him"
@@ -8093,8 +8177,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     19075,
-     19081
+     19053,
+     19059
     ],
     "len": 6,
     "text": "in the middle of the night"
@@ -8110,8 +8194,8 @@
   "representative": {
    "story_id": "td_1948_12_a019",
    "tok": [
-    3199,
-    3205
+    3201,
+    3207
    ],
    "text": "there was no answer from the"
   },
@@ -8120,8 +8204,8 @@
     "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     3199,
-     3205
+     3201,
+     3207
     ],
     "len": 6,
     "text": "there was no answer from the"
@@ -8130,8 +8214,8 @@
     "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     3674,
-     3680
+     3676,
+     3682
     ],
     "len": 6,
     "text": "there was no answer from the"
@@ -8157,8 +8241,8 @@
   "representative": {
    "story_id": "td_1948_12_a019",
    "tok": [
-    6088,
-    6094
+    6090,
+    6096
    ],
    "text": "stood with his back to the"
   },
@@ -8167,8 +8251,8 @@
     "story_id": "td_1948_12_a019",
     "issue": "td_1948_12",
     "tok": [
-     6088,
-     6094
+     6090,
+     6096
     ],
     "len": 6,
     "text": "stood with his back to the"
@@ -8177,8 +8261,8 @@
     "story_id": "www_1936_02_a051",
     "issue": "www_1936_02",
     "tok": [
-     9695,
-     9701
+     9699,
+     9705
     ],
     "len": 6,
     "text": "stood with his back to the"
@@ -8214,8 +8298,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     23891,
-     23897
+     23869,
+     23875
     ],
     "len": 6,
     "text": "he closed the door behind him"
@@ -8288,8 +8372,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     30290,
-     30296
+     30268,
+     30274
     ],
     "len": 6,
     "text": "In the light of the little"
@@ -8379,8 +8463,8 @@
   "representative": {
    "story_id": "td_1948_12_a023",
    "tok": [
-    7435,
-    7441
+    7418,
+    7424
    ],
    "text": "that was the name of the"
   },
@@ -8389,8 +8473,8 @@
     "story_id": "td_1948_12_a023",
     "issue": "td_1948_12",
     "tok": [
-     7435,
-     7441
+     7418,
+     7424
     ],
     "len": 6,
     "text": "that was the name of the"
@@ -8399,8 +8483,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     7766,
-     7772
+     7568,
+     7574
     ],
     "len": 6,
     "text": "That was the name of the"
@@ -8416,8 +8500,8 @@
   "representative": {
    "story_id": "td_1948_12_a025",
    "tok": [
-    2154,
-    2160
+    2225,
+    2231
    ],
    "text": "had no way of knowing that"
   },
@@ -8426,8 +8510,8 @@
     "story_id": "td_1948_12_a025",
     "issue": "td_1948_12",
     "tok": [
-     2154,
-     2160
+     2225,
+     2231
     ],
     "len": 6,
     "text": "had no way of knowing that"
@@ -8510,8 +8594,8 @@
     "story_id": "www_1936_02_a051",
     "issue": "www_1936_02",
     "tok": [
-     10250,
-     10256
+     10254,
+     10260
     ],
     "len": 6,
     "text": "With a wave of his hand"
@@ -8527,8 +8611,8 @@
   "representative": {
    "story_id": "ws_1937_02_a044",
    "tok": [
-    16957,
-    16963
+    16935,
+    16941
    ],
    "text": "the door of the bunk house"
   },
@@ -8537,8 +8621,8 @@
     "story_id": "ws_1937_02_a044",
     "issue": "ws_1937_02",
     "tok": [
-     16957,
-     16963
+     16935,
+     16941
     ],
     "len": 6,
     "text": "the door of the bunk house"
@@ -8547,8 +8631,8 @@
     "story_id": "www_1936_02_a051",
     "issue": "www_1936_02",
     "tok": [
-     10215,
-     10221
+     10219,
+     10225
     ],
     "len": 6,
     "text": "the door of the bunk house"
@@ -8557,8 +8641,8 @@
     "story_id": "www_1936_02_a051",
     "issue": "www_1936_02",
     "tok": [
-     11253,
-     11259
+     11257,
+     11263
     ],
     "len": 6,
     "text": "the door of the bunk house"
@@ -8574,8 +8658,8 @@
   "representative": {
    "story_id": "ws_1937_02_a051",
    "tok": [
-    7424,
-    7430
+    7226,
+    7232
    ],
    "text": "What I want to know is"
   },
@@ -8584,8 +8668,8 @@
     "story_id": "ws_1937_02_a051",
     "issue": "ws_1937_02",
     "tok": [
-     7424,
-     7430
+     7226,
+     7232
     ],
     "len": 6,
     "text": "What I want to know is"

@@ -1,28 +1,28 @@
 {
  "ast_1930_01": {
   "stories": 7,
-  "region_keys": 2191,
+  "region_keys": 2181,
   "keys_owned_by_2plus": 0,
   "stories_sharing": 0,
   "worst_pairs": []
  },
  "ast_1930_03": {
   "stories": 5,
-  "region_keys": 2263,
+  "region_keys": 2260,
   "keys_owned_by_2plus": 0,
   "stories_sharing": 0,
   "worst_pairs": []
  },
  "gal_1952_03": {
-  "stories": 6,
-  "region_keys": 2255,
+  "stories": 5,
+  "region_keys": 2258,
   "keys_owned_by_2plus": 0,
   "stories_sharing": 0,
   "worst_pairs": []
  },
  "gal_1952_04": {
   "stories": 6,
-  "region_keys": 1993,
+  "region_keys": 1987,
   "keys_owned_by_2plus": 0,
   "stories_sharing": 0,
   "worst_pairs": []
@@ -35,36 +35,36 @@
   "worst_pairs": []
  },
  "td_1948_12": {
-  "stories": 8,
-  "region_keys": 1990,
+  "stories": 7,
+  "region_keys": 1972,
   "keys_owned_by_2plus": 0,
   "stories_sharing": 0,
   "worst_pairs": []
  },
  "ws_1937_02": {
-  "stories": 7,
-  "region_keys": 1872,
+  "stories": 6,
+  "region_keys": 1894,
   "keys_owned_by_2plus": 0,
   "stories_sharing": 0,
   "worst_pairs": []
  },
  "wt_1925_11": {
   "stories": 17,
-  "region_keys": 1899,
+  "region_keys": 1890,
   "keys_owned_by_2plus": 0,
   "stories_sharing": 0,
   "worst_pairs": []
  },
  "wt_1934_05": {
-  "stories": 9,
-  "region_keys": 1692,
+  "stories": 8,
+  "region_keys": 1696,
   "keys_owned_by_2plus": 0,
   "stories_sharing": 0,
   "worst_pairs": []
  },
  "www_1936_02": {
   "stories": 10,
-  "region_keys": 2081,
+  "region_keys": 2093,
   "keys_owned_by_2plus": 0,
   "stories_sharing": 0,
   "worst_pairs": []

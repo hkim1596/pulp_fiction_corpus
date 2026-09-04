@@ -65,9 +65,12 @@ def sortkey(k):
 
 
 def stamp_of(path):
+    """The <stamp> of data/assembly_archive/<stamp>_refresh, as an ISO time, from
+    anywhere in the path (the archive's articles/ folder is what is passed, so
+    the basename alone is "articles"; the last stamp in the path wins)."""
     import re as _re
-    m = _re.search(r"(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})", os.path.basename(path.rstrip("/")))
-    return f"{m.group(1)}-{m.group(2)}-{m.group(3)}T{m.group(4)}:{m.group(5)}:{m.group(6)}" if m else None
+    ms = _re.findall(r"(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})", os.path.abspath(path))
+    return "{}-{}-{}T{}:{}:{}".format(*ms[-1]) if ms else None
 
 
 def compare(iid, before, after, ann_before, ann_after, all_records=False, early=None):
@@ -140,6 +143,10 @@ def main():
     cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"), encoding="utf-8"))
     ids = [args.issue] if args.issue else [i["id"] for i in cfg["issues"]]
     rel = lambda p: p if os.path.isabs(p) else os.path.join(ROOT, p)  # noqa: E731
+    if args.early:
+        if not stamp_of(args.early):
+            sys.exit(f"--early {args.early}: no <stamp>_refresh in the path, so no record could be taken from it")
+        print(f"[early] records verified before {stamp_of(args.early)} are compared against {args.early}")
     total = 0
     for iid in ids:
         total += compare(iid, rel(args.before), rel(args.after), rel(args.ann_before), rel(args.ann_after), args.all_records,
