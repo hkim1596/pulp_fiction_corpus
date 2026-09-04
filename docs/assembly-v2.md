@@ -277,3 +277,22 @@ September the one annotated record (The Stolen Body, Weird Tales
 1925-11: three actions by Heejin) lost page 133's six regions to a
 house advertisement that v2.1 reads correctly; the refresh was forced
 and the replay re-placed the annotated region by its key.
+
+## v2.1.1 (3 September, evening): what the audit against the corrections changed
+
+docs/assembly-accuracy.md reads the human corrections record by record
+(pipeline/s10_assembly_audit.py). Six rules changed from it: the end of
+a piece's column above the next piece's title stays with the piece when
+there is evidence the column runs on; blurbs, synopsis headings and a
+second setting of the title above the title go to the new piece
+(teaser, heading); a repeated title over a "continued from" notice is
+furniture; a plain subheading inside a department with selling words
+under it is an advertisement, and a filler exits only at narrative
+prose; a headline inside advertising matter starts the next
+advertisement (stacked headlines joined) and an announcement header runs
+on to a later notice on the page; a by-line followed by selling words on
+its page is a book or magazine announcement. Human-touched records
+identical to the machine's: 9 → 16 of 51; contents-page pieces clean
+105 → 106; story starts inside pieces 3 → 2 (a reader's poem inside The
+Eyrie and an unlisted lead novel — neither a split).
+

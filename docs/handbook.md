@@ -334,6 +334,15 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     /assembly page of the site shows it. --yardstick
                     <archive> replays the annotations over an archived
                     assembly after a switch.
+    s10_assembly_audit   the audit (2026-09-03): every record a person
+                    corrected against the live assembly, region by
+                    region, each disagreement sorted by cause
+                    (furniture, advertisement, split, other piece …) with
+                    the machine's and the person's reasons →
+                    data/assembly_v2/audit.json and a report.
+                    --yardstick <archive> as for s09; --show keeps every
+                    disputed region. docs/assembly-accuracy.md is the
+                    reading of it.
     scripts/switch_assembly.py   makes a v2 candidate the live assembly,
                     moving the old assembly and the annotation logs to
                     data/assembly_archive/<stamp>/ (nothing deleted;
