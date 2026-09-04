@@ -215,3 +215,21 @@ Dropbox share carries the full context of each.
   addresses stay in the data file, the site shows the part before the @.
   The publisher table (config/publishers_magazines.json) is reference
   knowledge to be confirmed against the mastheads.
+- 2026-09-05 (night, "Can we have the progress bar looks something like
+  the following: https://causal-inference.digihumeng.org/corpus Also can
+  we have some general design upgrade. Like similar to the causal
+  inference site") — The site takes the design of the centre's
+  causal-inference site: one stylesheet on colour tokens with a dark
+  scheme, system type, a sitemark row with the era pill, two labelled
+  nav rows, folded reading notes, cards, big-number rows, hairline
+  tables. The progress graphic is now the year strip: one row per layer
+  (in the archive, downloaded, assembled, verified), one cell per year
+  of the era 1896–1959, darker for a fuller year, a tooltip on every
+  cell; the single collection bar stays under it on the collection and
+  progress pages as the whole-collection view. "Downloaded" is defined
+  as the archive record or any product of it on this machine (the page
+  images stay on the server, the records travel with the repository),
+  so the site shows the same count wherever it runs. The era of the
+  strip and the pill is 1896–1959, the protocol's; items dated outside
+  it and undated items are named in the caption, not drawn. Nothing in
+  the data or the tools changed; site v0.15.0.

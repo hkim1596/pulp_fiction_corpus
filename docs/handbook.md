@@ -123,6 +123,66 @@ paratext.jsonl, corpus_stats.json ("export" is a raw-file root). Logs:
 data/reuse/validation/judgments.jsonl and data/reuse/cases.jsonl are
 append-only like the annotation logs and travel with the data, not git.
 
+The design since v0.15.0 (2026-09-05, after the centre's causal-inference
+site, causal-inference.digihumeng.org — Heejin: "Can we have the progress
+bar looks something like the following … Also can we have some general
+design upgrade"): the whole stylesheet is the `CSS` constant at the top
+of webapp/app.py, written on tokens — `--page` #f7f7f4, `--surface`
+#fdfdfc, `--ink` #101010, `--ink2` #4e4d49, `--muted` #8a8880, `--grid`
+#e2e1da, `--accent` #4a3aa7, `--accent2` #2a78d6, `--warn` #eb6834, and
+the ones the older pages use (`--surface2`, `--grid2`, `--green`,
+`--green2`, `--purple2`, `--border`, `--okbg`, `--warnbg`, `--accbg`,
+`--shadow`) — and a dark scheme under
+`prefers-color-scheme: dark` that redefines the tokens only; system-ui
+type; a page never names a colour by hex (the modules were mapped by
+regex, the charts' PALETTE and the strip's layer colours are the
+exceptions, chosen to read on both schemes). The frame (`page()`): the
+sitemark row (a pill "PULP MAGAZINES · 1896–1959" linking home, the
+site's name, the centre's link at the right), then two nav rows labelled
+EXPLORE and WORKROOM (`NAV_EXPLORE`, `NAV_WORKROOM`; `nav_on(path, href)`
+marks the current page — the longest href the path begins with, /reuse
+only for /reuse and the cluster pages), then the body, the feedback box,
+the footer. Login and sign-up use `access_page()` (the sitemark, one
+card, the footer). Each page's reading note is `howto(text)` — a
+`<details class='howto'>` folded by default; `stats_html([(value,
+label), …])` is the big-number row (a zero greyed) that replaced the old
+tiles on the overview, the landing page and the progress pages;
+`.card`/`.card.pad` and `.grid2` are the cards and the two-column grid.
+
+The progress strip (the "progress bar" of the request) is
+explore_pages.year_strip(layers): an SVG of 980 units wide, one row per
+layer (22 high, 6 apart, a 100-unit label column), one cell per year
+1896–1959 (`YEAR_LO`, `YEAR_HI` — the era the sitemark names), the
+cell's opacity 0.3 + 0.7 × its share (the archive row relative to its
+fullest year; the other rows relative to that year's archive items, a
+full year opaque), a `<title>` tooltip on every cell, a tick every
+decade. `year_progress_layers(con)` gives the four layers from the
+explorer's database — "In the archive" (#1baf7a; the survey's
+working_corpus.fiction_by_year, so `python3 pipeline/s00_survey.py
+--summary` must have run once on a summary that has it, else the
+archive row is empty and the caption says so), "Downloaded" (#2a78d6),
+"Assembled" (#eb6834; complete = 1) and "Verified" (the accent; every
+story verified). Downloaded is `is_downloaded(row)`: the archive record
+or any product of it on this machine — the ia title, page images,
+layout records, or a complete assembly — because the page images stay on
+the server while the records travel with the repository; the same
+definition feeds `n_downloaded(con)`, the collection bar and the process
+board. `year_strip_html(con)` adds the caption with the era totals (and
+how many items are dated outside the era or undated: 8,940 + 4,902 +
+582 = the survey's 14,424 fiction items). It stands on the landing page,
+/collection and /reuse/progress; the single collection bar
+(`collection_bar`) stays under it on the last two as the whole-collection
+view. `year_grid_html(con)` is the card per year on /collection (items in
+the archive, issues read or downloaded; a year links to /issues?year=YYYY,
+which lists every selected issue of that year, complete or not). The
+landing page reads the explorer's database directly for its counters.
+Checked on the sandbox in headless Chromium, light and dark: every route
+(34 paths, no traceback), the workbench script (lists, role, body text,
+move to, verify) and the review script (judge by key and by button, my
+judgments, calibration, revisit, a case from a pair page, a note); a wide
+table under `reuse_pages._chart_row` (more than seven columns) now goes
+under its chart instead of beside it.
+
 Routes since v0.12.0: /issues is the explorer's paged issue list (built
 for the whole corpus, filters by magazine, decade, genre, completeness);
 the workroom's old table of the ten pilot issues with their processing

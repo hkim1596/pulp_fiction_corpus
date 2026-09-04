@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.14.0"
+APP_VERSION = "0.15.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -1150,119 +1150,168 @@ def issue_frag_map(iid, doc):
 # ---------------- html helpers ----------------
 
 CSS = """
-body{font-family:Georgia,'Times New Roman',serif;margin:0;color:#1c1a17;background:#faf7f2}
-a{color:#7a3020}
-.wrap{max-width:1200px;margin:0 auto;padding:16px 20px 60px}
-.top{border-bottom:2px solid #1c1a17;padding:14px 0;margin-bottom:18px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
-.brand{font-size:22px;letter-spacing:.4px}
-.brand a{text-decoration:none;color:#1c1a17}
-.nav a{margin-left:12px;font-size:14px}
-.nav .navgrp{margin-left:18px;font-size:11px;letter-spacing:.6px;color:#75695a}
-.nav .navgrp:first-child{margin-left:0}
-h1{font-size:26px;font-weight:normal;margin:8px 0 14px}
-h2{font-size:19px;font-weight:normal;margin:20px 0 8px;border-bottom:1px solid #d8cfc0;padding-bottom:3px}
-.howto{background:#f3ead9;border:1px solid #d8cfc0;padding:10px 14px;font-size:14px;margin:0 0 18px}
-.howto .t{letter-spacing:1.2px;font-size:12px;color:#7a3020;margin-bottom:4px}
-table{border-collapse:collapse;font-size:14px;width:100%}
-td,th{border:1px solid #d8cfc0;padding:6px 9px;text-align:left;font-weight:normal;vertical-align:top}
-th{background:#f3ead9}
+:root{color-scheme:light;
+  --page:#f7f7f4;--surface:#fdfdfc;--surface2:#f1f1ec;--ink:#101010;--ink2:#4e4d49;--muted:#8a8880;
+  --grid:#e2e1da;--grid2:#cfcec6;--accent:#4a3aa7;--accent2:#2a78d6;--warn:#eb6834;--green:#1baf7a;--green2:#178f64;
+  --purple2:#8a5cc7;--border:rgba(16,16,16,.10);--okbg:rgba(27,175,122,.14);--warnbg:rgba(235,104,52,.14);--accbg:rgba(74,58,167,.10);
+  --shadow:0 4px 18px rgba(0,0,0,.18)}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;
+  --page:#0d0d0e;--surface:#19191b;--surface2:#202023;--ink:#f5f5f2;--ink2:#c3c2ba;--muted:#8a8880;
+  --grid:#2b2b2e;--grid2:#3a3a3e;--accent:#9085e9;--accent2:#3987e5;--warn:#d95926;--green:#1baf7a;--green2:#2fc98f;
+  --purple2:#a98be0;--border:rgba(245,245,242,.12);--okbg:rgba(27,175,122,.18);--warnbg:rgba(235,104,52,.18);--accbg:rgba(144,133,233,.16);
+  --shadow:0 4px 18px rgba(0,0,0,.5)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:var(--accent2)}
+.wrap{max-width:1200px;margin:0 auto;padding:22px 20px 60px}
+.sitemark{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.sitemark .tag{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--accent);border:1.5px solid var(--accent);border-radius:99px;padding:2px 10px;text-decoration:none;white-space:nowrap}
+.sitemark .sub{color:var(--ink2);font-size:13.5px}
+.sitemark .sub a{color:var(--ink);text-decoration:none;font-weight:600}
+.sitemark .home{margin-left:auto;color:var(--ink2);text-decoration:none;font-size:12.5px;font-weight:600;border:1px solid var(--border);border-radius:99px;padding:3px 11px;white-space:nowrap}
+.sitemark .home:hover{background:var(--surface);color:var(--ink);border-color:var(--accent)}
+nav.top{display:flex;gap:2px;flex-wrap:wrap;align-items:center;margin:14px 0 0;padding:4px 0 6px}
+nav.top+nav.top{margin-top:0;border-bottom:1px solid var(--grid);padding-bottom:10px;margin-bottom:8px}
+nav.top .navgrp{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin-right:6px;min-width:64px}
+nav.top a{color:var(--ink2);text-decoration:none;font-size:13.5px;font-weight:600;padding:4px 9px;border-radius:8px}
+nav.top a:hover{background:var(--surface);color:var(--ink)}
+nav.top a.on{color:var(--accent);background:var(--accbg)}
+h1{font-size:25px;line-height:1.25;margin:10px 0 6px}
+h2{font-size:19px;margin:26px 0 8px}
+h3{font-size:15.5px;margin:14px 0 6px}
+p{margin:8px 0}
+.lede{font-size:15.5px}
+.muted{color:var(--ink2)}
+.fine{font-size:12.5px;color:var(--muted)}
+details.howto{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:0 10px 10px 0;padding:8px 14px;margin:10px 0 14px;font-size:13.5px;color:var(--ink2)}
+details.howto summary{cursor:pointer;font-weight:700;font-size:12px;letter-spacing:.05em;color:var(--accent2)}
+details.howto[open] summary{margin-bottom:6px}
+.howto{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:0 10px 10px 0;padding:8px 14px;margin:10px 0 14px;font-size:13.5px;color:var(--ink2)}
+.howto .t{font-weight:700;font-size:12px;letter-spacing:.05em;color:var(--accent2);margin-bottom:4px}
+.doctrine{border-left:3px solid var(--accent);padding:8px 14px;margin:16px 0;color:var(--ink);font-size:15px;background:var(--surface);border-radius:0 10px 10px 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0;margin:0 0 10px}
+.card.pad{padding:14px 18px;margin:12px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:680px){.grid2{grid-template-columns:1fr}}
+.stats{display:flex;gap:22px;flex-wrap:wrap;margin:12px 0 4px}
+.stat{font-size:24px;font-variant-numeric:tabular-nums;font-weight:400;color:var(--ink)}
+.stat span{font-size:12px;color:var(--ink2);display:block;font-variant-numeric:normal}
+.stat.zero{color:var(--muted)}
+.stagestrip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}
+@media (max-width:680px){.stagestrip{grid-template-columns:1fr 1fr}}
+.stage{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--ink2)}
+.stage span.t{display:block;color:var(--ink);font-size:13px;margin-bottom:3px}
+.empty{border:1.5px dashed var(--grid2);border-radius:12px;padding:16px 18px;color:var(--ink2);margin:14px 0;font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:10px 0}
+th{text-align:left;color:var(--ink2);font-size:12px;letter-spacing:.04em;font-weight:400;border-bottom:1px solid var(--grid);padding:6px 10px 6px 0;vertical-align:bottom}
+td{border-bottom:1px solid var(--grid);padding:7px 10px 7px 0;vertical-align:top}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
 .num{text-align:right;font-variant-numeric:tabular-nums}
-.muted{color:#75695a}
-.empty{background:#fff;border:1px dashed #b8a88e;padding:14px;font-size:14px;color:#5a4f40}
+tr:hover td{background:var(--surface)}
+.tick{font:11px system-ui;fill:var(--muted)}
+.dlabel{font:12px system-ui;fill:var(--ink2)}
+.yeargrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:14px 0}
+.yeargrid a{display:block;text-align:center;padding:9px 4px;background:var(--surface);border:1px solid var(--grid);border-radius:8px;text-decoration:none;color:var(--ink)}
+.yeargrid a span{display:block;font-size:11px;color:var(--muted)}
+.yeargrid a:hover{border-color:var(--accent)}
+.yeargrid a.done{border-color:var(--green)}
+.phase{display:flex;gap:12px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--grid);font-size:14px}
+.st,.chip{font-size:10.5px;font-weight:800;letter-spacing:.06em;border-radius:99px;padding:2px 9px;border:1.5px solid;white-space:nowrap;display:inline-block}
+.st.done,.stV{color:var(--green2);border-color:var(--green2);background:var(--okbg)}
+.st.now,.stM{color:var(--warn);border-color:var(--warn);background:var(--warnbg)}
+.st.next,.stA{color:var(--muted);border-color:var(--muted)}
+.btn,button.go,.selbar .go,.inclpanel .go{display:inline-block;background:var(--accent);color:var(--surface);text-decoration:none;font-weight:700;font-size:13.5px;padding:8px 16px;border-radius:9px;border:0;cursor:pointer;font-family:inherit}
+.btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+input[type=text],input[type=password],input[type=number],select,textarea{font-family:inherit;font-size:14px;padding:6px 9px;border-radius:8px;border:1px solid var(--grid2);background:var(--page);color:var(--ink)}
+button{font-family:inherit;font-size:13px;padding:5px 11px;border-radius:8px;border:1px solid var(--grid2);background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--accent)}
+input.pw{font-size:15px;padding:8px 10px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:var(--surface2);padding:0 4px;border-radius:4px}
+pre{white-space:pre-wrap;font-family:Georgia,'Times New Roman',serif;font-size:14.5px;line-height:1.5;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:0;max-height:640px;overflow-y:auto}
+blockquote.proto{border-left:3px solid var(--accent);background:var(--surface);border-radius:0 10px 10px 0;margin:10px 0;padding:8px 14px;font-size:14.5px;line-height:1.55}
+.method-toc a{margin-right:14px}
+.footer{margin-top:44px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--grid);padding-top:12px}
+.fb{margin-top:34px;border-top:1px solid var(--grid);padding-top:12px;font-size:13.5px;color:var(--ink2)}
+.fb input[type=text]{width:200px}.fb textarea{width:100%;height:60px}
+.flash{background:var(--okbg);border:1px solid var(--green);border-radius:8px;padding:6px 10px;margin:0 0 8px;font-size:14px}
+.land{max-width:640px;margin:7vh auto 0;padding:0}
+.land h1{font-size:26px}
+.land p{font-size:15.5px;line-height:1.6}
+.land .card{padding:22px 26px}
+.d_ins{background:var(--okbg)}
+.d_del{background:var(--warnbg);text-decoration:line-through}
+.pgnav a{margin-right:10px}
+.stages a{display:inline-block;margin:0 6px 6px 0;font-size:13px;padding:3px 9px;border:1px solid var(--grid2);border-radius:8px;text-decoration:none;color:var(--ink2)}
+.stages a.on{background:var(--ink);color:var(--page);border-color:var(--ink)}
 .viewer{display:flex;gap:18px;align-items:flex-start}
 .scan{position:relative;flex:0 0 36%}
-.scan img{width:100%;display:block;border:1px solid #b8a88e}
+.scan img{width:100%;display:block;border:1px solid var(--grid2);border-radius:6px}
 .scan svg{position:absolute;left:0;top:0;width:100%;height:100%}
 .textpane{flex:1;min-width:0}
 .panelgrid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px;align-items:start}
-.panel{border:1px solid #b8a88e;background:#fff}
-.panel .ph{background:#f3ead9;border-bottom:1px solid #d8cfc0;padding:6px 10px;font-size:12.5px;line-height:1.5}
-.panel .ph .nm{color:#7a3020;letter-spacing:.4px}
-.panel .ph .facts{color:#5a4f40}
-.panel pre{border:0}
-pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:14.5px;line-height:1.5;background:#fff;border:1px solid #d8cfc0;padding:12px;margin:0;max-height:640px;overflow-y:auto}
-.stages a{display:inline-block;margin:0 8px 6px 0;font-size:13px;padding:2px 7px;border:1px solid #b8a88e;text-decoration:none}
-.stages a.on{background:#1c1a17;color:#faf7f2;border-color:#1c1a17}
-.d_ins{background:#dcefdc}
-.d_del{background:#f6d7d3;text-decoration:line-through}
-.pgnav a{margin-right:10px}
-.fb{margin-top:34px;border-top:1px solid #d8cfc0;padding-top:12px;font-size:14px}
-.flash{background:#e3efe3;border:1px solid #7fae81;padding:6px 10px;margin:0 0 8px;font-size:14px}
-.fb input[type=text]{width:180px} .fb textarea{width:100%;height:60px}
-.fb input,.fb textarea,.fb button{font-family:inherit;font-size:14px;border:1px solid #b8a88e;background:#fff;padding:5px}
-.chip{font-size:11.5px;padding:1px 8px;border:1px solid;border-radius:9px;letter-spacing:.4px}
-.stA{color:#75695a;border-color:#b8a88e;background:#f3ead9}
-.stM{color:#faf7f2;border-color:#8a6d1f;background:#b8860b}
-.stV{color:#2c5e2e;border-color:#7fae81;background:#e3efe3}
+.panel{border:1px solid var(--border);background:var(--surface);border-radius:10px;overflow:hidden}
+.panel .ph{background:var(--surface2);border-bottom:1px solid var(--grid);padding:6px 10px;font-size:12.5px;line-height:1.5}
+.panel .ph .nm{color:var(--accent);letter-spacing:.4px;font-weight:600}
+.panel .ph .facts{color:var(--ink2)}
+.panel pre{border:0;border-radius:0}
 .mini{display:inline}
-.mini button,.mb{font-size:11.5px;padding:1px 6px;border:1px solid #b8a88e;background:#fff;cursor:pointer;font-family:inherit}
-.mini select{font-size:11.5px;padding:1px;border:1px solid #b8a88e;font-family:inherit}
-.annform input[type=text]{font-size:14px;padding:3px;border:1px solid #b8a88e;font-family:inherit}
-.annform select,.annform button{font-size:13px;padding:3px 8px;border:1px solid #b8a88e;background:#fff;font-family:inherit}
-.annform textarea{width:100%;height:280px;font-size:13.5px;font-family:inherit;border:1px solid #b8a88e;padding:8px}
-.fragsnip{color:#5a4f40;font-size:12.5px}
+.mini button,.mb{font-size:11.5px;padding:1px 7px;border:1px solid var(--grid2);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer;font-family:inherit}
+.mini button:hover,.mb:hover{border-color:var(--accent);color:var(--accent)}
+.mini select{font-size:11.5px;padding:1px 4px;border:1px solid var(--grid2);border-radius:6px;font-family:inherit;background:var(--surface);color:var(--ink)}
+.annform input[type=text]{font-size:14px;padding:3px 6px}
+.annform select,.annform button{font-size:13px;padding:3px 8px}
+.annform textarea{width:100%;height:280px;font-size:13.5px}
+.fragsnip{color:var(--ink2);font-size:12.5px}
 .wb{display:flex;gap:16px;align-items:flex-start}
 .wbleft{flex:0 0 42%;max-height:88vh;overflow-y:auto;padding-right:4px}
 .wbright{flex:1;min-width:0;max-height:88vh;overflow-y:auto;padding-right:4px}
 .scanwrap{position:relative;margin:0 0 14px}
-.scanwrap img{width:100%;display:block;border:1px solid #b8a88e}
+.scanwrap img{width:100%;display:block;border:1px solid var(--grid2);border-radius:6px}
 .scanwrap svg{position:absolute;left:0;top:0;width:100%;height:100%}
-.scanwrap .pgcap{font-size:12px;color:#75695a;margin:2px 0 0}
-.card{border:1px solid #b8a88e;background:#fff;margin:0 0 10px}
+.scanwrap .pgcap{font-size:12px;color:var(--muted);margin:2px 0 0}
 .card[draggable=true]{cursor:grab}
 .card.dragging{opacity:.45}
-.card.hl,.othercard.hl{outline:3px solid #7a3020}
-.card .ch{background:#f3ead9;border-bottom:1px solid #d8cfc0;padding:4px 8px;font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.idchip{display:inline-block;background:#1c1a17;color:#faf7f2;font-size:11.5px;padding:0 7px;letter-spacing:.6px;cursor:pointer}
-.idchip.other{background:#75695a}
-.cardtext{padding:8px 10px;font-size:13.5px;line-height:1.5;white-space:pre-wrap;max-height:170px;overflow-y:auto}
-.cardtext.edited{background:#f7f3e8}
+.card.hl,.othercard.hl{outline:3px solid var(--accent)}
+.card .ch{background:var(--surface2);border-bottom:1px solid var(--grid);border-radius:12px 12px 0 0;padding:4px 8px;font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.idchip{display:inline-block;background:var(--ink);color:var(--page);font-size:11.5px;padding:0 7px;letter-spacing:.6px;cursor:pointer;border-radius:5px}
+.idchip.other{background:var(--muted)}
+.cardtext{padding:8px 10px;font-size:13.5px;line-height:1.5;white-space:pre-wrap;max-height:170px;overflow-y:auto;font-family:Georgia,'Times New Roman',serif}
+.cardtext.edited{background:var(--surface2)}
 .othercard{opacity:.8;border-style:dashed;margin:0 0 10px}
 .fbox rect{cursor:pointer}
-.editbox{width:100%;height:150px;font-size:13px;font-family:inherit;border:1px solid #7a3020;padding:6px}
-.posdd{font-size:11.5px;border:1px solid #b8a88e;font-family:inherit;padding:0 2px}
-.rolechip{display:inline-block;background:#2c5e2e;color:#faf7f2;font-size:10.5px;padding:0 6px;letter-spacing:.4px}
-.rolechip.t{background:#7a3020}
-.subtitleline{font-size:16px;color:#5a4f40;margin:-8px 0 10px}
-.secbar{font-size:12px;letter-spacing:1.4px;color:#faf7f2;padding:5px 12px;margin:16px 0 10px}
+.editbox{width:100%;height:150px;font-size:13px;border:1px solid var(--accent);padding:6px}
+.posdd{font-size:11.5px;border:1px solid var(--grid2);border-radius:6px;font-family:inherit;padding:0 2px;background:var(--surface);color:var(--ink)}
+.todd{font-size:11.5px;padding:1px 4px}
+.rolechip{display:inline-block;background:var(--green2);color:var(--surface);font-size:10.5px;padding:0 7px;letter-spacing:.4px;border-radius:99px}
+.rolechip.t{background:var(--accent)}
+.rolechip.z{background:var(--warn)}
+.rolechip.c{background:var(--purple2)}
+.subtitleline{font-size:16px;color:var(--ink2);margin:-6px 0 10px}
+.secbar{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--surface);padding:5px 12px;margin:16px 0 10px;border-radius:8px}
 .secbar:first-child{margin-top:0}
-.secbar.secT{background:#7a3020}
-.secbar.secA{background:#2c5e2e}
-.secbar.secB{background:#1c1a17}
-.secbar.secZ{background:#8a6d1f}
-.card.rZ{border-left:6px solid #8a6d1f}
-.rolechip.z{background:#8a6d1f}
-.card.rT{border-left:6px solid #7a3020}
-.card.rA{border-left:6px solid #2c5e2e}
-.card.rB{border-left:6px solid #b8a88e}
-.card.rC{border-left:6px solid #5b3b8a}
-.rgrp{display:inline-block;margin-left:8px;padding-left:6px;border-left:1px solid #d8cfc0}
-.mini.cur{display:inline-block;font-size:11px;padding:1px 6px;background:#1c1a17;color:#faf7f2;margin-right:3px}
-.card.rB{border-left:6px solid #1c1a17}
-.sechint{font-size:12.5px;color:#75695a;border:1px dashed #b8a88e;background:#fff;padding:8px 10px;margin:0 0 10px}
-.pgjump{font-size:13px;margin:0 0 10px;background:#f3ead9;border:1px solid #d8cfc0;padding:6px 10px}
-.pgjump input{width:64px;font-size:13px;border:1px solid #b8a88e;font-family:inherit;padding:1px 4px}
-.pgjump button{font-size:12.5px;border:1px solid #b8a88e;background:#fff;font-family:inherit;cursor:pointer}
+.secbar.secT{background:var(--accent)}
+.secbar.secA{background:var(--green2)}
+.secbar.secB{background:var(--ink);color:var(--page)}
+.secbar.secZ{background:var(--warn)}
+.card.rT{border-left:5px solid var(--accent)}
+.card.rA{border-left:5px solid var(--green2)}
+.card.rZ{border-left:5px solid var(--warn)}
+.card.rC{border-left:5px solid var(--purple2)}
+.card.rB{border-left:5px solid var(--grid2)}
+.rgrp{display:inline-block;margin-left:8px;padding-left:6px;border-left:1px solid var(--grid)}
+.mini.cur{display:inline-block;font-size:11px;padding:1px 7px;background:var(--ink);color:var(--page);margin-right:3px;border-radius:6px}
+.sechint{font-size:12.5px;color:var(--ink2);border:1px dashed var(--grid2);border-radius:10px;background:var(--surface);padding:8px 10px;margin:0 0 10px}
+.pgjump{font-size:13px;margin:0 0 10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px 10px}
+.pgjump input{width:64px;font-size:13px;padding:1px 4px}
+.pgjump button{font-size:12.5px}
 .pgjump a{margin-right:7px}
-.inclpanel{position:fixed;bottom:18px;right:22px;width:380px;background:#fff;border:2px solid #7a3020;box-shadow:0 4px 18px rgba(0,0,0,.28);z-index:50}
+.inclpanel{position:fixed;bottom:18px;right:22px;width:380px;background:var(--surface);border:2px solid var(--accent);border-radius:12px;box-shadow:var(--shadow);z-index:50}
 .inclpanel .cardtext{max-height:130px}
-.inclpanel .go{font-size:13px;padding:3px 12px;border:1px solid #1c1a17;background:#1c1a17;color:#faf7f2;cursor:pointer}
-.selbar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1c1a17;color:#faf7f2;padding:9px 16px;box-shadow:0 4px 18px rgba(0,0,0,.35);z-index:60;font-size:14px}
-.selbar .go{font-size:13px;padding:3px 12px;border:1px solid #faf7f2;background:#7a3020;color:#faf7f2;cursor:pointer}
+.selbar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--page);padding:9px 16px;border-radius:12px;box-shadow:var(--shadow);z-index:60;font-size:14px}
 .selbar button{cursor:pointer}
-g.selbox rect{stroke:#b8860b !important;stroke-width:9 !important;fill:rgba(201,155,78,.28) !important}
-g.flash rect{stroke:#b8860b !important;stroke-width:10 !important}
-.rolechip.c{background:#5b3b8a}
-blockquote.proto{border-left:4px solid #7a3020;background:#fff;margin:10px 0;padding:8px 14px;font-size:14.5px;line-height:1.55}
-code{font-family:Menlo,Consolas,monospace;font-size:12.5px;background:#f3ead9;padding:0 3px}
-.method-toc a{margin-right:14px}
-.footer{margin-top:44px;font-size:12px;color:#75695a;border-top:2px solid #1c1a17;padding-top:8px}
-.land{max-width:640px;margin:8vh auto 0;padding:0 20px}
-.land h1{font-size:34px}
-.land p{font-size:17px;line-height:1.65}
-input.pw{font-size:16px;padding:6px;border:1px solid #b8a88e}
-button.go{font-size:15px;padding:6px 16px;border:1px solid #1c1a17;background:#1c1a17;color:#faf7f2}
-.boxlabel{font-size:11px;fill:#7a3020}
+g.selbox rect{stroke:var(--warn) !important;stroke-width:9 !important;fill:rgba(235,104,52,.28) !important}
+g.flash rect{stroke:var(--warn) !important;stroke-width:10 !important}
+.boxlabel{font-size:11px;fill:var(--accent)}
 """
 
 
@@ -1283,22 +1332,42 @@ def esc(s):
     return html.escape(str(s), quote=True)
 
 
+NAV_EXPLORE = [("/overview", "Overview"), ("/authors", "Authors"), ("/magazines", "Magazines"), ("/issues", "Issues"),
+               ("/stories", "Records"), ("/pairs", "Pairs"), ("/reuse", "Reuse"), ("/collection", "Collection"),
+               ("/corpus", "Corpus"), ("/datasheet", "Datasheet"), ("/method", "Method")]
+NAV_WORKROOM = [("/guide", "Guide"), ("/articles", "Workbench"), ("/reuse/validate", "Paraphrase review"),
+                ("/reuse/cases", "Cases"), ("/reuse/progress", "Progress"), ("/assembly", "Assembly"),
+                ("/timing", "Timing"), ("/activity", "Activity"), ("/feedback", "Feedback")]
+
+
+def nav_on(path, href):
+    """The link that is 'on' for a path: the longest href the path begins with."""
+    if href == "/reuse":
+        return path == "/reuse" or path.startswith("/reuse/cluster")
+    if href == "/articles":
+        return path.startswith("/articles") or path.startswith("/article/") or path.startswith("/issue/")
+    if href == "/stories":
+        return path.startswith("/stories") or path.startswith("/story/") or path.startswith("/record")
+    if href == "/authors":
+        return path.startswith("/author")
+    if href == "/magazines":
+        return path.startswith("/magazine")
+    if href == "/pairs":
+        return path.startswith("/pair")
+    return path == href or path.startswith(href + "/") or path.startswith(href + "?")
+
+
 def page(title, body, member=True, path="/", admin=False, user_name="", flash=""):
-    userslink = "<a href='/users'>Users</a>" if admin else ""
-    nav = ("<span class='nav'>"
-           "<span class='navgrp'>Explore</span>"
-           "<a href='/overview'>Overview</a><a href='/authors'>Authors</a>"
-           "<a href='/magazines'>Magazines</a><a href='/issues'>Issues</a>"
-           "<a href='/stories'>Records</a><a href='/pairs'>Pairs</a>"
-           "<a href='/reuse'>Reuse</a><a href='/collection'>Collection</a><a href='/corpus'>Corpus</a>"
-           "<a href='/datasheet'>Datasheet</a><a href='/method'>Method</a>"
-           "<span class='navgrp'>Workroom</span>"
-           "<a href='/guide'>Guide</a><a href='/articles'>Workbench</a>"
-           "<a href='/reuse/validate'>Paraphrase review</a><a href='/reuse/cases'>Cases</a>"
-           "<a href='/reuse/progress'>Progress</a><a href='/assembly'>Assembly</a>"
-           "<a href='/timing'>Timing</a><a href='/activity'>Activity</a>"
-           f"<a href='/feedback'>Feedback</a>{userslink}"
-           "<a href='/logout'>Log out</a></span>") if member else ""
+    """The page frame: the sitemark (a tag pill, the site's name, the centre's
+    link), two nav rows (Explore, Workroom) with the current page marked, the
+    body, the feedback box, the footer. Design of 2026-09-05, after the
+    centre's causal-inference site."""
+    def row(label, links):
+        return ("<nav class='top'><span class='navgrp'>" + label + "</span>"
+                + "".join(f"<a href='{h}'{' class=on' if nav_on(path, h) else ''}>{esc(t)}</a>" for h, t in links)
+                + "</nav>")
+    work = list(NAV_WORKROOM) + ([("/users", "Users")] if admin else []) + [("/logout", "Log out")]
+    nav = (row("EXPLORE", NAV_EXPLORE) + row("WORKROOM", work)) if member else ""
     fb = ("<div class='fb'><form method='POST' action='/feedback'>"
           f"<input type='hidden' name='path' value='{esc(path)}'>"
           + (f"<div class='flash'>{esc(flash)}</div>" if flash else "")
@@ -1311,19 +1380,47 @@ def page(title, body, member=True, path="/", admin=False, user_name="", flash=""
 <meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>{esc(title)} · Pulp Fiction Corpus</title><style>{CSS}</style></head>
 <body><div class='wrap'>
-<div class='top'><span class='brand'><a href='/'>PULP FICTION CORPUS</a>
-<span class='muted' style='font-size:13px'> · pilot</span></span>{nav}</div>
+<div class='sitemark'><a class='tag' href='/'>PULP MAGAZINES · 1896–1959</a>
+<span class='sub'><a href='/overview'>Pulp Fiction Corpus</a> · a text-reuse study on the Internet Archive's pulp collection</span>
+<a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
+{nav}
 {body}{fb}
-<div class='footer'>Pulp Fiction Corpus pilot · Digital Humanities Engineering
+<div class='footer'>Pulp Fiction Corpus · Digital Humanities Engineering
 Center, Kyungpook National University, with Columbia University ·
 v{APP_VERSION} · texts shown verbatim with their OCR errors, anchored to the
 scans · contact {CONTACT}</div>
 </div></body></html>"""
 
 
+def access_page(title, inner):
+    """The frame of the pages outside the member area (login, sign-up): the
+    sitemark, one card, the footer."""
+    return f"""<!doctype html><html><head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>{esc(title)} · Pulp Fiction Corpus</title><style>{CSS}</style></head>
+<body><div class='wrap'>
+<div class='sitemark'><a class='tag' href='/'>PULP MAGAZINES · 1896–1959</a>
+<span class='sub'><a href='/'>Pulp Fiction Corpus</a> · a text-reuse study on the Internet Archive's pulp collection</span>
+<a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
+<div class='land'><div class='card pad'>{inner}</div></div>
+<div class='footer'>Pulp Fiction Corpus · Digital Humanities Engineering Center, Kyungpook National University,
+with Columbia University · v{APP_VERSION} · contact {CONTACT}</div>
+</div></body></html>"""
+
+
+def stats_html(items):
+    """The big-number row: items = [(value, label), ...]; a zero value is greyed."""
+    out = []
+    for v, label in items:
+        txt = f"{v:,}" if isinstance(v, int) else str(v)
+        zero = " zero" if (isinstance(v, (int, float)) and not v) else ""
+        out.append(f"<div class='stat{zero}'>{esc(txt)}<span>{esc(label)}</span></div>")
+    return "<div class='stats'>" + "".join(out) + "</div>"
+
+
 def howto(text):
-    return (f"<div class='howto'><div class='t'>HOW TO READ THIS PAGE</div>"
-            f"{text}</div>")
+    """The reading note of a page, folded by default (design of 2026-09-05)."""
+    return f"<details class='howto'><summary>HOW TO READ THIS PAGE</summary><div>{text}</div></details>"
 
 
 def diff_html(old, new):
@@ -1885,7 +1982,7 @@ class H(BaseHTTPRequestHandler):
 
     def signup_page(self, msg, vals, ok=False):
         m = (f"<p class='{'muted' if ok else ''}' "
-             f"style='{'color:#2c5e2e' if ok else 'color:#7a3020'}'>"
+             f"style='{'color:var(--green2)' if ok else 'color:var(--accent)'}'>"
              f"{esc(msg)}</p>" if msg else "")
         form = "" if ok else f"""
 <form method='POST' action='/signup'>
@@ -1901,16 +1998,14 @@ placeholder='password (min 6)'>
 <input class='pw' type='password' name='password2'
 placeholder='password again'></p>
 <p><button class='go'>Request account</button></p></form>"""
-        body = f"""<div class='land'><h1>Request an annotator account</h1>
+        inner = f"""<h1 style='margin-top:0'>Request an annotator account</h1>
 <p>Accounts let you correct and verify articles; every action is recorded
 under your name. New accounts start as requests and work after the
 administrator approves them.</p>
 {m}{form}
 <p class='muted'><a href='/login'>back to login</a> · questions:
-{CONTACT}</p></div>"""
-        return f"""<!doctype html><html><head><meta charset='utf-8'>
-<title>Sign up · Pulp Fiction Corpus</title><style>{CSS}</style></head>
-<body>{body}</body></html>"""
+{CONTACT}</p>"""
+        return access_page("Sign up", inner)
 
     def users_page(self, msg):
         u = users() or {}
@@ -2126,31 +2221,58 @@ administrator approves them.</p>
         gated = site_password() is not None
         note = "" if gated else ("<p class='muted'>(No passcode is set right now, "
                                  "so member pages are open.)</p>")
-        body = f"""
-<div class='land'>
-<h1>PULP FICTION CORPUS</h1>
-<p>A research archive in preparation: American pulp fiction magazines
+        # the public counters read the explorer's database and the survey directly
+        try:
+            con = EX.db()
+            n_issues = EX._val(con, "SELECT COUNT(*) FROM issues WHERE complete=1") or 0
+            n_rec = EX._val(con, "SELECT COUNT(*) FROM records") or 0
+            n_story = EX._val(con, "SELECT COUNT(*) FROM records WHERE type='story'") or 0
+            n_words = EX._val(con, "SELECT COALESCE(SUM(n_words),0) FROM records WHERE type='story'") or 0
+            n_ver = EX._val(con, "SELECT COUNT(*) FROM records WHERE status='verified'") or 0
+            fr = EX.survey_frame(con)
+            n_frame = fr.get("fiction") or 0
+            strip = EX.year_strip_html(con)
+        except Exception:
+            n_issues = n_rec = n_story = n_words = n_ver = n_frame = 0
+            strip = ""
+        stats = stats_html([(n_frame, "fiction-magazine items in the archive"), (n_issues, "issues read"),
+                            (n_rec, "records"), (n_story, "stories"), (n_words, "words of story text"), (n_ver, "records verified")])
+        body = f"""<div class='wrap'>
+<div class='sitemark'><span class='tag'>PULP MAGAZINES · 1896–1959</span>
+<span class='sub'>Pulp Fiction Corpus</span>
+<a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
+<h1>Pulp Fiction Corpus</h1>
+<p class='lede'>A research archive in preparation: American pulp fiction magazines
 (1896–1959), rebuilt from library scans into clean, page-anchored text for
-computational study. A pilot of {n} issue{'s' if n != 1 else ''} is being
-processed end to end: a computer pipeline reads the scanned pages, and a
-small team checks and repairs the result — every story, poem, feature,
-and advertisement becomes its own verified record, traceable to the
-exact spot on the scan it was printed.</p>
-<p>Digital Humanities Engineering Center, Kyungpook National University,
-with the Department of English and Comparative Literature, Columbia University.</p>
-<p>WHAT YOU CAN DO HERE. With the shared passcode you can read
-everything, in layers: an overview of charts, then lists of authors,
-magazines, issues, records and story pairs, then one page per entity,
-then the printed page on the scan and the raw record behind it — every
-number on the site can be followed down to the data it came from. The
-full method is on one page, with the protocol quoted step by step. With
-an annotator account you can also repair and verify articles on the
-workbench — the site explains each step as you go, and a guide page
-walks you through your first repair.</p>
-<p>Ready? <a href='/login'>Enter with the passcode, or log in / sign
-up</a>. New annotator accounts are approved by the project lead. To
-request the passcode, write to {CONTACT}.</p>{note}
-<div class='footer'>v{APP_VERSION}</div>
+a study of how often stories repeat one another. A development set of {n}
+issue{'s' if n != 1 else ''} is processed end to end: a computer pipeline reads the
+scanned pages and cuts each issue into its printed pieces, and a small team
+checks and repairs the result — every story, poem, feature and advertisement
+becomes its own verified record, traceable to the exact spot on the scan
+where it was printed.</p>
+<div class='grid2'>
+<div class='card pad'><h3>What the site can do</h3><p>Read everything in layers: an overview of charts,
+then lists of authors, magazines, issues, records and story pairs, then one page per entity, then the
+printed page on the scan and the raw record behind it — every number on the site can be followed down to
+the data it came from. The full method is on one page, with the Registered Report protocol quoted step by
+step and what the pipeline does for each step.</p></div>
+<div class='card pad'><h3>What the team does here</h3><p>With an annotator account you repair and verify
+articles on the workbench, judge the pairs the paraphrase detector proposes, and mark the cases worth
+reading in full — every action recorded under your name in an append-only log, the machine's draft never
+edited in place.</p></div>
+</div>
+<h2>The record so far</h2>
+{stats}
+{strip}
+<p class='fine'>These counters read the working record directly and grow as issues are processed; the strip shows the era year by year.</p>
+<div class='grid2'>
+<div class='card pad'><h3>Enter</h3><p><a class='btn' href='/login'>Enter the site</a></p>
+<p class='fine'>With the shared passcode, or a named account (new accounts are approved by the project lead). To request access, write to {CONTACT}.</p>{note}</div>
+<div class='card pad'><h3>Contact</h3><p>Digital Humanities Engineering Center<br>Kyungpook National University<br>
+Director: Prof. Heejin Kim · {CONTACT}<br><a href='https://www.digihumeng.org'>www.digihumeng.org</a></p>
+<p class='fine'>With the Department of English and Comparative Literature, Columbia University.</p></div>
+</div>
+<div class='footer'>Pulp Fiction Corpus · Digital Humanities Engineering Center, Kyungpook National University, with Columbia University · v{APP_VERSION}</div>
 </div>"""
         return f"""<!doctype html><html><head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
@@ -2169,7 +2291,7 @@ placeholder='password'> <button class='go'>Log in</button></p></form>
 <p class='muted'>Named accounts can verify and correct articles; every
 action is recorded under your name. No account yet?
 <a href='/signup'>Request one</a>.</p>"""
-        body = f"""<div class='land'><h1>Collaborator access</h1>{m}
+        inner = f"""<h1 style='margin-top:0'>Collaborator access</h1>{m}
 {acct}
 <h2 style='border:0'>Guest (read only)</h2>
 <form method='POST' action='/login'>
@@ -2177,10 +2299,8 @@ action is recorded under your name. No account yet?
 placeholder='shared passcode'> <button class='go'>Enter</button></p></form>
 <p class='muted'>Accounts and the passcode: {CONTACT}. Once you are in,
 the guide page in the top menu explains what everything is and what to
-click first.</p></div>"""
-        return f"""<!doctype html><html><head><meta charset='utf-8'>
-<title>Access · Pulp Fiction Corpus</title><style>{CSS}</style></head>
-<body>{body}</body></html>"""
+click first.</p>"""
+        return access_page("Access", inner)
 
     def issues_page(self):
         c = cfg()
@@ -2375,7 +2495,7 @@ click first.</p></div>"""
                 x0, y0, x1, y1 = rg["bbox"]
                 boxes.append(
                     f"<rect x='{x0}' y='{y0}' width='{x1-x0}' height='{y1-y0}' "
-                    f"fill='none' stroke='#7a3020' stroke-opacity='0.55' "
+                    f"fill='none' stroke='var(--accent)' stroke-opacity='0.55' "
                     f"stroke-width='3'/>"
                     f"<text x='{x0+4}' y='{max(y0-6,12)}' class='boxlabel'>"
                     f"{esc(rg['label'])}</text>")
@@ -2452,7 +2572,7 @@ click first.</p></div>"""
                 f"style='margin:0 0 14px'>"
                 f"<input type='text' name='q' value='{esc(q)}' "
                 f"placeholder='title or author' "
-                f"style='font-size:14px;padding:4px;border:1px solid #b8a88e'> "
+                f"style='font-size:14px;padding:4px;border:1px solid var(--grid2)'> "
                 f"<select name='type' style='font-size:14px;padding:4px'>"
                 f"{topts}</select> "
                 f"<select name='status' style='font-size:14px;padding:4px'>"
@@ -2639,24 +2759,24 @@ click first.</p></div>"""
                 if mine:
                     role = roles.get(e["key"], "")
                     if role in ("title", "subtitle"):
-                        stroke, width, dash = "#7a3020", 5, ""
+                        stroke, width, dash = "var(--accent)", 5, ""
                         fill = "rgba(122,48,32,0.12)"
                     elif role == "author":
-                        stroke, width, dash = "#2c5e2e", 5, ""
+                        stroke, width, dash = "var(--green2)", 5, ""
                         fill = "rgba(44,94,46,0.12)"
                     elif role in CHAPTER_ROLES:
-                        stroke, width, dash = "#5b3b8a", 5, ""
+                        stroke, width, dash = "var(--purple2)", 5, ""
                         fill = "rgba(91,59,138,0.10)"
                     else:
-                        stroke, width, dash = "#7a3020", 4, ""
+                        stroke, width, dash = "var(--accent)", 4, ""
                 elif e["kind"] == "article":
-                    stroke, width, dash = ("#75695a", 3,
+                    stroke, width, dash = ("var(--muted)", 3,
                                            " stroke-dasharray='14,10'")
                 elif e["kind"] == "furniture":
-                    stroke, width, dash = ("#b8a88e", 2,
+                    stroke, width, dash = ("var(--grid2)", 2,
                                            " stroke-dasharray='4,7'")
                 else:
-                    stroke, width, dash = ("#c99b4e", 3,
+                    stroke, width, dash = ("var(--green)", 3,
                                            " stroke-dasharray='8,8'")
                 inner, lx, ly = "", None, None
                 for r in e["region_ids"]:
@@ -2674,7 +2794,7 @@ click first.</p></div>"""
                     ty = max(ly - 8, fs)
                     inner += (f"<rect x='{lx}' y='{max(ly-fs-10, 0)}' "
                               f"width='{w}' height='{fs+8}' fill='{stroke}'/>"
-                              f"<text x='{lx+6}' y='{ty}' fill='#faf7f2' "
+                              f"<text x='{lx+6}' y='{ty}' fill='var(--page)' "
                               f"font-size='{fs}'>{e['id']}</text>")
                 r0 = e["region_ids"][0] if e["region_ids"] else -1
                 snip = ((regs[r0].get("text") or "")[:110]
@@ -3068,7 +3188,7 @@ click first.</p></div>"""
                         f"({esc(e['_archive'])})</span>")
             return f"<a href='/article/{aid}'>{aid}</a>"
         rows = "".join(
-            f"<tr{' style=' + chr(39) + 'background:#f4efe6' + chr(39) if e.get('_archive') else (' style=' + chr(39) + 'background:#eef3ee' + chr(39) if e.get('action') == 'login' else '')}>"
+            f"<tr{' style=' + chr(39) + 'background:var(--surface2)' + chr(39) if e.get('_archive') else (' style=' + chr(39) + 'background:var(--okbg)' + chr(39) if e.get('action') == 'login' else '')}>"
             f"<td class='muted'>{esc(e.get('ts', ''))}</td>"
             f"<td>{esc(display_name(e.get('user', '?')))}</td>"
             f"<td>{esc(e.get('action', ''))}</td>"
@@ -3128,12 +3248,16 @@ us how to make the automatic step better.</p>
 <a href='/authors'>authors</a>, <a href='/magazines'>magazines</a>,
 <a href='/issues'>issues</a>, <a href='/stories'>records</a> and
 <a href='/pairs'>story pairs</a>, the <a href='/reuse'>text-reuse
-results</a>, and the <a href='/method'>method</a>; every page links one
+results</a>, the archive's <a href='/collection'>collection</a> and the
+<a href='/corpus'>corpus</a> with its <a href='/datasheet'>datasheet</a>,
+and the <a href='/method'>method</a>; every page links one
 layer down until you reach the scan and the raw record. The overview can
 be sliced by decade, genre or magazine, lists come a hundred rows a page,
 and only complete issues (assembled into records by the machine) appear
 on that side. WORKROOM is the working side: the
 <a href='/articles'>workbench</a> where articles are repaired, the
+<a href='/reuse/validate'>paraphrase review</a> and the
+<a href='/reuse/cases'>cases</a>, the
 <a href='/reuse/progress'>progress</a> page with every issue at every step
 of the process, and the timing, activity and feedback pages. Feedback is
 sent from any page and stays there; you can edit your own entries later,

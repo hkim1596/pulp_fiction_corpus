@@ -44,7 +44,13 @@ importantly — the annotation workbench, where a signed-in annotator
 repairs and verifies the machine-assembled articles. Guest passcode
 access is read-only; annotator accounts are approved by the admin
 (Heejin). Every human action is recorded, append-only, under the
-annotator's name; the machine's output is never overwritten.
+annotator's name; the machine's output is never overwritten. Since
+v0.15.0 (5 September 2026) the site has the design of the centre's
+causal-inference site (causal-inference.digihumeng.org): the stylesheet
+is one set of colour tokens with a dark scheme, and the progress graphic
+is the year strip (in the archive / downloaded / assembled / verified,
+one cell per year of 1896–1959) — see "The design since v0.15.0" in
+docs/handbook.md before touching the look of a page.
 
 ## Map of this folder
 

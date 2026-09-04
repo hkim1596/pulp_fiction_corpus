@@ -456,7 +456,7 @@ def summary():
     by_lang, by_class, by_kind, by_media, by_sub = Counter(), Counter(), Counter(), Counter(), Counter()
     work = {"items": 0, "pages": 0, "bytes": 0, "by_decade": Counter(), "by_genre": Counter(), "by_kind": Counter(),
             "fiction_items": 0, "fiction_pages": 0, "fiction_by_decade": Counter(), "fiction_by_genre": Counter(),
-            "fiction_by_decade_genre": defaultdict(Counter)}
+            "fiction_by_decade_genre": defaultdict(Counter), "fiction_by_year": Counter()}
     mags = {}
     pages_all = 0
     bytes_all = 0
@@ -503,6 +503,8 @@ def summary():
                 work["fiction_items"] += 1
                 work["fiction_pages"] += np
                 work["fiction_by_decade"][dec] += 1
+                if y:
+                    work["fiction_by_year"][y] += 1
                 work["fiction_by_genre"][it["genre"] or "unsorted"] += 1
                 work["fiction_by_decade_genre"][dec][it["genre"] or "unsorted"] += 1
         k = mag_key(it["magazine"])
@@ -551,6 +553,7 @@ def summary():
                 "fiction_definition": "working-corpus items the archive files as fiction magazines (pulps and digests): not dime novels, film magazines or comics",
                 "fiction_items": work["fiction_items"], "fiction_page_images": work["fiction_pages"],
                 "fiction_by_decade": dict(sorted(work["fiction_by_decade"].items())),
+                "fiction_by_year": {str(y): n for y, n in sorted(work["fiction_by_year"].items())},
                 "fiction_by_genre": dict(work["fiction_by_genre"].most_common()),
                 "fiction_by_decade_genre": {d: dict(c.most_common()) for d, c in sorted(work["fiction_by_decade_genre"].items())},
                 "fiction_by_publisher": dict(by_publisher.most_common()),

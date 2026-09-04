@@ -144,16 +144,16 @@ def _story_head(meta, sid):
 CSS = """
 <style>
 .vwrap{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0}
-.vcol{flex:1 1 380px;background:#fff;border:1px solid #d8cfc0;padding:10px 14px}
+.vcol{flex:1 1 380px;background:var(--surface);border:1px solid var(--grid);padding:10px 14px}
 .vhead{margin-bottom:8px;font-size:14px}
 .vtext{font-family:Georgia,serif;font-size:15px;line-height:1.5}
 .vtext mark{background:#fff1a8}
 .vbtns{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
-.vbtns button{font-size:14px;padding:6px 14px;border:1px solid #8c7b5f;background:#fff;cursor:pointer;font-family:inherit}
-.vbtns button.p{background:#e6f2e0}.vbtns button.n{background:#f6e4e0}.vbtns button.u{background:#f0ecdf}
+.vbtns button{font-size:14px;padding:6px 14px;border:1px solid var(--grid2);background:var(--surface);cursor:pointer;font-family:inherit}
+.vbtns button.p{background:var(--okbg)}.vbtns button.n{background:var(--warnbg)}.vbtns button.u{background:var(--surface2)}
 .vnote{width:100%;max-width:640px;height:56px;font-family:inherit;font-size:13px}
-.vprog{font-size:13px;color:#5a5a5a;margin:6px 0 10px}
-.vgrid td.chosen{background:#e6f2e0;font-weight:bold}
+.vprog{font-size:13px;color:var(--ink2);margin:6px 0 10px}
+.vgrid td.chosen{background:var(--okbg);font-weight:bold}
 </style>"""
 
 
@@ -422,7 +422,7 @@ def cases_page(qs, user, render=None):
                     "<button name='action' value='note'>Add note</button> "
                     + ("<button name='action' value='close'>Close</button>" if c["open"] else "<button name='action' value='reopen'>Reopen</button>")
                     + "</form>")
-        rows.append(f"<div class='card' id='{_esc(c['case_id'])}' style='padding:10px 14px;margin:8px 0;background:#fff;border:1px solid #d8cfc0'>"
+        rows.append(f"<div class='card' id='{_esc(c['case_id'])}' style='padding:10px 14px;margin:8px 0;background:var(--surface);border:1px solid var(--grid)'>"
                     f"<b>{_esc(c['case_id'])}</b> · <a href='{link}'>{_esc(c['title'] or what)}</a>"
                     f"{'' if c['open'] else ' <span class=muted>(closed)</span>'}<br><span class='muted'>{_esc(what)} · opened by "
                     f"{_esc(_G['display_name'](c['by']))} {_esc(c['ts'][:16])}</span>{notes}{form}</div>")

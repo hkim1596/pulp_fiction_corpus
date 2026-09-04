@@ -133,7 +133,7 @@ def _para_files(tag, k):
 # ---------------------------------------------------------------- charts
 
 PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]   # fixed order, never cycled
-INK, INK2, GRID = "#1c1a17", "#75695a", "#e2d9c8"
+INK, INK2, GRID = "var(--ink)", "var(--muted)", "var(--grid)"
 
 
 def _fmt(v):
@@ -183,7 +183,7 @@ def svg_bars(categories, series, title, width=520, height=230, unit=""):
     barw = min(24, (band * 0.7) / n_ser)
     gap = 2
     parts = [f"<svg viewBox='0 0 {width} {height}' width='100%' style='max-width:{width}px' "
-             f"role='img' aria-label='{_esc(title)}' font-family='Georgia,serif'>",
+             f"role='img' aria-label='{_esc(title)}' font-family='system-ui,-apple-system,Segoe UI,sans-serif'>",
              f"<text x='{left}' y='16' font-size='13' fill='{INK}'>{_esc(title)}</text>"]
     for t in ticks:
         y = top + ph - ph * t / vtop
@@ -266,7 +266,7 @@ def svg_lines(xs, series, title, width=520, height=240, ylog=False, xlabel="", x
     def xpos(x):
         return left + pw * (x - xmin) / max(1e-9, xmax - xmin)
     parts = [f"<svg viewBox='0 0 {width} {height}' width='100%' style='max-width:{width}px' "
-             f"role='img' aria-label='{_esc(title)}' font-family='Georgia,serif'>",
+             f"role='img' aria-label='{_esc(title)}' font-family='system-ui,-apple-system,Segoe UI,sans-serif'>",
              f"<text x='{left}' y='16' font-size='13' fill='{INK}'>{_esc(title)}</text>"]
     if len(series) >= 2:                      # legend, top right, one row
         lx = width - right
@@ -310,7 +310,7 @@ def svg_lines(xs, series, title, width=520, height=240, ylog=False, xlabel="", x
                      f"stroke-linejoin='round' stroke-linecap='round'/>")
         for x, y, xv, yv in pts:
             lab = xlabels[xs.index(xv)] if xlabels else _fmt(xv)
-            parts.append(f"<circle cx='{x:.1f}' cy='{y:.1f}' r='4' fill='{col}' stroke='#faf7f2' "
+            parts.append(f"<circle cx='{x:.1f}' cy='{y:.1f}' r='4' fill='{col}' stroke='var(--page)' "
                          f"stroke-width='2'><title>{_esc(name)} · {_esc(lab)}: {_fmt(yv)}</title></circle>")
         if len(series) == 1:
             ex, ey = pts[-1][0], pts[-1][1]
@@ -321,7 +321,8 @@ def svg_lines(xs, series, title, width=520, height=240, ylog=False, xlabel="", x
 
 
 def _chart_row(chart, table, stack=False):
-    if stack:
+    # a wide table (more than seven columns) goes under the chart rather than beside it
+    if stack or table.count("<th") > 7:
         return (f"<div style='margin:6px 0 16px'><div style='max-width:560px'>{chart}</div>"
                 f"<div style='overflow-x:auto;margin-top:8px'>{table}</div></div>")
     return (f"<div style='display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin:6px 0 16px'>"
@@ -523,7 +524,7 @@ def extensive_cases_html(set_, k):
                     f"<td class='num'>{p['n_matches']}</td><td class='num'>{p['max_len']}</td>"
                     f"<td class='num'>{100 * p.get('cover_a', 0):.2f}%</td><td class='num'>{100 * p.get('cover_b', 0):.2f}%</td>"
                     f"<td>{band}</td><td><a href='/pair/{_esc(p['a'])}/{_esc(p['b'])}'>pair</a></td></tr>")
-    out = [f"<h3 style='font-weight:normal;font-size:16px'>1b. Extensive cases (seed {k}, {_esc(set_)} set): whole-story and high-coverage matches</h3>",
+    out = [f"<h3>1b. Extensive cases (seed {k}, {_esc(set_)} set): whole-story and high-coverage matches</h3>",
            f"<p>Of {len(pairs)} story pairs sharing at least one passage across issues, <b>{n_whole}</b> are whole-story cases "
            f"(shared passages cover {int(WHOLE_STORY * 100)}% or more of the shorter story) and <b>{n_high}</b> high-coverage cases "
            f"({int(HIGH_COVERAGE * 100)}% or more). The pairs with the largest coverage:</p>",
@@ -536,7 +537,7 @@ def extensive_cases_html(set_, k):
         vals = sorted(shares.values(), reverse=True)
         n = len(vals)
         top = sorted(shares.items(), key=lambda kv: -kv[1])[:10]
-        out.append(f"<h3 style='font-weight:normal;font-size:16px'>The proportion of each story involved in reuse</h3>"
+        out.append(f"<h3>The proportion of each story involved in reuse</h3>"
                    f"<p>{n} stories share at least one passage with a story of another issue: "
                    f"{sum(1 for v in vals if v >= 0.5)} have half or more of their words in shared passages, "
                    f"{sum(1 for v in vals if 0.1 <= v < 0.5)} between a tenth and a half, {sum(1 for v in vals if 0.01 <= v < 0.1)} between one percent and a tenth, "
@@ -560,7 +561,7 @@ def capture_html(set_):
     if not row or not row["n"]:
         return ""
     ex_only, pa_only, both = row["ex_only"] or 0, row["pa_only"] or 0, row["both"] or 0
-    return (f"<h3 style='font-weight:normal;font-size:16px'>What each form of reuse captures ({_esc(set_)} set, cross-issue pairs)</h3>"
+    return (f"<h3>What each form of reuse captures ({_esc(set_)} set, cross-issue pairs)</h3>"
             f"<p>Of {row['n']:,} story pairs across issues, <b>{ex_only + both:,}</b> share an exact passage (seed 6) and <b>{pa_only + both:,}</b> "
             f"a kept alignment (K = 10): {both:,} both, {ex_only:,} exact only, {pa_only:,} paraphrase only. Passages: {int(row['ex_pass'] or 0):,} exact matches "
             f"against {int(row['pa_pass'] or 0):,} alignments. Exact and paraphrastic matches are kept in separate files and columns "
@@ -791,7 +792,7 @@ def overview(render=None):
                                f"<td class='num'>{_fmt(v['naive_mean_err'])}</td></tr>")
                     first = False
             tbl.append("</table>")
-            out.append(f"<h3 style='font-weight:normal;font-size:16px'>Sampler check ({sc['n_per_stratum']} "
+            out.append(f"<h3>Sampler check ({sc['n_per_stratum']} "
                        f"non-matching pairs per stratum, {sc['seeds']} draws)</h3>" + "".join(tbl)
                        + "<p class='muted'>At corpus scale the protocol keeps every matched pair and samples "
                        "non-matching pairs by stratum (later decade × years apart × topic quartile), reweighting "
@@ -801,7 +802,7 @@ def overview(render=None):
         # models
         models = s.get("models", {})
         if models:
-            out.append("<h3 style='font-weight:normal;font-size:16px'>Two-part hierarchical model — first version, "
+            out.append("<h3>Two-part hierarchical model — first version, "
                        "a proposal for the statistical design</h3>")
             for name, m in models.items():
                 out.append(f"<details><summary class='muted'>{_esc(name)}: {m['n_any']} of {m['n_pairs']:,} "
@@ -833,7 +834,7 @@ def overview(render=None):
                            f"{('under 1 in ' + format(r['stratum_n'], ',')) if r['p_at_least'] == 0 else _fmt(r['p_at_least'])}</td>"
                            f"<td>{'yes' if r['same_author'] else ''}</td><td class='muted'>{_esc(r['excerpt'])}</td></tr>")
             tbl.append("</table>")
-            out.append("<h3 style='font-weight:normal;font-size:16px'>Most unusual exact matches, placed in their "
+            out.append("<h3>Most unusual exact matches, placed in their "
                        "background</h3>" + "".join(tbl))
     else:
         out.append("<div class='empty'>The background stage has not been run on this server's data yet.</div>")
@@ -979,7 +980,7 @@ def cluster_page(set_, kind, k, idx, render=None, user=None):
         f" · longest {c['max_len']} {'words' if kind == 'exact' else 'columns'}</h1>",
         f"<p class='muted'>{_esc(set_)} set · {'exact, seed ' if kind == 'exact' else 'paraphrase, K='}{k} · "
         f"<a href='/reuse/clusters?set={_esc(set_)}&kind={kind}&k={k}'>back to the list</a></p>",
-        f"<blockquote style='border-left:4px solid #7a3020;margin:10px 0;padding:6px 12px;background:#fff'>"
+        f"<blockquote style='border-left:4px solid var(--accent);margin:10px 0;padding:6px 12px;background:var(--surface)'>"
         f"{_esc(c['representative']['text'])}</blockquote>"]
     # protocol 4.2: a cluster can be marked as a case for the literary genealogies
     out.append(_G["RV"].case_form_html("cluster", {"set": set_, "kind": kind, "k": int(k), "idx": int(idx)}, user,
@@ -1010,10 +1011,10 @@ def cluster_page(set_, kind, k, idx, render=None, user=None):
             ctx_b = _esc(loc["before"]) if loc and loc.get("before") else ""
             ctx_a = _esc(loc["after"]) if loc and loc.get("after") else ""
             body.append(
-                f"<div class='cardtext' style='max-height:none;border-top:1px solid #eee6d6'>"
+                f"<div class='cardtext' style='max-height:none;border-top:1px solid var(--grid)'>"
                 f"<div class='muted' style='font-size:12px;margin-bottom:3px'>{unit_word} {m['tok'][0]}–{m['tok'][1]} · "
                 f"{m['len']} {unit_word} · {links}</div>"
-                f"<span class='muted'>{ctx_b}</span><span style='background:#f3e2a8'>{_esc(text)}</span>"
+                f"<span class='muted'>{ctx_b}</span><span style='background:var(--warnbg)'>{_esc(text)}</span>"
                 f"<span class='muted'>{ctx_a}</span></div>")
         out.append(f"<div class='card'>{head}{''.join(body)}</div>")
     if kind == "para" and matches:
@@ -1235,13 +1236,13 @@ def assembly_page(qs, render=None):
                 "<th>Title agrees</th><th>Author agrees</th><th class='num'>Pages covered</th><th class='num'>Story starts inside</th><th>Runs over</th></tr>"]
         for t in v["contents"]:
             ok = t["start_found"] and t["title_ok"] and not t["runs_over"] and not t["extra_starts_inside"]
-            rows.append(f"<tr style='{'' if ok else 'background:#fbe9e0'}'><td>{_esc(t['title'])}</td><td>{_esc(t.get('author') or '')}</td>"
+            rows.append(f"<tr style='{'' if ok else 'background:var(--warnbg)'}'><td>{_esc(t['title'])}</td><td>{_esc(t.get('author') or '')}</td>"
                         f"<td>{_esc(t.get('type') or '')}</td><td class='num'><a href='/issue/{_esc(which)}/p/{t['scan']}'>{t['scan']}</a></td>"
                         f"<td>{_esc(t.get('record_title') or ('—' if not t['start_found'] else ''))}</td>"
                         f"<td>{'yes' if t['title_ok'] else 'no'}</td><td>{'' if t['author_ok'] is None else ('yes' if t['author_ok'] else 'no')}</td>"
                         f"<td class='num'>{t['coverage']:.2f}</td><td class='num'>{t['extra_starts_inside']}</td><td>{'yes' if t['runs_over'] else ''}</td></tr>")
         rows.append("</table>")
-        out.append("<h3 style='font-weight:normal;font-size:16px'>Against the contents page</h3>" + "".join(rows))
+        out.append("<h3>Against the contents page</h3>" + "".join(rows))
         hs = v.get("human", [])
         if hs:
             rows = ["<table><tr><th>Human record</th><th>Status</th><th class='num'>Regions</th><th>Best candidate</th><th class='num'>Recall</th>"
@@ -1253,11 +1254,11 @@ def assembly_page(qs, render=None):
                             f"<td>{'yes' if h.get('exact') else ''}</td><td>{'' if h.get('title_ok') is None else ('yes' if h['title_ok'] else 'no')}</td>"
                             f"<td>{'' if h.get('author_ok') is None else ('yes' if h['author_ok'] else 'no')}</td></tr>")
             rows.append("</table>")
-            out.append("<h3 style='font-weight:normal;font-size:16px'>Against the human-corrected records</h3>" + "".join(rows)
+            out.append("<h3>Against the human-corrected records</h3>" + "".join(rows)
                        + "<p class='muted'>Verified records are finished repairs; modified ones are partial, so a low score there "
                          "can mean the person had not finished, not that the candidate is wrong.</p>")
         st = v["summary"]["structure"]
-        out.append("<h3 style='font-weight:normal;font-size:16px'>Structure</h3><p>" + ", ".join(
+        out.append("<h3>Structure</h3><p>" + ", ".join(
             f"{_esc(k.replace('_', ' '))} {v_ if not isinstance(v_, dict) else _esc(str(v_))}" for k, v_ in st.items()) + ".</p>")
         if variant != "live":
             out.append(f"<p class='muted'>{_esc(variant)} records and the page analysis: "

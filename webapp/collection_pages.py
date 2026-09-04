@@ -117,19 +117,22 @@ def collection_page(qs, render=None):
         "Files: <a href='/raw/file?path=survey/summary.json'>summary.json</a>, <a href='/raw/file?path=survey/magazines.json'>magazines.json</a>, "
         "<a href='/raw/file?path=survey/items.jsonl'>items.jsonl</a>, <a href='/raw/file?path=survey/enrich.jsonl'>enrich.jsonl</a>.</p>"]
     # 1. what it holds
-    out.append("<h2>1. What the collection holds</h2>")
+    out.append("<h2>1. What the collection holds, and how far the era is read</h2>")
     if fr.get("have"):
-        n_dl = EX._val(con, "SELECT COUNT(*) FROM issues WHERE pages>0") or 0
+        n_dl = EX.n_downloaded(con)
         n_c = EX._val(con, "SELECT COUNT(*) FROM issues WHERE complete=1") or 0
         n_fv = EX._val(con, "SELECT COUNT(*) FROM issues WHERE stories>0 AND verified=stories") or 0
+        out.append(EX.year_strip_html(con))
         out.append(EX.collection_bar(fr, n_dl, n_c, n_fv))
+        out.append("<h3>The era year by year</h3><p class='fine'>Items the archive holds for each year of the era, and what this site has read of them; "
+                   "a year opens its issues.</p>" + EX.year_grid_html(con))
     out.append("<div class='row' style='display:flex;gap:24px;flex-wrap:wrap'>"
-               "<div><h3 style='font-weight:normal;font-size:16px'>By language</h3>"
+               "<div><h3>By language</h3>"
                + _kv_table(sv.get("by_language_class", {}), "Language field", "Items", total=total)
                + "<p class='muted' style='max-width:340px'>“unmarked” = no language given; taken as English in the working corpus, and checked below against the language the archive's OCR detected.</p></div>"
-               "<div><h3 style='font-weight:normal;font-size:16px'>By kind (the archive's sub-collections)</h3>"
+               "<div><h3>By kind (the archive's sub-collections)</h3>"
                + _kv_table(sv.get("by_kind", {}), "Kind", "Items", total=total) + "</div>"
-               "<div><h3 style='font-weight:normal;font-size:16px'>The working corpus</h3>"
+               "<div><h3>The working corpus</h3>"
                + _kv_table(w.get("by_kind", {}), "Kind (English or unmarked)", "Items", total=w.get("items"))
                + f"<p class='muted' style='max-width:340px'>{_n(w.get('items'))} items; the fiction magazines among them, {_n(w.get('fiction_items'))}, are the frame of the study.</p></div></div>")
     # 2. history of transmission
@@ -147,17 +150,17 @@ def collection_page(qs, render=None):
     if ups:
         rows = "".join(f"<tr><td>{_esc(u['handle'])}</td><td class='num'>{_n(u['items'])}</td><td class='num'>{_n(u['fiction_items'])}</td>"
                        f"<td>{_esc('–'.join(str(x) for x in u['years']) if u.get('years') else '')}</td></tr>" for u in ups)
-        out.append(f"<h3 style='font-weight:normal;font-size:16px'>Uploader accounts ({_n(pv.get('uploader_accounts'))} distinct among the records fetched)</h3>"
+        out.append(f"<h3>Uploader accounts ({_n(pv.get('uploader_accounts'))} distinct among the records fetched)</h3>"
                    "<table><tr><th>Account</th><th class='num'>Items</th><th class='num'>Fiction magazines</th><th>Years active</th></tr>"
                    + rows + "</table><p class='muted'>The part of the address before the @, as the archive shows it on every item page; "
                    "the full addresses stay in the data file.</p>")
     cols = "<div style='display:flex;gap:24px;flex-wrap:wrap'>"
     if pv.get("curators"):
-        cols += "<div><h3 style='font-weight:normal;font-size:16px'>Curators (the archive's admission record)</h3>" + _kv_table(pv["curators"], "Curator", "Items") + "</div>"
+        cols += "<div><h3>Curators (the archive's admission record)</h3>" + _kv_table(pv["curators"], "Curator", "Items") + "</div>"
     if pv.get("collection_added"):
-        cols += "<div><h3 style='font-weight:normal;font-size:16px'>Filed under</h3>" + _kv_table(pv["collection_added"], "Sub-collection", "Items") + "</div>"
+        cols += "<div><h3>Filed under</h3>" + _kv_table(pv["collection_added"], "Sub-collection", "Items") + "</div>"
     if pv.get("scan_tags_fiction"):
-        cols += ("<div><h3 style='font-weight:normal;font-size:16px'>Scanning-group tags in the titles</h3>"
+        cols += ("<div><h3>Scanning-group tags in the titles</h3>"
                  + _kv_table(pv["scan_tags_fiction"], "Tag", "Fiction items", limit=20)
                  + "<p class='muted' style='max-width:340px'>The pulp-scanning community signs its scans in the item title — “(Darwin-IA)”, “(Gorgon776)”, “(cape1736)” — which is the nearest thing to a source field.</p></div>")
     cols += "</div>"
@@ -165,18 +168,18 @@ def collection_page(qs, render=None):
     if pv.get("ocr_engines_fiction"):
         by_dec = pv.get("ocr_engine_by_upload_decade", {})
         rows = "".join(f"<tr><td>{_esc(d)}</td><td>" + ", ".join(f"{_esc(e)} {_n(n)}" for e, n in c.items()) + "</td></tr>" for d, c in by_dec.items())
-        out.append("<h3 style='font-weight:normal;font-size:16px'>The archive's own OCR: the engine named in each record</h3>"
+        out.append("<h3>The archive's own OCR: the engine named in each record</h3>"
                    "<div style='display:flex;gap:24px;flex-wrap:wrap'><div>"
                    + _kv_table(pv["ocr_engines_fiction"], "Engine (fiction magazines)", "Items", total=pv.get("items_enriched"))
                    + "</div><div><table><tr><th>Decade uploaded</th><th>Engines</th></tr>" + rows + "</table></div></div>"
                    "<p class='muted'>Different engines and versions across the years of upload are why the protocol re-reads every page with one pipeline "
                    "(section 2: “existing OCR is also uneven across a collection assembled from scans produced at different times and by different contributors”).</p>")
     if pv.get("detected_language_of_unmarked"):
-        out.append("<h3 style='font-weight:normal;font-size:16px'>Unmarked items: the language the archive's OCR detected</h3>"
+        out.append("<h3>Unmarked items: the language the archive's OCR detected</h3>"
                    + _kv_table(pv["detected_language_of_unmarked"], "Detected language", "Unmarked items")
                    + "<p class='muted'>A check on the working-corpus rule that an item with no language given is English.</p>")
     if pv.get("rights_fields"):
-        out.append("<h3 style='font-weight:normal;font-size:16px'>Rights fields present</h3>" + _kv_table(pv["rights_fields"], "Field value", "Items"))
+        out.append("<h3>Rights fields present</h3>" + _kv_table(pv["rights_fields"], "Field value", "Items"))
     # 3. the sample
     out.append("<h2>3. The sample: fiction magazines in the working corpus</h2>")
     fbd = w.get("fiction_by_decade", {})
@@ -190,12 +193,12 @@ def collection_page(qs, render=None):
         head = "<tr><th>Decade</th>" + "".join(f"<th class='num'>{_esc(g)}</th>" for g in genres) + "</tr>"
         rows = "".join(f"<tr><td>{_esc(d)}</td>" + "".join(f"<td class='num'>{_n(c.get(g, 0)) if c.get(g) else ''}</td>" for g in genres) + "</tr>"
                        for d, c in dg.items())
-        out.append("<h3 style='font-weight:normal;font-size:16px'>By decade and genre</h3><div style='overflow-x:auto'><table>" + head + rows + "</table></div>")
+        out.append("<h3>By decade and genre</h3><div style='overflow-x:auto'><table>" + head + rows + "</table></div>")
     mags = w.get("fiction_magazines_top", [])
     if mags:
         rows = "".join(f"<tr><td>{_esc(m['name'])}</td><td class='num'>{_n(m['items'])}</td><td>{_esc('–'.join(str(x) for x in m['years']) if m.get('years') else '')}</td>"
                        f"<td>{_esc(m.get('genre') or '')}</td></tr>" for m in mags[:40])
-        out.append(f"<h3 style='font-weight:normal;font-size:16px'>By magazine title ({_n(w.get('fiction_magazines'))} names; the forty with the most items)</h3>"
+        out.append(f"<h3>By magazine title ({_n(w.get('fiction_magazines'))} names; the forty with the most items)</h3>"
                    "<table><tr><th>Magazine</th><th class='num'>Items</th><th>Years</th><th>Genre</th></tr>" + rows + "</table>"
                    "<p class='muted'>Names as the survey reads them from the item titles; one magazine can appear under two names "
                    "(“Astounding” and “Astounding Science Fiction”). Full list: magazines.json.</p>")
@@ -204,7 +207,7 @@ def collection_page(qs, render=None):
         assigned = sum(v for k, v in fbp.items() if k != "not assigned")
         bdp = w.get("fiction_by_decade_publisher", {})
         rows = "".join(f"<tr><td>{_esc(d)}</td><td>" + ", ".join(f"{_esc(p)} {_n(n)}" for p, n in c.items()) + "</td></tr>" for d, c in bdp.items())
-        out.append("<h3 style='font-weight:normal;font-size:16px'>By publisher</h3>"
+        out.append("<h3>By publisher</h3>"
                    "<div style='display:flex;gap:24px;flex-wrap:wrap'><div>" + _kv_table(fbp, "Publisher group", "Items", total=w.get("fiction_items"), limit=25)
                    + "</div><div><table><tr><th>Decade</th><th>Publishers</th></tr>" + rows + "</table></div></div>"
                    f"<p class='muted'>Publisher assigned to {_n(assigned)} of {_n(w.get('fiction_items'))} items ({_pct(assigned, w.get('fiction_items') or 1)}) from a "
@@ -259,13 +262,13 @@ def corpus_page(qs, render=None):
          "<a href='/raw/file?path=export/corpus_stats.json'>corpus_stats.json</a> · the combined file <a href='/raw/file?path=pilot_stories.jsonl'>pilot_stories.jsonl</a>.</p>"
          if cs else "<p class='muted'>The export has not written the two files yet (run pipeline/r00_export_stories.py).</p>"),
         "<div style='display:flex;gap:24px;flex-wrap:wrap'>"
-        "<div style='flex:1 1 320px;background:#fff;border:1px solid #d8cfc0;padding:10px 14px'>"
+        "<div style='flex:1 1 320px;background:var(--surface);border:1px solid var(--grid);padding:10px 14px'>"
         f"<h2 style='margin-top:0'>Story-level corpus</h2><p><b>{_n(n_story)}</b> story records ({_n(n_story50)} of fifty words or more), <b>{_n(w_story)}</b> words; "
         f"{_n(sum(r['v'] for r in story_rows))} verified. A story record is one work as printed in one issue — a serial instalment is a story with serial fields, "
         "and instalments of one work are linked across issues. Its reading text is the body and the chapter apparatus; the title, "
         "by-line, teaser, synopsis, credits and captions are fields.</p>"
         "<p class='muted'>Enters: exact reuse (r02), paraphrase (r04), the pair table (r05). Records under fifty words are fragments and go to the parallel corpus.</p></div>"
-        "<div style='flex:1 1 320px;background:#fff;border:1px solid #d8cfc0;padding:10px 14px'>"
+        "<div style='flex:1 1 320px;background:var(--surface);border:1px solid var(--grid);padding:10px 14px'>"
         f"<h2 style='margin-top:0'>Parallel corpus</h2><p><b>{_n(n_par)}</b> records, <b>{_n(w_par)}</b> words: "
         + ", ".join(f"{_esc(r['type'])} {_n(r['n'])}" for r in by_type if r["type"] != "story")
         + ".</p><p class='muted'>Advertisements by class: " + ", ".join(f"{_esc(r['c'])} {_n(r['n'])}" for r in ad_cls)

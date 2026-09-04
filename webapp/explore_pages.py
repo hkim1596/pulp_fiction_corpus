@@ -685,21 +685,20 @@ def _mag_link(name, slug=None):
 
 
 def _tiles(items):
-    """Headline numbers: [(label, value, href)]"""
-    out = ["<div style='display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 18px'>"]
+    """Headline numbers: [(label, value, href)] — the big-number row of the design
+    of 2026-09-05 (a number, its label under it, a zero greyed); each is a link."""
+    out = ["<div class='stats'>"]
     for label, value, href in items:
         v = _n(value or 0)
-        box = (f"<div style='flex:1 1 130px;min-width:120px;background:#fff;border:1px solid #d8cfc0;"
-               f"padding:8px 12px'><div style='font-size:22px;font-variant-numeric:tabular-nums'>{v}</div>"
-               f"<div class='muted' style='font-size:12.5px'>{_esc(label)}</div></div>")
-        out.append(f"<a href='{href}' style='text-decoration:none;color:inherit;flex:1 1 130px;display:flex'>{box}</a>"
-                   if href else box)
+        zero = " zero" if not value else ""
+        box = f"<div class='stat{zero}'>{v}<span>{_esc(label)}</span></div>"
+        out.append(f"<a href='{href}' style='text-decoration:none;color:inherit'>{box}</a>" if href else box)
     out.append("</div>")
     return "".join(out)
 
 
 def _raw_link(path, label="raw data"):
-    return (f"<a href='{path}' class='muted' style='font-size:12.5px;border:1px solid #b8a88e;"
+    return (f"<a href='{path}' class='muted' style='font-size:12.5px;border:1px solid var(--grid2);"
             f"padding:1px 8px;text-decoration:none'>{_esc(label)} ↓</a>")
 
 
@@ -822,7 +821,7 @@ def svg_stacked(categories, series, title, href=None, width=560, height=250):
     band = pw / n_cat
     barw = min(28, band * 0.72)
     parts = [f"<svg viewBox='0 0 {width} {height}' width='100%' style='max-width:{width}px' role='img' "
-             f"aria-label='{_esc(title)}' font-family='Georgia,serif'>",
+             f"aria-label='{_esc(title)}' font-family='system-ui,-apple-system,Segoe UI,sans-serif'>",
              f"<text x='{left}' y='16' font-size='13' fill='{RP.INK}'>{_esc(title)}</text>"]
     for t in ticks:
         y = top + ph - ph * t / vtop
@@ -838,8 +837,8 @@ def svg_stacked(categories, series, title, href=None, width=560, height=250):
                 continue
             h = ph * v / vtop
             y -= h
-            col = RP.PALETTE[si % len(RP.PALETTE)] if si < len(RP.PALETTE) else "#9a917f"
-            rect = (f"<rect x='{x:.1f}' y='{y:.1f}' width='{barw:.1f}' height='{h:.1f}' fill='{col}' stroke='#faf7f2' stroke-width='0.5'>"
+            col = RP.PALETTE[si % len(RP.PALETTE)] if si < len(RP.PALETTE) else "var(--grid2)"
+            rect = (f"<rect x='{x:.1f}' y='{y:.1f}' width='{barw:.1f}' height='{h:.1f}' fill='{col}' stroke='var(--page)' stroke-width='0.5'>"
                     f"<title>{_esc(name)} · {_esc(str(cat))}: {_fmt(v)}</title></rect>")
             parts.append(f"<a href='{href(cat, name)}'>{rect}</a>" if href else rect)
         if ci % label_every == 0 or ci == n_cat - 1:
@@ -852,7 +851,7 @@ def svg_stacked(categories, series, title, href=None, width=560, height=250):
     parts.append(f"<line x1='{left}' x2='{left + pw}' y1='{top + ph}' y2='{top + ph}' stroke='{RP.INK2}'/>")
     lx = left
     for si, (name, _) in enumerate(series):
-        col = RP.PALETTE[si % len(RP.PALETTE)] if si < len(RP.PALETTE) else "#9a917f"
+        col = RP.PALETTE[si % len(RP.PALETTE)] if si < len(RP.PALETTE) else "var(--grid2)"
         parts.append(f"<rect x='{lx}' y='{height - 12}' width='10' height='10' fill='{col}'/>")
         parts.append(f"<text x='{lx + 14}' y='{height - 3}' font-size='11' fill='{RP.INK2}'>{_esc(name)}</text>")
         lx += 22 + 6.5 * len(name)
@@ -893,7 +892,7 @@ def svg_network(con, links, max_nodes=DRAW_LIMITS["authors"]):
         ang = 2 * math.pi * i / n - math.pi / 2
         pos[k] = (cx + R * math.cos(ang), cy + R * math.sin(ang), ang)
     parts = [f"<svg viewBox='0 0 {W} {H}' width='100%' style='max-width:{W}px' role='img' "
-             f"aria-label='Author reuse network' font-family='Georgia,serif'>"]
+             f"aria-label='Author reuse network' font-family='system-ui,-apple-system,Segoe UI,sans-serif'>"]
     maxn = max(L["n"] for L in links)
     drawn = 0
     for L in sorted(links, key=lambda L: L["n"]):
@@ -922,7 +921,7 @@ def svg_network(con, links, max_nodes=DRAW_LIMITS["authors"]):
         else:
             anchor, rot = "end", deg + 180
         parts.append(f"<a href='/author/{_esc(author_slug(k))}'>"
-                     f"<circle cx='{x:.1f}' cy='{y:.1f}' r='{r:.1f}' fill='{RP.PALETTE[1]}' stroke='#faf7f2' stroke-width='2'>"
+                     f"<circle cx='{x:.1f}' cy='{y:.1f}' r='{r:.1f}' fill='{RP.PALETTE[1]}' stroke='var(--page)' stroke-width='2'>"
                      f"<title>{_esc(name)} · {a['n_stories']} stories · {mag_abbr(main_mag(k))} · "
                      f"{degree[k]} shared passages</title></circle>"
                      f"<text x='{lx:.1f}' y='{ly + 3.5:.1f}' font-size='10' fill='{RP.INK}' text-anchor='{anchor}' "
@@ -952,8 +951,8 @@ def html_grid(con, mags, links):
         for b in names:
             c = counts.get((a, b), 0)
             shade = 0 if not c else 0.15 + 0.75 * (c / mx)
-            bg = f"rgba(42,120,214,{shade:.2f})" if c else "#fff"
-            ink = "#fff" if shade > 0.55 else RP.INK
+            bg = f"rgba(42,120,214,{shade:.2f})" if c else "var(--surface)"
+            ink = "var(--surface)" if shade > 0.55 else RP.INK
             href = f"/pairs?ma={urllib.parse.quote(a)}&mb={urllib.parse.quote(b)}&min=6"
             cells.append(f"<td style='background:{bg};color:{ink};text-align:center;padding:6px'>"
                          f"<a href='{href}' style='color:inherit;text-decoration:none' "
@@ -978,8 +977,8 @@ def html_genre_grid(cells, genres):
             n, s = cells.get((a, b), (0, 0))
             rate = (s / n) if n else 0
             shade = 0 if not n else 0.12 + 0.78 * (rate / mx)
-            bg = f"rgba(235,104,52,{shade:.2f})" if n else "#fff"
-            ink = "#fff" if shade > 0.6 else RP.INK
+            bg = f"rgba(235,104,52,{shade:.2f})" if n else "var(--surface)"
+            ink = "var(--surface)" if shade > 0.6 else RP.INK
             href = f"/pairs?ga={urllib.parse.quote(a)}&gb={urllib.parse.quote(b)}&min=6"
             cs.append(f"<td style='background:{bg};color:{ink};text-align:center;padding:6px'>"
                       f"<a href='{href}' style='color:inherit;text-decoration:none' title='{_esc(a)} × {_esc(b)}: "
@@ -1008,7 +1007,7 @@ def svg_timeline(issues):
     def xp(y):
         return left + pw * (y - y0) / max(1, y1 - y0)
     parts = [f"<svg viewBox='0 0 {W} {H}' width='100%' style='max-width:{W}px' role='img' "
-             f"aria-label='Issues on a time axis' font-family='Georgia,serif'>",
+             f"aria-label='Issues on a time axis' font-family='system-ui,-apple-system,Segoe UI,sans-serif'>",
              f"<text x='{left}' y='16' font-size='13' fill='{RP.INK}'>Issues on the time axis — bar height = stories "
              f"assembled, dark part = verified</text>"]
     for t in ticks:
@@ -1292,7 +1291,7 @@ def survey_frame(con):
 
 def _bar(v, of, width=560, height=14):
     pct = (100 * v / of) if of else 0
-    return (f"<div style='background:#eee5d5;height:{height}px;max-width:{width}px;border:1px solid #d8cfc0'>"
+    return (f"<div style='background:var(--surface2);height:{height}px;max-width:{width}px;border:1px solid var(--grid)'>"
             f"<div style='background:{RP.PALETTE[0]};height:100%;width:{min(100, pct):.2f}%'></div></div>")
 
 
@@ -1311,14 +1310,14 @@ def collection_bar(fr, downloaded, processed, verified, width=760):
 
     def w(v, minpx=0):
         return f"max({minpx}px,{100 * v / total:.3f}%)"
-    segs = [(f"width:{w(fiction)};background:#c99b4e", f"fiction magazines in the working corpus: {fiction:,}"),
-            (f"width:{w(working - fiction)};background:#eee5d5", f"other items of the working corpus (dime novels, film and general magazines, comics): {working - fiction:,}"),
-            (f"width:{w(other)};background:#cfc8bd;opacity:.6", f"other languages, left out: {other:,}")]
-    marks = [(f"width:{w(downloaded, 3)};background:#2c5e2e", f"downloaded: {downloaded:,}"),
-             (f"width:{w(processed, 3)};background:#7a3020", f"automatically processed (assembled into records): {processed:,}"),
-             (f"width:{w(verified, 3)};background:#1c1a17", f"fully verified by people: {verified:,}")]
+    segs = [(f"width:{w(fiction)};background:var(--green)", f"fiction magazines in the working corpus: {fiction:,}"),
+            (f"width:{w(working - fiction)};background:var(--surface2)", f"other items of the working corpus (dime novels, film and general magazines, comics): {working - fiction:,}"),
+            (f"width:{w(other)};background:var(--grid2);opacity:.6", f"other languages, left out: {other:,}")]
+    marks = [(f"width:{w(downloaded, 3)};background:var(--green2)", f"downloaded: {downloaded:,}"),
+             (f"width:{w(processed, 3)};background:var(--accent)", f"automatically processed (assembled into records): {processed:,}"),
+             (f"width:{w(verified, 3)};background:var(--ink)", f"fully verified by people: {verified:,}")]
     html = [f"<div style='max-width:{width}px'>"
-            "<div style='display:flex;height:22px;border:1px solid #d8cfc0;background:#fff'>"]
+            "<div style='display:flex;height:22px;border:1px solid var(--grid);background:var(--surface)'>"]
     for st, ttl in segs:
         html.append(f"<div title='{_esc(ttl)}' style='{st};height:100%'></div>")
     html.append("</div>")
@@ -1327,14 +1326,133 @@ def collection_bar(fr, downloaded, processed, verified, width=760):
         html.append(f"<div title='{_esc(ttl)}' style='{st};height:100%;margin-right:1px'></div>")
     html.append("</div>")
     html.append("<p class='muted' style='font-size:12.5px;margin:4px 0 0'>"
-                f"<span style='display:inline-block;width:11px;height:11px;background:#c99b4e;vertical-align:middle'></span> fiction magazines {fiction:,} · "
-                f"<span style='display:inline-block;width:11px;height:11px;background:#eee5d5;border:1px solid #d8cfc0;vertical-align:middle'></span> rest of the working corpus {working - fiction:,} · "
-                f"<span style='display:inline-block;width:11px;height:11px;background:#cfc8bd;opacity:.6;vertical-align:middle'></span> other languages {other:,} (of {total:,} items in the collection)<br>"
-                f"<span style='display:inline-block;width:11px;height:6px;background:#2c5e2e;vertical-align:middle'></span> downloaded {downloaded:,} · "
-                f"<span style='display:inline-block;width:11px;height:6px;background:#7a3020;vertical-align:middle'></span> automatically processed {processed:,} · "
-                f"<span style='display:inline-block;width:11px;height:6px;background:#1c1a17;vertical-align:middle'></span> fully verified {verified:,} "
+                f"<span style='display:inline-block;width:11px;height:11px;background:var(--green);vertical-align:middle'></span> fiction magazines {fiction:,} · "
+                f"<span style='display:inline-block;width:11px;height:11px;background:var(--surface2);border:1px solid var(--grid);vertical-align:middle'></span> rest of the working corpus {working - fiction:,} · "
+                f"<span style='display:inline-block;width:11px;height:11px;background:var(--grid2);opacity:.6;vertical-align:middle'></span> other languages {other:,} (of {total:,} items in the collection)<br>"
+                f"<span style='display:inline-block;width:11px;height:6px;background:var(--green2);vertical-align:middle'></span> downloaded {downloaded:,} · "
+                f"<span style='display:inline-block;width:11px;height:6px;background:var(--accent);vertical-align:middle'></span> automatically processed {processed:,} · "
+                f"<span style='display:inline-block;width:11px;height:6px;background:var(--ink);vertical-align:middle'></span> fully verified {verified:,} "
                 "— the three marks are drawn at least 3 px wide; at this scale the pilot is a sliver.</p></div>")
     return "".join(html)
+
+
+YEAR_LO, YEAR_HI = 1896, 1959      # the era the site is framed on (the sitemark tag); the survey shows what lies outside
+
+
+def is_downloaded(row):
+    """An issue counts as downloaded when the archive record or any product of it is
+    on this machine — the page images may live on another machine, the records
+    travel with the repository."""
+    return bool((_j(row["ia"], {}) or {}).get("title") or row["pages"] or row["layout_pages"] or row["complete"])
+
+
+def n_downloaded(con):
+    return sum(1 for r in _rows(con, "SELECT ia, pages, layout_pages, complete FROM issues") if is_downloaded(r))
+
+
+def year_progress_layers(con, lo=YEAR_LO, hi=YEAR_HI):
+    """The four layers of the year strip: fiction-magazine items in the archive by
+    year (the survey), and the issues downloaded, read and assembled, and fully
+    verified (the explorer's issues table), each {year: count}."""
+    sv = meta_json(con, "survey", {}) or {}
+    fby = (sv.get("working_corpus") or {}).get("fiction_by_year") or {}
+    archive = {int(y): int(n) for y, n in fby.items() if str(y).isdigit() and lo <= int(y) <= hi}
+    rows = _rows(con, "SELECT year, ia, pages, layout_pages, complete, stories, verified FROM issues WHERE year IS NOT NULL")
+    dl, done, ver = {}, {}, {}
+    for r in rows:
+        y = int(r["year"])
+        # downloaded = the archive record or any of its products is on this machine (the page
+        # images may live on another machine; the records travel with the repo)
+        if is_downloaded(r):
+            dl[y] = dl.get(y, 0) + 1
+        if r["complete"]:
+            done[y] = done.get(y, 0) + 1
+        if r["stories"] and r["verified"] == r["stories"]:
+            ver[y] = ver.get(y, 0) + 1
+    return [("In the archive", "#1baf7a", archive, None), ("Downloaded", "#2a78d6", dl, archive),
+            ("Assembled", "#eb6834", done, archive), ("Verified", "var(--accent)", ver, archive)]
+
+
+def year_strip(layers, lo=YEAR_LO, hi=YEAR_HI, width=980, label_w=100):
+    """The progress strip (design of 2026-09-05, after the centre's causal-inference
+    site): one row per layer, one cell per year, darker meaning a fuller year — the
+    archive row relative to its fullest year, the process rows relative to the
+    year's archive items (any presence at least a third strong, so ten issues
+    show); a tooltip on every cell; a tick every decade."""
+    n = hi - lo + 1
+    inner = width - label_w - 12
+    cw = inner / n
+    rh, gap, top = 22, 6, 6
+    H = top + len(layers) * (rh + gap) + 22
+    out = [f"<svg viewBox='0 0 {width} {H}' role='img' aria-label='Processing coverage by year, {lo} to {hi}' style='width:100%;height:auto'>"]
+    for i, (label, colour, data, denom) in enumerate(layers):
+        y = top + i * (rh + gap)
+        out.append(f"<text x='{label_w - 8}' y='{y + 15}' text-anchor='end' class='dlabel'>{_esc(label)}</text>")
+        out.append(f"<rect x='{label_w}' y='{y}' width='{inner:.1f}' height='{rh}' fill='var(--grid)' opacity='0.35' rx='3'/>")
+        mx = max(data.values()) if data else 0
+        for yr in range(lo, hi + 1):
+            v = data.get(yr, 0)
+            if not v:
+                continue
+            if denom is None:
+                op = 0.3 + 0.7 * (v / mx if mx else 1)
+                tip = f"{yr}: {v:,} fiction-magazine items in the archive"
+            else:
+                d = denom.get(yr, 0)
+                share = (v / d) if d else 1.0
+                op = 1.0 if share >= 1 else 0.3 + 0.7 * share
+                tip = f"{yr}: {v:,} of {d:,} issues {label.lower()}" if d else f"{yr}: {v:,} issues {label.lower()}"
+            x = label_w + (yr - lo) * cw
+            out.append(f"<rect x='{x:.2f}' y='{y}' width='{max(1.0, cw - 0.6):.2f}' height='{rh}' fill='{colour}' opacity='{op:.2f}'><title>{_esc(tip)}</title></rect>")
+    ty = H - 6
+    for yr in range((lo // 10 + 1) * 10, hi + 1, 10):
+        x = label_w + (yr - lo) * cw
+        out.append(f"<text x='{x:.1f}' y='{ty}' class='tick'>{yr}</text>")
+    out.append("</svg>")
+    return "".join(out)
+
+
+def year_strip_html(con=None, caption=True):
+    """The strip with its caption: the four layers and their totals."""
+    con = con or db()
+    layers = year_progress_layers(con)
+    sv = meta_json(con, "survey", {}) or {}
+    wc = sv.get("working_corpus") or {}
+    fby = wc.get("fiction_by_year") or {}
+    n_out = sum(int(v) for y, v in fby.items() if str(y).isdigit() and not (YEAR_LO <= int(y) <= YEAR_HI))
+    n_undated = max(0, int(wc.get("fiction_items") or 0) - sum(int(v) for y, v in fby.items() if str(y).isdigit()))
+    tot = [sum(d.values()) for _, _, d, _ in layers]
+    cap = ""
+    if caption:
+        rest = ", ".join(x for x in [f"{n_out:,} dated outside the era" if n_out else "",
+                                     f"{n_undated:,} undated" if n_undated else ""] if x)
+        cap = (f"<figcaption class='fine'>How much of the era is in each layer — darker means a fuller year. Right now: "
+               f"{tot[0]:,} fiction-magazine items in the archive dated {YEAR_LO}–{YEAR_HI}"
+               + (f" (and {rest})" if rest else "")
+               + f" · {tot[1]:,} downloaded · {tot[2]:,} read and assembled · {tot[3]:,} fully verified.</figcaption>")
+    if not fby:
+        cap = "<figcaption class='fine'>The archive layer needs the survey's per-year counts (pipeline/s00_survey.py --summary).</figcaption>" + cap
+    return f"<figure style='margin:14px 0'>{cap}{year_strip(layers)}</figure>"
+
+
+def year_grid_html(con=None, lo=YEAR_LO, hi=YEAR_HI):
+    """One card per year: items in the archive, and what this site has of them."""
+    con = con or db()
+    layers = year_progress_layers(con, lo, hi)
+    archive, dl, done = layers[0][2], layers[1][2], layers[2][2]
+    out = ["<div class='yeargrid'>"]
+    for yr in range(lo, hi + 1):
+        a = archive.get(yr, 0)
+        n_done, n_dl = done.get(yr, 0), dl.get(yr, 0)
+        sub = f"{a:,} items" if a else "no items"
+        if n_done:
+            sub += f" · {n_done} read"
+        elif n_dl:
+            sub += f" · {n_dl} downloaded"
+        cls = " class='done'" if n_done else ""
+        out.append(f"<a href='/issues?year={yr}'{cls}>{yr}<span>{_esc(sub)}</span></a>")
+    out.append("</div>")
+    return "".join(out)
 
 
 def explore_progress_html(con=None):
@@ -1353,8 +1471,9 @@ def explore_progress_html(con=None):
                    f"pulp collection holds {fr['total']:,} items, {fr['working']:,} of them in English or with no language given "
                    f"(the working corpus; {fr['other']:,} in other languages are left out), and {fr['fiction']:,} of those are "
                    f"fiction magazines — the frame the complete-issue count is drawn against below.</p>")
-        n_dl = _val(con, "SELECT COUNT(*) FROM issues WHERE pages>0") or 0
+        n_dl = n_downloaded(con)
         n_fv = _val(con, "SELECT COUNT(*) FROM issues WHERE stories>0 AND verified=stories") or 0
+        out.append(year_strip_html(con))
         out.append(collection_bar(fr, n_dl, n_c, n_fv))
         out.append(f"<p class='muted' style='font-size:12.5px'>{n_c:,} complete of {fr['fiction']:,} fiction-magazine items "
                    f"({_fmt(100 * n_c / fr['fiction'] if fr['fiction'] else 0)}%). Survey of {_esc(fr['generated'])}, metadata only "
@@ -1390,7 +1509,7 @@ def process_board_html():
     if fr["have"]:
         bk = fr["by_kind"]
         wbk = fr["working_by_kind"]
-        out.append(f"<h3 style='font-weight:normal;font-size:16px'>The collection (survey of {_esc(fr['generated'])}, metadata only)</h3>")
+        out.append(f"<h3>The collection (survey of {_esc(fr['generated'])}, metadata only)</h3>")
         crows = [["archive items in the collection, every language", N(fr["total"]), _bar(fr["total"], fr["total"], 220),
                   f"<span class='muted'>{fr['pages_total']:,} page images; {fr['magazines_distinct']:,} magazine names as the archive titles them</span>"],
                  ["marked English", N(fr["english"]), _bar(fr["english"], fr["total"], 220), ""],
@@ -1402,7 +1521,9 @@ def process_board_html():
                  ["of which fiction magazines (pulps and digests)", N(fr["fiction"]), _bar(fr["fiction"], fr["total"], 220),
                   f"<span class='muted'>{fr['fiction_pages']:,} page images, {fr['fiction_magazines']:,} magazine names; the rest: "
                   + ", ".join(f"{k} {v:,}" for k, v in wbk.items() if k != "fiction magazine") + "</span>"]]
-        out.append(collection_bar(fr, sum(1 for i in iss if i["pages"]), sum(1 for i in iss if i["assembled"] or i["exported"]),
+        out.append(year_strip_html(con))
+        out.append(collection_bar(fr, sum(1 for i in iss if is_downloaded(i)),
+                                  sum(1 for i in iss if i["assembled"] or i["exported"]),
                                   sum(1 for i in iss if i["stories"] and i["verified"] == i["stories"])))
         out.append(_table(["the collection", "#items", "share of the collection", "note"], crows))
         dec = fr["fiction_by_decade"]
@@ -1417,7 +1538,7 @@ def process_board_html():
     of = fr["fiction"]
     steps = [("surveyed (metadata from the archive)", fr["total"] if fr["have"] else 0, fr["total"], "every item, every language"),
              ("issues selected for processing", n, of, "the pilot development set; the full-study sample after protocol acceptance"),
-             ("downloaded (archive record on disk)", sum(1 for i in iss if _j(i["ia"], {}).get("title") or i["pages"]), of, ""),
+             ("downloaded (archive record or a product of it on this machine)", sum(1 for i in iss if is_downloaded(i)), of, ""),
              ("page images on disk", sum(1 for i in iss if i["pages"]), of, f"{sum(i['pages'] for i in iss):,} pages"),
              ("read by layout OCR (layout records)", sum(1 for i in iss if i["layout_pages"]), of, f"{sum(i['layout_pages'] for i in iss):,} pages"),
              ("text stages present", sum(1 for i in iss if _j(i["text_stages"], [])), of, ""),
@@ -1433,7 +1554,7 @@ def process_board_html():
         pct = (100 * v / den) if den else 0
         rows.append([_esc(label), N(v), _bar(v, den, 220, 12).replace("max-width:220px", "width:220px;display:inline-block;vertical-align:middle")
                      + f" <span class='muted' style='font-size:12px'>{_fmt(pct)}% of {den:,}</span>", f"<span class='muted'>{_esc(note)}</span>"])
-    out.append("<h3 style='font-weight:normal;font-size:16px'>The process, issue by issue, against the working corpus's fiction magazines</h3>")
+    out.append("<h3>The process, issue by issue, against the working corpus's fiction magazines</h3>")
     out.append(_table(["step", "#issues", "share", "note"], rows))
     out.append(f"<p class='muted'>What the explorer holds now: {counts.get('magazines', 0):,} magazines, {counts.get('complete_issues', 0):,} "
                f"complete issues, {counts.get('records', 0):,} records of all kinds, {counts.get('stories', 0):,} stories, "
@@ -1448,7 +1569,7 @@ def process_board_html():
                       N(i["assembled"] or ""), N(i["exported"] or ""), N(i["stories"] or ""),
                       N(i["events"] or "") + (f" <span class='muted'>+{i['events_archived']:,} archived</span>" if i["events_archived"] else ""),
                       N(i["modified"] or ""), N(i["verified"] or ""), done])
-    out.append("<h3 style='font-weight:normal;font-size:16px'>Every issue, every step</h3>")
+    out.append("<h3>Every issue, every step</h3>")
     out.append(_table(["issue", "#pages", "#layout pages", "text stages", "#assembled", "#exported", "#stories", "#actions",
                        "#modified", "#verified", "complete"], irows))
     out.append("<p class='muted'>Complete = assembled into records by the machine; such issues appear on the explorer "
@@ -1674,13 +1795,17 @@ def issues_page(qs=None, render=None):
     con = db()
     q = _g(qs, "q").strip().lower()
     sort = _g(qs, "sort", "date") or "date"
-    complete = _g(qs, "complete", "1")
+    year = _g(qs, "year", "")
+    complete = _g(qs, "complete", "all" if year else "1")
     sl = _slice(qs)
     conds, args = [], []
     if complete == "1":
         conds.append("complete=1")
     elif complete == "0":
         conds.append("complete=0")
+    if year.isdigit():
+        conds.append("CAST(year AS INTEGER)=?")
+        args.append(int(year))
     if q:
         conds.append("(LOWER(magazine) LIKE ? OR LOWER(id) LIKE ? OR LOWER(cover_date) LIKE ? OR LOWER(ia_identifier) LIKE ?)")
         args += [f"%{q}%"] * 4
@@ -2028,10 +2153,10 @@ def story_page(sid, render=None):
     if facts:
         body.append("<p class='muted' style='font-size:12.5px'>" + " · ".join(facts) + "</p>")
     if r.get("teaser"):
-        body.append(f"<p style='font-style:italic;border-left:3px solid #8a6d1f;padding-left:10px'>{_esc(r['teaser'])} "
+        body.append(f"<p style='font-style:italic;border-left:3px solid var(--warn);padding-left:10px'>{_esc(r['teaser'])} "
                     f"<span class='muted' style='font-style:normal;font-size:12px'>— teaser as printed (metadata, not story text)</span></p>")
     if r.get("synopsis"):
-        body.append(f"<details style='border-left:3px solid #8a6d1f;padding-left:10px;margin:6px 0'><summary class='muted' style='cursor:pointer'>"
+        body.append(f"<details style='border-left:3px solid var(--warn);padding-left:10px;margin:6px 0'><summary class='muted' style='cursor:pointer'>"
                     f"synopsis of the earlier instalments, as printed ({len(r['synopsis'].split()):,} words — the story's own earlier text, "
                     f"left out of the reading text and of the reuse inventory)</summary>"
                     + "".join(f"<p style='font-style:italic'>{_esc(para)}</p>" for para in r["synopsis"].split("\n\n")[:40]) + "</details>")
@@ -2169,7 +2294,7 @@ def pair_page(a, b, render=None, user=None):
     al = _rows(con, "SELECT * FROM aligns WHERE (a=? AND b=?) OR (a=? AND b=?) ORDER BY cols DESC", (a, b, b, a))
 
     def head(r):
-        return (f"<div style='flex:1 1 300px;background:#fff;border:1px solid #d8cfc0;padding:8px 12px'>"
+        return (f"<div style='flex:1 1 300px;background:var(--surface);border:1px solid var(--grid);padding:8px 12px'>"
                 f"<div style='font-size:17px'>{_story_link(con, r['id'], False, rec=r)}</div>"
                 f"<div class='muted'>{_author_link(r)}</div>"
                 f"<div class='muted'>{_issue_link(con, r['issue'])} · {r['n_words']:,} words · {_esc(r['status'])} · "
@@ -2214,7 +2339,7 @@ def pair_page(a, b, render=None, user=None):
         if t:
             parts.append("Paraphrase (K = 10): " + t + ".")
         if parts:
-            bgnote = ("<h3 style='font-weight:normal;font-size:16px'>Placed among comparable pairs (protocol 4.1)</h3><p>" + " ".join(parts)
+            bgnote = ("<h3>Placed among comparable pairs (protocol 4.1)</h3><p>" + " ".join(parts)
                       + " <span class='muted'>The stratum is the sampler's: the later work's decade, the interval band, and the topic-similarity "
                       "quartile; the pair itself is left out of the count.</span></p>")
     s = meta_json(con, "summary", {})
@@ -2254,7 +2379,7 @@ def pair_page(a, b, render=None, user=None):
                     links = "<span class='muted'>not located now</span>"
                 return (f"<div style='flex:1 1 300px'><div class='muted' style='font-size:12px'>{_esc(r['title'] or r['id'])} · {links}</div>"
                         f"<div><span class='muted'>{_esc((loc or {}).get('before', ''))}</span>"
-                        f"<span style='background:#f3e2a8'>{_esc(m['excerpt'])}</span>"
+                        f"<span style='background:var(--warnbg)'>{_esc(m['excerpt'])}</span>"
                         f"<span class='muted'>{_esc((loc or {}).get('after', ''))}</span></div></div>")
             body.append(f"<div class='card'><div class='ch'><span>{m['len']} words</span>"
                         + (f"<span class='muted'>{_esc(m.get('cause') or '')}</span>" if m.get("cause") else "")
@@ -2588,7 +2713,7 @@ DICTIONARY = [
 def data_dictionary_html():
     out = []
     for title, fields in DICTIONARY:
-        out.append(f"<h3 style='font-weight:normal;font-size:16px'>{_esc(title)}</h3>")
+        out.append(f"<h3>{_esc(title)}</h3>")
         out.append(_table(["field", "meaning"], [[_esc(f), _esc(m)] for f, m in fields]))
     return "".join(out)
 
