@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.13.1"
+APP_VERSION = "0.14.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -1290,9 +1290,11 @@ def page(title, body, member=True, path="/", admin=False, user_name="", flash=""
            "<a href='/overview'>Overview</a><a href='/authors'>Authors</a>"
            "<a href='/magazines'>Magazines</a><a href='/issues'>Issues</a>"
            "<a href='/stories'>Records</a><a href='/pairs'>Pairs</a>"
-           "<a href='/reuse'>Reuse</a><a href='/method'>Method</a>"
+           "<a href='/reuse'>Reuse</a><a href='/collection'>Collection</a><a href='/corpus'>Corpus</a>"
+           "<a href='/datasheet'>Datasheet</a><a href='/method'>Method</a>"
            "<span class='navgrp'>Workroom</span>"
            "<a href='/guide'>Guide</a><a href='/articles'>Workbench</a>"
+           "<a href='/reuse/validate'>Paraphrase review</a><a href='/reuse/cases'>Cases</a>"
            "<a href='/reuse/progress'>Progress</a><a href='/assembly'>Assembly</a>"
            "<a href='/timing'>Timing</a><a href='/activity'>Activity</a>"
            f"<a href='/feedback'>Feedback</a>{userslink}"
@@ -1406,8 +1408,12 @@ import sys as _sys
 _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reuse_pages as RP  # noqa: E402
 import explore_pages as EX  # noqa: E402
+import review_pages as RV  # noqa: E402
+import collection_pages as CP  # noqa: E402
 RP.bind(globals())
 EX.bind(globals())
+RV.bind(globals())
+CP.bind(globals())
 
 
 # ---------------- request handler ----------------
@@ -1673,6 +1679,12 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, text, "text/plain; charset=utf-8")
         if path == "/overview":
             return self._send(200, EX.overview(qs, render=self._page))
+        if path == "/collection":
+            return self._send(200, CP.collection_page(qs, render=self._page))
+        if path == "/corpus":
+            return self._send(200, CP.corpus_page(qs, render=self._page))
+        if path == "/datasheet":
+            return self._send(200, CP.datasheet_page(qs, render=self._page))
         if path == "/authors":
             return self._send(200, EX.authors_page(qs, render=self._page))
         if path == "/magazines":
@@ -1692,7 +1704,7 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, EX.story_page(m.group(1), render=self._page))
         m = re.fullmatch(r"/pair/([\w\-]+)/([\w\-]+)", path)
         if m:
-            return self._send(200, EX.pair_page(m.group(1), m.group(2), render=self._page))
+            return self._send(200, EX.pair_page(m.group(1), m.group(2), render=self._page, user=self.user))
         m = re.fullmatch(r"/raw/(story|author|issue|magazine)/([\w\-]+?)(\.json)?", path)
         if m:
             return self._raw(m.group(1), m.group(2), bool(m.group(3)))
@@ -1717,10 +1729,14 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, RP.assembly_page(qs, render=self._page))
         if path == "/reuse/progress":
             return self._send(200, RP.progress_page(render=self._page))
+        if path == "/reuse/validate":
+            return self._send(200, RV.validate_page(qs, self.user, render=self._page))
+        if path == "/reuse/cases":
+            return self._send(200, RV.cases_page(qs, self.user, render=self._page))
         m = re.fullmatch(r"/reuse/cluster/(\w+)/(exact|para)/(\d+)/(\d+)", path)
         if m:
             return self._send(200, RP.cluster_page(m.group(1), m.group(2), int(m.group(3)),
-                                                   int(m.group(4)), render=self._page))
+                                                   int(m.group(4)), render=self._page, user=self.user))
         if path == "/guide":
             return self._send(200, self.guide_page())
         if path == "/method":
@@ -1789,6 +1805,15 @@ class H(BaseHTTPRequestHandler):
             if is_admin(self.user):
                 feedback_update(get("id"), self.user, True, done=(get("done") == "1"))
             return self._redirect("/feedback?fb=saved")
+        if path in ("/reuse/validate", "/reuse/case"):
+            if self.user == "guest":
+                return self._send(403, self._page("No", howto(
+                    "Judging and marking need a named account, so the log shows who did it.")
+                    + "<h1>Guests cannot judge</h1>"))
+            if path == "/reuse/validate":
+                RV.append_judgment(self.user, get("set_id"), get("item"), get("judgment"), get("note"))
+                return self._redirect(f"/reuse/validate?after={urllib.parse.quote(get('item'))}")
+            return self._redirect(RV.do_case(get, self.user))
         if path == "/annotate":
             if self.user == "guest":
                 return self._send(403, self._page("No", howto(
@@ -3207,8 +3232,31 @@ mark as verified. Done &mdash; the record now carries your name
 and the time, and verify, then next unverified takes you
 straight to the next one.</p>
 
+<h2>Two more jobs: paraphrase review and cases</h2>
+<p>6. <a href='/reuse/validate'>Paraphrase review</a> (protocol 3.2):
+the detector that looks for rewritten passages needs readers to tell it
+where the line runs. Each item shows two passages from stories of
+different issues; press 1 if the second is a rewritten or copied
+version of the first (or both share a rewritten passage), 2 if the two
+merely treat the same subject or share stock phrasing, 3 if unsure, and
+leave a note when it helps. You do not see the machine's numbers until
+you have judged, on purpose. Two readers judge the same items; the
+calibration page shows how every setting fares against the readers and
+which one is chosen.</p>
+<p>7. <a href='/reuse/cases'>Cases</a> (protocol 4.2): when a cluster
+or a pair of stories looks extensive, unexpected, or historically
+suggestive, press mark as a case on its page and say why; the case
+carries its notes in order until it is written up or dropped.</p>
+
 <h2>What the other pages are for</h2>
-<p><a href='/issues'>issues</a>: every complete issue in the explorer
+<p><a href='/collection'>collection</a>: the archive's collection and
+the sample drawn from it &mdash; who uploaded what and when, the OCR
+engines behind the archive's own text, the sample by decade, genre,
+magazine and publisher. <a href='/corpus'>corpus</a>: the story-level
+corpus and the parallel corpus of advertisements and paratexts, with
+downloads. <a href='/datasheet'>datasheet</a>: the corpus documented in
+the datasheet form, generated from the survey and the counts.
+<a href='/issues'>issues</a>: every complete issue in the explorer
 (built for the whole corpus: paged, with filters); the workroom's own
 list of the ten pilot issues with their processing stages is
 <a href='/workroom/issues'>workroom/issues</a>. Each issue opens

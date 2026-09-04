@@ -501,6 +501,72 @@ def _render(render, title, body, path):
     return (render or _G["page"])(title, body, path=path)
 
 
+WHOLE_STORY, HIGH_COVERAGE = 0.80, 0.20      # share of the shorter story covered by shared passages (protocol 3.1, "Report")
+
+
+def extensive_cases_html(set_, k):
+    """Protocol 3.1, Report: 'especially extensive cases, including whole-story and
+    high-coverage reprints' and 'the proportion of each story involved in reuse'."""
+    pairs = _load(f"{set_}_k{k}_pairs.json") or []
+    shares = _load(f"{set_}_k{k}_story_share.json") or {}
+    if not pairs:
+        return ""
+    meta = _story_meta()
+    ranked = sorted(pairs, key=lambda p: -max(p.get("cover_a", 0), p.get("cover_b", 0)))
+    n_whole = sum(1 for p in ranked if max(p.get("cover_a", 0), p.get("cover_b", 0)) >= WHOLE_STORY)
+    n_high = sum(1 for p in ranked if HIGH_COVERAGE <= max(p.get("cover_a", 0), p.get("cover_b", 0)) < WHOLE_STORY)
+    rows = []
+    for p in ranked[:12]:
+        cov = max(p.get("cover_a", 0), p.get("cover_b", 0))
+        band = "whole story" if cov >= WHOLE_STORY else "high coverage" if cov >= HIGH_COVERAGE else "ordinary"
+        rows.append(f"<tr><td>{_esc(_name(p['a'], meta))}</td><td>{_esc(_name(p['b'], meta))}</td>"
+                    f"<td class='num'>{p['n_matches']}</td><td class='num'>{p['max_len']}</td>"
+                    f"<td class='num'>{100 * p.get('cover_a', 0):.2f}%</td><td class='num'>{100 * p.get('cover_b', 0):.2f}%</td>"
+                    f"<td>{band}</td><td><a href='/pair/{_esc(p['a'])}/{_esc(p['b'])}'>pair</a></td></tr>")
+    out = [f"<h3 style='font-weight:normal;font-size:16px'>1b. Extensive cases (seed {k}, {_esc(set_)} set): whole-story and high-coverage matches</h3>",
+           f"<p>Of {len(pairs)} story pairs sharing at least one passage across issues, <b>{n_whole}</b> are whole-story cases "
+           f"(shared passages cover {int(WHOLE_STORY * 100)}% or more of the shorter story) and <b>{n_high}</b> high-coverage cases "
+           f"({int(HIGH_COVERAGE * 100)}% or more). The pairs with the largest coverage:</p>",
+           "<table><tr><th>Story A</th><th>Story B</th><th class='num'>Passages</th><th class='num'>Longest</th>"
+           "<th class='num'>Cover A</th><th class='num'>Cover B</th><th>Band</th><th></th></tr>" + "".join(rows) + "</table>",
+           "<p class='muted'>Coverage = share of a story's words inside passages it shares with the other; the bands are the report's "
+           "thresholds, not evidence of anything by themselves. A whole-story case is classified by the printed record on its pair page "
+           "(a reprint the magazine acknowledges, or not); the background analysis says how unusual the rest are.</p>"]
+    if shares:
+        vals = sorted(shares.values(), reverse=True)
+        n = len(vals)
+        top = sorted(shares.items(), key=lambda kv: -kv[1])[:10]
+        out.append(f"<h3 style='font-weight:normal;font-size:16px'>The proportion of each story involved in reuse</h3>"
+                   f"<p>{n} stories share at least one passage with a story of another issue: "
+                   f"{sum(1 for v in vals if v >= 0.5)} have half or more of their words in shared passages, "
+                   f"{sum(1 for v in vals if 0.1 <= v < 0.5)} between a tenth and a half, {sum(1 for v in vals if 0.01 <= v < 0.1)} between one percent and a tenth, "
+                   f"{sum(1 for v in vals if v < 0.01)} under one percent. Largest shares: "
+                   + ", ".join(f"<a href='/story/{_esc(sid)}'>{_esc(_name(sid, meta))}</a> {100 * v:.1f}%" for sid, v in top) + ".</p>")
+    return "".join(out)
+
+
+def capture_html(set_):
+    """Protocol 3.2, Consolidate and report: 'compare how much recurrence is captured
+    by each form of reuse' — story pairs and passages found by exact matching, by the
+    paraphrase stage, and by both, from the pair table."""
+    try:
+        con = _G["EX"].db()
+        row = _G["EX"]._one(con, "SELECT SUM(CASE WHEN exact_k6_n>0 AND (para_k10_n IS NULL OR para_k10_n=0) THEN 1 ELSE 0 END) ex_only, "
+                                 "SUM(CASE WHEN para_k10_n>0 AND (exact_k6_n IS NULL OR exact_k6_n=0) THEN 1 ELSE 0 END) pa_only, "
+                                 "SUM(CASE WHEN exact_k6_n>0 AND para_k10_n>0 THEN 1 ELSE 0 END) both, COUNT(*) n, "
+                                 "SUM(exact_k6_n) ex_pass, SUM(para_k10_n) pa_pass FROM pairs WHERE same_issue=0")
+    except Exception:
+        return ""
+    if not row or not row["n"]:
+        return ""
+    ex_only, pa_only, both = row["ex_only"] or 0, row["pa_only"] or 0, row["both"] or 0
+    return (f"<h3 style='font-weight:normal;font-size:16px'>What each form of reuse captures ({_esc(set_)} set, cross-issue pairs)</h3>"
+            f"<p>Of {row['n']:,} story pairs across issues, <b>{ex_only + both:,}</b> share an exact passage (seed 6) and <b>{pa_only + both:,}</b> "
+            f"a kept alignment (K = 10): {both:,} both, {ex_only:,} exact only, {pa_only:,} paraphrase only. Passages: {int(row['ex_pass'] or 0):,} exact matches "
+            f"against {int(row['pa_pass'] or 0):,} alignments. Exact and paraphrastic matches are kept in separate files and columns "
+            "(exact_k*_ and para_k*_ in the pair table), so the two inventories can always be compared.</p>")
+
+
 def overview(render=None):
     runs = _runs()
     if not runs["exact"]:
@@ -523,8 +589,8 @@ def overview(render=None):
         "same issue are reported separately as assembly diagnostics."),
         "<h1>Text reuse in the pilot</h1>",
         "<p class='muted'>Browse: <a href='/reuse/clusters'>reuse clusters</a> · "
-        "<a href='/reuse/progress'>progress</a>. Method: docs/handbook.md, section "
-        "“Text reuse pipeline”.</p>"]
+        "<a href='/reuse/validate'>paraphrase review</a> · <a href='/reuse/cases'>cases</a> · "
+        "<a href='/reuse/progress'>progress</a>. Method: <a href='/method#reuse'>the protocol step by step</a>.</p>"]
 
     # ---- exact
     out.append("<h2>1. Exact reuse (r02)</h2>")
@@ -577,6 +643,9 @@ def overview(render=None):
                    + "".join(f"<tr><td class='num'>{n}</td><td>{_esc(s)}</td></tr>" for s, n in top)
                    + "</table></details>")
 
+    # ---- 1b. extensive cases and the share of each story (protocol 3.1, "Report")
+    out.append(extensive_cases_html(main_set, ks[0] if ks else 6))
+
     # ---- paraphrase
     out.append("<h2>2. Paraphrase and near-verbatim reuse (r04)</h2>")
     if runs["para"]:
@@ -619,6 +688,7 @@ def overview(render=None):
                    "passage; 5 and 20 are the sensitivity settings around the main run at 10.</p>")
     else:
         out.append("<div class='empty'>The paraphrase stage has not been run on this server's data yet.</div>")
+    out.append(capture_html(main_set))
 
     # ---- synthetic
     out.append("<h2>3. Planted reuse — machinery validation (kept separate)</h2>")
@@ -886,7 +956,7 @@ def clusters_page(qs, render=None):
     return _render(render, "Reuse clusters", "".join(out), "/reuse/clusters")
 
 
-def cluster_page(set_, kind, k, idx, render=None):
+def cluster_page(set_, kind, k, idx, render=None, user=None):
     runs = _runs()
     if kind == "exact":
         clusters, matches, _, stats = _exact_files(set_, k)
@@ -911,6 +981,10 @@ def cluster_page(set_, kind, k, idx, render=None):
         f"<a href='/reuse/clusters?set={_esc(set_)}&kind={kind}&k={k}'>back to the list</a></p>",
         f"<blockquote style='border-left:4px solid #7a3020;margin:10px 0;padding:6px 12px;background:#fff'>"
         f"{_esc(c['representative']['text'])}</blockquote>"]
+    # protocol 4.2: a cluster can be marked as a case for the literary genealogies
+    out.append(_G["RV"].case_form_html("cluster", {"set": set_, "kind": kind, "k": int(k), "idx": int(idx)}, user,
+                                       f"/reuse/cluster/{set_}/{kind}/{k}/{idx}",
+                                       title=(c['representative']['text'] or '')[:60]))
     out.append("<h2>Witnesses</h2>")
     members = sorted(c["members"], key=lambda m: (m["issue"], m["story_id"], m["tok"][0]))
     by_story = defaultdict(list)
@@ -1083,6 +1157,30 @@ def progress_page(render=None):
                    + ". Target for the correction sprint (implementation plan 0.1): 20–30 verified stories including one full issue.</p>")
     else:
         out.append("<div class='empty'>No annotation events on this server yet.</div>")
+    # ---- the two review tools of the protocol (3.2 validation, 4.2 cases)
+    out.append("<h2>Paraphrase review and cases</h2>")
+    try:
+        RV = _G["RV"]
+        items = RV._items()
+        if items:
+            r6 = RV._r6()
+            js = RV._judgments(items[0].get("set_id"))
+            cal = r6.calibrate(items, js, write=False) or {}
+            readers = ", ".join(f"{_esc(_G['display_name'](u))} {n}" for u, n in sorted(cal.get("readers", {}).items(), key=lambda kv: -kv[1])) or "nobody yet"
+            ag = cal.get("agreement") or {}
+            ch = cal.get("chosen")
+            out.append(f"<p>Review set {_esc(items[0].get('set_id'))}: {len(items)} items; judged by {readers}; "
+                       f"{cal.get('decided_items', 0)} decided"
+                       + (f"; agreement {ag['agree']} of {ag['items_both_decided']} (kappa {ag['kappa']})" if ag.get("items_both_decided") else "")
+                       + "; chosen setting " + (f"K = {ch['k']}, {ch['min_cols']} columns, identity {ch['min_identity']}" if ch else "none yet")
+                       + ". <a href='/reuse/validate'>Review</a> · <a href='/reuse/validate?view=calibration'>calibration</a>.</p>")
+        else:
+            out.append("<p class='muted'>No paraphrase review set on this server yet (pipeline/r06_validation.py --build).</p>")
+        cases = RV.load_cases()
+        out.append(f"<p>Cases for the literary genealogies: {sum(1 for c in cases.values() if c['open'])} open, "
+                   f"{sum(1 for c in cases.values() if not c['open'])} closed. <a href='/reuse/cases'>Cases</a>.</p>")
+    except Exception as e:
+        out.append(f"<p class='muted'>Review status unavailable ({_esc(str(e)[:80])}).</p>")
     # ---- pipeline board
     out.append("<h2>Pipeline status board</h2>")
     out.append(status_table(runs))

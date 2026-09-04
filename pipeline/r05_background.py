@@ -316,6 +316,15 @@ def background_curves(df):
                                 for lo in range(60, 100, 10)}
         cur["identity_hist"]["1.00"] = int((ident >= 1.0).sum())
         out["paraphrase"][f"k{k}"] = cur
+    # every full stratum of the sampler (later decade x years band x topic quartile): its size and
+    # survival curve, so that any match can be placed among comparable pairs (protocol 4.1, Report)
+    out["by_stratum"] = {}
+    for name, col, grid in (("exact_k6", "exact_k6_longest", list(range(6, 41))), ("exact_k7", "exact_k7_longest", list(range(7, 41))),
+                            ("exact_k8", "exact_k8_longest", list(range(8, 41))), ("para_k10", "para_k10_longest", list(range(20, 301, 10)))):
+        t = {}
+        for (dec, band, q), g in bg.groupby(["later_decade", "years_band", "topic_q"]):
+            t[f"{int(dec)}s|{band}|q{int(q)}"] = {"n": int(len(g)), **survival(g[col], grid)}
+        out["by_stratum"][name] = t
     # the two historical variables, tabulated
     out["time_table"] = {}
     for name, col, thr in (("exact_k6", "exact_k6_longest", 6), ("exact_k8", "exact_k8_longest", 8),
@@ -349,6 +358,35 @@ def surprise_table(df, top=25):
                              "excerpt": r["exact_excerpt" if name.startswith("exact") else "para_excerpt"][:200]})
         rows.sort(key=lambda r: (r["p_at_least"], -r["longest"]))
         out[name] = {"n_matched_pairs": len(rows), "most_unusual": rows[:top]}
+    return out
+
+
+def placement_table(df):
+    """Every matched cross-issue pair placed among comparable pairs, at two
+    levels: the full stratum (later decade x years band x topic quartile) and the
+    wider one (topic quartile x years band). p = share of the other pairs of the
+    stratum that share at least as much. Written to background/placement_<set>.json
+    so that the pair page and the story page can show it for any match."""
+    bg = df[df["same_issue"] == 0]
+    out = {}
+    for name, col, thr in (("exact_k6", "exact_k6_longest", 6), ("para_k10", "para_k10_longest", 20)):
+        rows = {}
+        for (dec, band, q), g in bg.groupby(["later_decade", "years_band", "topic_q"]):
+            vals = g[col].values
+            for _, r in g[g[col] >= thr].iterrows():
+                p = float(((vals >= r[col]).sum() - 1) / max(1, len(vals) - 1))
+                rows[f"{r['a']}|{r['b']}"] = {"longest": int(r[col]), "stratum": f"{int(dec)}s|{band}|q{int(q)}",
+                                             "stratum_n": int(len(g)), "p_at_least": round(p, 6)}
+        for (q, band), g in bg.groupby(["topic_q", "years_band"]):
+            vals = g[col].values
+            for _, r in g[g[col] >= thr].iterrows():
+                key = f"{r['a']}|{r['b']}"
+                if key in rows:
+                    p = float(((vals >= r[col]).sum() - 1) / max(1, len(vals) - 1))
+                    rows[key]["wider"] = f"q{int(q)}|{band}"
+                    rows[key]["wider_n"] = int(len(g))
+                    rows[key]["p_at_least_wider"] = round(p, 6)
+        out[name] = rows
     return out
 
 
@@ -518,6 +556,7 @@ def run(set_name="machine", outdir=OUTDIR, log=print):
         summary["topic_tfidf_vs_embedding_corr"] = round(float(c), 4)
     summary["background"] = background_curves(df)
     summary["unusual"] = surprise_table(df)
+    json.dump(placement_table(df), open(os.path.join(outdir, f"placement_{set_name}.json"), "w", encoding="utf-8"), indent=0)
     summary["sampler_check"] = sampler_check(df)
     summary["models"] = {
         "exact_k6": fit_two_part(df, units, "exact_k6", 6, log),

@@ -1,0 +1,483 @@
+[
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a015",
+   "tok": [
+    938,
+    945
+   ],
+   "text": "was at a loss to account for"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a015",
+    "issue": "wt_1925_11",
+    "tok": [
+     938,
+     945
+    ],
+    "len": 7,
+    "text": "was at a loss to account for"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     6487,
+     6494
+    ],
+    "len": 7,
+    "text": "was at a loss to account for"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    1319,
+    1326
+   ],
+   "text": "Try as he would, he could not"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     1319,
+     1326
+    ],
+    "len": 7,
+    "text": "Try as he would, he could not"
+   },
+   {
+    "story_id": "td_1932_02_a014",
+    "issue": "td_1932_02",
+    "tok": [
+     2874,
+     2881
+    ],
+    "len": 7,
+    "text": "try as he would he could not"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    9135,
+    9142
+   ],
+   "text": "You have been very good to me"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     9135,
+     9142
+    ],
+    "len": 7,
+    "text": "You have been very good to me"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     13247,
+     13254
+    ],
+    "len": 7,
+    "text": "You have been very good to me"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    13064,
+    13071
+   ],
+   "text": "on the back of a chair with"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     13064,
+     13071
+    ],
+    "len": 7,
+    "text": "on the back of a chair with"
+   },
+   {
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
+    "tok": [
+     8561,
+     8568
+    ],
+    "len": 7,
+    "text": "on the back of a chair with"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a029",
+   "tok": [
+    2777,
+    2784
+   ],
+   "text": "If I can get there in time"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a029",
+    "issue": "wt_1925_11",
+    "tok": [
+     2777,
+     2784
+    ],
+    "len": 7,
+    "text": "If I can get there in time"
+   },
+   {
+    "story_id": "www_1936_02_a055",
+    "issue": "www_1936_02",
+    "tok": [
+     10959,
+     10966
+    ],
+    "len": 7,
+    "text": "If I can get there in time"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a029",
+   "tok": [
+    3450,
+    3457
+   ],
+   "text": "Every moment he expected to feel the"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a029",
+    "issue": "wt_1925_11",
+    "tok": [
+     3450,
+     3457
+    ],
+    "len": 7,
+    "text": "Every moment he expected to feel the"
+   },
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     2801,
+     2808
+    ],
+    "len": 7,
+    "text": "Every moment he expected to feel the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1934_05_a007",
+   "tok": [
+    6396,
+    6403
+   ],
+   "text": "he had opened his eyes to find"
+  },
+  "members": [
+   {
+    "story_id": "wt_1934_05_a007",
+    "issue": "wt_1934_05",
+    "tok": [
+     6396,
+     6403
+    ],
+    "len": 7,
+    "text": "he had opened his eyes to find"
+   },
+   {
+    "story_id": "td_1932_02_a016",
+    "issue": "td_1932_02",
+    "tok": [
+     281,
+     288
+    ],
+    "len": 7,
+    "text": "he had opened his eyes to find"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1934_05_a007",
+   "tok": [
+    7634,
+    7641
+   ],
+   "text": "For the barest fraction of a second"
+  },
+  "members": [
+   {
+    "story_id": "wt_1934_05_a007",
+    "issue": "wt_1934_05",
+    "tok": [
+     7634,
+     7641
+    ],
+    "len": 7,
+    "text": "For the barest fraction of a second"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     18491,
+     18498
+    ],
+    "len": 7,
+    "text": "for the barest fraction of a second"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "ast_1930_03_a019",
+   "tok": [
+    1058,
+    1065
+   ],
+   "text": "On the other side of the room"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a019",
+    "issue": "ast_1930_03",
+    "tok": [
+     1058,
+     1065
+    ],
+    "len": 7,
+    "text": "On the other side of the room"
+   },
+   {
+    "story_id": "td_1932_02_a017",
+    "issue": "td_1932_02",
+    "tok": [
+     7703,
+     7710
+    ],
+    "len": 7,
+    "text": "on the other side of the room"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "gal_1952_03_a020",
+   "tok": [
+    5142,
+    5149
+   ],
+   "text": "The hand is quicker than the eye"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a020",
+    "issue": "gal_1952_03",
+    "tok": [
+     5142,
+     5149
+    ],
+    "len": 7,
+    "text": "The hand is quicker than the eye"
+   },
+   {
+    "story_id": "www_1936_02_a053",
+    "issue": "www_1936_02",
+    "tok": [
+     984,
+     991
+    ],
+    "len": 7,
+    "text": "the hand is quicker than the eye"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "td_1932_02_a015",
+   "tok": [
+    4474,
+    4481
+   ],
+   "text": "door at the end of the hall"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
+    "tok": [
+     4474,
+     4481
+    ],
+    "len": 7,
+    "text": "door at the end of the hall"
+   },
+   {
+    "story_id": "td_1948_12_a027",
+    "issue": "td_1948_12",
+    "tok": [
+     1796,
+     1803
+    ],
+    "len": 7,
+    "text": "door at the end of the hall"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "td_1932_02_a021",
+   "tok": [
+    2032,
+    2039
+   ],
+   "text": "on the other side of the street"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     2032,
+     2039
+    ],
+    "len": 7,
+    "text": "on the other side of the street"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     8686,
+     8693
+    ],
+    "len": 7,
+    "text": "on the other side of the street"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "ws_1937_02_a051",
+   "tok": [
+    4043,
+    4050
+   ],
+   "text": "he knew that he would have to"
+  },
+  "members": [
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     4043,
+     4050
+    ],
+    "len": 7,
+    "text": "he knew that he would have to"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     10777,
+     10784
+    ],
+    "len": 7,
+    "text": "He knew that he would have to"
+   }
+  ]
+ }
+]

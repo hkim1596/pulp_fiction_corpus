@@ -1,0 +1,146 @@
+{
+ "set": "machine",
+ "set_id": "20260904_115931",
+ "generated": "2026-09-04 11:59",
+ "stories": 78,
+ "passages": 24997,
+ "k_retrieve": 20,
+ "candidates_cross_issue": 393630,
+ "cosine_cuts": {
+  "closest_5pct": 0.7635,
+  "next_20pct": 0.7281
+ },
+ "per_stratum": 15,
+ "seed": 20260904,
+ "items": 115,
+ "strata": [
+  {
+   "source": "embedding-only",
+   "score_band": "below any rule",
+   "cosine_band": "closest 5%",
+   "candidates": 19601,
+   "drawn": 15,
+   "weight": 1306.733
+  },
+  {
+   "source": "embedding-only",
+   "score_band": "below any rule",
+   "cosine_band": "next 20%",
+   "candidates": 78429,
+   "drawn": 15,
+   "weight": 5228.6
+  },
+  {
+   "source": "embedding-only",
+   "score_band": "below any rule",
+   "cosine_band": "the rest",
+   "candidates": 294258,
+   "drawn": 15,
+   "weight": 19617.2
+  },
+  {
+   "source": "embedding-only",
+   "score_band": "loose rule only",
+   "cosine_band": "closest 5%",
+   "candidates": 61,
+   "drawn": 15,
+   "weight": 4.067
+  },
+  {
+   "source": "embedding-only",
+   "score_band": "loose rule only",
+   "cosine_band": "next 20%",
+   "candidates": 211,
+   "drawn": 15,
+   "weight": 14.067
+  },
+  {
+   "source": "embedding-only",
+   "score_band": "loose rule only",
+   "cosine_band": "the rest",
+   "candidates": 641,
+   "drawn": 15,
+   "weight": 42.733
+  },
+  {
+   "source": "embedding-only",
+   "score_band": "default rule",
+   "cosine_band": null,
+   "candidates": 6,
+   "drawn": 6,
+   "weight": 1.0
+  },
+  {
+   "source": "exact-seeded",
+   "score_band": "loose rule only",
+   "cosine_band": null,
+   "candidates": 419,
+   "drawn": 15,
+   "weight": 27.933
+  },
+  {
+   "source": "exact-seeded",
+   "score_band": "default rule",
+   "cosine_band": null,
+   "candidates": 4,
+   "drawn": 4,
+   "weight": 1.0
+  }
+ ],
+ "grid": {
+  "k": [
+   5,
+   10,
+   20
+  ],
+  "rules": [
+   [
+    15,
+    0.5
+   ],
+   [
+    20,
+    0.55
+   ],
+   [
+    20,
+    0.6
+   ],
+   [
+    25,
+    0.6
+   ],
+   [
+    25,
+    0.65
+   ],
+   [
+    30,
+    0.7
+   ]
+  ]
+ },
+ "precision_floor": 0.9,
+ "score_bands": [
+  [
+   null,
+   9,
+   "below any rule"
+  ],
+  [
+   9,
+   16,
+   "loose rule only"
+  ],
+  [
+   16,
+   30,
+   "default rule"
+  ],
+  [
+   30,
+   null,
+   "strong"
+  ]
+ ]
+}

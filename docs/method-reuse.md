@@ -14,16 +14,42 @@ site.
 
 > These efforts ultimately yield a story-level corpus, ready for analysis, in which individual works are linked to authors and to their original issue-level metadata, which we plan to release publicly.
 
-Here: the corpus-building stages s01–s07 (the section above this one)
-produce one record per printed unit — story, serial part, feature,
-poem, letters page, advertisement — with title and by-line as printed,
-page range, and the scan regions it came from. The reuse stages read
-those records through the site's own replay (machine assembly plus
-every human correction) via `pipeline/r00_export_stories.py`, which
-writes `data/pilot_stories.jsonl`. Only records typed story or serial
-part with at least 50 words enter the analysis; the rest form the
-paratext side. Ten issues are the declared development set; nothing
-else is downloaded or analysed before the protocol is accepted.
+Here: the corpus-building stages s01–s08 (the section above this one)
+produce one record per printed unit — story (a serial instalment is a
+story with serial fields), poem, feature, letters page, house matter,
+advertisement, contents page — with title and by-line as printed, page
+range, and the scan regions it came from. The reuse stages read those
+records through the site's own replay (machine assembly plus every
+human correction) via `pipeline/r00_export_stories.py`, which writes
+`data/pilot_stories.jsonl` and, since 4 September 2026, the two corpora
+the protocol names as two files: `data/export/stories.jsonl`, the
+story-level corpus (story records of fifty words or more), and
+`data/export/paratext.jsonl`, the parallel corpus (everything else,
+including story records too short to be stories). The
+[corpus page](/corpus) shows both side by side with downloads. Ten
+issues are the declared development set; nothing else is downloaded or
+analysed before the protocol is accepted.
+
+> Because the archive was assembled from a variety of contributors rather than according to a systematic collection design or a library collection policy, we treat it as a repository from which to construct our analytical corpus rather than as a representative corpus in itself. Following longstanding work on corpus design and representativeness, as well as more recent calls to document the provenance and construction of digital collections, we reconstruct the collection's history of transmission and assess the resulting sample by year, title, author, and publisher, alongside other available metadata.
+
+Here (`pipeline/s00_survey.py`, metadata only, allowed before
+acceptance by the decision of 3 September): `--run` reads the search
+index for every item of the collection (28,286 on 3 September 2026;
+language, sub-collections, dates, page counts), and `--enrich` reads
+each item's own metadata record for what the index does not carry —
+the uploading account and date, the curator who admitted it and the
+sub-collection it was filed under, the OCR engine that produced the
+archive's text, the language that OCR detected (a check on the items
+with no language given), the rights fields. The
+[collection page](/collection) is the history of transmission and the
+sample assessed by decade, genre, magazine title, publisher (from
+`config/publishers_magazines.json`, a reference table of magazine and
+period to be confirmed against the mastheads) and language, with the
+authors of the issues processed so far; the [datasheet](/datasheet)
+is the same material in the form of Gebru et al.'s datasheets and
+Bender and Friedman's data statements (the protocol's references 12
+and 13), generated from the survey and the corpus counts, with what
+the protocol leaves for the release marked pending.
 
 ## Study design (protocol section 3)
 
@@ -78,10 +104,18 @@ shows them side by side.
 
 Here: `*_stats.json` (counts, length histogram, clusters, stories
 involved), `*_story_share.json` (share of each story inside matches),
-`*_pairs.json` (per story pair: matches, longest, coverage). Whole-
-story duplicates surfaced immediately — as same-issue shared-region
-duplicates, which is the assembly finding recorded in the pilot
-results.
+`*_pairs.json` (per story pair: matches, longest, coverage). Since 4
+September the reuse page reports the extensive cases as the protocol
+asks: every cross-issue story pair ranked by the share of the shorter
+story that shared passages cover, with two named bands — whole-story
+(80% or more) and high-coverage (20% or more) — and the proportion of
+each story involved in reuse (how many stories have half, a tenth, one
+percent of their words in shared passages, and the largest shares by
+name). A whole-story case is classified on its pair page by the
+printed record (a reprint the magazine acknowledges, or not). Whole-
+story duplicates surfaced immediately in the first run — as same-issue
+shared-region duplicates, which is the assembly finding recorded in
+the pilot results.
 
 ## Paraphrase detection (protocol section 3.2)
 
@@ -111,15 +145,35 @@ score, and both texts.
 
 > Parameter selection and validation. To calibrate the paraphrase detector, we first test it on a separate set of passages reviewed by hand. This allows us to compare a small, prespecified range of settings and select those that best recover known paraphrases without needlessly expanding the candidate pool. The selected settings are then fixed and applied to the full corpus.
 
-Here: the hand-reviewed set does not exist yet (Sujin Kang leads it;
-implementation plan 3.2). Until then the development-set default keep
-rule is 20 or more columns with identity 0.60 or more, and the planted-
-reuse copy stands in for validation: a separate copy of the pilot
-stories with 20 verbatim, 20 lightly damaged, and 20 heavily edited
-plants, scored for recall. The site's reuse page shows the recall at
-the default rule and at a looser rule (15 columns, 0.50), and what the
-looser rule admits on the real corpus, so the threshold question
-arrives at the validation set with numbers attached.
+Here (`pipeline/r06_validation.py`, the [paraphrase review](/reuse/validate)
+page): the hand-reviewed set is drawn from the detector's own candidate
+pairs across the whole range it sees. Candidates are stratified by
+source (embedding-only, or seeded by an exact match) and by the
+alignment score of the candidate region — below any rule (score under
+9), loose rule only (9–15), default rule (16–29), strong (30 and more)
+— and, in the two lowest bands, by the embedding cosine (the closest
+5%, the next 20%, the rest), so that the set holds pairs the default
+rule keeps, pairs only a looser rule would keep, pairs below every
+rule, and the hard negatives the embedding search brought close
+although the words share little. Fifteen candidates are drawn from
+every stratum with a fixed seed, each with the inverse of its
+inclusion probability as its weight. Readers judge each pair on the
+site — paraphrase or copy, not a paraphrase, unsure, with a note —
+without seeing the machine's numbers; each judgment is one line of an
+append-only log (`data/reuse/validation/judgments.jsonl`: time,
+reader, set, item, judgment, note), and two readers judge the same
+items so that their agreement (Cohen's kappa) is reported. The
+calibration scores every setting in a fixed grid — K 5, 10, 20 by six
+keep rules from 15 columns at identity 0.50 to 30 columns at 0.70 —
+against the agreed judgments: precision (kept pairs the readers called
+paraphrase), recall (paraphrase pairs the setting keeps), both weighted
+by the strata, and the size of the pool kept; the chosen setting is
+the highest recall among those with precision of at least 0.90, ties
+to the smaller pool. Until the readers have judged, the default keep
+rule stands (20 columns, identity 0.60), and the planted-reuse copy
+stands in as the positive control: 20 verbatim, 20 lightly damaged and
+20 heavily edited plants scored for recall at the default rule and at
+a looser one (15 columns, 0.50).
 
 > Consolidate and report. As in the verbatim analysis, overlapping and related alignments are grouped into reuse clusters with multiple witnesses. Exact and paraphrastic matches are retained separately, allowing us later to compare how much recurrence is captured by each form of reuse.
 
@@ -166,8 +220,16 @@ correct.
 Here: empirical curves P(longest ≥ L) over cross-issue pairs, overall
 and by topic quartile, years-apart band, later decade, and same-author
 flag, for each seed; the same for paraphrase alignments by length with
-the identity distribution. Every matched pair is placed in its stratum
-(the "most unusual" table and the pair page).
+the identity distribution; and, since 4 September, the curve of every
+full stratum of the sampler (later decade × years-apart band × topic
+quartile) in `summary_<set>.json` under `background.by_stratum`. Every
+matched pair is placed among comparable pairs in
+`background/placement_<set>.json` — at two levels, the full stratum
+and the wider one (topic quartile × years band), the pair itself left
+out of the count — and the [pair page](/pairs) shows the placement for
+exact and for paraphrastic reuse ("none of the other 157 comparable
+pairs share at least 10 words"), the story page for each of a story's
+matches, and the reuse page the most unusual pairs overall.
 
 > Model historical variation. Once these background distributions can be established, we model recurrence at the level of story pairs. … To do this, we use a two-part hierarchical model, first estimating the probability that a pair contains any detected reuse and then, where reuse occurs, its extent. The models account for topic similarity, temporal distance, shared authorship, and publication venue. Story-level effects account for the fact that the same work may appear in many comparisons.
 
@@ -188,4 +250,8 @@ output, shown on the reuse page with that label.
 Here: the layered explorer is the working surface for this — cluster
 → witnesses → story → pair → the passage on the scan — so that every
 quoted passage in a case study can be checked against the printed
-page.
+page; and, since 4 September, the [cases](/reuse/cases) page: a
+cluster or a pair marked as a case from its page with a name and a
+note, the notes kept in order, the case closed when written up or
+dropped — an append-only log (`data/reuse/cases.jsonl`) with the name
+of who did what, which is the working list of the qualitative step.

@@ -1,0 +1,2597 @@
+{
+"exact_k6": {
+"wt_1934_05_a006|ws_1937_02_a046": {
+"longest": 6,
+"stratum": "1930s|0-2|q2",
+"stratum_n": 52,
+"p_at_least": 0.039216,
+"wider": "q2|0-2",
+"wider_n": 52,
+"p_at_least_wider": 0.039216
+},
+"wt_1934_05_a007|www_1936_02_a049": {
+"longest": 6,
+"stratum": "1930s|0-2|q2",
+"stratum_n": 52,
+"p_at_least": 0.039216,
+"wider": "q2|0-2",
+"wider_n": 52,
+"p_at_least_wider": 0.039216
+},
+"wt_1934_05_a014|td_1932_02_a013": {
+"longest": 7,
+"stratum": "1930s|0-2|q2",
+"stratum_n": 52,
+"p_at_least": 0.0,
+"wider": "q2|0-2",
+"wider_n": 52,
+"p_at_least_wider": 0.0
+},
+"wt_1934_05_a007|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"wt_1934_05_a007|td_1932_02_a021": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"wt_1934_05_a007|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"wt_1934_05_a007|www_1936_02_a055": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"wt_1934_05_a008|ws_1937_02_a049": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"wt_1934_05_a009|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"ast_1930_01_a019|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"ast_1930_01_a019|td_1932_02_a021": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"ast_1930_01_a020|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"ast_1930_01_a021|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"ast_1930_01_a022|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"ast_1930_01_a022|td_1932_02_a017": {
+"longest": 7,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.0,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.0
+},
+"ast_1930_03_a019|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"ast_1930_03_a019|td_1932_02_a021": {
+"longest": 6,
+"stratum": "1930s|0-2|q3",
+"stratum_n": 85,
+"p_at_least": 0.154762,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"wt_1934_05_a007|td_1932_02_a013": {
+"longest": 7,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.057554,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.050955
+},
+"wt_1934_05_a007|td_1932_02_a016": {
+"longest": 7,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.057554,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.050955
+},
+"wt_1934_05_a007|td_1932_02_a017": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"wt_1934_05_a007|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"wt_1934_05_a007|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"wt_1934_05_a009|td_1932_02_a013": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"wt_1934_05_a009|td_1932_02_a015": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"wt_1934_05_a009|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"wt_1934_05_a011|td_1932_02_a013": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"wt_1934_05_a011|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a016|ast_1930_03_a015": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a016|ast_1930_03_a018": {
+"longest": 7,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.057554,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.050955
+},
+"ast_1930_01_a016|ast_1930_03_a019": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a016|ast_1930_03_a020": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a016|td_1932_02_a013": {
+"longest": 7,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.057554,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.050955
+},
+"ast_1930_01_a017|ast_1930_03_a014": {
+"longest": 8,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.007194,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.006369
+},
+"ast_1930_01_a017|ast_1930_03_a018": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a017|ast_1930_03_a020": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a017|td_1932_02_a017": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a019|ast_1930_03_a015": {
+"longest": 10,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.0,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.0
+},
+"ast_1930_01_a019|ast_1930_03_a019": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a019|td_1932_02_a013": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a019|td_1932_02_a016": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a019|td_1932_02_a017": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a020|ast_1930_03_a018": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a020|ast_1930_03_a020": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a020|td_1932_02_a017": {
+"longest": 7,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.057554,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.050955
+},
+"ast_1930_01_a021|td_1932_02_a013": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a022|ast_1930_03_a020": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a022|td_1932_02_a013": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a024|ast_1930_03_a015": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a024|ast_1930_03_a018": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a024|ast_1930_03_a020": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a024|td_1932_02_a013": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a024|td_1932_02_a015": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_01_a024|td_1932_02_a017": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_03_a015|td_1932_02_a015": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_03_a015|td_1932_02_a016": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_03_a018|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_03_a018|td_1932_02_a015": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_03_a018|td_1932_02_a016": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_03_a018|td_1932_02_a021": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_03_a019|td_1932_02_a013": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_03_a019|td_1932_02_a015": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ast_1930_03_a019|td_1932_02_a017": {
+"longest": 7,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.057554,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.050955
+},
+"ast_1930_03_a020|td_1932_02_a013": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ws_1937_02_a044|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ws_1937_02_a051|www_1936_02_a047": {
+"longest": 7,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.057554,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.050955
+},
+"ws_1937_02_a051|www_1936_02_a049": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"ws_1937_02_a051|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|0-2|q4",
+"stratum_n": 140,
+"p_at_least": 0.352518,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"wt_1925_11_a023|www_1936_02_a049": {
+"longest": 6,
+"stratum": "1930s|10-19|q1",
+"stratum_n": 146,
+"p_at_least": 0.0,
+"wider": "q1|10-19",
+"wider_n": 273,
+"p_at_least_wider": 0.0
+},
+"wt_1925_11_a016|www_1936_02_a050": {
+"longest": 6,
+"stratum": "1930s|10-19|q2",
+"stratum_n": 85,
+"p_at_least": 0.02381,
+"wider": "q2|10-19",
+"wider_n": 235,
+"p_at_least_wider": 0.029915
+},
+"wt_1925_11_a023|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1930s|10-19|q2",
+"stratum_n": 85,
+"p_at_least": 0.02381,
+"wider": "q2|10-19",
+"wider_n": 235,
+"p_at_least_wider": 0.029915
+},
+"wt_1925_11_a023|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|10-19|q2",
+"stratum_n": 85,
+"p_at_least": 0.02381,
+"wider": "q2|10-19",
+"wider_n": 235,
+"p_at_least_wider": 0.029915
+},
+"wt_1925_11_a015|ws_1937_02_a051": {
+"longest": 7,
+"stratum": "1930s|10-19|q3",
+"stratum_n": 32,
+"p_at_least": 0.064516,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.01676
+},
+"wt_1925_11_a020|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1930s|10-19|q3",
+"stratum_n": 32,
+"p_at_least": 0.16129,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"wt_1925_11_a027|ws_1937_02_a046": {
+"longest": 7,
+"stratum": "1930s|10-19|q3",
+"stratum_n": 32,
+"p_at_least": 0.064516,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.01676
+},
+"wt_1925_11_a027|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1930s|10-19|q3",
+"stratum_n": 32,
+"p_at_least": 0.16129,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"wt_1925_11_a027|www_1936_02_a055": {
+"longest": 6,
+"stratum": "1930s|10-19|q3",
+"stratum_n": 32,
+"p_at_least": 0.16129,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"wt_1925_11_a029|www_1936_02_a055": {
+"longest": 7,
+"stratum": "1930s|10-19|q3",
+"stratum_n": 32,
+"p_at_least": 0.064516,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.01676
+},
+"wt_1925_11_a027|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1930s|10-19|q4",
+"stratum_n": 9,
+"p_at_least": 0.0,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"wt_1925_11_a026|ast_1930_01_a017": {
+"longest": 6,
+"stratum": "1930s|3-9|q1",
+"stratum_n": 190,
+"p_at_least": 0.010582,
+"wider": "q1|3-9",
+"wider_n": 197,
+"p_at_least_wider": 0.010204
+},
+"wt_1925_11_a031|ast_1930_01_a021": {
+"longest": 6,
+"stratum": "1930s|3-9|q1",
+"stratum_n": 190,
+"p_at_least": 0.010582,
+"wider": "q1|3-9",
+"wider_n": 197,
+"p_at_least_wider": 0.010204
+},
+"wt_1925_11_a031|td_1932_02_a021": {
+"longest": 6,
+"stratum": "1930s|3-9|q1",
+"stratum_n": 190,
+"p_at_least": 0.010582,
+"wider": "q1|3-9",
+"wider_n": 197,
+"p_at_least_wider": 0.010204
+},
+"wt_1925_11_a022|wt_1934_05_a012": {
+"longest": 6,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.047826,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.046512
+},
+"wt_1925_11_a022|ast_1930_03_a019": {
+"longest": 6,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.047826,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.046512
+},
+"wt_1925_11_a023|wt_1934_05_a007": {
+"longest": 6,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.047826,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.046512
+},
+"wt_1925_11_a023|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.047826,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.046512
+},
+"wt_1925_11_a023|td_1932_02_a015": {
+"longest": 8,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.0,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.0
+},
+"wt_1925_11_a023|td_1932_02_a021": {
+"longest": 6,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.047826,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.046512
+},
+"wt_1925_11_a025|wt_1934_05_a012": {
+"longest": 6,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.047826,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.046512
+},
+"wt_1925_11_a025|ast_1930_01_a020": {
+"longest": 6,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.047826,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.046512
+},
+"wt_1925_11_a025|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.047826,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.046512
+},
+"ast_1930_01_a024|ws_1937_02_a047": {
+"longest": 7,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.004348,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.003876
+},
+"ast_1930_03_a019|www_1936_02_a049": {
+"longest": 6,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.047826,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.046512
+},
+"td_1932_02_a021|www_1936_02_a049": {
+"longest": 6,
+"stratum": "1930s|3-9|q2",
+"stratum_n": 231,
+"p_at_least": 0.047826,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.046512
+},
+"wt_1925_11_a023|ast_1930_01_a019": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"wt_1925_11_a023|ast_1930_03_a019": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"wt_1925_11_a023|td_1932_02_a017": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"wt_1925_11_a025|wt_1934_05_a009": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"wt_1925_11_a027|td_1932_02_a014": {
+"longest": 7,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.012658,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.015873
+},
+"wt_1925_11_a029|wt_1934_05_a007": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"wt_1925_11_a029|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"wt_1934_05_a012|ast_1930_01_a019": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"wt_1934_05_a014|ast_1930_01_a016": {
+"longest": 7,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.012658,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.015873
+},
+"wt_1934_05_a015|ast_1930_01_a020": {
+"longest": 7,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.012658,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.015873
+},
+"wt_1934_05_a015|ast_1930_03_a018": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"ast_1930_01_a017|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"ast_1930_01_a017|www_1936_02_a050": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"ast_1930_01_a017|www_1936_02_a055": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"ast_1930_01_a019|www_1936_02_a049": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"ast_1930_01_a020|ws_1937_02_a049": {
+"longest": 7,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.012658,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.015873
+},
+"ast_1930_01_a020|www_1936_02_a055": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"ast_1930_01_a022|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"ast_1930_03_a014|www_1936_02_a050": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"ast_1930_03_a019|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"ast_1930_03_a019|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"ast_1930_03_a020|www_1936_02_a050": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"td_1932_02_a014|ws_1937_02_a049": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"td_1932_02_a014|www_1936_02_a049": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"td_1932_02_a014|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"td_1932_02_a017|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"td_1932_02_a017|www_1936_02_a049": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"td_1932_02_a021|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q3",
+"stratum_n": 238,
+"p_at_least": 0.113924,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"wt_1925_11_a015|ast_1930_01_a020": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1925_11_a016|ast_1930_01_a024": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1925_11_a020|wt_1934_05_a009": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1925_11_a027|wt_1934_05_a006": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1925_11_a027|ast_1930_01_a016": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1925_11_a027|ast_1930_01_a021": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1925_11_a027|td_1932_02_a013": {
+"longest": 7,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.030151,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.030973
+},
+"wt_1925_11_a027|td_1932_02_a015": {
+"longest": 7,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.030151,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.030973
+},
+"wt_1925_11_a029|ast_1930_03_a018": {
+"longest": 7,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.030151,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.030973
+},
+"wt_1925_11_a029|ast_1930_03_a020": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1925_11_a029|td_1932_02_a013": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1925_11_a030|td_1932_02_a013": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a006|ast_1930_01_a016": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a007|ast_1930_01_a016": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a007|ast_1930_01_a019": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a007|ast_1930_03_a019": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a007|ast_1930_03_a020": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a008|ast_1930_01_a016": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a009|ast_1930_01_a019": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a009|ast_1930_01_a024": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a009|ast_1930_03_a015": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a009|ast_1930_03_a018": {
+"longest": 7,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.030151,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.030973
+},
+"wt_1934_05_a009|ast_1930_03_a020": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a011|ast_1930_01_a016": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"wt_1934_05_a015|ast_1930_03_a019": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_01_a016|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_01_a019|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_01_a019|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_01_a019|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a014|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a014|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a015|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a015|www_1936_02_a055": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a018|ws_1937_02_a049": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a018|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a018|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a018|www_1936_02_a055": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a019|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a019|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a020|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"ast_1930_03_a020|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"td_1932_02_a013|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"td_1932_02_a013|www_1936_02_a050": {
+"longest": 7,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.030151,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.030973
+},
+"td_1932_02_a013|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"td_1932_02_a013|www_1936_02_a055": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"td_1932_02_a014|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"td_1932_02_a015|ws_1937_02_a044": {
+"longest": 7,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.030151,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.030973
+},
+"td_1932_02_a017|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"td_1932_02_a017|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"td_1932_02_a017|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"td_1932_02_a017|www_1936_02_a055": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"td_1932_02_a021|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.261307,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"td_1932_02_a021|ws_1937_02_a051": {
+"longest": 7,
+"stratum": "1930s|3-9|q4",
+"stratum_n": 200,
+"p_at_least": 0.030151,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.030973
+},
+"wt_1934_05_a009|td_1948_12_a025": {
+"longest": 6,
+"stratum": "1940s|10-19|q2",
+"stratum_n": 84,
+"p_at_least": 0.036145,
+"wider": "q2|10-19",
+"wider_n": 235,
+"p_at_least_wider": 0.029915
+},
+"wt_1934_05_a009|td_1948_12_a028": {
+"longest": 6,
+"stratum": "1940s|10-19|q2",
+"stratum_n": 84,
+"p_at_least": 0.036145,
+"wider": "q2|10-19",
+"wider_n": 235,
+"p_at_least_wider": 0.029915
+},
+"ast_1930_01_a019|td_1948_12_a030": {
+"longest": 6,
+"stratum": "1940s|10-19|q2",
+"stratum_n": 84,
+"p_at_least": 0.036145,
+"wider": "q2|10-19",
+"wider_n": 235,
+"p_at_least_wider": 0.029915
+},
+"td_1948_12_a025|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1940s|10-19|q2",
+"stratum_n": 84,
+"p_at_least": 0.036145,
+"wider": "q2|10-19",
+"wider_n": 235,
+"p_at_least_wider": 0.029915
+},
+"wt_1934_05_a011|td_1948_12_a027": {
+"longest": 6,
+"stratum": "1940s|10-19|q3",
+"stratum_n": 66,
+"p_at_least": 0.092308,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"wt_1934_05_a015|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q3",
+"stratum_n": 66,
+"p_at_least": 0.092308,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"wt_1934_05_a015|td_1948_12_a027": {
+"longest": 6,
+"stratum": "1940s|10-19|q3",
+"stratum_n": 66,
+"p_at_least": 0.092308,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"ast_1930_01_a022|td_1948_12_a023": {
+"longest": 6,
+"stratum": "1940s|10-19|q3",
+"stratum_n": 66,
+"p_at_least": 0.092308,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"ast_1930_01_a024|td_1948_12_a028": {
+"longest": 6,
+"stratum": "1940s|10-19|q3",
+"stratum_n": 66,
+"p_at_least": 0.092308,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"td_1932_02_a013|td_1948_12_a030": {
+"longest": 6,
+"stratum": "1940s|10-19|q3",
+"stratum_n": 66,
+"p_at_least": 0.092308,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"td_1948_12_a028|www_1936_02_a050": {
+"longest": 6,
+"stratum": "1940s|10-19|q3",
+"stratum_n": 66,
+"p_at_least": 0.092308,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"wt_1934_05_a007|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"wt_1934_05_a009|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"ast_1930_01_a017|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"ast_1930_01_a019|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"ast_1930_01_a024|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"ast_1930_03_a018|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"ast_1930_03_a019|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1932_02_a013|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1932_02_a013|td_1948_12_a027": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1932_02_a014|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1932_02_a015|td_1948_12_a027": {
+"longest": 7,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.012987,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.006757
+},
+"td_1932_02_a016|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1932_02_a017|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1932_02_a021|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1948_12_a019|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1948_12_a019|ws_1937_02_a046": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1948_12_a019|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1948_12_a019|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1948_12_a019|www_1936_02_a049": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1948_12_a019|www_1936_02_a050": {
+"longest": 7,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.012987,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.006757
+},
+"td_1948_12_a019|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1948_12_a023|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1948_12_a027|ws_1937_02_a046": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"td_1948_12_a028|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1940s|10-19|q4",
+"stratum_n": 78,
+"p_at_least": 0.298701,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"wt_1925_11_a023|td_1948_12_a027": {
+"longest": 7,
+"stratum": "1940s|20+|q2",
+"stratum_n": 33,
+"p_at_least": 0.0,
+"wider": "q2|20+",
+"wider_n": 125,
+"p_at_least_wider": 0.0
+},
+"wt_1925_11_a016|td_1948_12_a023": {
+"longest": 6,
+"stratum": "1940s|20+|q3",
+"stratum_n": 16,
+"p_at_least": 0.2,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"wt_1925_11_a020|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|20+|q3",
+"stratum_n": 16,
+"p_at_least": 0.2,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"wt_1925_11_a023|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|20+|q3",
+"stratum_n": 16,
+"p_at_least": 0.2,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"wt_1925_11_a026|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|20+|q3",
+"stratum_n": 16,
+"p_at_least": 0.2,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"wt_1925_11_a016|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|20+|q4",
+"stratum_n": 11,
+"p_at_least": 0.1,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"wt_1925_11_a027|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1940s|20+|q4",
+"stratum_n": 11,
+"p_at_least": 0.1,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"gal_1952_03_a009|gal_1952_04_a008": {
+"longest": 6,
+"stratum": "1950s|0-2|q3",
+"stratum_n": 12,
+"p_at_least": 0.0,
+"wider": "q3|0-2",
+"wider_n": 97,
+"p_at_least_wider": 0.145833
+},
+"gal_1952_03_a008|gal_1952_04_a016": {
+"longest": 6,
+"stratum": "1950s|0-2|q4",
+"stratum_n": 18,
+"p_at_least": 0.176471,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"gal_1952_03_a011|gal_1952_04_a008": {
+"longest": 6,
+"stratum": "1950s|0-2|q4",
+"stratum_n": 18,
+"p_at_least": 0.176471,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"gal_1952_03_a020|gal_1952_04_a006": {
+"longest": 6,
+"stratum": "1950s|0-2|q4",
+"stratum_n": 18,
+"p_at_least": 0.176471,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"gal_1952_03_a020|gal_1952_04_a012": {
+"longest": 6,
+"stratum": "1950s|0-2|q4",
+"stratum_n": 18,
+"p_at_least": 0.176471,
+"wider": "q4|0-2",
+"wider_n": 158,
+"p_at_least_wider": 0.33758
+},
+"wt_1934_05_a014|gal_1952_04_a011": {
+"longest": 6,
+"stratum": "1950s|10-19|q2",
+"stratum_n": 66,
+"p_at_least": 0.0,
+"wider": "q2|10-19",
+"wider_n": 235,
+"p_at_least_wider": 0.029915
+},
+"wt_1934_05_a009|gal_1952_04_a012": {
+"longest": 6,
+"stratum": "1950s|10-19|q3",
+"stratum_n": 82,
+"p_at_least": 0.08642,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"wt_1934_05_a011|gal_1952_03_a011": {
+"longest": 6,
+"stratum": "1950s|10-19|q3",
+"stratum_n": 82,
+"p_at_least": 0.08642,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"wt_1934_05_a015|gal_1952_03_a008": {
+"longest": 6,
+"stratum": "1950s|10-19|q3",
+"stratum_n": 82,
+"p_at_least": 0.08642,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"gal_1952_03_a008|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1950s|10-19|q3",
+"stratum_n": 82,
+"p_at_least": 0.08642,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"gal_1952_03_a009|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1950s|10-19|q3",
+"stratum_n": 82,
+"p_at_least": 0.08642,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"gal_1952_03_a020|www_1936_02_a049": {
+"longest": 6,
+"stratum": "1950s|10-19|q3",
+"stratum_n": 82,
+"p_at_least": 0.08642,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"gal_1952_03_a020|www_1936_02_a053": {
+"longest": 7,
+"stratum": "1950s|10-19|q3",
+"stratum_n": 82,
+"p_at_least": 0.0,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.01676
+},
+"gal_1952_04_a008|ws_1937_02_a046": {
+"longest": 6,
+"stratum": "1950s|10-19|q3",
+"stratum_n": 82,
+"p_at_least": 0.08642,
+"wider": "q3|10-19",
+"wider_n": 180,
+"p_at_least_wider": 0.111732
+},
+"wt_1934_05_a007|gal_1952_04_a006": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"wt_1934_05_a007|gal_1952_04_a016": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"wt_1934_05_a009|gal_1952_03_a020": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"wt_1934_05_a009|gal_1952_04_a006": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"wt_1934_05_a009|gal_1952_04_a016": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"wt_1934_05_a011|gal_1952_03_a020": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"gal_1952_03_a008|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"gal_1952_03_a009|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"gal_1952_03_a020|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"gal_1952_04_a006|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"gal_1952_04_a006|ws_1937_02_a049": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"gal_1952_04_a006|www_1936_02_a047": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"gal_1952_04_a006|www_1936_02_a051": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"gal_1952_04_a008|ws_1937_02_a044": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"gal_1952_04_a008|ws_1937_02_a051": {
+"longest": 6,
+"stratum": "1950s|10-19|q4",
+"stratum_n": 62,
+"p_at_least": 0.229508,
+"wider": "q4|10-19",
+"wider_n": 149,
+"p_at_least_wider": 0.263514
+},
+"wt_1925_11_a025|gal_1952_04_a012": {
+"longest": 6,
+"stratum": "1950s|20+|q2",
+"stratum_n": 92,
+"p_at_least": 0.0,
+"wider": "q2|20+",
+"wider_n": 125,
+"p_at_least_wider": 0.008065
+},
+"ast_1930_01_a017|gal_1952_04_a012": {
+"longest": 6,
+"stratum": "1950s|20+|q3",
+"stratum_n": 123,
+"p_at_least": 0.07377,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"ast_1930_01_a020|gal_1952_04_a008": {
+"longest": 6,
+"stratum": "1950s|20+|q3",
+"stratum_n": 123,
+"p_at_least": 0.07377,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"ast_1930_01_a022|gal_1952_04_a012": {
+"longest": 6,
+"stratum": "1950s|20+|q3",
+"stratum_n": 123,
+"p_at_least": 0.07377,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"ast_1930_03_a014|gal_1952_03_a011": {
+"longest": 6,
+"stratum": "1950s|20+|q3",
+"stratum_n": 123,
+"p_at_least": 0.07377,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"ast_1930_03_a019|gal_1952_04_a011": {
+"longest": 6,
+"stratum": "1950s|20+|q3",
+"stratum_n": 123,
+"p_at_least": 0.07377,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"gal_1952_03_a009|td_1932_02_a021": {
+"longest": 6,
+"stratum": "1950s|20+|q3",
+"stratum_n": 123,
+"p_at_least": 0.07377,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"gal_1952_04_a011|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1950s|20+|q3",
+"stratum_n": 123,
+"p_at_least": 0.07377,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"gal_1952_04_a012|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1950s|20+|q3",
+"stratum_n": 123,
+"p_at_least": 0.07377,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"gal_1952_04_a014|td_1932_02_a014": {
+"longest": 6,
+"stratum": "1950s|20+|q3",
+"stratum_n": 123,
+"p_at_least": 0.07377,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.094203
+},
+"gal_1952_04_a014|td_1932_02_a017": {
+"longest": 7,
+"stratum": "1950s|20+|q3",
+"stratum_n": 123,
+"p_at_least": 0.0,
+"wider": "q3|20+",
+"wider_n": 139,
+"p_at_least_wider": 0.0
+},
+"ast_1930_01_a016|gal_1952_04_a006": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_01_a017|gal_1952_04_a006": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_01_a019|gal_1952_04_a016": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_01_a020|gal_1952_03_a020": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_01_a020|gal_1952_04_a006": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_01_a022|gal_1952_03_a011": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_03_a015|gal_1952_03_a008": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_03_a015|gal_1952_04_a006": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_03_a018|gal_1952_03_a020": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_03_a018|gal_1952_04_a006": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_03_a019|gal_1952_04_a006": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_03_a020|gal_1952_04_a006": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"ast_1930_03_a020|gal_1952_04_a016": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"gal_1952_03_a009|td_1932_02_a015": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"gal_1952_03_a020|td_1932_02_a015": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"gal_1952_03_a020|td_1932_02_a016": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"gal_1952_03_a020|td_1932_02_a017": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"gal_1952_04_a006|td_1932_02_a013": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"gal_1952_04_a006|td_1932_02_a016": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"gal_1952_04_a006|td_1932_02_a021": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"gal_1952_04_a016|td_1932_02_a015": {
+"longest": 6,
+"stratum": "1950s|20+|q4",
+"stratum_n": 125,
+"p_at_least": 0.16129,
+"wider": "q4|20+",
+"wider_n": 136,
+"p_at_least_wider": 0.162963
+},
+"gal_1952_04_a008|td_1948_12_a025": {
+"longest": 6,
+"stratum": "1950s|3-9|q2",
+"stratum_n": 28,
+"p_at_least": 0.0,
+"wider": "q2|3-9",
+"wider_n": 259,
+"p_at_least_wider": 0.046512
+},
+"gal_1952_03_a020|td_1948_12_a028": {
+"longest": 6,
+"stratum": "1950s|3-9|q3",
+"stratum_n": 15,
+"p_at_least": 0.142857,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"gal_1952_04_a006|td_1948_12_a028": {
+"longest": 7,
+"stratum": "1950s|3-9|q3",
+"stratum_n": 15,
+"p_at_least": 0.0,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.015873
+},
+"gal_1952_04_a008|td_1948_12_a023": {
+"longest": 6,
+"stratum": "1950s|3-9|q3",
+"stratum_n": 15,
+"p_at_least": 0.142857,
+"wider": "q3|3-9",
+"wider_n": 253,
+"p_at_least_wider": 0.119048
+},
+"gal_1952_03_a008|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1950s|3-9|q4",
+"stratum_n": 27,
+"p_at_least": 0.230769,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"gal_1952_03_a020|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1950s|3-9|q4",
+"stratum_n": 27,
+"p_at_least": 0.230769,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"gal_1952_03_a020|td_1948_12_a023": {
+"longest": 6,
+"stratum": "1950s|3-9|q4",
+"stratum_n": 27,
+"p_at_least": 0.230769,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"gal_1952_04_a006|td_1948_12_a019": {
+"longest": 6,
+"stratum": "1950s|3-9|q4",
+"stratum_n": 27,
+"p_at_least": 0.230769,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"gal_1952_04_a006|td_1948_12_a027": {
+"longest": 6,
+"stratum": "1950s|3-9|q4",
+"stratum_n": 27,
+"p_at_least": 0.230769,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"gal_1952_04_a008|td_1948_12_a027": {
+"longest": 6,
+"stratum": "1950s|3-9|q4",
+"stratum_n": 27,
+"p_at_least": 0.230769,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.261062
+},
+"gal_1952_04_a016|td_1948_12_a019": {
+"longest": 7,
+"stratum": "1950s|3-9|q4",
+"stratum_n": 27,
+"p_at_least": 0.0,
+"wider": "q4|3-9",
+"wider_n": 227,
+"p_at_least_wider": 0.030973
+}
+},
+"para_k10": {}
+}

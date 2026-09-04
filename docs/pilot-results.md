@@ -273,6 +273,19 @@ hall": "The Seventh Devil" in Weird Tales 1925-11 against "The Murder
 Monster" in Thrilling Detective 1932-02 and Louis L'Amour's "With
 Death in His Corner" in 1948-12).
 
+The corrected set (the same evening, 18:40 on the main server): the
+40 stories that people had verified (12) or modified (28) by then,
+362,706 tokens, 682 cross-issue pairs. 153 six-word matches across
+issues (80 clusters, 31 stories), 13 at seven, none at eight; the
+longest seven words. No paraphrase alignment at K = 10 (14,486
+passages). 14.7% of the cross-issue pairs share a six-word phrase (none
+in the lowest topic quartile, 7.1%, 19.4%, 32.2% in the others); the
+sampler reproduces the full table exactly; the two-part model fits for
+seed 6 (100 matched pairs; topic +1.1 log-odds per standard deviation,
+same magazine +1.0, same publisher −1.0) and is skipped for seed 7 and
+for paraphrase. Same picture as the machine set on fewer, cleaner
+stories; the corrected set's use is the comparison, not the numbers.
+
 Between the 2 September run and this one the main server ran the
 stages once more (4 September 10:02–10:10, on the v2.1.1 records);
 those results were overwritten by this run before they travelled, so

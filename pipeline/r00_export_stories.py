@@ -28,12 +28,19 @@ sys.path.insert(0, os.path.join(ROOT, "webapp"))
 import app  # noqa: E402  (the website module; read-only use of its replay)
 
 OUT = os.path.join(ROOT, "data", "pilot_stories.jsonl")
+EXPORT_DIR = os.path.join(ROOT, "data", "export")
+STORY_CORPUS_TYPES = ("story",)      # the story-level corpus (protocol section 2); every other type is the parallel corpus
+MIN_STORY_WORDS = 50                 # the reuse stages' floor (r02.MIN_TOKENS): shorter story records are fragments
 
 
 def main():
     cfg = app.cfg()
     issues = {i["id"]: i for i in cfg.get("issues", [])}
     n_art = n_story = n_verified = 0
+    os.makedirs(EXPORT_DIR, exist_ok=True)
+    f_st = open(os.path.join(EXPORT_DIR, "stories.jsonl"), "w", encoding="utf-8")
+    f_pt = open(os.path.join(EXPORT_DIR, "paratext.jsonl"), "w", encoding="utf-8")
+    n_corpus = {"story-level": 0, "parallel": 0, "story-level words": 0, "parallel words": 0, "story fragments": 0}
     with open(OUT, "w", encoding="utf-8") as f:
         for iid, meta in issues.items():
             doc = app.effective_doc(iid)
@@ -88,6 +95,18 @@ def main():
                 if rec["type"] == "serial_part":
                     rec["type"] = "story"                      # instalments are stories with serial fields since 2026-09-04
                     rec["serial"] = rec.get("serial") or {"part_label": None, "part_n": None, "part_total": None, "source": "annotator"}
+                # the two corpora the protocol names: the story-level corpus (stories of fifty words or
+                # more) and the parallel corpus (advertisements, contents pages, editorial matter, house
+                # matter, poems, letters pages — and story records too short to be stories)
+                if rec["type"] in STORY_CORPUS_TYPES and rec["n_words"] >= MIN_STORY_WORDS:
+                    rec["corpus"] = "story-level"
+                else:
+                    rec["corpus"] = "parallel"
+                    if rec["type"] in STORY_CORPUS_TYPES:
+                        n_corpus["story fragments"] += 1
+                (f_st if rec["corpus"] == "story-level" else f_pt).write(json.dumps(rec, ensure_ascii=False) + "\n")
+                n_corpus[rec["corpus"]] += 1
+                n_corpus[rec["corpus"] + " words"] += rec["n_words"]
                 f.write(json.dumps(rec, ensure_ascii=False) + "\n")
                 n_art += 1
                 if rec["type"] == "story":
@@ -95,8 +114,18 @@ def main():
                 if rec["status"] == "verified":
                     n_verified += 1
             print(f"[r00] {iid}: {len(doc['articles'])} articles")
+    f_st.close()
+    f_pt.close()
+    json.dump({"generated": time.strftime("%Y-%m-%d %H:%M"), "story_level_records": n_corpus["story-level"],
+               "story_level_words": n_corpus["story-level words"], "parallel_records": n_corpus["parallel"],
+               "parallel_words": n_corpus["parallel words"], "story_fragments_in_parallel": n_corpus["story fragments"],
+               "min_story_words": MIN_STORY_WORDS, "files": ["stories.jsonl", "paratext.jsonl"]},
+              open(os.path.join(EXPORT_DIR, "corpus_stats.json"), "w", encoding="utf-8"), indent=1)
     print(f"[r00] wrote {OUT}: {n_art} articles, {n_story} stories (instalments included), "
           f"{n_verified} verified — {time.strftime('%Y-%m-%d %H:%M')}")
+    print(f"[r00] export/stories.jsonl: {n_corpus['story-level']} records, {n_corpus['story-level words']:,} words; "
+          f"export/paratext.jsonl: {n_corpus['parallel']} records, {n_corpus['parallel words']:,} words "
+          f"({n_corpus['story fragments']} story records under {MIN_STORY_WORDS} words among them)")
 
 
 if __name__ == "__main__":

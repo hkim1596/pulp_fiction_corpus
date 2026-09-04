@@ -193,3 +193,25 @@ Dropbox share carries the full context of each.
   draw one bar for the whole collection (28,286 items) with the working
   corpus, its fiction magazines, and the issues downloaded, processed
   and fully verified in their own colours.
+- 2026-09-04 (evening, "Read the revised protocol. Upgrade our website
+  and tool according to the protocol"; Heejin: the Google Doc as it
+  stands, no additions) — The protocol was checked step by step against
+  the site and the pipeline, and six places where it commits to
+  something the tools did not yet do were built (all six chosen by
+  Heejin): the paraphrase review set and its calibration (3.2), the
+  collection's history of transmission and the datasheet (2), the two
+  corpora as two files (2), the extensive cases and the exact-versus-
+  paraphrase comparison on the reuse page (3.1, 3.2), every match placed
+  among comparable pairs (4.1), and the cases for the genealogies (4.2).
+  Working settings written into the tools, to be confirmed or changed:
+  the review set's strata (source × score band × cosine band), 15 items
+  per stratum, the grid K {5, 10, 20} × six keep rules, the precision
+  floor 0.90, the choice rule (highest weighted recall at the floor,
+  ties to the smaller pool); whole-story = 80% and high-coverage = 20%
+  of the shorter story; a case is any cluster or pair a named member
+  marks. Readers do not see the machine's numbers until they have
+  judged. The provenance enrichment reads each item's own metadata
+  record (metadata only, within the decision of 3 September); uploader
+  addresses stay in the data file, the site shows the part before the @.
+  The publisher table (config/publishers_magazines.json) is reference
+  knowledge to be confirmed against the mastheads.

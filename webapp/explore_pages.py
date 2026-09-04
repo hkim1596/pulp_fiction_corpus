@@ -1890,6 +1890,38 @@ def stories_page(qs, render=None):
     return _render(render, "Records", body, "/stories")
 
 
+_PLACE = {}
+
+
+def placement(set_name="machine"):
+    """background/placement_<set>.json: every matched cross-issue pair placed among
+    comparable pairs (protocol 4.1, Report), keyed 'a|b'; cached by file time."""
+    p = os.path.join(_G["DATA"], "reuse", "background", f"placement_{set_name}.json")
+    if not os.path.exists(p):
+        return {}
+    mt = os.path.getmtime(p)
+    if _PLACE.get("mt") != mt:
+        try:
+            _PLACE["data"] = json.load(open(p, encoding="utf-8"))
+        except Exception:
+            _PLACE["data"] = {}
+        _PLACE["mt"] = mt
+    return _PLACE.get("data", {})
+
+
+def placement_text(pl, name, a, b, unit="words"):
+    """One phrase: 'longest 10 words; 1 in 157 comparable pairs (1930s, 0–2 years apart, topic q4) share as much'."""
+    d = (pl.get(name) or {}).get(f"{a}|{b}") or (pl.get(name) or {}).get(f"{b}|{a}")
+    if not d:
+        return ""
+    dec, band, q = (d["stratum"].split("|") + ["", ""])[:3]
+    p = d["p_at_least"]
+    how = ("none of the other" if p == 0 else f"{_fmt(100 * p)}% of the")
+    return (f"{how} {d['stratum_n']:,} comparable pairs ({_esc(dec)}, {_esc(band)} years apart, topic {_esc(q)}) share at least "
+            f"{d['longest']} {unit}" + (f"; in the wider stratum ({_esc(d['wider'].replace('|', ', '))}, {d['wider_n']:,} pairs) "
+                                        f"{'none' if d['p_at_least_wider'] == 0 else _fmt(100 * d['p_at_least_wider']) + '%'}" if d.get("wider") else ""))
+
+
 def story_page(sid, render=None):
     con = db()
     r = _one(con, "SELECT * FROM records WHERE id=?", (sid,))
@@ -1902,10 +1934,17 @@ def story_page(sid, render=None):
     pages = _j(r["pages"], [])
     ex = _rows(con, "SELECT * FROM matches WHERE k=6 AND same_issue=0 AND (a=? OR b=?) ORDER BY len DESC LIMIT 300", (sid, sid))
     erows = []
+    pl = placement()
+    seen_pairs = set()
     for m in ex:
         other = m["b"] if m["a"] == sid else m["a"]
         oi = m["b_issue"] if m["a"] == sid else m["a_issue"]
+        place = ""
+        if (m["a"], m["b"]) not in seen_pairs:
+            seen_pairs.add((m["a"], m["b"]))
+            place = placement_text(pl, "exact_k6", m["a"], m["b"])
         erows.append([N(m["len"]), _esc(m["excerpt"][:140]), _story_link(con, other), _issue_link(con, oi),
+                      f"<span class='muted' style='font-size:12px'>{place}</span>",
                       f"<a href='/pair/{_esc(m['a'])}/{_esc(m['b'])}'>pair</a>"])
     pa = _rows(con, "SELECT * FROM aligns WHERE a=? OR b=? ORDER BY cols DESC LIMIT 300", (sid, sid))
     prows = [[N(a["cols"]), N(a["identity"]), _esc((a["text_a"] if a["a"] == sid else a["text_b"])[:140]),
@@ -2000,7 +2039,7 @@ def story_page(sid, render=None):
              + (" · ".join(f"<a href='/issue/{_esc(r['issue'])}/p/{p}'>scan p.{p}</a>" for p in pages[:8]))
              + f" · {_raw_link('/raw/story/' + sid)}</p>",
              "<h2>Shared passages (exact, seed 6, other issues)</h2>",
-             _table(["#words", "passage", "shared with", "in issue", ""], erows) if erows else "<div class='empty'>None.</div>",
+             _table(["#words", "passage", "shared with", "in issue", "among comparable pairs", ""], erows) if erows else "<div class='empty'>None.</div>",
              "<h2>Paraphrase alignments</h2>",
              _table(["#columns", "#identity", "this side", "other story", ""], prows) if prows else "<div class='empty'>None.</div>",
              "<h2>Closest stories by topic (reuse-masked TF-IDF)</h2>",
@@ -2118,7 +2157,7 @@ def pairs_page(qs, render=None):
     return _render(render, "Story pairs", body, "/pairs")
 
 
-def pair_page(a, b, render=None):
+def pair_page(a, b, render=None, user=None):
     con = db()
     row = pair_row(con, a, b)
     if row:
@@ -2165,8 +2204,21 @@ def pair_page(a, b, render=None):
             cells.append(f"<tr><th style='text-align:left;width:300px'>{_esc(label)}</th><td>{_esc(str(v))}</td></tr>")
         facts = "<table>" + "".join(cells) + "</table>"
     bgnote = ""
+    pl = placement()
+    if pl and row:
+        parts = []
+        t = placement_text(pl, "exact_k6", a, b)
+        if t:
+            parts.append("Exact reuse (seed 6): " + t + ".")
+        t = placement_text(pl, "para_k10", a, b, unit="aligned columns")
+        if t:
+            parts.append("Paraphrase (K = 10): " + t + ".")
+        if parts:
+            bgnote = ("<h3 style='font-weight:normal;font-size:16px'>Placed among comparable pairs (protocol 4.1)</h3><p>" + " ".join(parts)
+                      + " <span class='muted'>The stratum is the sampler's: the later work's decade, the interval band, and the topic-similarity "
+                      "quartile; the pair itself is left out of the count.</span></p>")
     s = meta_json(con, "summary", {})
-    if s and row:
+    if s and row and not bgnote:
         try:
             q, band = str(int(row["topic_q"])), row["years_band"]
             L = int(row["exact_k6_longest"] or 0)
@@ -2186,6 +2238,8 @@ def pair_page(a, b, render=None):
             f"<p class='muted' style='margin-top:8px'>{_raw_link(f'/raw/pair/{a}/{b}')}</p>",
             "<h2>Facts about the pair</h2>", facts or "<div class='empty'>Not in the pair table (one side is not a story of 50+ words).</div>",
             bgnote,
+            _G["RV"].case_form_html("pair", {"a": a, "b": b}, user, f"/pair/{a}/{b}",
+                                    title=f"{(ra.get('title') or a)[:28]} ~ {(rb.get('title') or b)[:28]}"),
             "<h2>Exact shared passages (seed 6)</h2>"]
     if ex:
         for m in ex:
@@ -2365,7 +2419,7 @@ def raw_list(kind, qs=None):
     return {"source_files": srcs, "total": total, "page": page, "limit": limit, "next": nxt, kind if kind != "stories" else "records": rows}
 
 
-RAW_ROOTS = ("reuse", "raw", "articles", "annotations", "layout", "text", "gold", "assembly_v2", "survey", "metrics.json", "timings.jsonl",
+RAW_ROOTS = ("reuse", "raw", "articles", "annotations", "layout", "text", "gold", "assembly_v2", "survey", "export", "metrics.json", "timings.jsonl",
              "pilot_stories.jsonl", "pilot_stories.jsonl.gz", "feedback.jsonl", "explorer.sqlite")
 
 

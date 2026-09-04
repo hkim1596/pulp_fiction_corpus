@@ -1,0 +1,58 @@
+{
+ "ast_1930_03": {
+  "stories": 5,
+  "region_keys": 2260,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "gal_1952_03": {
+  "stories": 5,
+  "region_keys": 2258,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "td_1932_02": {
+  "stories": 7,
+  "region_keys": 2380,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "td_1948_12": {
+  "stories": 7,
+  "region_keys": 1972,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "ws_1937_02": {
+  "stories": 2,
+  "region_keys": 597,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "wt_1925_11": {
+  "stories": 4,
+  "region_keys": 917,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "wt_1934_05": {
+  "stories": 2,
+  "region_keys": 470,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ },
+ "www_1936_02": {
+  "stories": 8,
+  "region_keys": 1863,
+  "keys_owned_by_2plus": 0,
+  "stories_sharing": 0,
+  "worst_pairs": []
+ }
+}

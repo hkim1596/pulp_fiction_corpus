@@ -14,6 +14,22 @@ answer. The pilot answers two questions before the full corpus is attempted:
 which method reads pulp pages best, and what does each method cost in time and
 money at the scale of the whole archive.
 
+## Stage 0 — the survey of the collection
+
+Before any page is downloaded, the archive's own metadata is read for
+every item of its pulp collection: the search index for all of them
+(28,286 items on 3 September 2026: language, sub-collections, dates,
+page counts) and each item's own record for who uploaded it and when,
+which curator admitted it, which OCR engine produced the archive's
+text, and what language that OCR detected. No page image and no text is
+fetched. This is the history of the collection's transmission and the
+frame the corpus is measured against: the working corpus is the items
+in English or with no language given, and the study's frame the fiction
+magazines among them (not the dime novels, comics, film and general
+magazines filed in the same collection). The collection page shows the
+sample by decade, genre, magazine, publisher and language; the datasheet
+documents the corpus in the datasheet form.
+
 ## Stage 1 — download
 
 For each approved issue we fetch from the Internet Archive: the item metadata,
@@ -108,6 +124,18 @@ reading text and of the text-reuse inventory, as the house and
 advertising records are. Standing departments are recognised from a
 per-magazine list, and a letters page must contain signed letters.
 
+## The two corpora
+
+The export writes what the protocol names: a story-level corpus — the
+story records of fifty words or more, each linked to its author and its
+issue, its reading text the body and the chapter apparatus — and a
+parallel corpus of everything else: advertisements, house matter,
+contents pages, features, letters pages, poems, and story records too
+short to be stories. The reuse stages read the story-level corpus only;
+the parallel corpus is kept for the study of the magazines and for the
+checks (an announcement that quotes a story is linked to it and stays
+out of the reuse inventory).
+
 ## Human verification: the annotation layer
 
 The machine's assembly is treated as a first draft. Every article page on
@@ -118,6 +146,14 @@ story text (a "Continued from page" notice, a stray page number), detach a
 wrongly joined piece into its own article, move a piece to the story it
 belongs to, merge articles, and correct the title, author, type, or the text
 itself. When an article is right, the annotator marks it verified.
+
+Two more hand-review tools follow the protocol's own steps. The
+paraphrase review shows readers pairs of passages the paraphrase
+detector drew from its candidates across the whole range it sees, and
+records each reader's judgment (paraphrase or copy, not, unsure) in an
+append-only log; the settings of the detector are calibrated against
+those judgments and frozen. The cases page keeps the clusters and pairs
+marked as cases for the literary genealogies, with their notes.
 
 Three rules make this trustworthy. First, the machine output is never
 edited in place: every human action is one line in an append-only log, and

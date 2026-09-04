@@ -102,6 +102,27 @@ record's own annotation history shows live events only. A rebuild of
 the explorer that fails on a half-written source file (a pipeline stage
 still running) keeps the old database and retries.
 
+Routes since v0.14.0 (2026-09-04, built to the protocol as written):
+/collection (the collection and the sample: transmission history,
+provenance, the sample by decade / genre / magazine / publisher /
+language, authors so far), /corpus (the story-level corpus and the
+parallel corpus, downloads of data/export/*.jsonl), /datasheet (the
+datasheet generated from the survey and the counts) in
+webapp/collection_pages.py; /reuse/validate (the paraphrase review:
+?view=mine|calibration|design, ?item=vNNN, ?after=vNNN; POST
+/reuse/validate with item, set_id, judgment, note — named accounts
+only) and /reuse/cases (POST /reuse/case with action add|note|close|
+reopen; the "Mark as a case" form on cluster and pair pages) in
+webapp/review_pages.py; the reuse overview gained 1b (extensive cases:
+whole-story ≥ 80% and high-coverage ≥ 20% of the shorter story, the
+proportion of each story involved) and "what each form of reuse
+captures"; the pair and story pages place every match among comparable
+pairs; the progress page reports the review tools; the guide has
+sections 6 and 7; the export writes data/export/stories.jsonl,
+paratext.jsonl, corpus_stats.json ("export" is a raw-file root). Logs:
+data/reuse/validation/judgments.jsonl and data/reuse/cases.jsonl are
+append-only like the annotation logs and travel with the data, not git.
+
 Routes since v0.12.0: /issues is the explorer's paged issue list (built
 for the whole corpus, filters by magazine, decade, genre, completeness);
 the workroom's old table of the ten pilot issues with their processing
@@ -310,6 +331,25 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     genre (the archive sub-collection's genre in the
                     pilot's vocabulary), year_derived, magazine (name read
                     from the title). The site's boards read summary.json.
+                    --enrich (2026-09-04, protocol 2 "history of
+                    transmission"): one metadata call per item
+                    (archive.org/metadata/<id>/metadata; 6 threads,
+                    resumable, one to four hours) → data/survey/enrich.jsonl
+                    with uploader, curation, collection_added, ocr,
+                    ocr_module_version, ocr_detected_lang(+conf), scanner,
+                    rights fields; summary() folds them into a
+                    "provenance" section (items added by year, uploader
+                    accounts as the part before the @, curators, OCR
+                    engines overall and by upload decade, detected language
+                    of the unmarked items, scanning-group tags read from
+                    the titles, collection_added, rights) and a
+                    fiction_by_publisher table from
+                    config/publishers_magazines.json (pattern + periods,
+                    reference knowledge to be confirmed; 59% of fiction
+                    items assigned on 4 September). The site: /collection,
+                    /datasheet (webapp/collection_pages.py). The rerun
+                    order after a fresh --run is --run then --enrich
+                    (enrich ends with summary()).
                     About a minute; rerun any time (--run; --summary
                     recomputes from items.jsonl). Downloads nothing; the
                     downloader's gate is untouched (decision of 2026-09-03).
@@ -551,8 +591,50 @@ hand-reviewed validation set and then frozen.
                         per story entering for both members of a pair;
                         variational Bayes via statsmodels) as a proposal
                         for Dennis.
+                        Since 2026-09-04: background.by_stratum in the
+                        summary (the survival curve of every full stratum
+                        later decade × years band × topic quartile, for
+                        exact k6/k7/k8 and para k10) and
+                        background/placement_<set>.json — every matched
+                        cross-issue pair placed among comparable pairs at
+                        two levels (full stratum; topic quartile × band),
+                        the pair itself left out; the pair page and the
+                        story page read it (explore_pages.placement()).
                         → data/reuse/background/pairs_<set>.csv.gz,
-                          summary_<set>.json
+                          summary_<set>.json, placement_<set>.json
+    r06_validation      protocol 3.2 "parameter selection and validation"
+                        (2026-09-04): --build draws the hand-review set
+                        from r04's own candidates (K=20 retrieval + exact
+                        seeds, cross-issue only): strata = source
+                        (embedding-only / exact-seeded) × alignment score
+                        band of the candidate region (below any rule <9,
+                        loose rule only 9–15, default rule 16–29, strong
+                        30+) × in the two lowest bands the cosine band
+                        (closest 5%, next 20%, the rest); 15 per stratum,
+                        seed 20260904, weight = pool / drawn; sampled
+                        items traced (r04._trace) for cols/identity;
+                        → data/reuse/validation/review_set.jsonl (items:
+                        windows with 25 words of context, the aligned span,
+                        the machine's numbers, stratum, weight; ids vNNN,
+                        set_id = stamp) and review_set_stats.json. The site
+                        writes judgments.jsonl (ts, user, set_id, item,
+                        judgment paraphrase|not|unsure, note; a reader's
+                        later judgment of an item replaces the earlier).
+                        --calibrate (also live on the site): consensus
+                        label per item (every deciding reader agrees;
+                        unsure does not count against; disagreement =
+                        disputed, excluded), the grid K {5,10,20} × rules
+                        {(15,.50),(20,.55),(20,.60),(25,.60),(25,.65),
+                        (30,.70)} → precision / recall raw and weighted,
+                        pool; chosen = max weighted recall at weighted
+                        precision ≥ 0.90, ties to the smaller pool; Cohen's
+                        kappa between the two most active readers. Needs
+                        the r04 embedding cache (same set) or recomputes
+                        it. Pilot: 115 items from 393,630 candidates in 9
+                        strata (4 September).
+                        → data/reuse/validation/{review_set.jsonl,
+                          review_set_stats.json, judgments.jsonl,
+                          calibration.json}
 
 Story sets: `machine` (every assembled story, 50+ words), `verified`
 (human-verified only) and `corrected` (verified or modified). The

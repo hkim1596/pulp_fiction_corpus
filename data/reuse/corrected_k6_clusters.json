@@ -1,0 +1,3252 @@
+[
+ {
+  "witnesses": 10,
+  "witnesses_collapsed": 10,
+  "issues": 6,
+  "occurrences": 12,
+  "max_len": 7,
+  "representative": {
+   "story_id": "ast_1930_03_a019",
+   "tok": [
+    1058,
+    1065
+   ],
+   "text": "On the other side of the room"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a019",
+    "issue": "ast_1930_03",
+    "tok": [
+     1058,
+     1065
+    ],
+    "len": 7,
+    "text": "On the other side of the room"
+   },
+   {
+    "story_id": "td_1932_02_a017",
+    "issue": "td_1932_02",
+    "tok": [
+     7703,
+     7710
+    ],
+    "len": 7,
+    "text": "on the other side of the room"
+   },
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     2032,
+     2039
+    ],
+    "len": 7,
+    "text": "on the other side of the street"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     8686,
+     8693
+    ],
+    "len": 7,
+    "text": "on the other side of the street"
+   },
+   {
+    "story_id": "wt_1934_05_a007",
+    "issue": "wt_1934_05",
+    "tok": [
+     8328,
+     8334
+    ],
+    "len": 6,
+    "text": "on the other side of the"
+   },
+   {
+    "story_id": "td_1932_02_a014",
+    "issue": "td_1932_02",
+    "tok": [
+     4262,
+     4268
+    ],
+    "len": 6,
+    "text": "on the other side of the"
+   },
+   {
+    "story_id": "td_1932_02_a017",
+    "issue": "td_1932_02",
+    "tok": [
+     8756,
+     8762
+    ],
+    "len": 6,
+    "text": "on the other side of the"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     12152,
+     12158
+    ],
+    "len": 6,
+    "text": "on the other side of the"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     653,
+     659
+    ],
+    "len": 6,
+    "text": "on the other side of the"
+   },
+   {
+    "story_id": "www_1936_02_a049",
+    "issue": "www_1936_02",
+    "tok": [
+     4403,
+     4409
+    ],
+    "len": 6,
+    "text": "on the other side of the"
+   },
+   {
+    "story_id": "www_1936_02_a051",
+    "issue": "www_1936_02",
+    "tok": [
+     89,
+     95
+    ],
+    "len": 6,
+    "text": "on the other side of the"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     18666,
+     18672
+    ],
+    "len": 6,
+    "text": "the other side of the room"
+   }
+  ]
+ },
+ {
+  "witnesses": 3,
+  "witnesses_collapsed": 3,
+  "issues": 3,
+  "occurrences": 3,
+  "max_len": 8,
+  "representative": {
+   "story_id": "td_1948_12_a019",
+   "tok": [
+    4782,
+    4790
+   ],
+   "text": "Then he sat down on the edge of"
+  },
+  "members": [
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     4782,
+     4790
+    ],
+    "len": 8,
+    "text": "Then he sat down on the edge of"
+   },
+   {
+    "story_id": "gal_1952_03_a008",
+    "issue": "gal_1952_03",
+    "tok": [
+     1676,
+     1682
+    ],
+    "len": 6,
+    "text": "sat down on the edge of"
+   },
+   {
+    "story_id": "td_1932_02_a016",
+    "issue": "td_1932_02",
+    "tok": [
+     2091,
+     2097
+    ],
+    "len": 6,
+    "text": "Then he sat down on the"
+   }
+  ]
+ },
+ {
+  "witnesses": 3,
+  "witnesses_collapsed": 3,
+  "issues": 3,
+  "occurrences": 3,
+  "max_len": 8,
+  "representative": {
+   "story_id": "ws_1937_02_a051",
+   "tok": [
+    4043,
+    4051
+   ],
+   "text": "he knew that he would have to make"
+  },
+  "members": [
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     4043,
+     4051
+    ],
+    "len": 8,
+    "text": "he knew that he would have to make"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     10777,
+     10784
+    ],
+    "len": 7,
+    "text": "He knew that he would have to"
+   },
+   {
+    "story_id": "gal_1952_03_a009",
+    "issue": "gal_1952_03",
+    "tok": [
+     2720,
+     2726
+    ],
+    "len": 6,
+    "text": "that he would have to make"
+   }
+  ]
+ },
+ {
+  "witnesses": 3,
+  "witnesses_collapsed": 3,
+  "issues": 3,
+  "occurrences": 3,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1934_05_a007",
+   "tok": [
+    7634,
+    7641
+   ],
+   "text": "For the barest fraction of a second"
+  },
+  "members": [
+   {
+    "story_id": "wt_1934_05_a007",
+    "issue": "wt_1934_05",
+    "tok": [
+     7634,
+     7641
+    ],
+    "len": 7,
+    "text": "For the barest fraction of a second"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     18491,
+     18498
+    ],
+    "len": 7,
+    "text": "for the barest fraction of a second"
+   },
+   {
+    "story_id": "www_1936_02_a055",
+    "issue": "www_1936_02",
+    "tok": [
+     11334,
+     11340
+    ],
+    "len": 6,
+    "text": "the barest fraction of a second"
+   }
+  ]
+ },
+ {
+  "witnesses": 3,
+  "witnesses_collapsed": 3,
+  "issues": 3,
+  "occurrences": 3,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1934_05_a007",
+   "tok": [
+    5142,
+    5148
+   ],
+   "text": "to the other side of the"
+  },
+  "members": [
+   {
+    "story_id": "wt_1934_05_a007",
+    "issue": "wt_1934_05",
+    "tok": [
+     5142,
+     5148
+    ],
+    "len": 6,
+    "text": "to the other side of the"
+   },
+   {
+    "story_id": "ast_1930_03_a019",
+    "issue": "ast_1930_03",
+    "tok": [
+     6267,
+     6273
+    ],
+    "len": 6,
+    "text": "to the other side of the"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     12532,
+     12538
+    ],
+    "len": 6,
+    "text": "to the other side of the"
+   }
+  ]
+ },
+ {
+  "witnesses": 3,
+  "witnesses_collapsed": 3,
+  "issues": 2,
+  "occurrences": 3,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a015",
+   "tok": [
+    23125,
+    23131
+   ],
+   "text": "in the center of the room"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a015",
+    "issue": "ast_1930_03",
+    "tok": [
+     23125,
+     23131
+    ],
+    "len": 6,
+    "text": "in the center of the room"
+   },
+   {
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
+    "tok": [
+     379,
+     385
+    ],
+    "len": 6,
+    "text": "in the center of the room"
+   },
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     8352,
+     8358
+    ],
+    "len": 6,
+    "text": "in the center of the room"
+   }
+  ]
+ },
+ {
+  "witnesses": 3,
+  "witnesses_collapsed": 3,
+  "issues": 3,
+  "occurrences": 4,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a018",
+   "tok": [
+    4418,
+    4424
+   ],
+   "text": "at the head of the stairs"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     4418,
+     4424
+    ],
+    "len": 6,
+    "text": "at the head of the stairs"
+   },
+   {
+    "story_id": "gal_1952_03_a020",
+    "issue": "gal_1952_03",
+    "tok": [
+     8389,
+     8395
+    ],
+    "len": 6,
+    "text": "at the head of the stairs"
+   },
+   {
+    "story_id": "gal_1952_03_a020",
+    "issue": "gal_1952_03",
+    "tok": [
+     11374,
+     11380
+    ],
+    "len": 6,
+    "text": "at the head of the stairs"
+   },
+   {
+    "story_id": "td_1932_02_a016",
+    "issue": "td_1932_02",
+    "tok": [
+     2624,
+     2630
+    ],
+    "len": 6,
+    "text": "at the head of the stairs"
+   }
+  ]
+ },
+ {
+  "witnesses": 3,
+  "witnesses_collapsed": 3,
+  "issues": 3,
+  "occurrences": 3,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a018",
+   "tok": [
+    13737,
+    13743
+   ],
+   "text": "on the back of the head"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     13737,
+     13743
+    ],
+    "len": 6,
+    "text": "on the back of the head"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     803,
+     809
+    ],
+    "len": 6,
+    "text": "on the back of the head"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     4304,
+     4310
+    ],
+    "len": 6,
+    "text": "on the back of the head"
+   }
+  ]
+ },
+ {
+  "witnesses": 3,
+  "witnesses_collapsed": 3,
+  "issues": 3,
+  "occurrences": 3,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a020",
+   "tok": [
+    10545,
+    10551
+   ],
+   "text": "I want to talk to you"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a020",
+    "issue": "gal_1952_03",
+    "tok": [
+     10545,
+     10551
+    ],
+    "len": 6,
+    "text": "I want to talk to you"
+   },
+   {
+    "story_id": "td_1932_02_a017",
+    "issue": "td_1932_02",
+    "tok": [
+     705,
+     711
+    ],
+    "len": 6,
+    "text": "I want to talk to you"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     15288,
+     15294
+    ],
+    "len": 6,
+    "text": "I want to talk to you"
+   }
+  ]
+ },
+ {
+  "witnesses": 3,
+  "witnesses_collapsed": 3,
+  "issues": 2,
+  "occurrences": 4,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a020",
+   "tok": [
+    11822,
+    11828
+   ],
+   "text": "What are you going to do"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a020",
+    "issue": "gal_1952_03",
+    "tok": [
+     11822,
+     11828
+    ],
+    "len": 6,
+    "text": "What are you going to do"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     6714,
+     6720
+    ],
+    "len": 6,
+    "text": "what are you going to do"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     16039,
+     16045
+    ],
+    "len": 6,
+    "text": "What are you going to do"
+   },
+   {
+    "story_id": "td_1948_12_a028",
+    "issue": "td_1948_12",
+    "tok": [
+     4363,
+     4369
+    ],
+    "len": 6,
+    "text": "what are you going to do"
+   }
+  ]
+ },
+ {
+  "witnesses": 3,
+  "witnesses_collapsed": 3,
+  "issues": 3,
+  "occurrences": 3,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1932_02_a021",
+   "tok": [
+    4724,
+    4730
+   ],
+   "text": "in the middle of the street"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     4724,
+     4730
+    ],
+    "len": 6,
+    "text": "in the middle of the street"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     8332,
+     8338
+    ],
+    "len": 6,
+    "text": "in the middle of the street"
+   },
+   {
+    "story_id": "www_1936_02_a049",
+    "issue": "www_1936_02",
+    "tok": [
+     549,
+     555
+    ],
+    "len": 6,
+    "text": "in the middle of the street"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a015",
+   "tok": [
+    938,
+    945
+   ],
+   "text": "was at a loss to account for"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a015",
+    "issue": "wt_1925_11",
+    "tok": [
+     938,
+     945
+    ],
+    "len": 7,
+    "text": "was at a loss to account for"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     6487,
+     6494
+    ],
+    "len": 7,
+    "text": "was at a loss to account for"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    1319,
+    1326
+   ],
+   "text": "Try as he would, he could not"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     1319,
+     1326
+    ],
+    "len": 7,
+    "text": "Try as he would, he could not"
+   },
+   {
+    "story_id": "td_1932_02_a014",
+    "issue": "td_1932_02",
+    "tok": [
+     2874,
+     2881
+    ],
+    "len": 7,
+    "text": "try as he would he could not"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    9135,
+    9142
+   ],
+   "text": "You have been very good to me"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     9135,
+     9142
+    ],
+    "len": 7,
+    "text": "You have been very good to me"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     13247,
+     13254
+    ],
+    "len": 7,
+    "text": "You have been very good to me"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    13064,
+    13071
+   ],
+   "text": "on the back of a chair with"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     13064,
+     13071
+    ],
+    "len": 7,
+    "text": "on the back of a chair with"
+   },
+   {
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
+    "tok": [
+     8561,
+     8568
+    ],
+    "len": 7,
+    "text": "on the back of a chair with"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a029",
+   "tok": [
+    2777,
+    2784
+   ],
+   "text": "If I can get there in time"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a029",
+    "issue": "wt_1925_11",
+    "tok": [
+     2777,
+     2784
+    ],
+    "len": 7,
+    "text": "If I can get there in time"
+   },
+   {
+    "story_id": "www_1936_02_a055",
+    "issue": "www_1936_02",
+    "tok": [
+     10959,
+     10966
+    ],
+    "len": 7,
+    "text": "If I can get there in time"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1925_11_a029",
+   "tok": [
+    3450,
+    3457
+   ],
+   "text": "Every moment he expected to feel the"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a029",
+    "issue": "wt_1925_11",
+    "tok": [
+     3450,
+     3457
+    ],
+    "len": 7,
+    "text": "Every moment he expected to feel the"
+   },
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     2801,
+     2808
+    ],
+    "len": 7,
+    "text": "Every moment he expected to feel the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "wt_1934_05_a007",
+   "tok": [
+    6396,
+    6403
+   ],
+   "text": "he had opened his eyes to find"
+  },
+  "members": [
+   {
+    "story_id": "wt_1934_05_a007",
+    "issue": "wt_1934_05",
+    "tok": [
+     6396,
+     6403
+    ],
+    "len": 7,
+    "text": "he had opened his eyes to find"
+   },
+   {
+    "story_id": "td_1932_02_a016",
+    "issue": "td_1932_02",
+    "tok": [
+     281,
+     288
+    ],
+    "len": 7,
+    "text": "he had opened his eyes to find"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "gal_1952_03_a020",
+   "tok": [
+    5142,
+    5149
+   ],
+   "text": "The hand is quicker than the eye"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a020",
+    "issue": "gal_1952_03",
+    "tok": [
+     5142,
+     5149
+    ],
+    "len": 7,
+    "text": "The hand is quicker than the eye"
+   },
+   {
+    "story_id": "www_1936_02_a053",
+    "issue": "www_1936_02",
+    "tok": [
+     984,
+     991
+    ],
+    "len": 7,
+    "text": "the hand is quicker than the eye"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 7,
+  "representative": {
+   "story_id": "td_1932_02_a015",
+   "tok": [
+    4474,
+    4481
+   ],
+   "text": "door at the end of the hall"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
+    "tok": [
+     4474,
+     4481
+    ],
+    "len": 7,
+    "text": "door at the end of the hall"
+   },
+   {
+    "story_id": "td_1948_12_a027",
+    "issue": "td_1948_12",
+    "tok": [
+     1796,
+     1803
+    ],
+    "len": 7,
+    "text": "door at the end of the hall"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a016",
+   "tok": [
+    4531,
+    4537
+   ],
+   "text": "on the edge of the bed"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a016",
+    "issue": "wt_1925_11",
+    "tok": [
+     4531,
+     4537
+    ],
+    "len": 6,
+    "text": "on the edge of the bed"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     10215,
+     10221
+    ],
+    "len": 6,
+    "text": "on the edge of the bed"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a016",
+   "tok": [
+    5344,
+    5350
+   ],
+   "text": "of a sudden, there was a"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a016",
+    "issue": "wt_1925_11",
+    "tok": [
+     5344,
+     5350
+    ],
+    "len": 6,
+    "text": "of a sudden, there was a"
+   },
+   {
+    "story_id": "td_1948_12_a023",
+    "issue": "td_1948_12",
+    "tok": [
+     8097,
+     8103
+    ],
+    "len": 6,
+    "text": "of a sudden there was a"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    6722,
+    6728
+   ],
+   "text": "about a mile and a half"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     6722,
+     6728
+    ],
+    "len": 6,
+    "text": "about a mile and a half"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     13575,
+     13581
+    ],
+    "len": 6,
+    "text": "about a mile and a half"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    9348,
+    9354
+   ],
+   "text": "as well as that of his"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     9348,
+     9354
+    ],
+    "len": 6,
+    "text": "as well as that of his"
+   },
+   {
+    "story_id": "www_1936_02_a055",
+    "issue": "www_1936_02",
+    "tok": [
+     6151,
+     6157
+    ],
+    "len": 6,
+    "text": "as well as that of his"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    10326,
+    10332
+   ],
+   "text": "As a matter of fact, it"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     10326,
+     10332
+    ],
+    "len": 6,
+    "text": "As a matter of fact, it"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     5589,
+     5595
+    ],
+    "len": 6,
+    "text": "As a matter of fact, it"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    13060,
+    13066
+   ],
+   "text": "from a precarious perch on the"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     13060,
+     13066
+    ],
+    "len": 6,
+    "text": "from a precarious perch on the"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     23009,
+     23015
+    ],
+    "len": 6,
+    "text": "from a precarious perch on the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a027",
+   "tok": [
+    16271,
+    16277
+   ],
+   "text": "what at first appeared to be"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a027",
+    "issue": "wt_1925_11",
+    "tok": [
+     16271,
+     16277
+    ],
+    "len": 6,
+    "text": "what at first appeared to be"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     11038,
+     11044
+    ],
+    "len": 6,
+    "text": "what at first appeared to be"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 3,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a029",
+   "tok": [
+    1954,
+    1960
+   ],
+   "text": "it was as if he were"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a029",
+    "issue": "wt_1925_11",
+    "tok": [
+     1954,
+     1960
+    ],
+    "len": 6,
+    "text": "it was as if he were"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     1023,
+     1029
+    ],
+    "len": 6,
+    "text": "It was as if he were"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     14917,
+     14923
+    ],
+    "len": 6,
+    "text": "It was as if he were"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a029",
+   "tok": [
+    3376,
+    3382
+   ],
+   "text": "With an effort he managed to"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a029",
+    "issue": "wt_1925_11",
+    "tok": [
+     3376,
+     3382
+    ],
+    "len": 6,
+    "text": "With an effort he managed to"
+   },
+   {
+    "story_id": "wt_1934_05_a007",
+    "issue": "wt_1934_05",
+    "tok": [
+     7681,
+     7687
+    ],
+    "len": 6,
+    "text": "with an effort he managed to"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a029",
+   "tok": [
+    3530,
+    3536
+   ],
+   "text": "it, and in a few minutes"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a029",
+    "issue": "wt_1925_11",
+    "tok": [
+     3530,
+     3536
+    ],
+    "len": 6,
+    "text": "it, and in a few minutes"
+   },
+   {
+    "story_id": "ast_1930_03_a020",
+    "issue": "ast_1930_03",
+    "tok": [
+     169,
+     175
+    ],
+    "len": 6,
+    "text": "it and, in a few minutes"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a029",
+   "tok": [
+    4703,
+    4709
+   ],
+   "text": "until it seemed as if the"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a029",
+    "issue": "wt_1925_11",
+    "tok": [
+     4703,
+     4709
+    ],
+    "len": 6,
+    "text": "until it seemed as if the"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     1272,
+     1278
+    ],
+    "len": 6,
+    "text": "until it seemed as if the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1925_11_a029",
+   "tok": [
+    6849,
+    6855
+   ],
+   "text": "the corridor that led to the"
+  },
+  "members": [
+   {
+    "story_id": "wt_1925_11_a029",
+    "issue": "wt_1925_11",
+    "tok": [
+     6849,
+     6855
+    ],
+    "len": 6,
+    "text": "the corridor that led to the"
+   },
+   {
+    "story_id": "td_1932_02_a014",
+    "issue": "td_1932_02",
+    "tok": [
+     3542,
+     3548
+    ],
+    "len": 6,
+    "text": "the corridor that led to the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1934_05_a007",
+   "tok": [
+    2277,
+    2283
+   ],
+   "text": "as though he had not heard"
+  },
+  "members": [
+   {
+    "story_id": "wt_1934_05_a007",
+    "issue": "wt_1934_05",
+    "tok": [
+     2277,
+     2283
+    ],
+    "len": 6,
+    "text": "as though he had not heard"
+   },
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     1170,
+     1176
+    ],
+    "len": 6,
+    "text": "as though he had not heard"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 3,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1934_05_a007",
+   "tok": [
+    3925,
+    3931
+   ],
+   "text": "if it hadn't been for the"
+  },
+  "members": [
+   {
+    "story_id": "wt_1934_05_a007",
+    "issue": "wt_1934_05",
+    "tok": [
+     3925,
+     3931
+    ],
+    "len": 6,
+    "text": "if it hadn't been for the"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     7159,
+     7165
+    ],
+    "len": 6,
+    "text": "if it hadn't been for the"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     10346,
+     10352
+    ],
+    "len": 6,
+    "text": "if it hadn't been for the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "wt_1934_05_a007",
+   "tok": [
+    7825,
+    7831
+   ],
+   "text": "At the far end of the"
+  },
+  "members": [
+   {
+    "story_id": "wt_1934_05_a007",
+    "issue": "wt_1934_05",
+    "tok": [
+     7825,
+     7831
+    ],
+    "len": 6,
+    "text": "At the far end of the"
+   },
+   {
+    "story_id": "ast_1930_03_a020",
+    "issue": "ast_1930_03",
+    "tok": [
+     4858,
+     4864
+    ],
+    "len": 6,
+    "text": "At the far end of the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a014",
+   "tok": [
+    81,
+    87
+   ],
+   "text": "won't have anything to do with"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a014",
+    "issue": "ast_1930_03",
+    "tok": [
+     81,
+     87
+    ],
+    "len": 6,
+    "text": "won't have anything to do with"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     2026,
+     2032
+    ],
+    "len": 6,
+    "text": "won't have anything to do with"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a014",
+   "tok": [
+    4418,
+    4424
+   ],
+   "text": "in front of the house and"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a014",
+    "issue": "ast_1930_03",
+    "tok": [
+     4418,
+     4424
+    ],
+    "len": 6,
+    "text": "in front of the house and"
+   },
+   {
+    "story_id": "gal_1952_03_a011",
+    "issue": "gal_1952_03",
+    "tok": [
+     976,
+     982
+    ],
+    "len": 6,
+    "text": "in front of the house and"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a015",
+   "tok": [
+    6194,
+    6200
+   ],
+   "text": "stood in the center of the"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a015",
+    "issue": "ast_1930_03",
+    "tok": [
+     6194,
+     6200
+    ],
+    "len": 6,
+    "text": "stood in the center of the"
+   },
+   {
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
+    "tok": [
+     16,
+     22
+    ],
+    "len": 6,
+    "text": "stood in the center of the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a015",
+   "tok": [
+    9782,
+    9788
+   ],
+   "text": "I had to do. And it"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a015",
+    "issue": "ast_1930_03",
+    "tok": [
+     9782,
+     9788
+    ],
+    "len": 6,
+    "text": "I had to do. And it"
+   },
+   {
+    "story_id": "gal_1952_03_a008",
+    "issue": "gal_1952_03",
+    "tok": [
+     2762,
+     2768
+    ],
+    "len": 6,
+    "text": "I had to do and it"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a015",
+   "tok": [
+    22491,
+    22497
+   ],
+   "text": "out into the center of the"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a015",
+    "issue": "ast_1930_03",
+    "tok": [
+     22491,
+     22497
+    ],
+    "len": 6,
+    "text": "out into the center of the"
+   },
+   {
+    "story_id": "www_1936_02_a055",
+    "issue": "www_1936_02",
+    "tok": [
+     7516,
+     7522
+    ],
+    "len": 6,
+    "text": "out into the center of the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a015",
+   "tok": [
+    22872,
+    22878
+   ],
+   "text": "I had him by the throat"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a015",
+    "issue": "ast_1930_03",
+    "tok": [
+     22872,
+     22878
+    ],
+    "len": 6,
+    "text": "I had him by the throat"
+   },
+   {
+    "story_id": "td_1932_02_a016",
+    "issue": "td_1932_02",
+    "tok": [
+     8250,
+     8256
+    ],
+    "len": 6,
+    "text": "I had him by the throat"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a015",
+   "tok": [
+    23206,
+    23212
+   ],
+   "text": "finger on the trigger of the"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a015",
+    "issue": "ast_1930_03",
+    "tok": [
+     23206,
+     23212
+    ],
+    "len": 6,
+    "text": "finger on the trigger of the"
+   },
+   {
+    "story_id": "td_1932_02_a016",
+    "issue": "td_1932_02",
+    "tok": [
+     7351,
+     7357
+    ],
+    "len": 6,
+    "text": "finger on the trigger of the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a018",
+   "tok": [
+    672,
+    678
+   ],
+   "text": "On the opposite side of the"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     672,
+     678
+    ],
+    "len": 6,
+    "text": "On the opposite side of the"
+   },
+   {
+    "story_id": "www_1936_02_a051",
+    "issue": "www_1936_02",
+    "tok": [
+     4732,
+     4738
+    ],
+    "len": 6,
+    "text": "On the opposite side of the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a018",
+   "tok": [
+    3829,
+    3835
+   ],
+   "text": "he turned on his heel and"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     3829,
+     3835
+    ],
+    "len": 6,
+    "text": "he turned on his heel and"
+   },
+   {
+    "story_id": "td_1932_02_a014",
+    "issue": "td_1932_02",
+    "tok": [
+     4477,
+     4483
+    ],
+    "len": 6,
+    "text": "he turned on his heel and"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a018",
+   "tok": [
+    6502,
+    6508
+   ],
+   "text": "You act as if you were"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     6502,
+     6508
+    ],
+    "len": 6,
+    "text": "You act as if you were"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     4459,
+     4465
+    ],
+    "len": 6,
+    "text": "You act as if you were"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a018",
+   "tok": [
+    7548,
+    7554
+   ],
+   "text": "he breathed a sigh of relief"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     7548,
+     7554
+    ],
+    "len": 6,
+    "text": "he breathed a sigh of relief"
+   },
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     3983,
+     3989
+    ],
+    "len": 6,
+    "text": "He breathed a sigh of relief"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a018",
+   "tok": [
+    7638,
+    7644
+   ],
+   "text": "he turned his attention to the"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     7638,
+     7644
+    ],
+    "len": 6,
+    "text": "he turned his attention to the"
+   },
+   {
+    "story_id": "www_1936_02_a055",
+    "issue": "www_1936_02",
+    "tok": [
+     10627,
+     10633
+    ],
+    "len": 6,
+    "text": "he turned his attention to the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a018",
+   "tok": [
+    7719,
+    7725
+   ],
+   "text": "he was on the right track"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     7719,
+     7725
+    ],
+    "len": 6,
+    "text": "he was on the right track"
+   },
+   {
+    "story_id": "td_1932_02_a016",
+    "issue": "td_1932_02",
+    "tok": [
+     2972,
+     2978
+    ],
+    "len": 6,
+    "text": "he was on the right track"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a018",
+   "tok": [
+    8563,
+    8569
+   ],
+   "text": "he glanced back in the direction"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     8563,
+     8569
+    ],
+    "len": 6,
+    "text": "he glanced back in the direction"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     11262,
+     11268
+    ],
+    "len": 6,
+    "text": "he glanced back in the direction"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a018",
+   "tok": [
+    11588,
+    11594
+   ],
+   "text": "in the direction of the door"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a018",
+    "issue": "ast_1930_03",
+    "tok": [
+     11588,
+     11594
+    ],
+    "len": 6,
+    "text": "in the direction of the door"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     10216,
+     10222
+    ],
+    "len": 6,
+    "text": "in the direction of the door"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a019",
+   "tok": [
+    730,
+    736
+   ],
+   "text": "what it's all about. I don't"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a019",
+    "issue": "ast_1930_03",
+    "tok": [
+     730,
+     736
+    ],
+    "len": 6,
+    "text": "what it's all about. I don't"
+   },
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     896,
+     902
+    ],
+    "len": 6,
+    "text": "what it's all about. I don't"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a019",
+   "tok": [
+    1081,
+    1087
+   ],
+   "text": "at the end of the room"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a019",
+    "issue": "ast_1930_03",
+    "tok": [
+     1081,
+     1087
+    ],
+    "len": 6,
+    "text": "at the end of the room"
+   },
+   {
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
+    "tok": [
+     1920,
+     1926
+    ],
+    "len": 6,
+    "text": "at the end of the room"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a019",
+   "tok": [
+    1131,
+    1137
+   ],
+   "text": "hand on the knob of the"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a019",
+    "issue": "ast_1930_03",
+    "tok": [
+     1131,
+     1137
+    ],
+    "len": 6,
+    "text": "hand on the knob of the"
+   },
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     4152,
+     4158
+    ],
+    "len": 6,
+    "text": "hand on the knob of the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a019",
+   "tok": [
+    1832,
+    1838
+   ],
+   "text": "just out of reach of the"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a019",
+    "issue": "ast_1930_03",
+    "tok": [
+     1832,
+     1838
+    ],
+    "len": 6,
+    "text": "just out of reach of the"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     12099,
+     12105
+    ],
+    "len": 6,
+    "text": "just out of reach of the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a020",
+   "tok": [
+    12567,
+    12573
+   ],
+   "text": "the shore of Long Island Sound"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a020",
+    "issue": "ast_1930_03",
+    "tok": [
+     12567,
+     12573
+    ],
+    "len": 6,
+    "text": "the shore of Long Island Sound"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     22052,
+     22058
+    ],
+    "len": 6,
+    "text": "the shore of Long Island Sound"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ast_1930_03_a020",
+   "tok": [
+    12743,
+    12749
+   ],
+   "text": "It was more than an hour"
+  },
+  "members": [
+   {
+    "story_id": "ast_1930_03_a020",
+    "issue": "ast_1930_03",
+    "tok": [
+     12743,
+     12749
+    ],
+    "len": 6,
+    "text": "It was more than an hour"
+   },
+   {
+    "story_id": "www_1936_02_a051",
+    "issue": "www_1936_02",
+    "tok": [
+     5485,
+     5491
+    ],
+    "len": 6,
+    "text": "it was more than an hour"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a008",
+   "tok": [
+    12168,
+    12174
+   ],
+   "text": "That was a long time ago"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a008",
+    "issue": "gal_1952_03",
+    "tok": [
+     12168,
+     12174
+    ],
+    "len": 6,
+    "text": "That was a long time ago"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     10998,
+     11004
+    ],
+    "len": 6,
+    "text": "That was a long time ago"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a009",
+   "tok": [
+    265,
+    271
+   ],
+   "text": "for the opposite side of the"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a009",
+    "issue": "gal_1952_03",
+    "tok": [
+     265,
+     271
+    ],
+    "len": 6,
+    "text": "for the opposite side of the"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     4558,
+     4564
+    ],
+    "len": 6,
+    "text": "for the opposite side of the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a009",
+   "tok": [
+    2280,
+    2286
+   ],
+   "text": "the house and out into the"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a009",
+    "issue": "gal_1952_03",
+    "tok": [
+     2280,
+     2286
+    ],
+    "len": 6,
+    "text": "the house and out into the"
+   },
+   {
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
+    "tok": [
+     10118,
+     10124
+    ],
+    "len": 6,
+    "text": "the house and out into the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a009",
+   "tok": [
+    2842,
+    2848
+   ],
+   "text": "he heard footsteps in the hall"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a009",
+    "issue": "gal_1952_03",
+    "tok": [
+     2842,
+     2848
+    ],
+    "len": 6,
+    "text": "he heard footsteps in the hall"
+   },
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     2670,
+     2676
+    ],
+    "len": 6,
+    "text": "he heard footsteps in the hall"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a009",
+   "tok": [
+    4163,
+    4169
+   ],
+   "text": "around the corner of the house"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a009",
+    "issue": "gal_1952_03",
+    "tok": [
+     4163,
+     4169
+    ],
+    "len": 6,
+    "text": "around the corner of the house"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     7748,
+     7754
+    ],
+    "len": 6,
+    "text": "around the corner of the house"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a009",
+   "tok": [
+    4242,
+    4248
+   ],
+   "text": "at the rear of the hall"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a009",
+    "issue": "gal_1952_03",
+    "tok": [
+     4242,
+     4248
+    ],
+    "len": 6,
+    "text": "at the rear of the hall"
+   },
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     3123,
+     3129
+    ],
+    "len": 6,
+    "text": "at the rear of the hall"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a020",
+   "tok": [
+    3082,
+    3088
+   ],
+   "text": "and dropped it to the ground"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a020",
+    "issue": "gal_1952_03",
+    "tok": [
+     3082,
+     3088
+    ],
+    "len": 6,
+    "text": "and dropped it to the ground"
+   },
+   {
+    "story_id": "www_1936_02_a049",
+    "issue": "www_1936_02",
+    "tok": [
+     3072,
+     3078
+    ],
+    "len": 6,
+    "text": "and dropped it to the ground"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a020",
+   "tok": [
+    3910,
+    3916
+   ],
+   "text": "The lights went out in the"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a020",
+    "issue": "gal_1952_03",
+    "tok": [
+     3910,
+     3916
+    ],
+    "len": 6,
+    "text": "The lights went out in the"
+   },
+   {
+    "story_id": "td_1932_02_a015",
+    "issue": "td_1932_02",
+    "tok": [
+     128,
+     134
+    ],
+    "len": 6,
+    "text": "the lights went out in the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a020",
+   "tok": [
+    6777,
+    6783
+   ],
+   "text": "had nothing to do with it"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a020",
+    "issue": "gal_1952_03",
+    "tok": [
+     6777,
+     6783
+    ],
+    "len": 6,
+    "text": "had nothing to do with it"
+   },
+   {
+    "story_id": "td_1948_12_a023",
+    "issue": "td_1948_12",
+    "tok": [
+     395,
+     401
+    ],
+    "len": 6,
+    "text": "had nothing to do with it"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "gal_1952_03_a020",
+   "tok": [
+    12440,
+    12446
+   ],
+   "text": "I've got to get back to"
+  },
+  "members": [
+   {
+    "story_id": "gal_1952_03_a020",
+    "issue": "gal_1952_03",
+    "tok": [
+     12440,
+     12446
+    ],
+    "len": 6,
+    "text": "I've got to get back to"
+   },
+   {
+    "story_id": "td_1948_12_a023",
+    "issue": "td_1948_12",
+    "tok": [
+     4980,
+     4986
+    ],
+    "len": 6,
+    "text": "I've got to get back to"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1932_02_a013",
+   "tok": [
+    656,
+    662
+   ],
+   "text": "a bunch of money on him"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     656,
+     662
+    ],
+    "len": 6,
+    "text": "a bunch of money on him"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     761,
+     767
+    ],
+    "len": 6,
+    "text": "a bunch of money on him"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1932_02_a013",
+   "tok": [
+    1868,
+    1874
+   ],
+   "text": "come to the end of the"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     1868,
+     1874
+    ],
+    "len": 6,
+    "text": "come to the end of the"
+   },
+   {
+    "story_id": "td_1948_12_a030",
+    "issue": "td_1948_12",
+    "tok": [
+     1503,
+     1509
+    ],
+    "len": 6,
+    "text": "come to the end of the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1932_02_a013",
+   "tok": [
+    5853,
+    5859
+   ],
+   "text": "from the side of his mouth"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     5853,
+     5859
+    ],
+    "len": 6,
+    "text": "from the side of his mouth"
+   },
+   {
+    "story_id": "www_1936_02_a051",
+    "issue": "www_1936_02",
+    "tok": [
+     732,
+     738
+    ],
+    "len": 6,
+    "text": "from the side of his mouth"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 3,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1932_02_a013",
+   "tok": [
+    6454,
+    6460
+   ],
+   "text": "At the foot of the steps"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     6454,
+     6460
+    ],
+    "len": 6,
+    "text": "At the foot of the steps"
+   },
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     6486,
+     6492
+    ],
+    "len": 6,
+    "text": "at the foot of the steps"
+   },
+   {
+    "story_id": "td_1948_12_a027",
+    "issue": "td_1948_12",
+    "tok": [
+     2644,
+     2650
+    ],
+    "len": 6,
+    "text": "at the foot of the steps"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 3,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1932_02_a013",
+   "tok": [
+    16224,
+    16230
+   ],
+   "text": "had a gun in his hand"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a013",
+    "issue": "td_1932_02",
+    "tok": [
+     16224,
+     16230
+    ],
+    "len": 6,
+    "text": "had a gun in his hand"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     17739,
+     17745
+    ],
+    "len": 6,
+    "text": "had a gun in his hand"
+   },
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     21435,
+     21441
+    ],
+    "len": 6,
+    "text": "had a gun in his hand"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1932_02_a017",
+   "tok": [
+    125,
+    131
+   ],
+   "text": "he realized that he was in"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a017",
+    "issue": "td_1932_02",
+    "tok": [
+     125,
+     131
+    ],
+    "len": 6,
+    "text": "he realized that he was in"
+   },
+   {
+    "story_id": "www_1936_02_a055",
+    "issue": "www_1936_02",
+    "tok": [
+     3217,
+     3223
+    ],
+    "len": 6,
+    "text": "He realized that he was in"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 5,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1932_02_a017",
+   "tok": [
+    3905,
+    3911
+   ],
+   "text": "in the direction of the sound"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a017",
+    "issue": "td_1932_02",
+    "tok": [
+     3905,
+     3911
+    ],
+    "len": 6,
+    "text": "in the direction of the sound"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     2105,
+     2111
+    ],
+    "len": 6,
+    "text": "in the direction of the sound"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     6690,
+     6696
+    ],
+    "len": 6,
+    "text": "in the direction of the sound"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     12811,
+     12817
+    ],
+    "len": 6,
+    "text": "in the direction of the sound"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     13960,
+     13966
+    ],
+    "len": 6,
+    "text": "in the direction of the sound"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1932_02_a021",
+   "tok": [
+    676,
+    682
+   ],
+   "text": "at the top of his voice"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     676,
+     682
+    ],
+    "len": 6,
+    "text": "at the top of his voice"
+   },
+   {
+    "story_id": "www_1936_02_a049",
+    "issue": "www_1936_02",
+    "tok": [
+     3050,
+     3056
+    ],
+    "len": 6,
+    "text": "at the top of his voice"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1932_02_a021",
+   "tok": [
+    804,
+    810
+   ],
+   "text": "that he was far from feeling"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     804,
+     810
+    ],
+    "len": 6,
+    "text": "that he was far from feeling"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     843,
+     849
+    ],
+    "len": 6,
+    "text": "that he was far from feeling"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1932_02_a021",
+   "tok": [
+    1539,
+    1545
+   ],
+   "text": "The door was flung open, and"
+  },
+  "members": [
+   {
+    "story_id": "td_1932_02_a021",
+    "issue": "td_1932_02",
+    "tok": [
+     1539,
+     1545
+    ],
+    "len": 6,
+    "text": "The door was flung open, and"
+   },
+   {
+    "story_id": "www_1936_02_a051",
+    "issue": "www_1936_02",
+    "tok": [
+     8556,
+     8562
+    ],
+    "len": 6,
+    "text": "the door was flung open, and"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1948_12_a019",
+   "tok": [
+    6090,
+    6096
+   ],
+   "text": "stood with his back to the"
+  },
+  "members": [
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     6090,
+     6096
+    ],
+    "len": 6,
+    "text": "stood with his back to the"
+   },
+   {
+    "story_id": "www_1936_02_a051",
+    "issue": "www_1936_02",
+    "tok": [
+     9699,
+     9705
+    ],
+    "len": 6,
+    "text": "stood with his back to the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1948_12_a019",
+   "tok": [
+    19294,
+    19300
+   ],
+   "text": "as he moved away from the"
+  },
+  "members": [
+   {
+    "story_id": "td_1948_12_a019",
+    "issue": "td_1948_12",
+    "tok": [
+     19294,
+     19300
+    ],
+    "len": 6,
+    "text": "as he moved away from the"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     1095,
+     1101
+    ],
+    "len": 6,
+    "text": "as he moved away from the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "td_1948_12_a023",
+   "tok": [
+    7418,
+    7424
+   ],
+   "text": "that was the name of the"
+  },
+  "members": [
+   {
+    "story_id": "td_1948_12_a023",
+    "issue": "td_1948_12",
+    "tok": [
+     7418,
+     7424
+    ],
+    "len": 6,
+    "text": "that was the name of the"
+   },
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     7568,
+     7574
+    ],
+    "len": 6,
+    "text": "That was the name of the"
+   }
+  ]
+ },
+ {
+  "witnesses": 2,
+  "witnesses_collapsed": 2,
+  "issues": 2,
+  "occurrences": 2,
+  "max_len": 6,
+  "representative": {
+   "story_id": "ws_1937_02_a051",
+   "tok": [
+    7226,
+    7232
+   ],
+   "text": "What I want to know is"
+  },
+  "members": [
+   {
+    "story_id": "ws_1937_02_a051",
+    "issue": "ws_1937_02",
+    "tok": [
+     7226,
+     7232
+    ],
+    "len": 6,
+    "text": "What I want to know is"
+   },
+   {
+    "story_id": "www_1936_02_a047",
+    "issue": "www_1936_02",
+    "tok": [
+     3345,
+     3351
+    ],
+    "len": 6,
+    "text": "What I want to know is"
+   }
+  ]
+ }
+]

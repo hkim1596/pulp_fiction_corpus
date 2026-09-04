@@ -11,8 +11,24 @@ so that the site's boards can show the whole collection — English and
 not, fiction magazines and not — and the project's progress against it.
 
     python3 pipeline/s00_survey.py --run        fetch everything (about a minute)
-    python3 pipeline/s00_survey.py --summary    recompute the summaries from items.jsonl
+    python3 pipeline/s00_survey.py --enrich     the provenance fields of every item, one metadata
+                                                call per item (resumable; an hour or two)
+    python3 pipeline/s00_survey.py --summary    recompute the summaries from items.jsonl (+ enrich.jsonl)
     python3 pipeline/s00_survey.py --selftest
+
+The enrichment (protocol section 2: "we reconstruct the collection's
+history of transmission and assess the resulting sample by year, title,
+author, and publisher") reads each item's own metadata record
+(archive.org/metadata/<id>) for the fields the search index does not
+carry: who uploaded it and when, which sub-collection it was added to and
+by which curator, which OCR engine produced the archive's text, the
+language the OCR detected, the rights fields. data/survey/enrich.jsonl
+keeps one line per item; the summary folds them into a "provenance"
+section (items added by year, uploader accounts, curators, OCR engines,
+detected language of the unmarked items, scanning-group tags read from
+the titles) and a "by publisher" table from config/publishers_magazines.json.
+Uploader addresses stay in the data file; the summary carries only the
+part before the @ and a count.
 
 Output: data/survey/items.jsonl (one archive item per line, as the API
 gave it, plus the derived fields year, lang_class, kind, genre, magazine),
@@ -233,8 +249,208 @@ def run():
     summary()
 
 
+ENRICH_FIELDS = ["uploader", "contributor", "source", "sponsor", "scanner", "publisher", "creator", "rights",
+                 "licenseurl", "possible-copyright-status", "scanningcenter", "curation", "collection_added",
+                 "ocr", "ocr_module_version", "ocr_detected_lang", "ocr_detected_lang_conf", "language",
+                 "imagecount", "date", "year", "addeddate", "publicdate"]
+META_API = "https://archive.org/metadata/"
+TAG_RE = re.compile(r"\(([^()]{2,40})\)\s*$")
+
+
+def enrich(threads=6, limit=None):
+    """One metadata call per item (resumable): data/survey/enrich.jsonl."""
+    import concurrent.futures
+    out = os.path.join(OUTDIR, "enrich.jsonl")
+    done = set()
+    if os.path.exists(out):
+        for line in open(out, encoding="utf-8"):
+            try:
+                done.add(json.loads(line)["identifier"])
+            except Exception:
+                pass
+    ids = [json.loads(l)["identifier"] for l in open(os.path.join(OUTDIR, "items.jsonl"), encoding="utf-8") if l.strip()]
+    todo = [i for i in ids if i not in done]
+    if limit:
+        todo = todo[:limit]
+    print(f"[s00] enrich: {len(done):,} done, {len(todo):,} to fetch", flush=True)
+
+    def one(ident):
+        try:
+            d = fetch(META_API + urllib.parse.quote(ident) + "/metadata", tries=3)
+            m = (d or {}).get("result") or {}
+            rec = {"identifier": ident, "fetched": time.strftime("%Y-%m-%d")}
+            for k in ENRICH_FIELDS:
+                if k in m:
+                    rec[k] = m[k]
+            return rec
+        except Exception as e:
+            return {"identifier": ident, "fetched": time.strftime("%Y-%m-%d"), "error": str(e)[:200]}
+    n = 0
+    t0 = time.time()
+    with open(out, "a", encoding="utf-8") as f, concurrent.futures.ThreadPoolExecutor(max_workers=threads) as ex:
+        for rec in ex.map(one, todo):
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            n += 1
+            if n % 500 == 0:
+                f.flush()
+                print(f"[s00]   {n:,}/{len(todo):,} in {time.time() - t0:.0f}s", flush=True)
+    print(f"[s00] enrich: wrote {n:,} records to {out}")
+    summary()
+
+
+def load_enrich():
+    p = os.path.join(OUTDIR, "enrich.jsonl")
+    out = {}
+    if os.path.exists(p):
+        for line in open(p, encoding="utf-8"):
+            try:
+                r = json.loads(line)
+            except Exception:
+                continue
+            if "error" not in r:
+                out[r["identifier"]] = r
+    return out
+
+
+def uploader_handle(u):
+    """The part before the @, plus the domain for institutional addresses."""
+    u = str(u or "").strip().lower()
+    if "@" not in u:
+        return u or "(none)"
+    local, dom = u.split("@", 1)
+    return f"{local} ({dom})" if dom in ("archive.org", "textfiles.com") else local
+
+
+def ocr_engine(v):
+    """'ABBYY FineReader 11.0' / 'tesseract 5.3' / ... from the archive's ocr field."""
+    v = str(v or "").strip()
+    if not v:
+        return "(none)"
+    m = re.match(r"(ABBYY FineReader \d+(?:\.\d)?|tesseract \d+\.\d+|[A-Za-z]+(?: [A-Za-z]+)? \d+(?:\.\d+)?)", v)
+    return m.group(1) if m else v[:40]
+
+
+def curator_of(v):
+    m = re.search(r"\[curator\]([^\[]+)\[/curator\]", str(v or ""))
+    return uploader_handle(m.group(1)) if m else None
+
+
+def scan_tag(title):
+    """The scanning-group tag the community writes at the end of a title:
+    (Darwin-IA), (Gorgon776), (c2c), (cape1736), (Darwination-McCoy-IA)."""
+    m = TAG_RE.search(title or "")
+    if not m:
+        return None
+    t = m.group(1).strip()
+    if re.fullmatch(r"[\d\s\-–/.]+|(?:18|19|20)\d{2}.*|vol.*|no\.?.*|spring.*|summer.*|fall.*|winter.*|selections|c2c|pdf|cbr|cbz|epub|djvu|ocr|scan|missing.*|incomplete.*|partial.*", t, flags=re.I):
+        return t.lower() if t.lower() == "c2c" else None
+    return t
+
+
+_PUBMAGS = None
+
+
+def publisher_of(magazine, year):
+    """Publisher group of a magazine in a year, from config/publishers_magazines.json."""
+    global _PUBMAGS
+    if _PUBMAGS is None:
+        try:
+            cfg = json.load(open(os.path.join(ROOT, "config", "publishers_magazines.json"), encoding="utf-8"))
+            _PUBMAGS = [(re.compile(e["pattern"], re.I), e["periods"]) for e in cfg["magazines"]]
+        except Exception:
+            _PUBMAGS = []
+    name = (magazine or "").strip().lower()
+    for rx, periods in _PUBMAGS:
+        if rx.search(name):
+            if year is None:
+                return None
+            for lo, hi, group in periods:
+                if lo <= year <= hi:
+                    return group
+            return None
+    return None
+
+
+def provenance_summary(items, enrich):
+    """The history of transmission and the OCR provenance, from the enriched records."""
+    added_year_all, added_year_fiction = Counter(), Counter()
+    uploaders, uploaders_fiction = Counter(), Counter()
+    upl_years = defaultdict(list)
+    curators = Counter()
+    engines_fiction, engines_all = Counter(), Counter()
+    engine_by_upload_decade = defaultdict(Counter)
+    detected_unmarked = Counter()
+    tags = Counter()
+    coll_added = Counter()
+    rights = Counter()
+    n_enriched = 0
+    for it in items:
+        lc = it["lang_class"]
+        working = lc in ("english", "unmarked")
+        fiction = working and it["kind"] == "fiction magazine"
+        ad = it.get("addeddate") or it.get("publicdate") or ""
+        ay = int(ad[:4]) if re.match(r"(19|20)\d{2}", ad) else None
+        if ay:
+            added_year_all[ay] += 1
+            if fiction:
+                added_year_fiction[ay] += 1
+        tg = scan_tag(it.get("title"))
+        if tg and fiction:
+            tags[tg] += 1
+        e = enrich.get(it.get("identifier"))
+        if not e:
+            continue
+        n_enriched += 1
+        h = uploader_handle(e.get("uploader"))
+        uploaders[h] += 1
+        if fiction:
+            uploaders_fiction[h] += 1
+        if ay:
+            upl_years[h].append(ay)
+        c = curator_of(e.get("curation"))
+        if c:
+            curators[c] += 1
+        eng = ocr_engine(e.get("ocr"))
+        engines_all[eng] += 1
+        if fiction:
+            engines_fiction[eng] += 1
+            if ay:
+                engine_by_upload_decade[f"{ay // 10 * 10}s"][eng] += 1
+        if lc == "unmarked":
+            dl = e.get("ocr_detected_lang")
+            try:
+                conf = float(e.get("ocr_detected_lang_conf") or 0)
+            except (TypeError, ValueError):
+                conf = 0.0
+            detected_unmarked[(str(dl) if dl else "(none)") + ("" if conf >= 0.9 or not dl else " (low confidence)")] += 1
+        ca = e.get("collection_added")
+        for x in (ca if isinstance(ca, list) else [ca] if ca else []):
+            coll_added[str(x)] += 1
+        r = e.get("possible-copyright-status") or e.get("rights") or e.get("licenseurl")
+        if r:
+            rights[str(r)[:60]] += 1
+    return {
+        "items_enriched": n_enriched,
+        "added_by_year": dict(sorted(added_year_all.items())),
+        "fiction_added_by_year": dict(sorted(added_year_fiction.items())),
+        "uploader_accounts": len(uploaders),
+        "uploaders_top": [{"handle": h, "items": n, "fiction_items": uploaders_fiction.get(h, 0),
+                           "years": [min(upl_years[h]), max(upl_years[h])] if upl_years.get(h) else None}
+                          for h, n in uploaders.most_common(20)],
+        "curators": dict(curators.most_common(10)),
+        "ocr_engines_all": dict(engines_all.most_common(12)),
+        "ocr_engines_fiction": dict(engines_fiction.most_common(12)),
+        "ocr_engine_by_upload_decade": {d: dict(c.most_common(6)) for d, c in sorted(engine_by_upload_decade.items())},
+        "detected_language_of_unmarked": dict(detected_unmarked.most_common(12)),
+        "scan_tags_fiction": dict(tags.most_common(25)),
+        "collection_added": dict(coll_added.most_common(15)),
+        "rights_fields": dict(rights.most_common(10)),
+    }
+
+
 def summary():
     items = [json.loads(l) for l in open(os.path.join(OUTDIR, "items.jsonl"), encoding="utf-8") if l.strip()]
+    enrich_map = load_enrich()
     cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"), encoding="utf-8"))
     pilot = {i["ia_identifier"]: i["id"] for i in cfg.get("issues", [])}
     by_lang, by_class, by_kind, by_media, by_sub = Counter(), Counter(), Counter(), Counter(), Counter()
@@ -246,6 +462,8 @@ def summary():
     bytes_all = 0
     with_year = 0
     by_decade_all = Counter()
+    by_publisher = Counter()
+    by_publisher_decade = defaultdict(Counter)
     for it in items:
         derive(it)
         lc = it["lang_class"]
@@ -270,6 +488,11 @@ def summary():
         bytes_all += nb
         working = lc in ("english", "unmarked")
         fiction = working and it["kind"] == "fiction magazine"
+        if fiction:
+            pub = publisher_of(it["magazine"], y)
+            by_publisher[pub or "not assigned"] += 1
+            if pub:
+                by_publisher_decade[dec][pub] += 1
         if working:
             work["items"] += 1
             work["pages"] += np
@@ -330,9 +553,12 @@ def summary():
                 "fiction_by_decade": dict(sorted(work["fiction_by_decade"].items())),
                 "fiction_by_genre": dict(work["fiction_by_genre"].most_common()),
                 "fiction_by_decade_genre": {d: dict(c.most_common()) for d, c in sorted(work["fiction_by_decade_genre"].items())},
+                "fiction_by_publisher": dict(by_publisher.most_common()),
+                "fiction_by_decade_publisher": {d: dict(c.most_common(8)) for d, c in sorted(by_publisher_decade.items())},
                 "fiction_magazines": len(fiction_mags),
                 "fiction_magazines_top": [{"name": m["name"], "items": m["fiction_items"], "years": m["years"], "genre": m["genre"]}
                                           for m in sorted(fiction_mags, key=lambda m: -m["fiction_items"])[:60]]},
+            "provenance": provenance_summary(items, enrich_map),
             "magazines_distinct": len(mag_out),
             "pilot_identifiers_found": sorted(pid for it in items for ident, pid in pilot.items() if it.get("identifier") == ident),
             "pilot_issues": len(pilot)}
@@ -386,6 +612,16 @@ def selftest():
     assert kind_of(["beadlesdimenovels", "nickles-and-dimes"]) == "dime novel"
     assert kind_of(["photoplaymagazine"]) == "film or general magazine" and genre_of(["photoplaymagazine"]) is None
     assert genre_of(["pulp_fiction_misc", "weirdtalesmagazine"]) == "weird"
+    assert uploader_handle("pulp@textfiles.com") == "pulp (textfiles.com)" and uploader_handle("someone@gmail.com") == "someone"
+    assert ocr_engine("ABBYY FineReader 11.0 (Extended OCR)") == "ABBYY FineReader 11.0"
+    assert ocr_engine("tesseract 5.3.0-6-g76ae") == "tesseract 5.3" and ocr_engine(None) == "(none)"
+    assert curator_of("[curator]jscott@archive.org[/curator][date]20250104070210[/date]") == "jscott (archive.org)"
+    assert scan_tag("10-Story Book v28n02 (1928-02) (Darwin-IA)") == "Darwin-IA"
+    assert scan_tag("Interzone 056 (1992 02) (Gorgon776)") == "Gorgon776" and scan_tag("Weird Tales v06n05 (1925-11)") is None
+    assert scan_tag("Amazing Stories v12n07 (1938-12) (selections)") is None
+    assert publisher_of("Astounding Stories", 1930) == "Clayton" and publisher_of("Astounding Science Fiction", 1945) == "Street & Smith"
+    assert publisher_of("Weird Tales", 1925) == "Popular Fiction (Weird Tales)" and publisher_of("Nowhere Tales", 1925) is None
+    assert publisher_of("Galaxy", 1952) == "Galaxy Publishing" and publisher_of("Wild West Weekly", 1936) == "Street & Smith"
     print("selftest OK")
 
 
@@ -393,16 +629,21 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", action="store_true")
     ap.add_argument("--summary", action="store_true")
+    ap.add_argument("--enrich", action="store_true", help="fetch each item's own metadata record (resumable)")
+    ap.add_argument("--threads", type=int, default=6)
+    ap.add_argument("--limit", type=int, default=None, help="enrich at most this many items (a test run)")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
     if a.selftest:
         selftest()
     elif a.run:
         run()
+    elif a.enrich:
+        enrich(a.threads, a.limit)
     elif a.summary:
         summary()
     else:
-        sys.exit("pass --run, --summary or --selftest")
+        sys.exit("pass --run, --enrich, --summary or --selftest")
 
 
 if __name__ == "__main__":
