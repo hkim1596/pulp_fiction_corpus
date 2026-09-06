@@ -17,7 +17,9 @@ opens a shell (`rtx ssh`). Multi-step server work is normally done with
 a heredoc paste: `ssh rtx6000 'bash -s' <<'EOS' … EOS`.
 
 THE MAIN SERVER is the lab's rtx6000 (shared, four GPUs). The project
-lives at `~/shared/khj/pulp_fiction_corpus`. The pipeline runs here; the
+lives at `~/shared/khj/pulp_fiction_corpus` — since 2026-09-06 that
+path is a symbolic link to `/mnt/sda/pulp/pulp_fiction_corpus`, the
+project's real home on the big disk (see Storage). The pipeline runs here; the
 website runs here; the Cloudflare tunnel that makes the site public runs
 here. GPU etiquette: this project may use GPU 0 or 1 only; GPUs hold
 other lab members' vLLM models — never free "someone else's" memory,
@@ -34,6 +36,28 @@ corpus (page images, layout, text stages) belongs under /mnt/sda/pulp;
 /mnt/sdb is unassigned. Docker on the root disk held about a terabyte
 of stopped containers and unused images; pruning is done per container
 and image, never blindly (the rule below).
+
+The root disk filled to 100% on 2026-09-06 (the p38 deploy failed on
+"No space left on device"; nothing of ours was lost, two derived files
+were emptied and rebuilt). Under the shared account Docker held 639 GB
+of images (622 GB belonging to no container) and 550 GB of containers
+(135 GB stopped), ~/.cache/huggingface 21 GB, ~/.cache/pip 11 GB
+(removed), and other projects' folders under ~/shared/khj tens of GB
+each; this project held under half a gigabyte. The lab decides about
+Docker; our answer was to move the whole project to /mnt/sda: `cp -a`
+to /mnt/sda/pulp/pulp_fiction_corpus (file count, bytes and the md5 of
+every log and record checked), the old directory renamed to
+~/shared/khj/pulp_fiction_corpus.before_move_20260906 (remove it once
+the moved site has run for a day: `rm -rf` of that name frees ~290 MB
+on root), a symbolic link at the old path, the site log moved to
+/mnt/sda/pulp/log_pulpsite.txt with a link at ~/shared/khj/
+log_pulpsite.txt, the tmux session `pulpsite` started again from the
+linked path. Everything that names the old path still works through
+the link (the serve script, the tunnel, the Studio's nightly pull, the
+secrets under ~/shared/khj). Scratch space: a full root disk also
+breaks /tmp — Python's tempfile (the s08 self-test) needs `export
+TMPDIR=/mnt/sda/pulp/tmp` in a server paste, and a paste's own scratch
+files go there too.
 
 THE BACKUP SERVER is a Mac Studio (no GPU — website only, no pipeline).
 Setup and switchover: `docs/backup-server.md` and
@@ -395,7 +419,14 @@ shows nothing — seen on 2026-09-04); a session that has already
 ended is not "still running", so never guard a paste on the pane's
 absence (2026-09-03: a guard read a finished run as running). The
 result files' own timestamps, reachable through the data door, are the
-sure sign that a run finished.
+sure sign that a run finished. Since the full disk of 2026-09-06: chain
+the pull with `|| { echo PULL-FAILED-STOP; exit 1; }` and every later
+must-succeed step likewise, so the pipeline never runs on old code or
+on a disk that cannot take its output (that day the export truncated
+its files before failing); write a paste's scratch files under
+/mnt/sda/pulp/tmp, never /tmp; and state in the expected output which
+figures come from which command (the audit's live mode and its
+--candidate mode print the same shape of line with different numbers).
 
 ## The pipeline, stage by stage
 
@@ -454,6 +485,16 @@ the stages load it themselves (`timing_util.load_pulp_env`).
     s04_rules       deterministic cleanup: normalize characters, drop
                     scan noise, remove running heads, rejoin hyphenated
                     words, unwrap paragraphs → data/text/<id>/rules_*/.
+                    Its word list (words(), looks_like_word — also used
+                    by s07's reading text and s08's "text inside an
+                    illustration" test) is config/words.txt, a copy of
+                    the main server's /usr/share/dict/words committed on
+                    2026-09-06 so that every machine reads the same list;
+                    without it a machine uses its own system list or a
+                    shape test and can differ from the server by a box
+                    or a word (the sandbox kept "WILLER" on p.153 of
+                    Galaxy 1952-04 in the story; the server put it in
+                    the picture).
     s05_llm_clean   LLM cleanup of rule-cleaned pages, two backends
                     (local qwen lane; Claude API) with a similarity
                     guard that rejects overlarge changes. Qwen quirk:

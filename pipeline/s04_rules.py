@@ -37,13 +37,25 @@ LIG = {"ﬁ": "fi", "ﬂ": "fl", "ﬀ": "ff", "ﬃ": "ffi",
        "ﬄ": "ffl", "­": "", "\x0c": ""}
 WORD_RE = re.compile(r"[A-Za-z]+")
 
-# small built-in wordlist fallback; server uses /usr/share/dict/words if present
+# The word list decides R4 (does the joined form of a hyphenated word exist?),
+# the assembly's "text inside an illustration" test (s08: are most of the short
+# lines on a picture page words?) and the same dehyphenation in s07's reading
+# text. So that every machine reads the SAME list, config/words.txt in the
+# repository — a copy of the main server's /usr/share/dict/words (Ubuntu's
+# wamerican) — comes first; a machine without it falls back on its own system
+# list, and without that on a shape test, and its records can then differ from
+# the server's by a box or a word (2026-09-06: the sandbox, which has no system
+# list, kept an illustrator's signature "WILLER" in a story that the server put
+# in the picture).
 _WORDS = None
+REPO_WORDS = os.path.join(ROOT, "config", "words.txt")
+
+
 def words():
     global _WORDS
     if _WORDS is None:
         _WORDS = set()
-        for path in ("/usr/share/dict/words", "/usr/share/dict/american-english"):
+        for path in (REPO_WORDS, "/usr/share/dict/words", "/usr/share/dict/american-english"):
             if os.path.exists(path):
                 with open(path, errors="ignore") as f:
                     _WORDS = {w.strip().lower() for w in f if w.strip()}

@@ -73,6 +73,7 @@ docs/handbook.md before touching the look of a page.
     config/pilot_issues.json the approved 10-issue development set
     config/departments.json  each magazine's standing departments (name, type, conductor) — assembly v2.2
     config/illustrators.json each magazine's known illustrators, for the signature read as text beside a drawing — assembly v2.3 (reference knowledge, to confirm)
+    config/words.txt         the word list every stage reads (a copy of the main server's /usr/share/dict/words), so that dehyphenation and the picture-text test are the same on every machine
     config/publishers_magazines.json  publisher of a magazine by period (reference table for the collection survey's "by publisher")
     data/reuse/              the reuse pipeline's result files (the one
                              data folder kept in git; small JSON)
