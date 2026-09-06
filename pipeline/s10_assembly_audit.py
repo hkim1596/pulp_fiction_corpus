@@ -42,10 +42,14 @@ import s09_assembly_eval as E9  # noqa: E402
 from s08_assemble_rules import load_pages, region_text, words, sim, FILLER_RE, AD_WORDS  # noqa: E402
 
 LIVE = os.path.join(ROOT, "data", "articles", "{iid}", "articles.json")
+CANDIDATE = {"dir": None}       # --candidate: a build to audit instead of the live records (data/assembly_v2/rules)
 
 
 def load_live(iid):
-    p = LIVE.format(iid=iid)
+    if CANDIDATE["dir"]:
+        p = os.path.join(CANDIDATE["dir"] if os.path.isabs(CANDIDATE["dir"]) else os.path.join(ROOT, CANDIDATE["dir"]), iid, "articles.json")
+    else:
+        p = LIVE.format(iid=iid)
     return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else None
 
 
@@ -207,7 +211,9 @@ def main():
     ap.add_argument("--yardstick", required=True)
     ap.add_argument("--issue")
     ap.add_argument("--show", action="store_true", help="keep every disputed region's detail in the JSON")
+    ap.add_argument("--candidate", help="audit this build (a directory of <issue>/articles.json) instead of the live records")
     args = ap.parse_args()
+    CANDIDATE["dir"] = args.candidate
     yard = args.yardstick if os.path.isabs(args.yardstick) else os.path.join(ROOT, args.yardstick)
     cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"), encoding="utf-8"))
     ids = [args.issue] if args.issue else [i["id"] for i in cfg["issues"]]
@@ -219,7 +225,7 @@ def main():
     txt = report(results)
     print(txt)
     out = os.path.join(ROOT, "data", "assembly_v2", "audit.json")
-    json.dump({"yardstick": os.path.relpath(yard, ROOT), "issues": results, "report": txt}, open(out, "w", encoding="utf-8"),
+    json.dump({"yardstick": os.path.relpath(yard, ROOT), "candidate": args.candidate or "data/articles", "issues": results, "report": txt}, open(out, "w", encoding="utf-8"),
               ensure_ascii=False, indent=1)
     print(f"\nwritten {os.path.relpath(out, ROOT)}")
 

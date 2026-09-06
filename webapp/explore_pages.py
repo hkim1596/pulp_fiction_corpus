@@ -2008,11 +2008,11 @@ def stories_page(qs, render=None):
                    "advertisements, features, poems, or everything. Counts and status are as exported for the "
                    "reuse run; the workbench link shows the record as it stands now with its scan regions. "
                    "One hundred records a page.")
-            + f"<h1>Records — {total:,} match</h1>" + form + pager
+            + f"<h1>Stories — {total:,} match</h1>" + form + pager
             + _table(["title — author", "type", "issue", "date", "pages", "#words", "#regions", "status", "#shared", "#paraphrase", ""], rows)
             + pager + f"<p class='muted'>{_raw_link('/raw/stories', 'raw export (paged JSON)')} · "
               f"{_raw_link('/raw/file?path=pilot_stories.jsonl.gz', 'download the export')}</p>")
-    return _render(render, "Records", body, "/stories")
+    return _render(render, "Stories", body, "/stories")
 
 
 _PLACE = {}
@@ -2090,9 +2090,10 @@ def story_page(sid, render=None):
             if sid in (u["a"], u["b"]):
                 surprise.append((name, u))
     body = [_howto("Layer 2: one record. Facts as exported for the reuse run, the live status on the workbench, "
-                   "every passage it shares with other stories (each linked to the pair page where both texts are "
-                   "shown and to the scan), its closest stories by topic, and its annotation history. "
-                   "Layer 3 is one click away: the workbench (regions on the scan) and the raw records."),
+                   "the whole reading text as it stands now, every passage it shares with other stories (each linked "
+                   "to the pair page where both texts are shown and to the scan), and its closest stories by topic. "
+                   "Layer 3 is one click away: the workbench (regions on the scan, and every human action on the "
+                   "record) and the raw records."),
             f"<h1>{_esc(r['title'] or '(untitled)')}</h1>",
             "<p class='muted'>" + (f"{_author_link(r)} · " if r.get("author") else "")
             + f"{_issue_link(con, r['issue'])} · {_esc(r['type'])} · "
@@ -2175,14 +2176,17 @@ def story_page(sid, render=None):
             f"<li>{_esc(name)}: longest {u['longest']}, stratum topic q{u['topic_q']} · {u['years_band']} years (n={u['stratum_n']:,}): "
             f"P(at least this) {('under 1 in ' + format(u['stratum_n'], ',')) if u['p_at_least'] == 0 else u['p_at_least']}</li>"
             for name, u in surprise) + "</ul>")
-    body.append("<h2>Annotation history</h2>")
-    if events:
-        body.append(_table(["when", "who", "action", "detail"],
-                           [[_esc(e.get("ts", "")), _esc(_G["display_name"](e.get("user", "?"))), _esc(e.get("action", "")),
-                             _esc(str({k: v for k, v in e.items() if k not in ("ts", "user", "action", "issue", "article_id")})[:160])]
-                            for e in events]))
+    # the whole reading text, as the site assembles it now (Heejin, 2026-09-05: "Show entire story text";
+    # the annotation history is on the workbench and in the raw record, not here)
+    live, _ = _G["article_by_id"](sid)
+    text = (live or {}).get("text") or ""
+    if text:
+        paras = [p for p in text.split("\n\n") if p.strip()]
+        body.append(f"<h2>The text ({len(text.split()):,} words, {len(paras):,} paragraphs — the reading text as the workbench has it now"
+                    + (f"; {len(events)} human action{'s' if len(events) != 1 else ''} on the record, on the workbench" if events else "") + ")</h2>")
+        body.append("<div class='readtext'>" + "".join(f"<p>{_esc(p)}</p>" for p in paras) + "</div>")
     else:
-        body.append("<div class='empty'>No human action on this record yet.</div>")
+        body.append("<h2>The text</h2><div class='empty'>No reading text for this record.</div>")
     return _render(render, r["title"] or sid, "".join(body), f"/story/{sid}")
 
 

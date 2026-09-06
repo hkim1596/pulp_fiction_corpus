@@ -457,3 +457,115 @@ stories, 24 features, 5 poems, 3 letters, 53 house, 411 ad, 11 toc, 2
 other; 38 notes, 32 synopsis regions in 4 records, 11 illustrators, 8
 serial instalments with fields, 37 records with a department, 22 boxes
 of text inside illustrations.
+
+## v2.3 (6 September): what the corrections audit found, and the rules that answer it
+
+The fourth round read the annotations of 3–6 September (558 events in
+nine issues, 82 records touched, 22 of them verified) not against an
+archive but against a fresh build of v2.2, with the new corrections
+audit (pipeline/s11_corrections_audit.py, `--candidate`): every record
+as the person left it, box by box against the machine's, each
+difference named — a box the person moved in (from which record or
+furniture, and why the machine put it there), a box the person took
+out (to which record, or "not story text"), a role that differs.
+Reading the differences one by one sorted them into machine mistakes,
+conventions, and the persons' own unfinished repairs; the rules answer
+the first group.
+
+What was wrong in v2.2, and the rule that replaces it:
+
+- Advertising set beside the story on its continuation pages (Thrilling
+  Detective 1948-12, pp. 100–110: a column of small advertisements next
+  to every page of the stories) was cut by reading order, so a story
+  paragraph in the other column went into the advertisement and a line
+  of copy stayed in the story. Now a filler or advertisement block keeps
+  to the COLUMN it stands in (`column_of`: left, right, or spanning),
+  and a paragraph of the piece's prose in the other column goes back to
+  the piece; an advertisement column is found even when it comes first
+  in reading order or has no headline label (pp. 102, 104, 106); inside
+  the column a headline that follows a paragraph of copy opens the next
+  advertisement; a block of short display lines at the foot of a
+  continuation page with nothing of the piece after it is an
+  advertisement (`trailing_display_block`); the tail of a picture
+  advertisement above the column's first headline — a copyright line, a
+  company, a slogan in capitals (p. 109: "Copyright 1948 Billerie Rubber
+  Co." / "FOREVER FIRST WITH FIRST QUALITY") — is its own record, titled
+  by the slogan. A full advertisement page with one advertiser (one
+  coupon, one Dept. code, no other company or address) is one record
+  (`merge_page_ads`; the first version merged classified pages wholesale
+  and was tightened). Price lines and addresses never open a record;
+  a line in capitals that is a signature ("HOLYOKE GAME CO.") closes one.
+- The head of a piece. Everything between the head and the first body
+  paragraph — on the start page and across the spread — is paratext
+  (`head_zone`): the illustration's caption and the pull-quote on the
+  start page are teaser (the annotators' rule since 4 September: five
+  records marked so, against two older verified records that left the
+  caption as furniture), a blurb set in several boxes is teaser box by
+  box, an epigraph with its attribution is teaser, a type label ("A
+  Complete Novelet") is subtitle, a department's tagline is subtitle
+  and its standing notice teaser, the illustrator's signature read as
+  text beside the drawing ("ADROSNATCH", "A. BROSNAT & Co.") is a note
+  and fills the illustrator field (config/illustrators.json, reference
+  knowledge to confirm), an empty title box is the title. The zone ends
+  at the drop cap (split or not), at a chapter head, at a column-width
+  paragraph of fifteen words, at a second long paragraph, at a run of
+  verse, or at forty words; poems have no zone. A blurb set across the
+  FOOT of the start page or its facing page, below the columns
+  (Thrilling Detective's house style: "Kip Morgan Wades Through a Battle
+  of Fists" / "and Knives for a Hard-Hitting K. O. of Crime!"; the
+  series introduction of The Great Pearl Theft, a header in capitals
+  with its paragraph), is teaser (`foot_blurb`; dialogue and a line that
+  continues the column above it are left alone). A by-line may carry its
+  type label ("a novelet by …"), a by-line of initials takes the surname
+  in the next box, and a title far above its by-line is found when the
+  contents page names it.
+- The end of a piece. A "COMING—" or "FEATURED IN THE NEXT ISSUE" block
+  with a title, a type label and a by-line is a house announcement; a
+  next-month blurb or a "Watch for" line at the end is a note whatever
+  its punctuation; what follows the end mark or the author's signature
+  on the last page is advertising or an announcement, by column, never
+  the piece's text. The end-signature and tail rules now run after the
+  head is joined from the facing page — for those records they had never
+  run (the keys were appended after the sort). A piece's column above a
+  title stops at a "continued on" notice, and a new start on the page
+  ends the notice's tail.
+- Smaller things: a chapter head the layout labelled as a running head
+  ("CHAPTER VII" in a PageHeader box) is a chapter head, not furniture —
+  but bare page numbers in such boxes stay furniture; a page outside the
+  printed range with text on it is an advertisement (the cigarette
+  pages), titled by its display lines; a record whose scan has leaves
+  out of order is given in printed-page order and flagged; a department
+  notice that names the magazine ("Address inquiries to …") is never an
+  advertisement; a "loose" lower-case line inside an advertisement
+  column ("instruction book …") no longer breaks the block.
+
+The reading text (pipeline/s07_articles.join_boxes, shared with the
+site): one paragraph per box, but a box that ends without closing
+punctuation or with a hyphen, or is followed by a box that starts in
+lower case, runs on into the next — so a paragraph the layout cut in
+two reads as one, and a word split at a line end is joined.
+
+Harness (pipeline/s09_assembly_eval.py --all: the contents pages, and
+the live logs' 22 verified records): the contents-page columns
+unchanged — 108/108 found, 88/88 titles and authors, 106 clean, cover
+0.95, 2 story starts inside pieces, no box owned twice or by nobody —
+and the verified records 16 of 22 exact with mean Jaccard 1.00 (rounded;
+the six that differ do so by
+one to three boxes each: three start-page captions the machine now
+keeps as teaser and two older verified records left as furniture, The
+Stolen Body's three boxes Heejin has still to take out, an empty box in
+Lukundoo, the "[THE END]" kept in The Gargoyle). 588 records on the ten
+issues: 79 stories, 23 features, 5
+poems, 3 letters, 56 house, 411 ad, 11 toc; roles 611 title, 84 author,
+89 teaser, 46 note, 17 subtitle, 13 caption, 283 chapter, 44 heading,
+32 synopsis; 14 illustrators, 36 records with a department, 8 serial
+instalments. Against the corrections (docs/assembly-accuracy.md, 6
+September): of the 82 records people touched, 38 are now exactly the
+machine's (25 before), 56 have the same boxes and roles (33), 68 the
+same boxes (49).
+
+The refresh that put v2.3 live (scripts/switch_assembly.py) keeps, for
+a candidate that joins several live records, the id the annotators
+named most often, and gives the boxes of a verified record a person
+made the roles they had before; after it every verified record must
+read "identical" in scripts/compare_effective.py.

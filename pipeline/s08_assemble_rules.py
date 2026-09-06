@@ -54,7 +54,35 @@ from collections import Counter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-VERSION = "2.2"
+VERSION = "2.3"
+# 2.3 (2026-09-06, from the corrections audit s11 over the 558 annotation events of 3–6 September,
+# read against a fresh build of 2.2): (a) advertising set beside the story on its continuation
+# pages is cut by COLUMN — a filler or advertisement block keeps to the column it stands in, and a
+# paragraph in the other column goes back to the piece (Thrilling Detective 1948-12, pp. 60, 100,
+# 104, 110); an advertisement column is found even when it comes first in reading order or has no
+# section-header label (pp. 102, 104, 106), one record per headline that follows a paragraph;
+# a block of short display lines at the foot of a continuation page with nothing after it is an
+# advertisement; a full advertisement page with one advertiser (one coupon, one Dept. code) is one
+# record; the tail of a picture advertisement above the column's first headline (a copyright line,
+# a company, a slogan in capitals) is its own record (p. 109); (b) the head zone of a piece —
+# everything between the head and the first body paragraph, across a spread — is paratext: the
+# illustration's caption and the pull-quote on the start page are teaser (the annotators' rule
+# since 4 September, five records), a blurb set in several boxes is teaser box by box, a blurb set
+# across the foot of the start page or its facing page below the columns is teaser (a display
+# line, or a header in capitals with its paragraph: the series introduction of The Great Pearl
+# Theft), an epigraph with its attribution is teaser, a type label is subtitle, a
+# department's tagline is subtitle and its standing notice teaser, the illustrator's signature read
+# beside the drawing is a note (config/illustrators.json), an empty title box is the title; a
+# by-line may carry its type label ("a novelet by …") and a by-line of initials takes the surname
+# in the next box; a title far above its by-line is found when the contents page names it; (c) the
+# end of a piece: a "COMING—" / "FEATURED IN THE NEXT ISSUE" block with a title, a type label and a
+# by-line is a house announcement, a next-month blurb or a "Watch for" line is a note whatever its
+# punctuation, the end-signature and tail rules now run after the head is joined from the facing
+# page (they never ran for those records); a piece's column above a title stops at a "continued on"
+# notice, and a new start on the page ends the notice's tail; (d) a chapter head the layout
+# labelled as a running head is a chapter head; a page outside the printed range with text is an
+# advertisement (the cigarette pages), titled by its display lines; a record whose scan has leaves
+# out of order is given in printed-page order.
 # 2.2 (2026-09-04, the third round of feedback and the annotations of 3–4 September): the types
 # gain house (the publisher's own matter: next-issue announcements, excerpts, coupons and ballots,
 # subscription appeals, the masthead — ad_class house_*) and lose serial_part (a serial instalment
@@ -96,7 +124,9 @@ NUM_WORDS = {"ONE": 1, "TWO": 2, "THREE": 3, "FOUR": 4, "FIVE": 5, "SIX": 6, "SE
 CHAPTER_RE = re.compile(r"^\s*(?:CHAPTER|Chapter|CHAP\.|PART|Part)\s+(?:[IVXLC\d]+|" + "|".join(NUM_WORDS) + "|" +
                         "|".join(w.capitalize() for w in NUM_WORDS) + r")\b|^\s*[IVXL]{1,6}\.?\s*$|^\s*\d{1,2}\.?\s*$|"
                         r"^\s*(?:[IVXL]{1,6}|\d{1,2})(?:\.\s+|\.?\s*[—–-]\s*)[\"“]?(?![A-Z]\.\s)[A-Z][^\n]{2,60}$")     # 'IV. The Coming of the Beast', 'I.—THE MURDER CLUB' on one line
-BYLINE_RE = re.compile(r"^\s*(?:[Bb][Yy]|Conducted by|Edited by|Compiled by|Arranged by|As told to)\s+(.+)$", re.S)
+BYLINE_RE = re.compile(r"^\s*(?:(?i:(?:a |an )?(?:complete |thrilling |gripping |long |short |true |new |exciting |novelette |novelet |novel |story )*"
+                       r"(?:novel|novelette|novelet|story|serial|mystery|romance)\s+))?"
+                       r"(?:[Bb][Yy]|Conducted by|Edited by|Compiled by|Arranged by|As told to)\s+(.+)$", re.S)
 NOT_BYLINE_RE = re.compile(r"^\s*(?:Illustrated|Illustrations?|Painted|Drawn|Drawings?|Cover|Decorations?|Photo)", re.I)
 # the illustrator's credit on a story's first page ("Illustrated by WILLER"): a note, never story text
 ILLUS_RE = re.compile(r"^\s*(?:Illustrated|Illustrations?|Drawings?|Decorations?|Pictures?|Painted|Photographs?)\s+by\s+(.{2,60}?)\s*\.?\s*$", re.I | re.S)
@@ -106,13 +136,18 @@ THE_END_RE = re.compile(r"^\W*(?:THE END|The End|FINIS|Finis|END|\(?The end\)?)\
 # an editorial line at the end of a piece: a note (paratext), never story text
 TAIL_NOTE_RE = re.compile(r"^\s*(?:Watch for|Don't miss|Look for|Read|Another|Next (?:month|week|issue)|In (?:the )?next|Coming|"
                           r"Be sure|More (?:about|of)|See (?:the )?next|The next)\b", re.I)
+# a paragraph at the end of an instalment that points to the next one ("… will be revealed in next month's
+# WEIRD TALES. Don't miss it."): a note, never story text
+NEXT_BLURB_RE = re.compile(r"next (?:month|week|issue)|in (?:the )?(?:next|following|forthcoming|coming) (?:issue|number|instal)|"
+                           r"don't miss|will be (?:told|revealed|concluded|continued|found)|to be concluded", re.I)
 # the instalment marker in a title: "[Part I]", "(Part One)", "(Conclusion)", "— Part Two of Three"
 PART_MARK_RE = re.compile(r"\s*[\[\(\-—–:,]*\s*(?:(?:a |the )?(?:(?:two|three|four|five|six|2|3|4|5|6)[\- ]part )?(?:serial|novel|story|novelette)?\s*[—–\-:,]?\s*)?"
                           r"(?P<label>(?:part|pt\.?|instalment|installment|chapters?)\s*(?P<n>[ivxl]+|\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b"
                           r"(?:\s*(?:of|in)\s*(?P<tot>[ivxl]+|\d+|two|three|four|five|six|seven|eight))?|conclusion|concluded|the end|ending|beginning|final(?:e| instal?lment)?)"
                           r"[^\]\)]{0,40}?[\]\)]?\s*$", re.I)
 # a type label printed with the head: "A Complete Book-Length Novel", "Novelette", "A Short Story"
-TYPE_LABEL_RE = re.compile(r"^(?:a |an )?(?:complete |thrilling |gripping |long |short |true |weird |new )*(?:book-length |full-length |short |long )?"
+TYPE_LABEL_RE = re.compile(r"^(?:a |an )?(?:complete |thrilling |gripping |long |short |true |weird |new |exciting |amazing |startling |"
+                           r"(?:(?!(?:the|this|that|his|her|our|your|my|a|an|in|of|as)\b)[\"\u201c]?[A-Z][A-Za-z'\-]*[\"\u201d]? ){1,3})*(?:book-length |full-length |short |long )?"
                            r"(?:novel|novelette|novelet|story|stories|serial|mystery|romance|fact story|feature)s?\b[^\n]{0,30}$", re.I)
 POEM_MARK_RE = re.compile(r"\s*[\(\[]\s*(?:a )?(?:poem|verse|verses|sonnet|ballad)\s*[\)\]]\s*$", re.I)
 # a signed letter's signature: "— John Smith, Chicago, Ill." / "Name, City, State."
@@ -125,7 +160,7 @@ PRICE_RE = re.compile(r"\b\d{1,2}c\b|\$\s?\d|\bcents\b|\bpostpaid\b|\bstamps\b",
 SMALL_WORDS = {"a", "an", "the", "and", "or", "of", "in", "on", "at", "to", "for", "by", "with", "from", "into", "as", "but", "nor", "vs", "via"}
 FILLER_RE = re.compile(r"NEXT ISSUE|NEXT MONTH|NEXT WEEK|WRITE IN|A LETTER TO|ON SALE|NEWSSTAND|APPEARS ON|COMING UP|COMING NEXT|COMING SOON|"
                        r"COMIN' NEXT|WATCH FOR|DON'T MISS|DON'T FAIL TO READ|IN THE (?:\w+ )?(?:ISSUE|NUMBER)|IN NEXT (?:MONTH|WEEK)'S|"
-                       r"NEXT (?:MONTH|WEEK)'S|NOW ON SALE|OUT NOW", re.I)
+                       r"NEXT (?:MONTH|WEEK)'S|NOW ON SALE|OUT NOW|^\W*COMING\W*$|FEATURED IN", re.I)
 AD_WORDS = re.compile(r"\$\d|\bFREE\b|coupon|Dept\.|Send (?:no|for|me)|money back|guarantee|\bWrite (?:for|to)\b|postpaid|Address\b|catalog|Agents wanted|Learn at home|\bmail\b", re.I)
 MENTION_RE = re.compile(r"Please mention|when answering advertisements", re.I)
 CONT_FROM_RE = re.compile(r"continued from (?:page\s*)?(\d{1,4})", re.I)
@@ -140,7 +175,7 @@ STORY_SECTIONS = re.compile(r"novel|story|stories|novelet|serial", re.I)
 # advertisement classes (feedback of 2026-09-02, Sujin Kang; decision of 2026-09-03):
 # house_next_issue, house_self, house_sibling, house_form, trade, classified
 HOUSE_NEXT_RE = re.compile(r"next (?:issue|month|week)|coming (?:next|soon|in)|in the (?:\w+ )?issue|on sale|newsstand|"
-                           r"appears? in|watch for|don't miss|will appear|forthcoming|out (?:next|on)\b|in our next", re.I)
+                           r"appears? in|watch for|don't miss|will appear|forthcoming|out (?:next|on)\b|in our next|^\W*coming\W*$|featured in", re.I | re.M)
 HOUSE_SELF_RE = re.compile(r"subscri|back (?:number|issue|cop)|anniversary number|numbers? combined|binder|renew|a year|per year|"
                            r"\b(?:12|twelve|six) issues|enclosed? find|use (?:the |this )?coupon|(?:copy|copies) of|"
                            r"every (?:month|week)|write (?:us|to us|in|the editor)|the editor|your favou?rite|ballot|vote|"
@@ -162,6 +197,9 @@ COMPANY_RE = re.compile(r"\b((?:[A-Z][A-Za-z&'\.\-]*,? ){1,4}(?:Co\.|Company|Inc
 COMPANY_STOP = re.compile(r"^(?:by |the |free |use |mail |send |write |this |your |our |at |to |for |of |in |and |a )|"
                           r"\b(?:civil|secret|public|employment|mail|high|night|day|home study|correspondence) (?:service|school)s?$|"
                           r"^(?:free |write |mail |send |use )?(?:coupon|today|now)", re.I)
+# the signature line of an advertisement set in capitals ("HOLYOKE GAME CO. 4 OLIVER ST., HOLYOKE, MASS.")
+CLOSING_RE = re.compile(r"\b(?:CO\.|INC\.|CORP\.|COMPANY|LTD\.|BROS\.|MFG\.)(?=\s|,|$)|\b(?:ST\.|STREET|AVE\.|AVENUE|BLVD\.?|DEPT\.?|BOX \d)\b|"
+                        r"\b[A-Z]{3,}\s*\d{0,2},\s*(?:[A-Z]{2,5}\.?|[A-Z]\. ?[A-Z]\.)\s*$")
 ADDRESS_RE = re.compile(r"\b(?:Dept\.?|Desk|Box|Bldg\.?|Building|Ave\.?|Avenue|St\.?|Street|Broadway|Blvd\.?|Station)\b\s*[A-Z0-9\-]*|"
                         r"\b[A-Z][a-z]+, (?:[A-Z][a-z]+\.?|[A-Z]{2})\s*$", re.M)
 # the credit line under a by-line: "Author of 'Men Like Gods,' 'Outline of History,' etc."
@@ -248,7 +286,7 @@ def running_heads(p):
     out = []
     for i, r in enumerate(p["regions"]):
         t = region_text(r)
-        if not t or re.fullmatch(r"\D{0,6}?\d{1,4}\D{0,4}", t) or MENTION_RE.search(t):
+        if not t or re.fullmatch(r"\D{0,6}?\d{1,4}\D{0,4}", t) or MENTION_RE.search(t) or re.match(r"^\s*(?:CHAPTER|Chapter|CHAP\.)\s+\S", t):
             continue
         y0, y1 = r["bbox"][1], r["bbox"][3]
         edge = y1 < 0.07 * H or y0 > 0.93 * H
@@ -261,7 +299,8 @@ def is_furniture(p, i, r):
     t = region_text(r)
     H = p["height"]
     if r["label"] in ("PageHeader", "PageFooter"):
-        return True
+        # "CHAPTER III" at the top of a column is a chapter head the layout took for a running head
+        return not (t and re.match(r"^\s*(?:CHAPTER|Chapter|CHAP\.|PART|Part)\s+\S", t) and chapter_head(t))
     if not t:
         return True
     if r["label"] in ("Picture", "Figure"):
@@ -300,6 +339,16 @@ def is_display(p, r):
         return False
     h = r["bbox"][3] - r["bbox"][1]
     return h >= DISPLAY_FRAC * p["height"] and words(region_text(r)) <= 14
+
+
+def column_of(p, r):
+    """Which column of the page a box stands in: 0 (left), 1 (right), or "span"
+    for a box wider than six tenths of the page."""
+    x0, _, x1, _ = r["bbox"]
+    W = p["width"]
+    if x1 - x0 > 0.6 * W:
+        return "span"
+    return 0 if (x0 + x1) / 2 < W / 2 else 1
 
 
 def chapter_title_like(r, head):
@@ -435,6 +484,27 @@ def departments():
         except Exception:
             _DEPARTMENTS = {}
     return _DEPARTMENTS
+
+
+_ILLUS = {}
+
+
+def illustrators_of(magazine):
+    """The known illustrators of a magazine (config/illustrators.json: a list of
+    names per magazine-name pattern, "*" for all), for reading a signature
+    the layout took for text."""
+    if not _ILLUS:
+        p = os.path.join(ROOT, "config", "illustrators.json")
+        try:
+            _ILLUS.update(json.load(open(p, encoding="utf-8")))
+        except Exception:
+            _ILLUS["*"] = []
+    out = list(_ILLUS.get("*", []))
+    m = (magazine or "").lower()
+    for pat, names in _ILLUS.items():
+        if pat != "*" and re.search(pat, m):
+            out += names
+    return out
 
 
 def department_of(magazine, title):
@@ -671,6 +741,11 @@ def analyse(pages):
             body_chars += len(t) if len(t) > 200 else 0
             info["ad_score"] += len(AD_WORDS.findall(t))
             a = byline_author(t)
+            if a and re.fullmatch(r"(?:[A-Z]\.?\s*){1,3}", a) and i + 1 < len(regs) and (i + 1) not in info["furniture"]:
+                nt = " ".join(region_text(regs[i + 1]).split())
+                if 0 < words(nt) <= 3 and re.fullmatch(r"[A-Z][A-Za-z'\-]+(?: [A-Z][A-Za-z'\-]+){0,2}\.?", nt) and not chapter_head(nt):
+                    info["bylines"].append({"idx": i, "author": (a.rstrip(".") + ". " + nt.strip(" .")).replace("..", "."), "name_idx": i + 1})
+                    continue                              # "By J. A." with "THOMPSON" in the next box
             if a:
                 info["bylines"].append({"idx": i, "author": a})
             elif re.fullmatch(r"(?i)(?:by|conducted by|edited by|compiled by|arranged by)", t.strip()) and i + 1 < len(regs):
@@ -766,6 +841,17 @@ def analyse(pages):
                 toc_hit = max(hits, key=lambda e: (sim(page_title_guess, e["title"]) if page_title_guess else 0, sim(e["author"], b["author"])))
             if not toc_hit and info["toc_entries"] and not lines:
                 toc_hit = max(info["toc_entries"], key=lambda e: sim(e["author"] or "", b["author"]))
+            if not lines and toc_hit:
+                # the title far above the by-line (a drawing between them: "Serenade WITH" a page-height above
+                # "a novelet by …"): the display line the contents page names, anywhere above on the page
+                for j in range(bi - 1, -1, -1):
+                    r = regs[j]
+                    tj = " ".join(region_text(r).split())
+                    if j in info["furniture"] or r["label"] != "SectionHeader" or not tj or words(tj) > 14:
+                        continue
+                    if sim(tj, toc_hit["title"]) > 0.6 or title_prefix(tj, toc_hit["title"]):
+                        lines = [j]
+                        break
             if not lines and not toc_hit:
                 continue
             # the title is the tallest line; other lines join it when the contents page agrees, else they are subtitles
@@ -1003,6 +1089,14 @@ def clean_text(text):
         return text
 
 
+def join_boxes(texts):
+    try:
+        from s07_articles import join_boxes as jb
+        return jb(texts)
+    except Exception:
+        return "\n".join(texts)
+
+
 def looks_like_word(w):
     try:
         from s04_rules import looks_like_word as llw
@@ -1024,6 +1118,8 @@ class Assembler:
         self.n = 0
 
     def new(self, typ, title=None, author=None, page=None, toc=None):
+        if typ == "ad" and title and words(title) > 12:
+            title = " ".join(title.split()[:12]) + " …"          # an advertisement titled by a paragraph: its first words
         self.n += 1
         rec = {"article_id": f"{self.iid}_a{self.n:03d}", "type": typ, "title": title, "author": author,
                "pages": [], "fragments": [], "roles": {}, "flags": [], "toc": toc, "keys": []}
@@ -1082,6 +1178,12 @@ class Assembler:
         for rec in list(self.records):
             if rec["keys"]:
                 self.finish(rec)
+        for rec in list(self.records):
+            if rec["keys"] and rec["type"] in ("story", "poem"):
+                self.trailing_display_block(rec)
+            if rec["keys"] and rec["type"] in ("story", "poem", "feature", "letters"):
+                self.empty_title_box(rec)
+        self.merge_page_ads()
         # texts, pages
         misplaced = dict(A.get("misplaced") or [])
         for rec in self.records:
@@ -1092,12 +1194,22 @@ class Assembler:
             rec["pages"] = sorted({pn for pn, _ in rec["keys"]})
             held = [pn for pn in rec["pages"] if pn in misplaced]
             if held:
+                # the record's pages in printed order (Sujin's note of 2026-09-04: "the page footer
+                # information should be used to verify and correct the page sequence")
+                folio_by_scan = {v: k for k, v in (A.get("folio_index") or {}).items()}
+                folio_by_scan.update(misplaced)
+
+                def printed(pn):
+                    return folio_by_scan.get(pn, pn - (A["offset"] or 0))
+                rec["keys"].sort(key=lambda x: (printed(x[0]), x[1]))
                 rec["flags"].append("the scan has a leaf out of order: scan page " + ", ".join(f"{pn} carries printed page {misplaced[pn]}" for pn in held)
-                                    + " — the text of this record is in scan order, not reading order")
+                                    + " — the text of this record follows the printed page numbers, not the scan order")
             frags = {}
             for pn, i in rec["keys"]:
                 frags.setdefault(pn, []).append(i)
-            rec["fragments"] = [{"page": pn, "region_ids": frags[pn]} for pn in sorted(frags)]
+            page_order = [pn for pn, _ in rec["keys"]]
+            page_order = list(dict.fromkeys(page_order))
+            rec["fragments"] = [{"page": pn, "region_ids": frags[pn]} for pn in page_order]
             body = []
             syn = []
             for pn, i in rec["keys"]:
@@ -1108,9 +1220,9 @@ class Assembler:
                     syn.append(region_text(pages[pn]["regions"][i]))
                     continue
                 body.append(region_text(pages[pn]["regions"][i]))
-            rec["text"] = clean_text("\n".join(body))
+            rec["text"] = clean_text(join_boxes(body))       # one paragraph per box; a split paragraph rejoined (v2.3)
             if syn:
-                rec["synopsis"] = clean_text("\n".join(syn))
+                rec["synopsis"] = clean_text(join_boxes(syn))
             rec["n_regions"] = len(rec["keys"])
             chs = self.chapters_of(rec) if rec["type"] not in ("ad", "house", "toc", "other") else []
             if chs:
@@ -1196,19 +1308,31 @@ class Assembler:
                            and norm_words(" ".join(region_text(r).split()) + " " + printed) == norm_words(full)), None)
                 if at is not None:
                     self.steal(rec, prev, at, "title")
+                    body_started = False
                     for j in range(at + 1, len(regs)):
                         r = regs[j]
                         t = " ".join(region_text(r).split())
                         k = key(prev, j)
-                        if self.owner.get(k) == "furniture" and not ILLUS_RE.match(t):
+                        if self.owner.get(k) == "furniture" and not (ILLUS_RE.match(t) or r["label"] == "Caption"):
                             continue
+                        fw = t.split()[0] if t.split() else ""
+                        dropcap = len(re.sub(r"[^A-Za-z]", "", fw)) >= 2 and fw.upper() == fw and words(t) >= 8
                         if ILLUS_RE.match(t) and words(t) <= 30:
                             self.steal(rec, prev, j, None)
                             self.illustrator(rec, prev, j)
-                        elif r["label"] == "Text" and words(t) >= 8 and not AD_WORDS.search(t):
-                            self.steal(rec, prev, j, None)        # the story's first paragraphs on the facing page
-                        elif r["label"] == "Text" and 8 <= words(t) <= 80 and self.owner.get(k) in (None, "furniture"):
-                            self.steal(rec, prev, j, "teaser")
+                        elif CREDIT_RE.match(t) and words(t) <= 30:
+                            self.steal(rec, prev, j, None)
+                            self.credit(rec, prev, j)
+                        elif body_started or dropcap or (r["label"] == "Text" and words(t) >= 60):
+                            if r["label"] == "Text" and words(t) >= 8 and not AD_WORDS.search(t):
+                                self.steal(rec, prev, j, None)    # the story's first paragraphs on the facing page
+                                body_started = True
+                        elif (r["label"] in ("Text", "Caption") and 3 <= words(t) <= 80) or t[:1] in "\"\u201c'\u2018":
+                            self.steal(rec, prev, j, "teaser")    # the blurb, box by box, and the pull-quote
+                            if not rec.get("teaser"):
+                                rec["teaser"] = t
+                        elif r["label"] == "SectionHeader" and words(t) <= 12 and not chapter_head(t):
+                            self.steal(rec, prev, j, "subtitle")
                     rec["flags"].append(f"the head begins on p.{prev}: title words and text there joined")
                     keys = rec["keys"]
                     first_pn = prev
@@ -1247,6 +1371,57 @@ class Assembler:
                         rec["serial"] = ser
                         rec["work_title"] = rec.get("work_title") or rec.get("title")
                         break
+        rec["keys"].sort()
+        keys = rec["keys"]
+        # 1c. the head zone (v2.3): everything between the head and the first body paragraph, across a spread,
+        #     is paratext — the blurb box by box, the pull-quote, the epigraph with its attribution, the type
+        #     label, a department's tagline and its standing notice, the illustrator's signature
+        if typ in ("story", "poem", "feature", "letters"):
+            self.head_zone(rec)
+        if typ in ("story", "feature", "letters"):
+            self.foot_blurb(rec)
+        # 2a. the end mark or the author's signature with boxes of the same page after it (v2.3): what follows the
+        #     end of a piece on its last page is advertising or an announcement, never the piece's text
+        if typ in ("story", "poem") and len(keys) >= 6:
+            last_pn = keys[-1][0]
+            on_last = [(pn, i) for pn, i in keys if pn == last_pn]
+            end_at = None
+            for pn, i in on_last:
+                t = region_text(pages[pn]["regions"][i]).strip()
+                m = END_SIG_RE.match(t)
+                if THE_END_RE.match(t) or (m and words(t) <= 6 and rec.get("author") and
+                                           (sim(m.group(1).strip(), rec["author"]) > 0.6 or sim(m.group(1).strip(), rec.get("author_as_printed") or "") > 0.6)):
+                    end_at = (pn, i)
+            if end_at is not None:
+                after = [(pn, i) for pn, i in on_last if (pn, i) > end_at and rec["roles"].get(key(pn, i)) in (None, "heading")]
+                texts_after = [region_text(pages[pn]["regions"][i]) for pn, i in after]
+                story_like = any(prose_like(pages[pn]["regions"][i]) for pn, i in after) or \
+                    sum(1 for t_ in texts_after if t_.lstrip()[:1] in "\"\u201c'\u2018") >= 2
+                if after and not story_like and len(after) <= 30 and \
+                        not any(TAIL_NOTE_RE.match(t_.strip()) or NEXT_BLURB_RE.search(t_) for t_ in texts_after):
+                    # one record per advertisement: by column, a display headline after a closing line (an address,
+                    # a price, a paragraph of copy) opens the next
+                    p_ = pages[last_pn]
+                    by_col = {}
+                    for pn, i in after:
+                        by_col.setdefault(column_of(p_, p_["regions"][i]), []).append((pn, i))
+                    for col, items in by_col.items():
+                        ad, closed = None, False
+                        for pn, i in items:
+                            r_ = p_["regions"][i]
+                            t_ = region_text(r_)
+                            closing = bool(POSTAL_RE.search(t_) or COMPANY_RE.search(t_) or PRICE_RE.search(t_) or ADDRESS_RE.search(t_) or CLOSING_RE.search(t_))
+                            headline = (r_["label"] == "SectionHeader" or is_display(p_, r_)) and words(t_) <= 10 and not closing
+                            if ad is None or (headline and closed):
+                                ad = self.new("ad", title=" ".join(t_.split())[:120], page=last_pn)
+                                ad["flags"].append(f"matter after the end of the piece on p.{last_pn}: not the piece's")
+                                self.steal(ad, pn, i, "title")
+                                closed = False
+                                continue
+                            self.steal(ad, pn, i)
+                            closed = bool(words(t_) >= 25 or closing)
+                    rec["keys"].sort()
+                    keys = rec["keys"]
         # 2. the end of the piece: the author's name repeated, "The End", the continuation notice, a tail note
         if typ in ("story", "feature", "poem", "letters") and len(keys) >= 3:
             tail = [(pn, i) for pn, i in keys[-4:] if rec["roles"].get(key(pn, i)) in (None, "heading")]
@@ -1275,7 +1450,16 @@ class Assembler:
                     rec["work_title"] = rec.get("work_title") or rec.get("title")
                     self.demote(rec, pn, i, "continuation notice")
                     continue
-                if words(t) <= 25 and TAIL_NOTE_RE.match(t) and (t.rstrip()[-1:] in ".!" or t.upper() == t):
+                if words(t) <= 25 and TAIL_NOTE_RE.match(t):
+                    rec["roles"][key(pn, i)] = "note"
+                    continue
+                break
+            # the last paragraph of an instalment that points to the next one ("… will be revealed in next
+            # month's WEIRD TALES. Don't miss it."; 'A Complete Novel, "…," by …, in Next Week's Issue.')
+            for pn, i in reversed([(pn, i) for pn, i in keys[-3:] if rec["roles"].get(key(pn, i)) in (None, "heading")]):
+                t = region_text(pages[pn]["regions"][i]).strip()
+                if words(t) <= 60 and NEXT_BLURB_RE.search(t) and (re.search(re.escape(self.magazine_name()[:12]), t, re.I) if self.magazine_name() else True
+                                                                    or re.search(r"(?i)\bissue\b|instal|chapters|story|novel", t)):
                     rec["roles"][key(pn, i)] = "note"
                     continue
                 break
@@ -1386,6 +1570,301 @@ class Assembler:
                 rec["type"] = "feature"
                 rec["flags"].append("typed feature: an editor's column with no signed letters")
 
+    def merge_page_ads(self):
+        """A full advertisement page cut at its display headlines into several
+        records, all of one advertiser — one coupon, one Dept. code, one company
+        name among them and no other address (Thrilling Detective 1948-12, p. 5:
+        the National Radio Institute's page in five headlines): one record
+        (Sujin's correction of 4 September)."""
+        pages = self.pages
+        by_page = {}
+        for rec in self.records:
+            if rec["type"] != "ad" or not rec["keys"]:
+                continue
+            pgs = {pn for pn, _ in rec["keys"]}
+            if len(pgs) != 1:
+                continue
+            by_page.setdefault(next(iter(pgs)), []).append(rec)
+        for pn, recs in by_page.items():
+            if len(recs) < 2:
+                continue
+            # only a page nobody else is on (a full advertisement page)
+            others = {self.owner.get(key(pn, j)) for j in range(len(pages[pn]["regions"]))} - {None, "furniture"} - {r["article_id"] for r in recs}
+            if others:
+                continue
+            depts, signed, unsigned_named, n_addr, with_code = set(), 0, False, 0, []
+            for rec in recs:
+                txt = "\n".join(region_text(pages[p2]["regions"][i]) for p2, i in rec["keys"])
+                d0 = {m.group(1).upper().strip("-") for m in re.finditer(r"\bDept\.?\s*([A-Z0-9\-]{1,8})", txt)}
+                c0 = {norm(m.group(1).strip(" ,.")) for m in COMPANY_RE.finditer(txt)
+                      if words(m.group(1)) >= 2 and not COMPANY_STOP.search(m.group(1))}
+                a0 = len(POSTAL_RE.findall(txt)) + len(re.findall(r"\b[A-Z][a-z]+, (?:[A-Z][a-z]+\.?|[A-Z]{2}|[A-Z]\. ?[A-Z]\.)\s*$", txt, re.M))
+                n_addr += a0
+                if d0 or c0 or a0:
+                    signed += 1
+                if (c0 or a0) and not d0:
+                    unsigned_named = True                   # a company or an address in a record with no Dept. code: another advertiser
+                if d0:
+                    with_code.append(rec)
+                depts |= d0
+            # one advertiser: one Dept. code on the page, in at most two records (the copy and the coupon), the
+            # last of them the coupon, no company or address named apart from it, and not a classified page
+            if len(recs) <= 6 and signed <= 2 and len(depts) == 1 and not unsigned_named and n_addr <= 3 and with_code and with_code[-1] is recs[-1]:
+                first = recs[0]
+                for rec in recs[1:]:
+                    for p2, i in rec["keys"]:
+                        self.owner[key(p2, i)] = first["article_id"]
+                        first["keys"].append((p2, i))
+                        role = rec["roles"].get(key(p2, i))
+                        if role and role != "title":
+                            first["roles"][key(p2, i)] = role
+                    rec["keys"] = []
+                    rec["roles"] = {}
+                first["flags"].append(f"the advertisements of p.{pn} joined: one advertiser (one coupon or Dept. code on the page)")
+
+    def head_zone(self, rec):
+        """The zone between a piece's head and its first body paragraph (v2.3),
+        on the start page and across a spread: every box there that has no
+        role yet is paratext. The zone begins after the title or by-line box
+        and ends at the first paragraph that opens with a word in capitals (the
+        drop cap, split or not), at a chapter head, at a column-width paragraph
+        of fifteen words or more, at a second long paragraph in a row, at a
+        run of verse, or at forty words. Poems have no zone."""
+        pages = self.pages
+        keys = rec["keys"]
+        if not keys or rec["type"] == "poem":
+            return
+        head_at = next((n for n, (pn, i) in enumerate(keys) if rec["roles"].get(key(pn, i)) in ("title", "author")), None)
+        if head_at is None:
+            return
+        first_pn = keys[head_at][0]
+        n = 0
+        long_run = 0
+        title_words = set(norm_words(rec.get("title") or "").split()) | set(norm_words((rec.get("toc") or {}).get("title") or "").split())
+        for pos in range(head_at, len(keys)):
+            pn, i = keys[pos]
+            if pn > first_pn + 1 or n > 14:
+                break
+            k = key(pn, i)
+            role = rec["roles"].get(k)
+            r = pages[pn]["regions"][i]
+            t = " ".join(region_text(r).split())
+            if role in ("title", "subtitle", "author", "teaser", "note", "caption", "synopsis"):
+                continue
+            if role == "chapter":
+                break
+            if not t:
+                continue
+            W = pages[pn]["width"]
+            x0, y0, x1, y1 = r["bbox"]
+            toks = t.split()
+            fw = toks[0]
+            caps2 = len(toks) >= 3 and len(re.sub(r"[^A-Za-z]", "", fw)) == 1 and fw.isupper() and toks[1].isupper() and len(toks[1]) <= 3 and toks[2][:1].islower()   # "A T first": a split drop cap
+            dropcap = (len(re.sub(r"[^A-Za-z]", "", fw)) >= 2 and fw.upper() == fw or caps2) and words(t) >= 8 and not (t.upper() == t)
+            column = (x1 - x0) < 0.5 * W and abs((x0 + x1) / 2 - W / 2) > 0.12 * W
+            centred_narrow = (x1 - x0) < 0.55 * W and abs((x0 + x1) / 2 - W / 2) <= 0.12 * W
+            nxt_key = keys[pos + 1] if pos + 1 < len(keys) else None
+            nxt_role = rec["roles"].get(key(*nxt_key)) if nxt_key else None
+            before_chapter = nxt_role == "chapter"                 # the box right before "CHAPTER I": the blurb, wherever it is set
+            verse = False
+            if centred_narrow and nxt_key and nxt_key[0] == pn:
+                r2 = pages[pn]["regions"][nxt_key[1]]
+                w2 = r2["bbox"][2] - r2["bbox"][0]
+                verse = abs(w2 - (x1 - x0)) < 0.15 * (x1 - x0) and abs((r2["bbox"][0] + r2["bbox"][2]) / 2 - W / 2) <= 0.12 * W and words(region_text(r2)) >= 12
+            caps_block = t.upper() == t and (words(t) >= 12 or (rec["type"] in ("feature", "letters") and t.endswith(".")))   # a picture feature's captions; a facts column's items
+            quoted = t[:1] in "\"\u201c'\u2018" or r["label"] == "Caption"
+            long = words(t) >= 15 and not quoted
+            if caps_block or verse or (long_run >= 1 and long) or \
+                    ((dropcap or words(t) > 40 or (column and words(t) >= 15 and r["label"] == "Text" and not quoted)) and not before_chapter):
+                break                                          # the body
+            if role == "heading" and re.match(r"^\W*(?:foreword|prologue|introduction)\b", t, re.I):
+                continue                                       # the heading stays; what follows it is decided box by box
+            if role is not None:
+                continue
+            n += 1
+            long_run = long_run + 1 if long else 0
+            tw = set(norm_words(t).split())
+            if CREDIT_RE.match(t) and words(t) <= 30:
+                self.credit(rec, pn, i)
+            elif ILLUS_RE.match(t) and words(t) <= 30:
+                self.illustrator(rec, pn, i)
+            elif byline_author(t) and words(t) <= 8:
+                rec["roles"][k] = "author"                     # a by-line the start did not use (the head on the facing page)
+                if not rec.get("author"):
+                    rec["author"] = byline_author(t)
+                    rec["author_source"] = "page"
+            elif tw and title_words and tw <= title_words and words(t) <= 6:
+                rec["roles"][k] = "title"                      # a piece of the title drawn in parts ("STAR", "SHELF")
+            elif words(t) <= 8 and TYPE_LABEL_RE.match(t):
+                rec["roles"][k] = "subtitle"
+                rec["subtitle"] = (rec.get("subtitle") + " " + t if rec.get("subtitle") else t)
+            elif self.signature_of(t) and words(t) <= 4:
+                rec["roles"][k] = "note"                       # the illustrator's signature read beside the drawing
+                rec["illustrator"] = rec.get("illustrator") or self.signature_of(t)
+                rec["flags"].append(f"the illustrator's signature on p.{pn} read as text ({t!r}): a note")
+            elif rec["type"] in ("feature", "letters") and t.upper() == t and words(t) <= 8 and not quoted and not t.endswith((".", "!", "?")):
+                rec["roles"][k] = "subtitle"                   # a department's tagline
+                rec["subtitle"] = (rec.get("subtitle") + " " + t if rec.get("subtitle") else t)
+            elif words(t) <= 40 or quoted:
+                rec["roles"][k] = "teaser"                     # the blurb (box by box), the pull-quote, the epigraph, the notice
+                if not rec.get("teaser"):
+                    rec["teaser"] = t
+            else:
+                break
+
+    def foot_blurb(self, rec):
+        """A blurb set across the foot of the start page or its facing page,
+        below the columns (v2.3; Thrilling Detective 1948-12: "Kip Morgan
+        Wades Through a Battle of Fists" at the foot of p.78 and its second
+        half "and Knives for a Hard-Hitting K. O. of Crime!" at the foot of
+        p.79; the boxed introduction "FROM THE ARCHIVES OF SCOTLAND YARD" with
+        its paragraph at the foot of p.71, which runs on into the first column
+        paragraph under the by-line). A display line of at most twenty words
+        there, or a header in capitals with one paragraph (at most a hundred
+        words) under it, is teaser;
+        when the paragraph ends without a full stop and the first column
+        paragraph after the head begins in lower case, that paragraph is the
+        introduction's continuation. Pages without column text are left alone
+        (the digests set everything full width)."""
+        pages = self.pages
+        keys = rec["keys"]
+        head_at = next((n for n, (pn, i) in enumerate(keys) if rec["roles"].get(key(pn, i)) in ("title", "author")), None)
+        if head_at is None:
+            return
+        first_pn = keys[head_at][0]
+        for pn in (first_pn, first_pn + 1):
+            p = pages.get(pn)
+            if not p:
+                continue
+            H = p["height"]
+            mine = [(pos, i) for pos, (pn_, i) in enumerate(keys) if pn_ == pn]
+            cols = [p["regions"][i] for _, i in mine
+                    if column_of(p, p["regions"][i]) != "span" and p["regions"][i]["label"] == "Text"
+                    and rec["roles"].get(key(pn, i)) is None]
+            if not cols:
+                continue
+            col_bottom = max(r["bbox"][3] for r in cols)
+            foot = []
+            for pos, i in mine:
+                r = p["regions"][i]
+                k = key(pn, i)
+                if rec["roles"].get(k) is not None or column_of(p, r) != "span" or r["label"] not in ("Text", "SectionHeader", "Caption"):
+                    continue
+                if r["bbox"][1] < col_bottom - 0.02 * H or r["bbox"][1] < 0.6 * H:
+                    continue
+                t = " ".join(region_text(r).split())
+                if not t or chapter_head(t) or words(t) > 100 or t[:1] in "\"\u201c'\u2018":
+                    continue                                   # dialogue is the body
+                fw = t.split()[0]
+                if len(re.sub(r"[^A-Za-z]", "", fw)) >= 3 and fw.upper() == fw and words(t) > 20:
+                    continue                                   # a paragraph opening with a drop cap: the body
+                prev = p["regions"][keys[pos - 1][1]] if pos > 0 and keys[pos - 1][0] == pn else None
+                if prev is not None and prev["label"] == "Text" and abs(prev["bbox"][0] - r["bbox"][0]) < 0.03 * p["width"] \
+                        and column_of(p, prev) != "span":
+                    continue                                   # the same flow of text as the line above it (a page cut round a drawing)
+                foot.append((pos, i, t))
+            if not foot:
+                continue
+            ok = all(words(t) <= 20 for _, _, t in foot) or \
+                (len(foot) == 2 and foot[0][2].upper() == foot[0][2] and words(foot[0][2]) <= 10 and words(foot[1][2]) <= 100)
+            if not ok:
+                continue
+            for pos, i, t in foot:
+                rec["roles"][key(pn, i)] = "teaser"
+                rec["teaser"] = (rec["teaser"] + " " + t) if rec.get("teaser") else t
+            rec["flags"].append(f"blurb across the foot of p.{pn} ({len(foot)} box(es)): teaser")
+            last_t = foot[-1][2]
+            if len(foot) == 2 and not re.search(r"[.!?\"”']$", last_t):
+                for pos, (pn_, i) in enumerate(keys):
+                    if pos <= head_at or pn_ != pn or rec["roles"].get(key(pn_, i)) is not None:
+                        continue
+                    r = p["regions"][i]
+                    if r["label"] != "Text":
+                        break
+                    t = " ".join(region_text(r).split())
+                    if t and t[:1].islower() and words(t) <= 60:
+                        rec["roles"][key(pn_, i)] = "teaser"
+                        rec["flags"].append(f"the introduction at the foot of p.{pn} runs on into the first paragraph under the head: teaser")
+                    break
+
+    def signature_of(self, t):
+        """An illustrator's name in a short garbled box ("ADROSNATCH", "A. BROSNAT
+        & Co.") against the magazine's known illustrators (config/illustrators.json)
+        and the issue's own "Illustrated by" credits; the canonical name, or None."""
+        t2 = re.sub(r"[^A-Za-z ]+", " ", t).strip()
+        if not t2 or words(t2) > 4 or byline_author(t) or CREDIT_RE.match(t) or chapter_head(t):
+            return None
+        names = list(illustrators_of(self.magazine_name()))
+        for rec in self.records:
+            if rec.get("illustrator"):
+                names.append(rec["illustrator"])
+        cand = t2.replace(" ", "").lower()
+        for name in names:
+            last = name.split()[-1].lower()
+            if len(last) >= 5 and (difflib.SequenceMatcher(None, cand, last).ratio() >= 0.7 or last in cand):
+                return name
+        return None
+
+    def trailing_display_block(self, rec):
+        """A block of short display lines at the foot of a continuation page,
+        with nothing of the piece after it on that page and the piece going on
+        on a later page, is advertising the layout gave no headline to
+        ("Everybody Gives— Everybody Benefits! / Contribute Generously to the
+        RED FEATHER SERVICES / COMMUNITY CHEST"): its own advertisement record."""
+        pages = self.pages
+        keys = sorted(rec["keys"])
+        by_page = {}
+        for pn, i in keys:
+            by_page.setdefault(pn, []).append(i)
+        pgs = sorted(by_page)
+        for pn in pgs:
+            idx = by_page[pn]
+            regs = pages[pn]["regions"]
+            # the piece's last boxes on the page, from the end back to the last paragraph of prose
+            block = []
+            for i in reversed(idx):
+                r = regs[i]
+                t = " ".join(region_text(r).split())
+                if rec["roles"].get(key(pn, i)) not in (None,) or not t:
+                    break
+                if words(t) <= 12 and t[:1] not in "\"\u201c'\u2018" and not t.endswith((".", ",", ";", ":")) and not re.search(r"[a-z]{2,}\s[a-z]{2,}\s[a-z]{2,}\s[a-z]{2,}", t):
+                    block.insert(0, i)
+                else:
+                    break
+            if len(block) < 3 or not any(region_text(regs[i]).upper() == region_text(regs[i]) for i in block):
+                continue
+            if not any(is_display(pages[pn], regs[i]) for i in block):
+                continue
+            # nothing of anybody else after the block on the page (the foot of the page)
+            after = [j for j in range(block[-1] + 1, len(regs)) if key(pn, j) in self.owner and self.owner[key(pn, j)] != "furniture"]
+            if after:
+                continue
+            ad = self.new("ad", title=" ".join(region_text(regs[block[0]]).split())[:120], page=pn)
+            ad["flags"].append(f"display lines at the foot of p.{pn} with nothing of the piece after them: an advertisement")
+            for i in block:
+                self.steal(ad, pn, i, "title" if i == block[0] else None)
+
+    def empty_title_box(self, rec):
+        """The box of a title drawn as lettering the OCR could not read (an empty
+        SectionHeader on the start page, before the first box of the record):
+        the record's, with the role title, so the scan shows the head as the
+        record's (Sujin's records of 4 September)."""
+        keys = sorted(rec["keys"])
+        if not keys or rec.get("title_source") != "contents":
+            return
+        if any(rec["roles"].get(key(pn, i)) == "title" for pn, i in keys):
+            return
+        pn, first = keys[0]
+        regs = self.pages[pn]["regions"]
+        for j in range(first - 1, -1, -1):
+            r = regs[j]
+            if r["label"] == "SectionHeader" and not region_text(r) and self.owner.get(key(pn, j)) in (None, "furniture"):
+                self.take(rec, pn, j, "title")
+                rec["flags"].append(f"the title box on p.{pn} carries no readable text; the title is the contents page's")
+                return
+            if region_text(r) and self.owner.get(key(pn, j)) not in (None, "furniture"):
+                return
+
     def chapters_of(self, rec):
         """The chapter heads of a record, in order, number and title apart:
         'CHAPTER II' + 'The Thing in the Vault' on two lines or one."""
@@ -1463,8 +1942,9 @@ class Assembler:
             cls, advertiser = "house_form", (own[0] if own else None)
         else:
             heads = len(CATEGORY_HEAD_RE.findall(full))
-            addrs = len(ADDRESS_RE.findall(full))
-            if heads >= 4 and addrs >= 4 and len(rec["keys"]) >= 4:
+            addrs = len({norm(m.group(0)) for m in ADDRESS_RE.finditer(full)})      # distinct: one advertiser repeats its address
+            depts = len({m.group(1).upper() for m in re.finditer(r"\bDept\.?\s*([A-Z0-9\-]{1,8})", full)})
+            if heads >= 4 and addrs >= 4 and len(rec["keys"]) >= 4 and depts != 1:
                 cls = "classified"
                 rec["n_items"] = max(heads, addrs)
             else:
@@ -1551,8 +2031,34 @@ class Assembler:
                 self.add(rec, pno, i)
         if pending:
             if rec is None:
-                t = next((region_text(regs[j]) for j in pending if region_text(regs[j])), "")
-                rec = self.new("ad" if info["ad_score"] else "other", title=t.split("\n")[0][:120], page=pno)
+                n_words = sum(words(region_text(regs[j])) for j in pending)
+                rec = self.new("ad" if (info["ad_score"] or n_words >= 8) else "other", title=None, page=pno)
+                # the title: the tallest display line with the short display lines around it ("OLD GOLD" /
+                # "changed the nation's smoking" / "HABITS"; "I do prefer" / "LUCKY STRIKE CIGARETTE")
+                disp = [j for j in pending if is_display(p, regs[j]) and region_text(regs[j])]
+                title_idx = []
+                if disp:
+                    tallest = max(disp, key=lambda j: regs[j]["bbox"][3] - regs[j]["bbox"][1])
+                    title_idx = [tallest]
+                    for j in reversed([x for x in disp if x < tallest]):
+                        if j == title_idx[0] - 1 and words(region_text(regs[j])) <= 6:
+                            title_idx.insert(0, j)
+                        else:
+                            break
+                    for j in [x for x in disp if x > tallest]:
+                        tj = region_text(regs[j])
+                        if j == title_idx[-1] + 1 and words(tj) <= 5 and tj.upper() == tj:
+                            title_idx.append(j)
+                        else:
+                            break
+                if title_idx:
+                    rec["title"] = " ".join(" ".join(region_text(regs[j]).split()) for j in title_idx)[:120]
+                else:
+                    t = next((region_text(regs[j]) for j in pending if region_text(regs[j])), "")
+                    rec["title"] = t.split("\n")[0][:120]
+                for j in pending:
+                    self.add(rec, pno, j, "title" if j in title_idx else None)
+                return
             for j in pending:
                 self.add(rec, pno, j)
 
@@ -1572,8 +2078,13 @@ class Assembler:
         # filler open, the announcement (title, by-line, blurb, a quoted excerpt) is house advertising
         announce_at = {}
         for s in info.get("rejected_starts", []):
-            if "inside a filler block" in (s.get("rejected") or ""):
+            rej = s.get("rejected") or ""
+            after = [j for j in range(s["byline_idx"] + 1, len(regs)) if j not in info["furniture"]][:3] if s.get("byline_idx") is not None else []
+            notice_after = any(words(region_text(regs[j])) <= 12 and FILLER_RE.search(region_text(regs[j])) for j in after)
+            if "inside a filler block" in rej or ("an announcement" in rej and notice_after):
                 announce_at.setdefault(start_first(s), s)
+                if notice_after:
+                    s["_notice_after"] = True
         n = len(regs)
         filler = None
         filler_hard = False        # the filler runs to the end of the page (a house announcement with its excerpt)
@@ -1609,13 +2120,19 @@ class Assembler:
             # piece's: teaser, heading), signature marks and display garble (furniture)
             first = min(start_first(s) for s in info["starts"])
             end_re = re.compile(r"[.!?\"\u201d\u2019']\s*[)\]]?\s*$")
+            # a "continued on" / "to be continued" notice above the title ends the open piece's column there:
+            # what stands between the notice and the title is announcement matter for the tail rule below
+            notice_above = min((c for c in cont_on if c < first), default=None)
             above = [j for j in range(0, first) if j not in info["furniture"] and key(pno, j) not in self.owner]
             open_ok = self.open is not None and self.open.get("type") not in ("ad", "other")
             # evidence that the open piece's column runs on at the top of this page: a paragraph that starts
             # in lower case (a sentence carried over) or a long one; every Text region down to the last such
             # paragraph is the column, and so is the Text that follows it — except a short quoted line right
             # before the title, which is the illustration's caption
-            evidence = [j for j in above if regs[j]["label"] == "Text" and (region_text(regs[j])[:1].islower() or words(region_text(regs[j])) > 40)]
+            evidence = [j for j in above if regs[j]["label"] == "Text" and (region_text(regs[j])[:1].islower() or words(region_text(regs[j])) > 40)
+                        and (notice_above is None or j < notice_above)
+                        and not (words(region_text(regs[j])) <= 8 and TYPE_LABEL_RE.match(region_text(regs[j])))    # "a novel" is a label
+                        and words(region_text(regs[j])) >= 4]
             col_last = max(evidence) if (evidence and open_ok) else -1
             new_titles = [s_["title"] for s_ in info["starts"] if s_.get("title")] + \
                          [s_["toc"]["title"] for s_ in info["starts"] if s_.get("toc") and s_["toc"].get("title")]
@@ -1624,12 +2141,17 @@ class Assembler:
                 r_ = regs[j]
                 t = region_text(r_)
                 last_above = (j == above[-1])
-                run_on = joined and r_["label"] == "Text" and not (last_above and t[:1] in "\"\u201c'\u2018" and words(t) <= 15)
+                after_notice = notice_above is not None and j > notice_above
+                run_on = joined and r_["label"] == "Text" and not (last_above and t[:1] in "\"\u201c'\u2018" and words(t) <= 15) and not after_notice
                 if open_ok and r_["label"] == "Text" and (j <= col_last or run_on):
                     self.add(self.open, pno, j, "chapter" if j in chapters else None)     # the end of the open piece
                     joined = True
                     continue
                 joined = False
+                if after_notice and not ((CREDIT_RE.match(t) or ILLUS_RE.match(t)) and words(t) <= 30
+                                         or any(title_prefix(t, nt) or sim(t, nt) > 0.6 for nt in new_titles)
+                                         or (words(t) <= 8 and TYPE_LABEL_RE.match(t)) or r_["label"] == "Caption"):
+                    continue                                   # between the notice and the title: the tail rule's (announcements)
                 if words(t) > 40 and self.open is None:
                     rec = self.new("feature", title=t.split("\n")[0][:80], page=pno)
                     rec["flags"].append("text above the first title of the page with no record open")
@@ -1638,9 +2160,11 @@ class Assembler:
                     pre_new.append(j)                          # the credit line of a head set inside the illustration
                 elif any(title_prefix(t, nt) for nt in new_titles):
                     pre_new.append(j)                          # the first words of a title set in two boxes ("THE YEAR" / "OF THE JACKPOT")
+                elif words(t) <= 8 and TYPE_LABEL_RE.match(t):
+                    pre_new.append(j)                          # "a novel" above the title: the new piece's type label
                 elif r_["label"] == "Caption" or t[:1] in "\"\u201c'\u2018":
-                    self.furn(pno, j)                          # the illustration's caption: not story text (the verified records' rule)
-                    self.furniture[-1]["why"] = "illustration caption above the title on a start page"
+                    pre_new.append(j)                          # the illustration's caption or pull-quote on the start page: the new
+                                                               # piece's teaser (the annotators' rule since 2026-09-04)
                 elif any(sim(t, nt) > 0.6 for nt in new_titles) or \
                         (words(t) >= 4 and re.search(r"[a-z]", t) and (end_re.search(t) or r_["label"] == "SectionHeader" or
                                                                         (8 <= words(t) <= 80 and not (len(t.split()[0]) >= 2 and t.split()[0].isupper())))):
@@ -1673,7 +2197,7 @@ class Assembler:
                 continue
             r = regs[i]
             t = region_text(r)
-            if self.open is not None and self.open.get("type") in ("story", "poem") and filler is None and not tail \
+            if self.open is not None and self.open.get("type") in ("story", "poem", "feature", "letters") and filler is None and not tail \
                     and i not in title_of and i not in starts and i not in at_of and i not in chapters and i not in cont_from:
                 nxt_i = self.column_ad(pno, p, info, i)
                 if nxt_i is not None:
@@ -1699,7 +2223,7 @@ class Assembler:
                 if role == "teaser":
                     s["_rec"]["teaser"] = t.replace("\n", " ")
                 self.open = s["_rec"]
-                filler, filler_hard = None, False
+                filler, filler_hard, tail = None, False, False
                 if s["byline_idx"] is None and i == max(s["title_idx"] + s["subtitle_idx"]):
                     self.teaser(pno, p, info, s, i + 1)
                 i += 1
@@ -1711,7 +2235,7 @@ class Assembler:
                     self.attach_pre(pno, p, s["_rec"], pre_new)
                     pre_new = []
                 self.open = s["_rec"]
-                filler, filler_hard = None, False
+                filler, filler_hard, tail = None, False, False
                 # fall through: this region is the first paragraph of the piece
             if i in starts:
                 s = starts[i]
@@ -1724,7 +2248,7 @@ class Assembler:
                     self.add(s["_rec"], pno, s["name_idx"], "author")
                 self.open = s["_rec"]
                 self.suspended = None
-                filler, filler_hard = None, False
+                filler, filler_hard, tail = None, False, False
                 self.teaser(pno, p, info, s, i + 1)
                 i += 1
                 continue
@@ -1776,7 +2300,13 @@ class Assembler:
             if filler is not None:
                 prose = (words(t) >= 40 and not AD_WORDS.search(t) and r["label"] == "Text"
                          and (t[:1].islower() or (words(t) >= 60 and prose_like(r))))
-                if prose and (not filler_hard or t[:1].islower()) and self.open is not None and self.open.get("type") not in ("ad", "other"):
+                piece_open = self.open is not None and self.open.get("type") not in ("ad", "other")
+                # the filler keeps to the column it stands in (v2.3): a paragraph in the other column is the piece's
+                fcols = {column_of(p, regs[j]) for pn_, j in filler["keys"] if pn_ == pno}
+                c = column_of(p, r)
+                other_col = (c != "span" and fcols and c not in fcols and "span" not in fcols and r["label"] == "Text"
+                             and words(t) >= 8 and not (AD_WORDS.search(t) or PRICE_RE.search(t) or POSTAL_RE.search(t)))
+                if piece_open and (other_col or (prose and (not filler_hard or t[:1].islower()))):
                     filler, filler_hard = None, False              # the piece's column resumes beside the advertisement
                 else:
                     self.add(filler, pno, i)
@@ -1812,6 +2342,18 @@ class Assembler:
                 filler = self.new("ad", title=(s.get("title") or "announcement").replace("\n", " ")[:120], page=pno)
                 filler["flags"].append(f"announcement block on p.{pno} (a rejected start)")
                 filler_hard = True
+                # the short display lines right above the title belong to the block ("AN ACE INVESTIGATOR PLUNGES
+                # INTO …" / "IN" / "THE WRONG CORPSE"), back to the piece's last paragraph
+                for j in range(i - 1, -1, -1):
+                    if j in info["furniture"]:
+                        continue
+                    tj = region_text(regs[j])
+                    if self.owner.get(key(pno, j)) == self.open["article_id"] and words(tj) <= 20 and \
+                            (regs[j]["label"] == "SectionHeader" or (tj.upper() == tj and not tj[:1] in "\"\u201c'\u2018")) and \
+                            self.open["roles"].get(key(pno, j)) is None:
+                        self.steal(filler, pno, j)
+                    else:
+                        break
                 self.add(filler, pno, i, "title" if i in (s.get("title_idx") or []) else None)
                 i += 1
                 continue
@@ -1890,7 +2432,12 @@ class Assembler:
             elif ILLUS_RE.match(t) and w <= 30:
                 self.illustrator(rec, pno, j)
             elif r["label"] == "Caption" or (t[:1] in "\"\u201c'\u2018" and w <= 40):
-                self.add(rec, pno, j, "caption")
+                self.add(rec, pno, j, "teaser")               # the caption or pull-quote on the start page
+                if not rec.get("teaser"):
+                    rec["teaser"] = t.replace("\n", " ")
+            elif w <= 8 and TYPE_LABEL_RE.match(t):
+                self.add(rec, pno, j, "subtitle")
+                rec["subtitle"] = (rec.get("subtitle") + " " + t if rec.get("subtitle") else t)
             elif (any(sim(t, nt) > 0.6 for nt in names) or any(title_prefix(t, nt) for nt in names)) and w <= 12:
                 self.add(rec, pno, j, "title")                # the title set a second time, or its first words in their own box
             elif SYNOPSIS_RE.match(t) and w <= 12:
@@ -1950,46 +2497,61 @@ class Assembler:
         return max(cands, key=lambda r: max((i for pn, i in r["keys"] if pn == scan), default=-1))
 
     def column_ad(self, pno, p, info, i):
-        """An advertisement column beside the story's text (Weird Tales 1925-11,
+        """An advertisement column beside the piece's text (Weird Tales 1925-11,
         pp. 139–141: the Rosicrucian and birth-control advertisements in the
-        right column while The Return of the Undead runs in the left). The
-        block from region i down its column, until the next display header or
-        the end of the page, is an advertisement when it sits in no column the
-        piece's prose uses on this page and carries selling signs (prices,
-        addresses, selling words, a company). Returns the index after the
+        right column while The Return of the Undead runs in the left; Thrilling
+        Detective 1948-12, pp. 100–110: a column of small advertisements beside
+        every continuation page). v2.3: the column is the page half the box
+        stands in (column_of), the block runs from region i down that column
+        to the next display headline, a paragraph of the piece's prose, or the
+        end of the page — whether or not the piece has prose on the page yet
+        (the advertisements often come first in reading order) — and it is an
+        advertisement when it carries selling signs (prices, addresses, selling
+        words, a company) and opens with a headline or a priced line; the piece
+        must have prose in the OTHER column of the page (or on the page before,
+        when this column has none). Inside the block a headline that follows a
+        paragraph starts the next advertisement. Returns the index after the
         block, or None."""
         regs = p["regions"]
         r = regs[i]
         x0, _, x1, _ = r["bbox"]
-        if x1 - x0 < 0.15 * p["width"]:
+        t0 = region_text(r)
+        if x1 - x0 < 0.15 * p["width"] and not (COMPANY_RE.search(t0) or re.search(r"(?i)copyright,? \d{4}", t0)):
             return None
-        # the columns the piece's prose occupies on this page so far
-        cols = []
-        for pn, j in self.open["keys"]:
-            if pn != pno:
-                continue
-            rr = regs[j]
-            if rr["label"] == "Text" and words(region_text(rr)) >= 20:
-                cols.append((rr["bbox"][0], rr["bbox"][2]))
-        if not cols:
+        c = column_of(p, r)
+        if c == "span":
             return None
-
-        def overlap(a0, a1, b0, b1):
-            return max(0, min(a1, b1) - max(a0, b0)) / max(1, min(a1 - a0, b1 - b0))
-        if any(overlap(x0, x1, c0, c1) > 0.3 for c0, c1 in cols):
-            return None
+        # where the piece's prose stands on this page: a column with narrative paragraphs is the piece's
+        prose_cols = {column_of(p, rr) for j, rr in enumerate(regs) if j not in info["furniture"] and prose_like(rr)}
+        prose_cols |= {column_of(p, regs[j]) for pn_, j in self.open["keys"] if pn_ == pno and words(region_text(regs[j])) >= 6}
+        if c in prose_cols:
+            return None                                       # the piece's own column: the filler rules decide
+        if not prose_cols:
+            return None                                       # the piece has no prose on this page: not a shared page
         block = [i]
+        sig_re = re.compile(r"(?i)copyright,? \d{4}")
         for j in range(i + 1, len(regs)):
             if j in info["furniture"] or key(pno, j) in self.owner:
                 continue
             rj = regs[j]
-            if overlap(x0, x1, rj["bbox"][0], rj["bbox"][2]) < 0.5:
+            if column_of(p, rj) != c:
                 break
-            if j != i and rj["label"] == "SectionHeader" and is_display(p, rj):
-                break                                         # the next advertisement's headline
+            tj = region_text(rj)
+            if prose_like(rj) or (rj["label"] == "Text" and tj[:1].islower() and words(tj) >= 20
+                                  and not (AD_WORDS.search(tj) or PRICE_RE.search(tj) or POSTAL_RE.search(tj))):
+                break                                         # the piece's prose: the column is shared
+            # the tail of a picture advertisement above the column's first headline (a copyright line, a
+            # company, a slogan in capitals — Thrilling Detective 1948-12 p.109: "Copyright 1948 Billerie
+            # Rubber Co." / "FOREVER FIRST WITH FIRST QUALITY" over "HOME-STUDY BRINGS BIGGER PAY"): its
+            # own block, so that it does not stay with the story
+            lead = [region_text(regs[b]) for b in block]
+            if len(block) <= 3 and all(words(t_) <= 8 for t_ in lead) and \
+                    any(COMPANY_RE.search(t_) or sig_re.search(t_) for t_ in lead) and \
+                    (rj["label"] == "SectionHeader" or is_display(p, rj)) and words(tj) <= 10:
+                break
             block.append(j)
-        txt = "\n".join(region_text(regs[j]) for j in block)
         texts = [region_text(regs[j]) for j in block]
+        txt = "\n".join(texts)
         quoted = sum(1 for t_ in texts if t_.lstrip()[:1] in "\"\u201c'\u2018")
         if quoted >= max(2, 0.4 * len(texts)):
             return None                                       # dialogue: the story's own second column
@@ -2000,25 +2562,57 @@ class Assembler:
         addr = len(POSTAL_RE.findall(txt))
         prices = len(PRICE_RE.findall(txt))
         hard = prices + 2 * addr + (1 if COMPANY_RE.search(txt) else 0)
-        soft = len([w for w in AD_WORDS.findall(txt) if not w.startswith("$")])
+        soft = len([w for w in AD_WORDS.findall(txt) if not w.startswith("$")]) + len(re.findall(r"(?i)copyright,? \d{4}|\btrade.?mark", txt))
         head_t = region_text(r).strip()
         display_head = (r["label"] == "SectionHeader" and is_display(p, r)) or (is_display(p, r) and head_t.upper() == head_t and words(head_t) <= 8)
-        first_signed = bool(PRICE_RE.search(texts[0]) or POSTAL_RE.search(texts[0]))
-        if not (display_head or first_signed):
+        first_signed = bool(PRICE_RE.search(texts[0]) or POSTAL_RE.search(texts[0]) or
+                            (words(texts[0]) <= 60 and len(AD_WORDS.findall(texts[0])) >= 2))
+        # a signature block: a few short lines with a company or a copyright line (the tail of a picture
+        # advertisement whose headline is drawn in the picture)
+        signature = (len(block) <= 3 and all(words(t_) <= 8 for t_ in texts) and hard + soft >= 2 and
+                     (COMPANY_RE.search(txt) or re.search(r"(?i)copyright,? \d{4}", txt)))
+        if not (display_head or first_signed or signature):
             return None                                       # an advertisement block opens with a headline or a priced line
-        if not ((hard >= 1 and hard + soft >= 3) or (addr >= 1 and hard + soft >= 2)):
+        if not ((hard >= 1 and hard + soft >= 3) or (addr >= 1 and hard + soft >= 2) or signature):
             return None
-        head = region_text(r).replace("\n", " ")
-        # the previous column advertisement on this page continues when this block has no headline of its own
+        own_names = [x for x in (self.magazine_name(), self.A.get("magazine_head") or "") if x]
+        if any(re.search(re.escape(x[:16]), txt, re.I) for x in own_names):
+            return None                                       # the department's own notice names the magazine
+        if self.open.get("type") in ("feature", "letters") and not prices:
+            return None                                       # inside a department only a priced block is trade advertising
+        # one record per advertisement: a headline (display size, at most eight words) that follows a
+        # paragraph of copy opens the next one; the previous column advertisement on this page continues
+        # when the block has no headline of its own
         prev = next((rec for rec in reversed(self.records) if rec["type"] == "ad" and rec.get("_column_ad") == pno), None)
-        if prev is not None and not (r["label"] == "SectionHeader" or is_display(p, r)):
-            rec = prev
-        else:
-            rec = self.new("ad", title=head[:120], page=pno)
-            rec["flags"].append(f"advertisement column beside the text on p.{pno}")
-            rec["_column_ad"] = pno
+        rec = None
+        closed = False                # the previous line closed an advertisement: an address, a price, a paragraph of copy
+        # a signature block is titled by its slogan (the line in capitals), not by the copyright line
+        sig_title = next((t_ for t_ in texts if t_.upper() == t_ and words(t_) >= 2 and not sig_re.search(t_)), None) if signature else None
         for j in block:
-            self.add(rec, pno, j, "title" if (j == i and rec is not prev and (r["label"] == "SectionHeader" or is_display(p, r))) else None)
+            rj = regs[j]
+            tj = region_text(rj)
+            closing = bool(POSTAL_RE.search(tj) or COMPANY_RE.search(tj) or PRICE_RE.search(tj) or ADDRESS_RE.search(tj) or CLOSING_RE.search(tj))
+            headline = (rj["label"] == "SectionHeader" or is_display(p, rj)) and words(tj) <= 10 and not closing
+            if rec is None:
+                if prev is not None and not headline and not signature:
+                    rec = prev
+                else:
+                    rec = self.new("ad", title=(sig_title or tj).replace("\n", " ")[:120], page=pno)
+                    rec["flags"].append(f"advertisement column beside the text on p.{pno}" +
+                                        (" (the tail of a picture advertisement: a copyright line, a company, a slogan)" if signature else ""))
+                    rec["_column_ad"] = pno
+                    self.add(rec, pno, j, "title" if (not sig_title or tj == sig_title) else None)
+                    closed = False
+                    continue
+            elif headline and closed:
+                rec = self.new("ad", title=tj.replace("\n", " ")[:120], page=pno)
+                rec["flags"].append(f"advertisement column beside the text on p.{pno} (the next headline)")
+                rec["_column_ad"] = pno
+                self.add(rec, pno, j, "title")
+                closed = False
+                continue
+            self.add(rec, pno, j, "title" if (sig_title and tj == sig_title) else None)
+            closed = bool(words(tj) >= 25 or closing)
         return block[-1] + 1
 
     def filler_kind(self, pno, p, info, i, strict=False):
@@ -2051,7 +2645,8 @@ class Assembler:
         if n_ad >= 2:
             return "ad"
         if n_ad >= 1 and len(block_idx) >= 2 and not any(prose_like(regs[j]) for j in block_idx if j != i) \
-                and re.search(r"free (?:offer|trial|book|sample|booklet|details|information|catalog)|\boffer\b|\bsend\b", block, re.I):
+                and re.search(r"free (?:offer|trial|book|sample|booklet|details|information|catalog)|\boffer\b|\bsend\b|"
+                              r"get yours|order now|yours now|\$|only \d|price|postpaid|c\. ?o\. ?d\.", block, re.I):
             return "ad"                                   # a small trade advertisement with one selling word
         return None
 

@@ -180,9 +180,47 @@ def refresh_map(iid, live, cand, force=False, verified_from=None):
     protected = set()
     for aid, rec in keep.items():
         protected |= frag_set(rec)
+    # a verified record a PERSON made (an id with _u, from the log's new_article / moves) holds its boxes
+    # through the log itself, but the roles of its boxes fall back on the machine's roles wherever the
+    # log set none; so the candidate that holds such a box keeps the box with the role the OLD live tree
+    # gave it, never the new run's (2026-09-06: two verified records of Thrilling Detective 1948-12 had a
+    # box retitled by a refresh; taking the boxes out of the candidates altogether lost the old roles)
+    made_protected = set()
+    old_roles = {}
+    for a in live_by_id.values():
+        for k, r in (a.get("roles") or {}).items():
+            old_roles[k] = r
+    made_ver = [aid for aid in ver if aid not in live_by_id]
+    if made_ver:
+        try:
+            sys.path.insert(0, os.path.join(ROOT, "webapp"))
+            for k, v in (("PULP_SITE_PASSWORD_FILE", "/nonexistent"), ("PULP_SECRET_FILE", "/tmp/.pulp_eval_secret"),
+                         ("PULP_USERS_FILE", "/nonexistent"), ("PULP_API_TOKEN_FILE", "/nonexistent")):
+                os.environ.setdefault(k, v)
+            import app as SITE
+            edoc = SITE.effective_doc(iid) or {}
+            for a in edoc.get("articles", []):
+                if a["article_id"] in made_ver:
+                    for fr in a.get("fragments", []):
+                        for r in fr.get("region_ids", []):
+                            made_protected.add((fr["page"], r))
+        except Exception as exc:                          # the site's engine is not there: no protection, say so
+            print(f"[refresh] {iid}: could not read the person-made verified records ({exc})")
     cand_recs = []
     unsorted_extra = []
     for c in cand.get("articles", []):
+        held = frag_set(c) & made_protected if made_protected else set()
+        if held:
+            c = dict(c)
+            c["roles"] = dict(c.get("roles") or {})
+            for pn, r in held:
+                k = f"{pn}:{r}"
+                if k in old_roles:
+                    c["roles"][k] = old_roles[k]
+                else:
+                    c["roles"].pop(k, None)
+            c["flags"] = list(c.get("flags") or []) + [
+                f"{len(held)} box(es) belong to a verified record a person made: they keep the roles they had before the refresh"]
         s = frag_set(c)
         if s & protected:
             # what the candidate would have put into (or beside) a verified record: taken away; if the
@@ -215,6 +253,11 @@ def refresh_map(iid, live, cand, force=False, verified_from=None):
             out.append((aid, c, "same regions"))
         else:
             pending.append((c, s))
+    ev_count = {}
+    for e in read_events(iid):
+        for k in ("article_id", "to_id", "into_id"):
+            if e.get(k):
+                ev_count[e[k]] = ev_count.get(e[k], 0) + 1
     for c, s in pending:
         best, bj = None, 0.0
         for aid, ls in live_sets.items():
@@ -227,8 +270,19 @@ def refresh_map(iid, live, cand, force=False, verified_from=None):
             taken.add(best)
             out.append((best, c, f"regions changed (overlap {bj:.2f})"))
             notes.append(f"{best}: regions changed (overlap {bj:.2f}); title {c.get('title')!r}")
-        else:
-            out.append((None, c, "new record"))
+            continue
+        # a candidate that swallows several live records (an advertisement page joined into one, 2026-09-06):
+        # it keeps the id of the one the annotators named most, else of the largest — so the moves and
+        # roles people logged against that id still find their record
+        contained = [(aid, ls) for aid, ls in live_sets.items()
+                     if aid not in taken and ls and s and len(s & ls) / len(ls) >= 0.8]
+        if contained:
+            aid, ls = max(contained, key=lambda x: (ev_count.get(x[0], 0), len(x[1])))
+            taken.add(aid)
+            out.append((aid, c, f"regions changed (joins {len(contained)} record(s); overlap {len(s & ls) / len(s | ls):.2f})"))
+            notes.append(f"{aid}: regions changed (joins {len(contained)} live record(s)); title {c.get('title')!r}")
+            continue
+        out.append((None, c, "new record"))
     # 3. the annotated records: refused unless forced; every one reported
     refused = []
     report = []

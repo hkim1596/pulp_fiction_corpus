@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.15.0"
+APP_VERSION = "0.16.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -305,7 +305,13 @@ function post(params,to){params.issue=ISSUE;params.article_id=AID;
   saveScroll();
   fetch('/annotate',{method:'POST',
     headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:new URLSearchParams(params)}).then(function(){if(to)location.href=to;else location.reload();});}
+    body:new URLSearchParams(params)}).then(function(r){
+      if(r.status===403||(r.redirected&&/\/login/.test(r.url))){
+        alert('Not saved: your login has ended or your account cannot annotate. Log in again and repeat the action.');
+        location.href='/login';return;}
+      if(!r.ok){alert('Not saved: the server answered '+r.status+'. Try again; if it repeats, leave feedback.');return;}
+      if(to)location.href=to;else location.reload();
+    }).catch(function(){alert('Not saved: the site could not be reached. Check the connection and try again.');});}
 document.addEventListener('submit',function(){saveScroll();},true);
 document.addEventListener('click',function(e){
   var t=e.target;
@@ -765,16 +771,16 @@ def frag_text(iid, fr, overrides=None):
 
 
 def assemble_text(iid, fragments, overrides=None):
-    raw = "\n".join(frag_text(iid, fr, overrides) for fr in fragments)
+    texts = [frag_text(iid, fr, overrides) for fr in fragments]
     try:
         import sys as _sys
         _p = os.path.join(ROOT, "pipeline")
         if _p not in _sys.path:
             _sys.path.insert(0, _p)
-        from s07_articles import clean_text
-        return clean_text(raw)
+        from s07_articles import clean_text, join_boxes
+        return clean_text(join_boxes(texts))     # one paragraph per box; a split paragraph rejoined (v0.16.0)
     except Exception:
-        return raw
+        return "\n".join(texts)
 
 
 def effective_doc(iid):
@@ -968,6 +974,14 @@ def effective_doc(iid):
             # to two records), then place one copy at its reading-order
             # position in the target.
             k = ev.get("frag", "")
+            tgt = byid.get(ev.get("to_id", ""))
+            if ev.get("to_id") != "new" and not tgt:
+                # the target record is gone (a refresh joined or dropped it): the box stays where it is
+                # rather than becoming a loose record of its own (v0.16.0)
+                src, _fr = findfrag(k)
+                if src not in (None, "unsorted"):
+                    touch(src, ev)
+                continue
             fr = None
             for a2 in arts:
                 hits = [f2 for f2 in a2["fragments"] if fragkey(f2) == k]
@@ -985,7 +999,6 @@ def effective_doc(iid):
                 fr = synth(k)               # furniture / unassigned box
                 if fr is None:
                     continue
-            tgt = byid.get(ev.get("to_id", ""))
             if ev.get("to_id") == "new" or not tgt:
                 n_user += 1
                 na = {"article_id": f"{iid}_u{n_user:03d}", "type": "story",
@@ -1234,6 +1247,8 @@ blockquote.proto{border-left:3px solid var(--accent);background:var(--surface);b
 .fb{margin-top:34px;border-top:1px solid var(--grid);padding-top:12px;font-size:13.5px;color:var(--ink2)}
 .fb input[type=text]{width:200px}.fb textarea{width:100%;height:60px}
 .flash{background:var(--okbg);border:1px solid var(--green);border-radius:8px;padding:6px 10px;margin:0 0 8px;font-size:14px}
+.readtext{max-width:760px;font-size:16px;line-height:1.7}
+.readtext p{margin:0 0 1em}
 .land{max-width:640px;margin:7vh auto 0;padding:0}
 .land h1{font-size:26px}
 .land p{font-size:15.5px;line-height:1.6}
@@ -1333,7 +1348,7 @@ def esc(s):
 
 
 NAV_EXPLORE = [("/overview", "Overview"), ("/authors", "Authors"), ("/magazines", "Magazines"), ("/issues", "Issues"),
-               ("/stories", "Records"), ("/pairs", "Pairs"), ("/reuse", "Reuse"), ("/collection", "Collection"),
+               ("/stories", "Stories"), ("/pairs", "Pairs"), ("/reuse", "Reuse"), ("/collection", "Collection"),
                ("/corpus", "Corpus"), ("/datasheet", "Datasheet"), ("/method", "Method")]
 NAV_WORKROOM = [("/guide", "Guide"), ("/articles", "Workbench"), ("/reuse/validate", "Paraphrase review"),
                 ("/reuse/cases", "Cases"), ("/reuse/progress", "Progress"), ("/assembly", "Assembly"),
@@ -2625,6 +2640,11 @@ click first.</p>"""
         ROLE_SEC = {"title": "T", "subtitle": "T", "author": "A", "teaser": "Z", "synopsis": "Z", "note": "Z"}
         CHAPTER_ROLES = ("chapter_number", "chapter_title", "section")
         PARATEXT_ROLES = ("teaser", "synopsis", "note")
+        ROLE_GROUP = {"title": "T", "subtitle": "T", "author": "A", "teaser": "Z", "synopsis": "Z", "note": "Z", "caption": "Z",
+                      "chapter_number": "C", "chapter_title": "C", "section": "C"}
+        GROUP_COLOUR = {"T": "var(--accent)", "A": "var(--green2)", "C": "var(--purple2)", "Z": "var(--warn)", "B": "var(--ink)",
+                        "other": "var(--muted)", "furniture": "var(--grid2)", "unsorted": "#eda100"}
+        GROUP_FILL = {"T": "rgba(74,58,167,0.12)", "A": "rgba(23,143,100,0.12)", "C": "rgba(138,92,199,0.12)", "Z": "rgba(235,104,52,0.12)"}
         AD_CLASSES = ("house_next_issue", "house_self", "house_sibling", "house_form", "trade", "classified")
         TYPES = ("story", "poem", "feature", "letters", "ad", "house", "toc", "other")
 
@@ -2756,29 +2776,24 @@ click first.</p>"""
             for e in per_page.get(pno, []):
                 mine = e["kind"] == "article" and e["owner"] == aid
                 fill = "rgba(0,0,0,0)"
+                # one colour per group, the same on the box, its label and the card's id chip (v0.16.0, Heejin's
+                # notes of 2026-09-06): title/subtitle, author, chapter info, paratext, body; other records, furniture,
+                # unsorted in their own greys and amber
                 if mine:
                     role = roles.get(e["key"], "")
-                    if role in ("title", "subtitle"):
-                        stroke, width, dash = "var(--accent)", 5, ""
-                        fill = "rgba(122,48,32,0.12)"
-                    elif role == "author":
-                        stroke, width, dash = "var(--green2)", 5, ""
-                        fill = "rgba(44,94,46,0.12)"
-                    elif role in CHAPTER_ROLES:
-                        stroke, width, dash = "var(--purple2)", 5, ""
-                        fill = "rgba(91,59,138,0.10)"
-                    else:
-                        stroke, width, dash = "var(--accent)", 4, ""
+                    grp = ROLE_GROUP.get(role, "B")
+                    stroke, width, dash = GROUP_COLOUR[grp], (5 if grp != "B" else 4), ""
+                    fill = GROUP_FILL.get(grp, fill)
                 elif e["kind"] == "article":
-                    stroke, width, dash = ("var(--muted)", 3,
+                    stroke, width, dash = (GROUP_COLOUR["other"], 3,
                                            " stroke-dasharray='14,10'")
                 elif e["kind"] == "furniture":
-                    stroke, width, dash = ("var(--grid2)", 2,
+                    stroke, width, dash = (GROUP_COLOUR["furniture"], 2,
                                            " stroke-dasharray='4,7'")
                 else:
-                    stroke, width, dash = ("var(--green)", 3,
+                    stroke, width, dash = (GROUP_COLOUR["unsorted"], 3,
                                            " stroke-dasharray='8,8'")
-                inner, lx, ly = "", None, None
+                inner, lx, ly, rx = "", None, None, None
                 for r in e["region_ids"]:
                     if r < len(regs):
                         x0, y0, x1, y1 = regs[r]["bbox"]
@@ -2787,14 +2802,18 @@ click first.</p>"""
                                   f"fill='{fill}' stroke='{stroke}' "
                                   f"stroke-width='{width}'{dash}/>")
                         if lx is None:
-                            lx, ly = x0, y0
+                            lx, ly, rx = x0, y0, x1
                 if lx is not None:
-                    fs = max(26, int(H * 0.022))
-                    w = int(fs * 0.66 * len(e["id"])) + 12
-                    ty = max(ly - 8, fs)
-                    inner += (f"<rect x='{lx}' y='{max(ly-fs-10, 0)}' "
-                              f"width='{w}' height='{fs+8}' fill='{stroke}'/>"
-                              f"<text x='{lx+6}' y='{ty}' fill='var(--page)' "
+                    # the label stands in the page margin beside the box, never on the text (Heejin, 2026-09-06):
+                    # the left margin for a box in the left half of the page, the right margin otherwise
+                    fs = max(22, int(H * 0.018))
+                    w = int(fs * 0.62 * len(e["id"])) + 12
+                    left_half = (lx + rx) / 2 < W / 2 or (rx - lx) > 0.6 * W
+                    bx = (lx - w - 4) if left_half else (rx + 4)
+                    bx = max(0, min(bx, W - w))
+                    by = max(ly - 2, 0)
+                    inner += (f"<rect x='{bx}' y='{by}' width='{w}' height='{fs+6}' rx='4' fill='{stroke}'/>"
+                              f"<text x='{bx+6}' y='{by+fs}' fill='var(--page)' "
                               f"font-size='{fs}'>{e['id']}</text>")
                 r0 = e["region_ids"][0] if e["region_ids"] else -1
                 snip = ((regs[r0].get("text") or "")[:110]
@@ -2899,13 +2918,14 @@ click first.</p>"""
                   + (" c" if role in CHAPTER_ROLES else "")
                   + f"'>{esc(role.replace('_', ' '))}</span>") if role else ""
             card_cls = ("rC" if role in CHAPTER_ROLES else s_key)
+            chip_colour = GROUP_COLOUR[ROLE_GROUP.get(role, "B")]
             drag = " draggable=true" if (can and in_body) else ""
             pick = (f"<input type='checkbox' class='pick' data-key='{k}' title='choose this segment "
                     f"(then: move the chosen segments to a new record, or take them out)'> " if (can and not manual) else "")
             sec[s_key] += (
                 f"<div class='card r{card_cls}' data-key='{k}'{drag}>"
                 f"<div class='ch'>{pick}"
-                f"<span class='idchip' data-selkey='{k}'>{fid}</span>{rc}"
+                f"<span class='idchip' data-selkey='{k}' style='background:{chip_colour}'>{fid}</span>{rc}"
                 f"<span class='muted'>"
                 + ("added by annotator" if manual else f"page {fr['page']}")
                 + (f" · {esc(lab)}" if lab else "")
@@ -3058,10 +3078,14 @@ click first.</p>"""
                  f"max='{allpages[-1] if allpages else 1}'> "
                  f"<button onclick='return pgjump()'>Go</button>" + attach
                  + (f" · this article: {artlinks}" if artlinks else "")
-                 + "<br><span class='muted'>solid = this article (red tint "
-                 "= title, green = author) · long dash = other articles · "
-                 "dotted = furniture · amber = unsorted/unassigned · click "
-                 "any box not in this article to include it</span></div>")
+                 + "<br><span class='muted'>solid = this record: black = body text, "
+                 "<span style='color:var(--accent);font-weight:700'>title</span>, "
+                 "<span style='color:var(--green2);font-weight:700'>author</span>, "
+                 "<span style='color:var(--purple2);font-weight:700'>chapter info</span>, "
+                 "<span style='color:var(--warn);font-weight:700'>paratext</span> — the same colours as the id chips on "
+                 "the cards; the label stands in the margin beside its box · long dash = other records · "
+                 "dotted = not story text / furniture · amber = unsorted or unassigned · click "
+                 "any box not in this record to include it</span></div>")
         inclpanel = (
             "<div id='inclpanel' class='inclpanel' style='display:none'>"
             "<div class='ch'><span class='idchip other' id='ip_id'></span>"

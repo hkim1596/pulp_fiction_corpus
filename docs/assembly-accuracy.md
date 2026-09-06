@@ -300,3 +300,163 @@ column advertisements, the text inside illustrations. Against the 2
 September yardstick nothing moved (108/108, 88/88, 106 clean, the
 verified Cave of Horror exact); against the newer annotations the
 comparison is scripts/compare_effective.py, run after every refresh.
+
+## 6 September: the second corrections audit, and what rules v2.3 changed
+
+Heejin's request of 6 September: "Read the feedback and new
+annotations. Improve layout assembly algorithm and annotation tools.
+Closely examines what was wrong by automatic assembly. Give me updated
+accuracy in plain English." The yardstick this time is the live
+annotation logs themselves — 558 events by Sujin and Heejin between 3
+and 6 September in nine issues, touching 82 records, 22 of them
+verified — read by a new audit (pipeline/s11_corrections_audit.py). For
+every record a person touched, the audit takes the record as the person
+left it (the site's own replay of the log) and puts it beside the
+machine's record, box by box: a box the person added (and where the
+machine had it — which record, or furniture, and the machine's reason),
+a box the person took out (and where it went), a role that differs, a
+title, author or type that differs. `--candidate` measures a fresh
+build of the rules against the same records, so a new version can be
+judged before it goes live. The three grades: exact (boxes, roles,
+title, author and type all as the machine made them), same boxes and
+roles (only a title, author or type differs; teaser, note, synopsis and
+caption count as one group here), same boxes.
+
+The same 82 records, the machine of 4 September (v2.2) against the
+machine of today (v2.3):
+
+    records                       n    exact        same boxes+roles   same boxes
+    all                          82    25 -> 38       33 -> 56           49 -> 68
+    verified                     22     6 ->  7        8 -> 12           13 -> 16
+    stories                      43    18 -> 25       20 -> 29           30 -> 35
+    advertisements and house     24     3 ->  7        6 -> 14            9 -> 18
+    features, letters, poems     15     4 ->  6        7 -> 13           10 -> 15
+
+    by issue                      n    exact        same boxes+roles   same boxes
+    Weird Tales 1925-11           7     3 ->  3        4 ->  4            5 ->  4
+    Weird Tales 1934-05           2     0 ->  1        0 ->  1            2 ->  2
+    Astounding 1930-03            8     2 ->  2        2 ->  5            5 ->  5
+    Galaxy 1952-03               11     3 ->  5        5 ->  8            8 -> 10
+    Thrilling Detective 1932-02  13     4 ->  5        6 ->  8           11 -> 12
+    Thrilling Detective 1948-12  20     0 ->  7        0 -> 10            0 -> 14
+    Western Story 1937-02        11     5 ->  7        7 -> 11            8 -> 11
+    Wild West Weekly 1936-02     10     8 ->  8        9 ->  9           10 -> 10
+
+Counted in boxes: the 82 records hold 13,610 boxes. The machine of 4
+September lacked 106 boxes the people have in those records and held
+68 they do not; today's lacks 28 and holds 5. Roles: 44 boxes had a
+different role, now 25; inside the paratext group (teaser against note,
+caption or subtitle) 14, now 18 — the machine now marks more of the
+head matter, and the people's names for it differ from one another.
+
+In plain words: before today, of every ten records a person had worked
+on, three came back exactly as the machine had made them and six had
+the right boxes; now about five of ten are exact and eight of ten have
+the right boxes. On the verified records — the ones a person read to
+the end — seven of 22 are exact and sixteen have the right boxes; the
+rest differ by one to three boxes each. The issue that had been
+hopeless, Thrilling Detective 1948-12 (advertising in a column beside
+every page of the stories), goes from none of twenty records right to
+fourteen of twenty with the right boxes.
+
+What was wrong in the machine, as the audit showed it box by box:
+
+1. Advertising beside the story. On the continuation pages of Thrilling
+   Detective 1948-12 the small advertisements run in one column while
+   the story runs in the other; the machine cut by reading order, so a
+   story paragraph went into the advertisement and copy stayed in the
+   story (most of that issue's twenty touched records). Now the block
+   keeps to its column, a
+   paragraph of the story's prose in the other column returns to the
+   story, an advertisement column is found even when it comes first on
+   the page or has no headline, and one record is made per headline
+   that follows a paragraph of copy. The tail of a picture advertisement
+   above the column ("Copyright 1948 Billerie Rubber Co." / "FOREVER
+   FIRST WITH FIRST QUALITY") stayed in the story; it is its own record.
+2. The head of a piece. The caption under the illustration and the
+   pull-quote on the start page went to furniture; since 4 September
+   the annotators put them in the record as teaser (five records). A
+   blurb set in several boxes was taken only in part; a type label
+   ("A Complete Novelet"), a department's tagline, an epigraph, the
+   illustrator's signature read as text beside the drawing, an empty
+   title box, a title set far above its by-line, a by-line of initials
+   with the surname in the next box — each was left as body text or
+   furniture. Now everything between the head and the first body
+   paragraph is paratext, with the role the annotators use. A blurb set
+   across the foot of the start page or its facing page, below the
+   columns (Thrilling Detective's style), was body text; it is teaser.
+3. The end of a piece. "COMING—" and "FEATURED IN THE NEXT ISSUE"
+   blocks with a title and a by-line were story text (two verified
+   records had to be carved by hand); they are house announcements. A
+   next-month blurb or a "Watch for" line at the end was body text; it
+   is a note. The end-signature and tail rules never ran for a record
+   whose head had been joined from the facing page — a plain bug — so
+   the matter after the end mark stayed in the story; fixed.
+4. Chapter heads that the layout stage had labelled as running heads
+   ("CHAPTER VII" in a header box) were furniture, so the chapter was
+   missing; the cigarette pages outside the printed range were left
+   unassigned; a scan with its leaves out of order gave the story in
+   scan order; a whole advertisement page with one advertiser was cut
+   into pieces at every headline. Each has its rule now.
+
+What still differs, and why:
+
+- Conventions the two annotators, or the annotators and the machine,
+  apply differently: "a novelet by X" is a by-line to the machine
+  (author) and a teaser to Sujin; the illustrator's credit, the "Author
+  of …" line and the artist's signature are notes to the machine and
+  teaser to her; the caption on the start page is teaser in her newer
+  records and furniture in two older verified ones; the "Foreword" of
+  Vampires of the Moon and the author's foreword of Brigands of the
+  Moon (ten paragraphs) are body text to the machine and teaser to her;
+  "[THE END]" was kept inside a verified record; an empty box where the
+  title is drawn is the title box to the machine and "not story text"
+  to her; the small advertisements on a classified page are one record
+  per headline to the machine and one record per column to her
+  ("INVENTORS", 24 boxes against the machine's 12); a house
+  announcement is titled by the story it announces ("The Wrong Corpse")
+  where she keeps the header ("FEATURED IN THE NEXT ISSUE!"). None of
+  these is an error; the guide should fix one form, and the roles are
+  a click on the workbench.
+- The persons' own leftovers: a story line inside an advertisement
+  (Tramp's Christmas Eve, p. 108) and a copyright line left in the
+  story (p. 109) that the machine now places right; a body line marked
+  as a chapter number; The Stolen Body's three boxes Heejin has still
+  to take out of the verified record (the repeated title over the
+  continuation and two lines of the next-month announcement).
+- Known limits: a reader's poem inside The Eyrie typed story (no
+  "verse" label on the page); text drawn inside pictures and blocks the
+  layout stage never read; the reading order of a page cut round a
+  drawing.
+
+Against the 2 September yardstick (the corrections made on the model
+assembly) nothing moved that matters: 108 of 108 pieces found, 88 of
+88 titles and authors, 106 clean, cover 0.95; 14 of 51 human-touched
+records identical (15 on 4 September — The Cave of Horror's start-page
+caption, which the machine now keeps as teaser by the annotators'
+newer convention).
+
+The tools changed with the rules (site v0.16.0): the boxes on the scan
+are coloured by role group and their ids stand in the margin beside
+them, with the same colour on the card; an action that cannot be saved
+says so instead of doing nothing; the reading text joins boxes that run
+on; the story page shows the whole text; a move to a record that no
+longer exists leaves the box in place. The refresh keeps the roles of
+verified records people made and the ids the annotators used most.
+
+How to reproduce:
+
+    python3 pipeline/s08_assemble_rules.py --all
+    python3 pipeline/s11_corrections_audit.py --candidate data/assembly_v2/rules
+    python3 pipeline/s09_assembly_eval.py --all
+    python3 pipeline/s10_assembly_audit.py --yardstick data/assembly_archive/20260902_203349 --candidate data/assembly_v2/rules
+
+(s09 without --yardstick measures against the live logs' verified
+records; with --yardstick data/assembly_archive/20260902_203349 against
+the archived corrections of 2 September.)
+
+The "before" column is the same audit run with `--candidate` pointing
+at a build of v2.2 (kept on the sandbox as /tmp/v22/rules_v22; on the
+server the archived live tree of the refresh,
+data/assembly_archive/<stamp>_refresh/articles, is that build with the
+annotators' ids).

@@ -1,0 +1,59 @@
+{
+ "_note": "Known interior illustrators by magazine (a regular expression on the magazine's name; '*' for every magazine). Reference knowledge written 2026-09-06, to be confirmed against the issues; used by s08 to read an illustrator's signature the layout took for text (Weird Tales 1925-11: 'ADROSNATCH', 'A. BROSNAT & Co.' beside the drawings) and to fill the record's illustrator field. Add a name when a signature turns up in a record's text.",
+ "*": [],
+ "weird tales": [
+  "Andrew Brosnatch",
+  "Hugh Rankin",
+  "Joseph Doolin",
+  "Curtis C. Senf",
+  "Vincent Napoli",
+  "Margaret Brundage",
+  "J. Allen St. John",
+  "Jayem Wilcox",
+  "Hannes Bok",
+  "Frank Utpatel",
+  "Boris Dolgov",
+  "Virgil Finlay",
+  "Lee Brown Coye",
+  "Harold S. De Lay",
+  "Matt Fox",
+  "Fred Humiston",
+  "John Giunta",
+  "Rankin"
+ ],
+ "astounding": [
+  "H. W. Wesso",
+  "Hans Wessolowski",
+  "J. Fleming Gould",
+  "Paul Orban",
+  "Elliott Dold",
+  "Charles Schneeman",
+  "Hubert Rogers",
+  "Frank Kramer",
+  "Marchioni",
+  "Wesso"
+ ],
+ "galaxy": [
+  "Ed Emshwiller",
+  "Emsh",
+  "David Stone",
+  "Willer",
+  "Marchetti",
+  "Karl Rogers",
+  "Don Sibley",
+  "Vidmer",
+  "Ashman",
+  "Kossin",
+  "Kirberger",
+  "Wallace Wood"
+ ],
+ "thrilling detective": [],
+ "wild west weekly|western story": [
+  "Amos Sewell",
+  "Frank Tinsley",
+  "H. W. Scott",
+  "R. G. Harris",
+  "Charles Durant",
+  "Walter Baumhofer"
+ ]
+}

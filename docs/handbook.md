@@ -183,6 +183,31 @@ judgments, calibration, revisit, a case from a pair page, a note); a wide
 table under `reuse_pages._chart_row` (more than seven columns) now goes
 under its chart instead of beside it.
 
+The workbench since v0.16.0 (2026-09-06, from Sujin's and Heejin's
+feedback of 4–6 September): every box drawn on the scan is coloured by
+its role's GROUP — title and subtitle (the accent), author (green),
+paratext (teaser, note, synopsis, caption: the warn orange), chapter
+heads and section headings (purple), body (ink), other records (grey),
+furniture (the grid colour), unsorted (yellow) — `ROLE_GROUP`, `GROUP_COLOUR`,
+`GROUP_FILL` in webapp/app.py; the box's id is written in the page
+margin beside the box (left margin for a box in the left half, right
+margin for the right; never over the text; `fs = max(22, H*0.018)`),
+and the id chip on the card carries the same colour, so a card and its
+box are found from either side; the legend under the scan names the
+groups. `post()` in the workbench script no longer fails silently: a
+403, a redirect to /login or a non-200 answer raises an alert ("Not
+saved: your login has ended …") and sends the person to /login — the
+case Sujin reported as "Nothing happens" after a long session. The
+reading text of a record joins its boxes as paragraphs: a box that
+ends without closing punctuation or with a hyphen, or is followed by a
+box starting in lower case, runs on into the next (s07_articles.
+join_boxes, shared with the export); the story page (/story/<id>)
+shows the whole reading text and no longer the annotation history; the
+EXPLORE menu's "Records" is "Stories". A move whose target record no
+longer exists (an id that a refresh joined into another) leaves the
+box where it is instead of making a "loose boxes" record
+(`effective_doc`, move_frag).
+
 Routes since v0.12.0: /issues is the explorer's paged issue list (built
 for the whole corpus, filters by magazine, decade, genre, completeness);
 the workroom's old table of the ten pilot issues with their processing
@@ -508,6 +533,32 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     "PART ONE" and "I.—THE MURDER CLUB" are chapter heads;
                     the page range takes in a trailing leaf the scan has
                     out of order (Galaxy 1952-03) and flags the record.
+                    v2.3 (2026-09-06, from the corrections audit s11):
+                    advertising beside a story is cut by column
+                    (column_of; a paragraph of the piece's prose in the
+                    other column returns to the piece; an advertisement
+                    column is found without a headline label; one record
+                    per headline after a paragraph of copy; the tail of a
+                    picture advertisement above the column is its own
+                    record; a block of display lines at the foot of a
+                    continuation page is an advertisement; one advertiser
+                    page is one record); the head zone between the head
+                    and the first body paragraph is paratext with the
+                    annotators' roles (head_zone; start-page captions and
+                    pull-quotes teaser, type labels subtitle, signatures
+                    note via config/illustrators.json, an empty title box
+                    the title; a blurb across the foot of the start page
+                    or its facing page teaser, foot_blurb); after the end
+                    of a piece: COMING / FEATURED IN THE NEXT ISSUE blocks
+                    are house announcements, next-month lines notes, and
+                    the tail rules run after a facing-page head join;
+                    chapter heads read as running heads are chapter
+                    heads; pages outside the printed range with text are
+                    advertisements; leaves out of order are given in
+                    printed-page order. The reading text joins run-on
+                    boxes (s07_articles.join_boxes). docs/assembly-v2.md
+                    has the whole list with the pages that asked for
+                    each rule.
     s09_assembly_eval    the assembly harness: every candidate (live —
                     whatever data/articles holds, the rules' records
                     since the switch —, rules, rules-on-model) against
@@ -523,8 +574,32 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     the machine's and the person's reasons →
                     data/assembly_v2/audit.json and a report.
                     --yardstick <archive> as for s09; --show keeps every
-                    disputed region. docs/assembly-accuracy.md is the
-                    reading of it.
+                    disputed region; --candidate <dir> (2026-09-06)
+                    measures a fresh build (data/assembly_v2/rules)
+                    instead of the live records. docs/assembly-accuracy.md
+                    is the reading of it.
+    s11_corrections_audit   the corrections audit (2026-09-06): every
+                    record a person touched in the LIVE annotation logs
+                    (not an archive), as the person left it (the site's
+                    own effective_doc), against the machine's record —
+                    box by box, with roles: "moved in" (the person added
+                    a box the machine had elsewhere: which record, or
+                    furniture, and why), "moved out" (the person took a
+                    box out: where it went — a record, "not story text",
+                    furniture), "role" (a different role; "role
+                    (paratext)" when both are in the teaser/note/synopsis/
+                    caption group), "order", "text"; then title, author,
+                    type, serial. The first line is the summary (records
+                    touched, verified, exact, same boxes and roles, same
+                    boxes; differences by kind). --candidate <dir> matches
+                    each person's record to the build's best-overlapping
+                    record (a person-made _u record counts as matched at
+                    J ≥ 0.6) — the way to measure a new version of the
+                    rules BEFORE a refresh; --issue, --since <ts>, --show
+                    (every box). Writes data/assembly_v2/corrections.json.
+                    This is the audit that produced rules v2.3 (docs/
+                    assembly-accuracy.md, 6 September); run it after every
+                    round of annotation.
     scripts/switch_assembly.py   makes a v2 candidate the live assembly,
                     moving the old assembly and the annotation logs to
                     data/assembly_archive/<stamp>/ (nothing deleted;
@@ -549,7 +624,21 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     in), and no flag overrides this — unverify on the
                     site first. Every other annotated record is reported
                     one line each (regions unchanged / REGIONS CHANGE
-                    +n −m / kept as verified). --verified-from
+                    +n −m / kept as verified). Since 2026-09-06: (1) a
+                    candidate that swallows several live records (an
+                    advertisement page joined into one) keeps the id of
+                    the one the annotators named most often in the log,
+                    else of the largest — so moves logged against that id
+                    still find their record (before, the id vanished and
+                    the replay made "loose boxes" records: 22 of them on
+                    the sandbox); (2) the boxes of a VERIFIED record a
+                    person made (an _u id) keep, in whichever candidate
+                    holds them, the roles the old live tree gave them —
+                    the log holds the boxes, the machine's roles are the
+                    fallback for boxes the log gave no role, so a new
+                    run's roles must not reach them (two verified records
+                    of Thrilling Detective 1948-12 had a box retitled by
+                    the refresh of the 6th before this). --verified-from
                     data/assembly_archive/<stamp>_refresh takes, for a
                     record verified BEFORE that stamp, the copy kept
                     there (what the person saw) instead of the live one —

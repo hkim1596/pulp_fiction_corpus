@@ -62,11 +62,17 @@ docs/handbook.md before touching the look of a page.
     pipeline/s01…s07         the corpus-building stages, in order
     pipeline/s08, s09        assembly v2 (the rules engine) and the
                              assembly harness; docs/assembly-v2.md
+    pipeline/s10, s11        the assembly audits: s10 against an archived
+                             yardstick, s11 against the live annotation
+                             logs (run after every round of annotation;
+                             --candidate judges a new build before a
+                             refresh); docs/assembly-accuracy.md
     pipeline/r00…r05         the text-reuse analysis stages (protocol
                              sections 3–4), rehearsed on the pilot
     scripts/                 setup, deploy helpers, backup server scripts
     config/pilot_issues.json the approved 10-issue development set
     config/departments.json  each magazine's standing departments (name, type, conductor) — assembly v2.2
+    config/illustrators.json each magazine's known illustrators, for the signature read as text beside a drawing — assembly v2.3 (reference knowledge, to confirm)
     config/publishers_magazines.json  publisher of a magazine by period (reference table for the collection survey's "by publisher")
     data/reuse/              the reuse pipeline's result files (the one
                              data folder kept in git; small JSON)

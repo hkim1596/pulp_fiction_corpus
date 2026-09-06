@@ -190,6 +190,26 @@ def mock_pass_b(frags):
 
 # ---------------- assembly ----------------
 
+def join_boxes(texts):
+    """The reading text of a record from its boxes, in order: every box is a
+    paragraph of its own, except that a box that ends mid-sentence (no closing
+    punctuation, or a hyphen) or whose successor begins in lower case runs on
+    into the next — a paragraph split across a column or a page ("dark-" /
+    "ness") comes back together (v2.3, 2026-09-06)."""
+    out = []
+    for i, t in enumerate(texts):
+        t = (t or "").strip()
+        if not t:
+            continue
+        if out:
+            prev = out[-1].rstrip()
+            nxt_lower = t[:1].islower()
+            open_end = not re.search(r"[.!?\"\u201d\u2019'\)\]:;]\s*$", prev) or prev.endswith("-")
+            out[-1] = out[-1] + ("\n" if (nxt_lower or open_end) else "\n\n")
+        out.append(t)
+    return "".join(out)
+
+
 def clean_text(text):
     lines = [normalize_chars(l) for l in text.splitlines()]
     # dehyphenate across line ends, keep punctuation attached

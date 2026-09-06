@@ -233,3 +233,27 @@ Dropbox share carries the full context of each.
   strip and the pill is 1896–1959, the protocol's; items dated outside
   it and undated items are named in the caption, not drawn. Nothing in
   the data or the tools changed; site v0.15.0.
+- 2026-09-06 ("Read the feedback and new annotations. Improve layout
+  assembly algorithm and annotation tools. Closely examines what was
+  wrong by automatic assembly. Give me updated accuracy in plain
+  English") — The annotators' newer conventions become the machine's
+  (rules v2.3, docs/assembly-v2.md): the illustration's caption and the
+  pull-quote on a start page are teaser, and so is everything else
+  between a piece's head and its first body paragraph, including a blurb
+  set across the foot of the page; a type label is subtitle; the
+  illustrator's signature read as text is a note; a "COMING—" /
+  "FEATURED IN THE NEXT ISSUE" block is a house announcement titled by
+  the story it announces; a next-month line at the end is a note;
+  advertising beside a story is cut by column, one record per headline,
+  and a whole page of one advertiser is one record; a piece whose scan
+  has leaves out of order is given in printed-page order. The
+  corrections audit (s11) against the live logs, not an archive, is the
+  measure of a new version, run with --candidate before a refresh;
+  after a refresh every verified record must read "identical" in
+  compare_effective, and a verified record a person made keeps the
+  roles it had. Open conventions for the guide: "a novelet by X" as
+  author or teaser; credits and signatures as note or teaser; a foreword
+  as body or teaser; the grain of classified advertisements. On the
+  workbench the boxes are coloured by role group with their ids in the
+  margin; an action that cannot be saved says so; "Records" is
+  "Stories" and the story page shows the whole text (site v0.16.0).
