@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.16.0"
+APP_VERSION = "0.16.1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -1294,6 +1294,26 @@ blockquote.proto{border-left:3px solid var(--accent);background:var(--surface);b
 .cardtext.edited{background:var(--surface2)}
 .othercard{opacity:.8;border-style:dashed;margin:0 0 10px}
 .fbox rect{cursor:pointer}
+.fbox rect.bx{fill:transparent;stroke:var(--accent2);stroke-width:4}
+.fbox.gT rect.bx{stroke:var(--accent);stroke-width:5;fill:rgba(74,58,167,.12)}
+.fbox.gA rect.bx{stroke:var(--green2);stroke-width:5;fill:rgba(23,143,100,.12)}
+.fbox.gC rect.bx{stroke:var(--purple2);stroke-width:5;fill:rgba(138,92,199,.12)}
+.fbox.gZ rect.bx{stroke:var(--warn);stroke-width:5;fill:rgba(235,104,52,.12)}
+.fbox.gB rect.bx{stroke:var(--accent2);stroke-width:4;fill:rgba(42,120,214,.05)}
+.fbox.gO rect.bx{stroke:var(--muted);stroke-width:3;stroke-dasharray:14,10}
+.fbox.gF rect.bx{stroke:var(--grid2);stroke-width:2;stroke-dasharray:4,7}
+.fbox.gU rect.bx{stroke:#eda100;stroke-width:3;stroke-dasharray:8,8}
+.fbox rect.lab{fill:var(--accent2);stroke:none}
+.fbox.gB rect.lab{fill:var(--accent2)}
+.fbox.gT rect.lab{fill:var(--accent)}
+.fbox.gA rect.lab{fill:var(--green2)}
+.fbox.gC rect.lab{fill:var(--purple2)}
+.fbox.gZ rect.lab{fill:var(--warn)}
+.fbox.gO rect.lab{fill:var(--muted)}
+.fbox.gF rect.lab{fill:var(--grid2)}
+.fbox.gU rect.lab{fill:#eda100}
+.fbox text.labt{fill:var(--page)}
+.fbox.gF text.labt{fill:var(--ink)}
 .editbox{width:100%;height:150px;font-size:13px;border:1px solid var(--accent);padding:6px}
 .posdd{font-size:11.5px;border:1px solid var(--grid2);border-radius:6px;font-family:inherit;padding:0 2px;background:var(--surface);color:var(--ink)}
 .todd{font-size:11.5px;padding:1px 4px}
@@ -1306,13 +1326,13 @@ blockquote.proto{border-left:3px solid var(--accent);background:var(--surface);b
 .secbar:first-child{margin-top:0}
 .secbar.secT{background:var(--accent)}
 .secbar.secA{background:var(--green2)}
-.secbar.secB{background:var(--ink);color:var(--page)}
+.secbar.secB{background:var(--accent2)}
 .secbar.secZ{background:var(--warn)}
 .card.rT{border-left:5px solid var(--accent)}
 .card.rA{border-left:5px solid var(--green2)}
 .card.rZ{border-left:5px solid var(--warn)}
 .card.rC{border-left:5px solid var(--purple2)}
-.card.rB{border-left:5px solid var(--grid2)}
+.card.rB{border-left:5px solid var(--accent2)}
 .rgrp{display:inline-block;margin-left:8px;padding-left:6px;border-left:1px solid var(--grid)}
 .mini.cur{display:inline-block;font-size:11px;padding:1px 7px;background:var(--ink);color:var(--page);margin-right:3px;border-radius:6px}
 .sechint{font-size:12.5px;color:var(--ink2);border:1px dashed var(--grid2);border-radius:10px;background:var(--surface);padding:8px 10px;margin:0 0 10px}
@@ -1594,6 +1614,13 @@ class H(BaseHTTPRequestHandler):
             /api/<token>/ls?path=annotations      list a data folder
             /api/<token>/get?path=annotations/x   read one file
             /api/<token>/doc/<issue-id>           assembled state as JSON
+            /api/<token>/health                   the disks under the data
+                                                  (free space, where the
+                                                  project really lives),
+                                                  the newest annotation,
+                                                  the site version (v0.16.1,
+                                                  after the full disk of
+                                                  2026-09-06)
         """
         try:
             want = open(API_TOKEN_FILE).read().strip()
@@ -1611,6 +1638,35 @@ class H(BaseHTTPRequestHandler):
             ok = p == DATA or p.startswith(DATA + os.sep)
             return p if ok else None
 
+        if rest == "health":
+            # the disks, so that a full disk is seen from here and not from a failed paste
+            import shutil
+            def disk(pth):
+                try:
+                    u = shutil.disk_usage(pth)
+                    return {"path": pth, "real": os.path.realpath(pth), "total_gb": round(u.total / 1e9, 1),
+                            "free_gb": round(u.free / 1e9, 2), "used_pct": round(100 * u.used / u.total, 1)}
+                except Exception as exc:
+                    return {"path": pth, "error": str(exc)}
+            newest = ""
+            try:
+                for n in os.listdir(ANNDIR):
+                    pth = os.path.join(ANNDIR, n)
+                    if n.endswith(".jsonl") and os.path.getsize(pth):
+                        with open(pth, "rb") as f:
+                            f.seek(max(0, os.path.getsize(pth) - 4000))
+                            last = [l for l in f.read().decode("utf-8", "ignore").splitlines() if l.strip()][-1]
+                        ts = json.loads(last).get("ts", "")
+                        newest = max(newest, ts)
+            except Exception:
+                pass
+            out = {"version": APP_VERSION, "time": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                   "data": disk(DATA), "pages": disk(os.path.join(DATA, "pages")),
+                   "root": disk("/"), "tmp": disk(os.environ.get("TMPDIR") or "/tmp"),
+                   "newest_annotation": newest,
+                   "annotation_logs": {n: os.path.getsize(os.path.join(ANNDIR, n))
+                                       for n in sorted(os.listdir(ANNDIR)) if n.endswith(".jsonl")} if os.path.isdir(ANNDIR) else {}}
+            return self._send(200, json.dumps(out, ensure_ascii=False, indent=1), "application/json")
         if rest == "ls":
             d = safe(qs.get("path", [""])[0])
             if not d or not os.path.isdir(d):
@@ -2642,9 +2698,8 @@ click first.</p>"""
         PARATEXT_ROLES = ("teaser", "synopsis", "note")
         ROLE_GROUP = {"title": "T", "subtitle": "T", "author": "A", "teaser": "Z", "synopsis": "Z", "note": "Z", "caption": "Z",
                       "chapter_number": "C", "chapter_title": "C", "section": "C"}
-        GROUP_COLOUR = {"T": "var(--accent)", "A": "var(--green2)", "C": "var(--purple2)", "Z": "var(--warn)", "B": "var(--ink)",
+        GROUP_COLOUR = {"T": "var(--accent)", "A": "var(--green2)", "C": "var(--purple2)", "Z": "var(--warn)", "B": "var(--accent2)",
                         "other": "var(--muted)", "furniture": "var(--grid2)", "unsorted": "#eda100"}
-        GROUP_FILL = {"T": "rgba(74,58,167,0.12)", "A": "rgba(23,143,100,0.12)", "C": "rgba(138,92,199,0.12)", "Z": "rgba(235,104,52,0.12)"}
         AD_CLASSES = ("house_next_issue", "house_self", "house_sibling", "house_form", "trade", "classified")
         TYPES = ("story", "poem", "feature", "letters", "ad", "house", "toc", "other")
 
@@ -2775,32 +2830,27 @@ click first.</p>"""
             boxes = ""
             for e in per_page.get(pno, []):
                 mine = e["kind"] == "article" and e["owner"] == aid
-                fill = "rgba(0,0,0,0)"
                 # one colour per group, the same on the box, its label and the card's id chip (v0.16.0, Heejin's
                 # notes of 2026-09-06): title/subtitle, author, chapter info, paratext, body; other records, furniture,
-                # unsorted in their own greys and amber
+                # unsorted in their own greys and amber. The colours live in the stylesheet, by the group class on
+                # the <g> (v0.16.1): a colour token written into an SVG attribute (fill='var(--accent)') is read by
+                # Chrome but not by every browser — on Heejin's the boxes lost their outlines and the labels went
+                # black ("Color code of labels in the layout is gone", 2026-09-06)
                 if mine:
                     role = roles.get(e["key"], "")
                     grp = ROLE_GROUP.get(role, "B")
-                    stroke, width, dash = GROUP_COLOUR[grp], (5 if grp != "B" else 4), ""
-                    fill = GROUP_FILL.get(grp, fill)
                 elif e["kind"] == "article":
-                    stroke, width, dash = (GROUP_COLOUR["other"], 3,
-                                           " stroke-dasharray='14,10'")
+                    grp = "O"
                 elif e["kind"] == "furniture":
-                    stroke, width, dash = (GROUP_COLOUR["furniture"], 2,
-                                           " stroke-dasharray='4,7'")
+                    grp = "F"
                 else:
-                    stroke, width, dash = (GROUP_COLOUR["unsorted"], 3,
-                                           " stroke-dasharray='8,8'")
+                    grp = "U"
                 inner, lx, ly, rx = "", None, None, None
                 for r in e["region_ids"]:
                     if r < len(regs):
                         x0, y0, x1, y1 = regs[r]["bbox"]
-                        inner += (f"<rect x='{x0}' y='{y0}' "
-                                  f"width='{x1-x0}' height='{y1-y0}' "
-                                  f"fill='{fill}' stroke='{stroke}' "
-                                  f"stroke-width='{width}'{dash}/>")
+                        inner += (f"<rect class='bx' x='{x0}' y='{y0}' "
+                                  f"width='{x1-x0}' height='{y1-y0}'/>")
                         if lx is None:
                             lx, ly, rx = x0, y0, x1
                 if lx is not None:
@@ -2812,8 +2862,8 @@ click first.</p>"""
                     bx = (lx - w - 4) if left_half else (rx + 4)
                     bx = max(0, min(bx, W - w))
                     by = max(ly - 2, 0)
-                    inner += (f"<rect x='{bx}' y='{by}' width='{w}' height='{fs+6}' rx='4' fill='{stroke}'/>"
-                              f"<text x='{bx+6}' y='{by+fs}' fill='var(--page)' "
+                    inner += (f"<rect class='lab' x='{bx}' y='{by}' width='{w}' height='{fs+6}' rx='4'/>"
+                              f"<text class='labt' x='{bx+6}' y='{by+fs}' "
                               f"font-size='{fs}'>{e['id']}</text>")
                 r0 = e["region_ids"][0] if e["region_ids"] else -1
                 snip = ((regs[r0].get("text") or "")[:110]
@@ -2831,7 +2881,7 @@ click first.</p>"""
                     binfo, ownerlink = "unsorted", ""
                 else:
                     binfo, ownerlink = "not assigned by the machine", ""
-                boxes += (f"<g class='fbox' data-key='{e['key']}' "
+                boxes += (f"<g class='fbox g{grp}' data-key='{e['key']}' "
                           f"data-selkey='{e['key']}' "
                           f"data-member='{1 if mine else 0}' "
                           f"data-boxid='{e['id']}' "
@@ -3078,7 +3128,8 @@ click first.</p>"""
                  f"max='{allpages[-1] if allpages else 1}'> "
                  f"<button onclick='return pgjump()'>Go</button>" + attach
                  + (f" · this article: {artlinks}" if artlinks else "")
-                 + "<br><span class='muted'>solid = this record: black = body text, "
+                 + "<br><span class='muted'>solid = this record: "
+                 "<span style='color:var(--accent2);font-weight:700'>body text</span>, "
                  "<span style='color:var(--accent);font-weight:700'>title</span>, "
                  "<span style='color:var(--green2);font-weight:700'>author</span>, "
                  "<span style='color:var(--purple2);font-weight:700'>chapter info</span>, "

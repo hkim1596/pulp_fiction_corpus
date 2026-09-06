@@ -211,9 +211,16 @@ The workbench since v0.16.0 (2026-09-06, from Sujin's and Heejin's
 feedback of 4–6 September): every box drawn on the scan is coloured by
 its role's GROUP — title and subtitle (the accent), author (green),
 paratext (teaser, note, synopsis, caption: the warn orange), chapter
-heads and section headings (purple), body (ink), other records (grey),
-furniture (the grid colour), unsorted (yellow) — `ROLE_GROUP`, `GROUP_COLOUR`,
-`GROUP_FILL` in webapp/app.py; the box's id is written in the page
+heads and section headings (purple), body text (blue, `--accent2`,
+since v0.16.1 — v0.16.0 drew it in ink, and on a page of body text
+that read as "the colour code is gone"), other records (grey),
+furniture (the grid colour, dark text), unsorted (yellow). The colours
+are STYLESHEET rules on the group class of the box's `<g>` (`.fbox.gT`
+… `.gU`, rects `.bx` and `.lab`, text `.labt`) — never a colour token
+inside an SVG attribute (`fill='var(--accent)'`): Chrome reads that,
+other browsers do not, and the boxes lose their outlines while the
+labels go black. `ROLE_GROUP` and `GROUP_COLOUR` in webapp/app.py give
+the card chips the same colours; the box's id is written in the page
 margin beside the box (left margin for a box in the left half, right
 margin for the right; never over the text; `fs = max(22, H*0.018)`),
 and the id chip on the card carries the same colour, so a card and its
@@ -294,6 +301,18 @@ change, delete, or approve anything.
                                               fragment keys, unsorted,
                                               furniture, roles, and every
                                               box with its owner
+    /api/<token>/health                       (v0.16.1) the disks: total,
+                                              free and used share of the
+                                              data directory (with the
+                                              real path it resolves to),
+                                              data/pages, the root disk
+                                              and the site's temp
+                                              directory; the newest
+                                              annotation's time; the size
+                                              of every annotation log —
+                                              the check to run after the
+                                              full disk of 2026-09-06,
+                                              before and after any paste
     /api/<token>/index                        what the explorer database
                                               holds and every result file
     /api/<token>/story/<id>  /pair/<a>/<b>    the same JSON the explorer's
