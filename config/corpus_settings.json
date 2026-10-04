@@ -149,7 +149,9 @@
       "max_tokens": 1500,
       "temperature": 0,
       "timeout_s": 300,
-      "_comment": "the lane on GPU 2 (PASTE 8b): vllm/vllm-openai:latest serving the lab's own copy of Qwen3-14B at /home/tailab/shared/models/qwen3-14b, port 8023, 80% of the card; PULP_LLM_BASE_URL and PULP_LLM_MODEL in the environment override these two for a trial of another lane or model (the lab also has qwen3.5-9b)"
+      "_comment": "the lane on GPU 2 (PASTE 8b): vllm/vllm-openai:latest serving the lab's own copy of Qwen3-14B at /home/tailab/shared/models/qwen3-14b, port 8023, 80% of the card; PULP_LLM_BASE_URL and PULP_LLM_MODEL in the environment override these two for a trial of another lane or model (the lab also has qwen3.5-9b)",
+      "thinking": false,
+      "max_tokens_thinking": 6000
     },
     "escalate": {
       "provider": "anthropic",

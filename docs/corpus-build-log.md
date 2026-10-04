@@ -282,4 +282,19 @@ the box-linking lane on GPU 2 serves the lab's own copy of Qwen3-14B (container 
 the card, 64 sequences, thinking off per request, JSON answers enforced); qwen3.5-9b stays available for a
 comparison through the PULP_LLM_MODEL/PULP_LLM_BASE_URL overrides.
 
-(Next entries: the lane up; the first issue through the three tiers; the trial's report.)
+### 2026-10-04, 22:45 KST — the lane on GPU 2 up (PASTE 8c); the first prompt seen; the ssh session dropped (8d)
+
+pulp-llm-8023 (vllm/vllm-openai:latest, Qwen3-14B, 80% of GPU 2, 64 sequences) was up after 120 s; GPU 2 at
+81,344 MiB. The first test question — does "and the wolves came down" continue "The night was cold and the
+moon rose red over the hills," — was answered {"continues": false, "confidence": 0.3}, wrong: a one-shot
+JSON answer with thinking off and no context is a weak test, but it is a warning that the local tier may be
+unsure often (a high escalation share) or wrong with confidence; the trial measures both against the rules,
+and p50i adds a thinking switch (llm_link.local.thinking; PULP_LLM_THINKING=1) and --redo/--tag so the same
+issues can be run again with thinking on, or with qwen3.5-9b, and the reports compared. The dry run of page 5
+of '47 showed the prompt as intended (17 boxes, labels, positions, the rules' proposals — including a rules
+weakness: the story "F. D. R." is said to begin mid-sentence on page 5, "and materials used, and all sorts of
+details about the construction"). The ssh session then broke ("Can't assign requested address"), so the
+single-issue run and the trial did not start; PASTE 8f runs the trial in tmux where a dropped session cannot
+end it.
+
+(Next entries: the trial's first issues; the report.)

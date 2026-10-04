@@ -175,15 +175,20 @@ def local_cfg():
         cfg["base_url"] = os.environ["PULP_LLM_BASE_URL"]
     if os.environ.get("PULP_LLM_MODEL"):
         cfg["model"] = os.environ["PULP_LLM_MODEL"]
+    if os.environ.get("PULP_LLM_THINKING"):
+        cfg["thinking"] = os.environ["PULP_LLM_THINKING"] not in ("0", "", "false", "no")
     return cfg
 
 
 def ask_local(user_text, cfg):
     """The local lane: an OpenAI-style chat endpoint (vLLM). Returns (text, usage, seconds)."""
-    body = {"model": cfg["model"], "temperature": cfg.get("temperature", 0), "max_tokens": cfg.get("max_tokens", 1500),
+    thinking = bool(cfg.get("thinking", False))                     # Qwen3's thinking mode: slower, often better judged
+    body = {"model": cfg["model"], "temperature": cfg.get("temperature", 0),
+            "max_tokens": cfg.get("max_tokens_thinking", 6000) if thinking else cfg.get("max_tokens", 1500),
             "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user_text}],
-            "response_format": {"type": "json_object"},
-            "chat_template_kwargs": {"enable_thinking": False}}          # Qwen's thinking mode returns nothing otherwise (pilot, s05)
+            "chat_template_kwargs": {"enable_thinking": thinking}}
+    if not thinking:
+        body["response_format"] = {"type": "json_object"}               # with thinking on, the JSON is parsed out of the answer instead
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {cfg.get('api_key') or 'EMPTY'}"}
     t0 = time.time()
     last = None
@@ -254,7 +259,7 @@ def parse_answer(txt, n_boxes):
     """The JSON in the model's answer; lenient about text around it. Returns the dict or None."""
     if not txt:
         return None
-    s = txt.strip()
+    s = re.sub(r"<think>.*?</think>", "", txt, flags=re.S).strip()
     s = re.sub(r"^```(?:json)?\s*|\s*```$", "", s)
     m = re.search(r"\{.*\}", s, re.S)
     if not m:
@@ -552,7 +557,7 @@ def issues_assembled(limit=None):
     return ids, meta
 
 
-def trial(n, workers):
+def trial(n, workers, redo=False, tag=None):
     load_pulp_env()
     ids, meta = issues_assembled(n)
     lc = local_cfg()
@@ -561,7 +566,7 @@ def trial(n, workers):
     results = {}
     t0 = time.time()
     with ThreadPoolExecutor(max_workers=workers) as ex:
-        futs = {ex.submit(link_issue, iid, meta[iid]): iid for iid in ids if not has(iid, "linked_llm")}
+        futs = {ex.submit(link_issue, iid, meta[iid]): iid for iid in ids if redo or not has(iid, "linked_llm")}
         for f in as_completed(futs):
             iid = futs[f]
             try:
@@ -570,7 +575,9 @@ def trial(n, workers):
                 log("s12", f"{iid}: FAILED {e}")
                 mark(iid, "linked_llm", fail=True, error=str(e)[:500])
     done = [r for r in results.values() if r]
-    rep = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "issues": len(ids), "done": len(done), "seconds": round(time.time() - t0, 1),
+    rep = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "tag": tag, "local_model": lc["model"], "thinking": bool(lc.get("thinking")),
+           "api_model": settings()["llm_link"]["escalate"]["model"], "thresholds": settings()["llm_link"]["thresholds"],
+           "issues": len(ids), "done": len(done), "seconds": round(time.time() - t0, 1),
            "pages": sum(r["pages"] for r in done), "boxes": sum(r["boxes"] for r in done),
            "api_pages": sum(r["api_pages"] for r in done), "flagged_pages": sum(r["flagged_pages"] for r in done),
            "cost_usd": round(sum(r["cost_usd"] for r in done), 3),
@@ -581,7 +588,7 @@ def trial(n, workers):
         rep["seconds_per_page"] = round(rep["seconds"] / max(1, rep["pages"]) * workers, 2)
         rep["escalation_share"] = round(rep["api_pages"] / max(1, rep["pages"]), 4)
         rep["flag_share"] = round(rep["flagged_pages"] / max(1, rep["pages"]), 4)
-    write_json_atomic(os.path.join(ROOT, "data", "corpus", "llm_link_trial.json"), rep)
+    write_json_atomic(os.path.join(ROOT, "data", "corpus", f"llm_link_trial{('_' + tag) if tag else ''}.json"), rep)
     log("s12", "trial: " + json.dumps({k: v for k, v in rep.items() if k != "spend_total"}))
     event("llm_link_trial", **{k: v for k, v in rep.items() if k != "spend_total"})
     return rep
@@ -625,6 +632,8 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="with --issue and --page: print the prompt, call nothing")
     ap.add_argument("--page", type=int, default=1)
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--redo", action="store_true", help="with --trial: run again over issues already linked (another model or setting)")
+    ap.add_argument("--tag", help="with --trial: a name for this trial's report (llm_link_trial_<tag>.json)")
     args = ap.parse_args()
     if args.selftest:
         selftest(); return
@@ -639,7 +648,7 @@ def main():
             link_issue(args.issue, m)
         return
     if args.trial:
-        trial(args.trial, args.workers or cfg["local"].get("concurrency", 4)); return
+        trial(args.trial, args.workers or cfg["local"].get("concurrency", 4), redo=args.redo, tag=args.tag); return
     sys.exit("pass --issue <id>, --trial N, or --selftest")
 
 
