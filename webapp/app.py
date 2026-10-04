@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.16.1"
+APP_VERSION = "0.16.2"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -146,7 +146,8 @@ def pages_of(iid):
     d = os.path.join(DATA, "pages", iid)
     if not os.path.isdir(d):
         return []
-    return sorted(f for f in os.listdir(d) if f.endswith(".png"))
+    # the pilot's working pages are PNG; the corpus downloader (s01c) writes JPEG
+    return sorted(f for f in os.listdir(d) if f.startswith("page_") and f.endswith((".png", ".jpg")))
 
 
 def stages_of(iid):
@@ -1762,6 +1763,8 @@ class H(BaseHTTPRequestHandler):
         (correct, only heavier)."""
         src = os.path.join(DATA, "pages", iid, f"page_{nn}.png")
         if not os.path.exists(src):
+            src = os.path.join(DATA, "pages", iid, f"page_{nn}.jpg")       # corpus issues (s01c)
+        if not os.path.exists(src):
             return self._send(404, "no image", "text/plain")
         cache = "private, max-age=86400"
         tp = os.path.join(DATA, "thumbs", iid, f"page_{nn}.jpg")
@@ -1834,6 +1837,10 @@ class H(BaseHTTPRequestHandler):
             p = os.path.join(DATA, "pages", m.group(1), f"page_{m.group(2)}.png")
             if os.path.exists(p):
                 return self._send(200, open(p, "rb").read(), "image/png",
+                                  cache="private, max-age=86400")
+            p = os.path.join(DATA, "pages", m.group(1), f"page_{m.group(2)}.jpg")   # corpus issues (s01c) at the same URL
+            if os.path.exists(p):
+                return self._send(200, open(p, "rb").read(), "image/jpeg",
                                   cache="private, max-age=86400")
             return self._send(404, "no image", "text/plain")
         m = re.fullmatch(r"/thumb/([\w\-]+)/page_(\d{4})\.jpg", path)

@@ -495,6 +495,8 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     Gold texts from Project Gutenberg → data/gold/<id>/.
     s01b_ia_pages   splits the Archive's text into pages using its
                     positional OCR (the plain text has no page breaks).
+                    Reads hOCR (the pilot's s01) or _djvu.xml (the
+                    corpus's s01c) — 2026-10-04.
     s02_layout_ocr  route A: Surya layout detection + region reading
                     → data/layout/<id>/page_NNNN.json (regions with
                     boxes, labels, text, reading order). Surya 0.22+
@@ -721,6 +723,55 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     reported as DIFFERS — the check's mistake, not the
                     records'; a path without a stamp now stops the script,
                     and the first line says which stamp it uses).
+
+## The corpus stages (Phase 0 and 1 of corpus-build-plan-2026-10-04; 2026-10-04)
+
+The run-book is docs/corpus-run.md: the stages, the space plan for the
+4 TB, the step-by-step run, the sandbox counts of 4 October, the
+duplicate rule and its known limits. In short:
+
+    corpus_lib        shared helpers: settings (config/corpus_settings.json),
+                      the issue list a stage reads (PULP_ISSUES, else the
+                      pilot list), the approval gate, the per-issue state
+                      files data/corpus/state/<id>.json (mark / has).
+    s00b_select       the archive's item list → config/corpus_issues.json
+                      (same shape as pilot_issues.json; generated on the
+                      server, not tracked by git), clause by clause, with
+                      the counts, every item's decision and reason, and
+                      the duplicate groups. --approve "Name" writes the
+                      tracked config/corpus_approval.json with the list's
+                      fingerprint; the stages refuse any other list.
+    s01c_fetch        the corpus downloader: 4 items at once, JP2 zip +
+                      archive text + _djvu.xml + scandata only, resumable,
+                      md5-checked, 429/Retry-After honoured, archive login
+                      cookies when `ia configure` has been run; JPEG
+                      working pages (2,200 px) and thumbnails in separate
+                      processes; masters kept zipped. --smoke <identifier>
+                      tests the machinery on one item outside the corpus.
+    s04b_lemma        spaCy en_core_web_sm 3.8.0 (pinned, checked): tags and
+                      lemmas aligned to the printed tokens, one gzipped
+                      JSONL per issue (data/text/<id>/lemma_routeA.jsonl.gz).
+    run_corpus        the orchestrator: download → image → read (one Surya
+                      worker per GPU, SURYA_INFERENCE_URL per server) →
+                      clean → lemma → assemble → cross-issue links per
+                      magazine; masters deleted once assembled; working
+                      images reaped under 400 GB free; progress.json every
+                      minute; a STOP file or Ctrl-C stops it, --run resumes.
+    scripts/corpus_reaper.py   the same space rules by hand.
+    docs/corpus-build-log.md   the dated build log for the data paper
+                      (Journal of Open Humanities Data) and the Zenodo
+                      deposit, and the list of the machine-written
+                      records: data/corpus/events.jsonl (every stage
+                      done or failed for every issue, every deletion,
+                      every run start, in time order), run_info.jsonl
+                      (host, git commit, tool versions, settings per
+                      start), the state files, the fetch manifest.
+
+The pilot stages s02, s04, s06, s08 and s01b now read their issue list
+through corpus_lib.issues_config() (the pilot list unless PULP_ISSUES
+is set), and s02 accepts JPEG working pages and the corpus state as
+proof that a download is complete. The site serves a corpus issue's
+JPEG pages at the same /img/<id>/page_NNNN.png URL (v0.16.2).
 
 ## The text-reuse pipeline (the r-series) and the reuse pages
 

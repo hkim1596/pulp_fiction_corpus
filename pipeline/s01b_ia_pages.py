@@ -3,8 +3,9 @@
 
 The plain _djvu.txt from these items carries no page separators (s04 saw
 "1 pages" per issue). IA's positional OCR (hOCR / chOCR, downloaded by s01 as
-data/raw/<id>/ia_hocr.html[.gz]) has explicit page divisions, so this stage
-parses it and writes the baseline as a normal per-page stage:
+data/raw/<id>/ia_hocr.html[.gz]; or _djvu.xml, downloaded by the corpus
+stage s01c as data/raw/<id>/ia_djvu.xml) has explicit page divisions, so this
+stage parses it and writes the baseline as a normal per-page stage:
 
     data/text/<id>/ia/page_NNNN.txt
 
@@ -79,35 +80,61 @@ def read_hocr(path):
     return p.result()
 
 
+def read_djvu_xml(path):
+    """The archive's _djvu.xml (what the corpus downloader fetches instead of hOCR): one OBJECT per page,
+    LINE and WORD elements inside. Streamed, so a 10 MB file costs little memory."""
+    import xml.etree.ElementTree as ET
+    pages = []
+    lines = None
+    for event, el in ET.iterparse(path, events=("start", "end")):
+        if event == "start" and el.tag == "OBJECT":
+            lines = []
+            pages.append(lines)
+        elif event == "end" and el.tag == "LINE" and lines is not None:
+            words = [(w.text or "").strip() for w in el.iter("WORD")]
+            words = [w for w in words if w]
+            if words:
+                lines.append(" ".join(words))
+            el.clear()
+        elif event == "end" and el.tag == "OBJECT":
+            el.clear()
+    return ["\n".join(ls) for ls in pages]
+
+
 def run_issue(iid):
     rawdir = os.path.join(ROOT, "data", "raw", iid)
     hocr = None
-    for cand in ("ia_hocr.html", "ia_hocr.html.gz"):
+    for cand in ("ia_hocr.html", "ia_hocr.html.gz", "ia_djvu.xml"):
         if os.path.exists(os.path.join(rawdir, cand)):
             hocr = os.path.join(rawdir, cand)
             break
     if not hocr:
-        print(f"[s01b] {iid}: no hOCR file — IA text stays single-block")
+        print(f"[s01b] {iid}: no hOCR or djvu.xml file — IA text stays single-block")
         return
     with stage_timer("s01b_ia_pages", iid):
-        pages = read_hocr(hocr)
+        pages = read_djvu_xml(hocr) if hocr.endswith(".xml") else read_hocr(hocr)
         outdir = os.path.join(ROOT, "data", "text", iid, "ia")
         os.makedirs(outdir, exist_ok=True)
         for i, text in enumerate(pages, 1):
             with open(os.path.join(outdir, f"page_{i:04d}.txt"), "w",
                       encoding="utf-8") as f:
                 f.write(text)
-    n_png = len(glob.glob(os.path.join(ROOT, "data", "pages", iid, "*.png")))
+    n_png = len(glob.glob(os.path.join(ROOT, "data", "pages", iid, "page_*.png"))) + len(glob.glob(os.path.join(ROOT, "data", "pages", iid, "page_*.jpg")))
     flag = "" if abs(len(pages) - n_png) <= 2 else \
         f"  (NOTE: {n_png} scan pages — check alignment)"
     print(f"[s01b] {iid}: {len(pages)} IA pages written{flag}")
 
 
 def main():
-    cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"),
-                         encoding="utf-8"))
+    import argparse
+    from corpus_lib import issues_config
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--issue", help="one issue id (default: every issue of the list)")
+    args = ap.parse_args()
+    cfg = issues_config()           # the pilot list, or PULP_ISSUES=config/corpus_issues.json
     for issue in cfg["issues"]:
-        run_issue(issue["id"])
+        if not args.issue or issue["id"] == args.issue:
+            run_issue(issue["id"])
 
 
 if __name__ == "__main__":

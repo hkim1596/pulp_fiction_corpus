@@ -7,9 +7,10 @@ returns, per page, labeled BLOCKS in reading order: label, bbox, html text,
 confidence. One pass gives layout + text + reading order together, so the
 old separate layout pass is gone.
 
-Input : data/pages/<id>/page_NNNN.png  (only issues whose s01 download is
-        CONFIRMED complete in data/raw/manifest.jsonl — a half-downloaded
-        issue is skipped with a message, never half-processed)
+Input : data/pages/<id>/page_NNNN.png or .jpg  (only issues whose download is
+        CONFIRMED complete — s01's data/raw/manifest.jsonl, or the corpus
+        state "imaged" written by s01c — a half-downloaded issue is skipped
+        with a message, never half-processed)
 Output: data/layout/<id>/page_NNNN.json  regions: label, bbox, order, text
         data/text/<id>/routeA/page_NNNN.txt  text in reading order,
         pictures and page furniture dropped
@@ -55,6 +56,15 @@ def surya_bin(name):
         return p
     cand = os.path.expanduser(f"~/.local/bin/{name}")
     return cand if os.path.exists(cand) else None
+
+
+def corpus_downloaded(iid):
+    """The corpus downloader's record (data/corpus/state/<id>.json has the stage 'imaged')."""
+    try:
+        from corpus_lib import has
+        return has(iid, "imaged")
+    except Exception:
+        return False
 
 
 def issues_download_complete():
@@ -165,14 +175,14 @@ def run_issue(iid, force=False):
     pages_dir = os.path.join(ROOT, "data", "pages", iid)
     if not os.path.isdir(pages_dir):
         print(f"[s02] {iid}: no pages on disk, run s01 first"); return
-    if not force and iid not in issues_download_complete():
+    if not force and iid not in issues_download_complete() and not corpus_downloaded(iid):
         print(f"[s02] {iid}: download not confirmed complete in the s01 "
-              f"manifest — skipped (use --force to override)"); return
+              f"manifest or the corpus state — skipped (use --force to override)"); return
     if os.path.exists(os.path.join(ROOT, "data", "text", iid, "routeA")) and not force:
         print(f"[s02] {iid}: routeA output already exists — skipped"); return
     if not surya_bin("surya_ocr"):
         sys.exit("surya not installed — run scripts/server_setup.sh")
-    n = len([f for f in os.listdir(pages_dir) if f.endswith(".png")])
+    n = len([f for f in os.listdir(pages_dir) if f.endswith((".png", ".jpg"))])
     work = os.path.join(ROOT, "data", "work_surya", iid)
     with stage_timer("s02_layout_ocr", iid, pages=n, extra={"route": "A"}):
         run_surya(pages_dir, work)
@@ -188,8 +198,8 @@ def main():
     ap.add_argument("--force", action="store_true",
                     help="process even without a completed-download record")
     args = ap.parse_args()
-    cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"),
-                         encoding="utf-8"))
+    from corpus_lib import issues_config
+    cfg = issues_config()           # the pilot list, or PULP_ISSUES=config/corpus_issues.json
     ids = [i["id"] for i in cfg["issues"]]
     if args.issue:
         ids = [args.issue]

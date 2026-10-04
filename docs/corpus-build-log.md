@@ -1,0 +1,96 @@
+# The corpus build log
+
+A dated record of how the corpus was built — every run, every count, every version, every decision — kept so
+that the database can be published (Zenodo) and described in a data paper for the Journal of Open Humanities Data
+(openhumanitiesdata.metajnl.com: 1,000–1,500 words; sections Overview — repository location, context; Method —
+steps, sampling strategy, quality control, constraints; Dataset description — object name, format names and
+versions, creation dates, dataset creators, language, license, repository name, publication date; Reuse
+potential). Heejin, 4 October 2026: "Just keep log of everything, so we can publish our database."
+
+Where the machine-written record is (all on the server under `data/corpus/` unless said otherwise):
+
+| file | what it holds |
+|---|---|
+| `data/survey/items.jsonl`, `enrich.jsonl` | every item of the archive's collection (28,411 on 4 October 2026) with the derived fields; the per-item metadata record (page count, OCR engine, detected language) |
+| `data/survey/selection.jsonl`, `selection_counts.json`, `duplicates.json` | every item's decision and reason under the selection rule; the counts per clause; the duplicate groups |
+| `config/corpus_issues.json` (archived as `pilot_export/p50_corpus_issues.json` in the Dropbox folder) | the issue list: id, archive identifier, magazine, cover date, year, genre, undated flag, page count in the record, alternates |
+| `config/corpus_approval.json` (git) | the approval: who, when, the list's SHA-256 fingerprint, the counts, the settings |
+| `config/corpus_settings.json` (git) | every setting the stages used, versioned |
+| `run_info.jsonl` | one record per start of the orchestrator: host, git commit, Python, the versions of surya-ocr, spaCy, the model, Pillow, torch; the settings; the approval |
+| `events.jsonl` | the chronological log: every stage finished or failed for every issue (with sizes, pages, seconds, errors), every deletion and why, every run start |
+| `state/<id>.json` | the same facts per issue: for the download the archive's file names, sizes and md5s, the archive's upload and change dates and OCR engine; for the imaging the page count, the master's pixel size, the nominal dpi; for the reading the pages and seconds; for the lemmas the token count; for the assembly the record counts |
+| `fetch_manifest.jsonl` | every file fetched from the archive (role, name, bytes, md5) and every issue event of the downloader |
+| `data/timings.jsonl` | one line per stage per issue: seconds and pages (the site's /timing page reads it) |
+| `data/raw/<id>/meta.json` | the archive's full item record as fetched (files, md5s, dates, uploader's metadata) |
+| `progress.json` | the running counts (rewritten every minute) |
+| `run.log` | the console output of the orchestrator (tee) |
+
+Code: github.com/hkim1596/pulp_fiction_corpus (public); the build runs from the commit recorded in `run_info.jsonl`.
+
+## Entries
+
+### 2026-10-04 — the selection rule and its counts (sandbox, survey of 4 October, no enrich records)
+
+Source: the Internet Archive collection `pulpmagazinearchive`, surveyed with `pipeline/s00_survey.py --run`
+(the collection's item list through the archive's search API; derived fields: language class, kind, genre,
+year, magazine name). Items: 28,411.
+
+The rule (`pipeline/s00b_select.py`, clauses in order; an item is set aside at the first clause it fails):
+1. language: marked English, or no language record — 22,448 (set aside 5,963);
+   1b. the archive's text detected as not English (from the enrich record; none in the sandbox) — 0;
+2. dated: a cover year from the date field, else the year field, else the title — 21,249 dated; 1,199 undated
+   are KEPT and flagged (out of the dated analyses);
+3. window 1890–1955 — 11,513 (set aside 9,736);
+4. kind: fiction magazine — 8,538 (set aside: comic magazine 337, dime novel 2,387, general-interest magazine
+   277 [subcollections libertymagazine, colliersmagazine, mccallsmagazine, mccluresmagazine], non-fiction
+   magazine 1,173);
+5. duplicates: one record per issue — 7,467 issues; 1,071 items are duplicate scans, kept as "alternates" of
+   the item with more pages (then the better archive text, then the earlier upload) and never downloaded.
+   Two items of one magazine are one issue when both carry a volume and number and they agree; or both carry a
+   whole number (#24) and it and the year agree; or the cover month agrees and is a real month (year-only records
+   never merge) and, where either carries a day, both do and agree; a month alone merges only magazines that are
+   not more than monthly (fewer than 15 distinct issues in every year). The cover month is read from the title
+   first, then from the archive's date field; a date field of January 1st counts as "year only" (258 of the
+   window's 01-01 dates stood under a title naming another month or season; 4,885 of 6,200 dated items carry
+   day 01). Undated among the 7,467: 604. Magazines (one key for spellings that differ only in "The" or
+   punctuation): 1,605. Page counts known for 2,701 issues (median 133); estimated pages 980,000.
+
+Known limits of the rule, recorded: the British and the American edition of a magazine with the same whole
+numbers merge under one magazine key (Zane Grey's Western Magazine, British Edition); an undated item is never
+merged; `format` (pulp or digest) is "unknown" for every issue because it cannot be read from the archive's
+records — the imaging step records the master's pixel size and nominal dpi for a later pass. The meeting deck of
+23 September 2026 counted 7,897 issues and 914 duplicates under the first rule (same magazine and cover month).
+
+Decided 4 October: the 604 undated items stay in the list (the protocol keeps them out of the dated analyses
+only) but are placed last in the download order; many are fan magazines of unknown date (collection
+pulp_misc_horror, uploads of 2017), to be judged later.
+
+### 2026-10-04 — the downloader and the imaging (sandbox tests)
+
+`pipeline/s01c_fetch.py`: four items at once (the archive's guidance for bots), per item the metadata record,
+`_djvu.txt`, `_djvu.xml`, `scandata.xml` and the `_jp2.zip` master (a PDF only when the item has no JP2 archive);
+resumable (HTTP Range); size and md5 checked against the item record; 429/503 honoured with Retry-After; six
+retries with growing waits; 1 s between files, 2 s between items per worker; User-Agent
+"pulp_fiction_corpus/1.0 (text-reuse study, KNU Digital Humanities Engineering Center; contact
+hkim1596@knu.ac.kr)". Masters kept zipped. Working images: JPEG, 2,200 px high (never upscaled), quality 90;
+thumbnails 300 px, quality 80. Measured: one item of 32 leaves, 16.6 MB, 21 s with the pauses; the transfer alone
+15 MB/s on a 37 MB file; imaging 0.36 s a page for 1,744 px masters, 1.2 s a page for 3,269 px masters.
+
+`pipeline/s04b_lemma.py`: spaCy 3.8.16, en_core_web_sm 3.8.0 (pinned and checked at start), parser and NER off;
+output per issue: text, lemma, part of speech, character offset for every token of the cleaned pages. 44,700
+tokens in 4 s. The rule lemmatizer is consistent, not always right ("riding" → "rid"); both sides of every
+comparison get the same treatment.
+
+`pipeline/run_corpus.py`: download → image → read (Surya 0.22, one worker per GPU) → clean (s04 rules) →
+lemma → assemble (s08 rules v2.3) → cross-issue links per magazine; the JP2 master deleted once its issue is
+assembled; working images of the oldest assembled issues deleted when free space falls under 400 GB. A
+two-issue trial of download and imaging through the orchestrator ran in 36 s; a restart found nothing to do.
+
+### 2026-10-04 — the green light
+
+Heejin: "I got the green light to go. Don't worry about the protocol anymore. Just keep log of everything, so
+we can publish our database and write in https://openhumanitiesdata.metajnl.com". The run starts with
+`pilot_export/p50_pastes.txt` (Dropbox). Every paste's output is appended here, with the date.
+
+(Next entries: the server's machine facts; the server's selection counts with the enrich records; the approval;
+the twenty-issue trial; the start of the run; the Surya server; the first progress reports.)

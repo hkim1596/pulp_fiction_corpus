@@ -5,3 +5,5 @@ secrets/
 data/*
 !data/reuse/
 data/reuse/**/*.npz
+# the corpus issue list is generated on the server (s00b) and archived in Dropbox; its approval file is tracked
+config/corpus_issues.json

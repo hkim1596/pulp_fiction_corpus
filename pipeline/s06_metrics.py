@@ -187,8 +187,8 @@ def main():
     say(f"[s06] rapidfuzz available: {HAVE_RF}"
         + ("" if HAVE_RF else " (long texts will be skipped with a note; "
            "pip install --user rapidfuzz)"))
-    cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"),
-                         encoding="utf-8"))
+    from corpus_lib import issues_config
+    cfg = issues_config()           # the pilot list, or PULP_ISSUES=config/corpus_issues.json
     report = {"issues": {}, "gold": {}}
     for issue in cfg["issues"]:
         iid = issue["id"]

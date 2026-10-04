@@ -254,7 +254,8 @@ def main():
     ap.add_argument("--src", default="ia", choices=["ia", "routeA", "routeB"],
                     help="which text stage to clean")
     args = ap.parse_args()
-    cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"), encoding="utf-8"))
+    from corpus_lib import issues_config
+    cfg = issues_config()           # the pilot list, or PULP_ISSUES=config/corpus_issues.json
     ids = [i["id"] for i in cfg["issues"]]
     if args.issue:
         ids = [args.issue]

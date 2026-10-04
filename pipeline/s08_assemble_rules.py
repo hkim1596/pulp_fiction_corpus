@@ -3084,7 +3084,8 @@ def main():
     if args.selftest:
         selftest()
         return
-    cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"), encoding="utf-8"))
+    from corpus_lib import issues_config
+    cfg = issues_config()           # the pilot list, or PULP_ISSUES=config/corpus_issues.json
     issues = {i["id"]: i for i in cfg["issues"]}
     if args.link_only:
         cross_issue(cfg)

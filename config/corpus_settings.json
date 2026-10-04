@@ -1,0 +1,133 @@
+{
+  "_comment": "Every setting the corpus stages use, in one place (corpus-build-plan-2026-10-04, Phase 0 item 13). Change here, never in code. Analysis settings (seed length, floors, grids) live in config/analysis_settings.json, written before the analysis, not here.",
+  "version": "1.0.0",
+  "selection": {
+    "collection": "pulpmagazinearchive",
+    "year_from": 1890,
+    "year_to": 1955,
+    "languages": [
+      "english",
+      "unmarked"
+    ],
+    "kinds_in": [
+      "fiction magazine"
+    ],
+    "general_interest_subcollections": [
+      "libertymagazine",
+      "colliersmagazine",
+      "mccallsmagazine",
+      "mccluresmagazine"
+    ],
+    "duplicate_rule": "same magazine; same volume+number, or same whole number in the same year, or same full date, or same cover month for magazines that are not more than monthly; year-only records never merge; the item with more pages is kept, the others are alternates",
+    "date_sources": [
+      "date",
+      "year",
+      "title"
+    ]
+  },
+  "download": {
+    "workers": 4,
+    "delay_between_files_s": 1.0,
+    "delay_between_items_s": 2.0,
+    "user_agent": "pulp_fiction_corpus/1.0 (text-reuse study, KNU Digital Humanities Engineering Center; contact hkim1596@knu.ac.kr)",
+    "files": [
+      "metadata",
+      "djvu_txt",
+      "djvu_xml",
+      "scandata",
+      "jp2_zip"
+    ],
+    "fallback_when_no_jp2": [
+      "pdf"
+    ],
+    "verify_md5": true,
+    "retry_max": 6,
+    "retry_backoff_s": [
+      30,
+      60,
+      120,
+      300,
+      600,
+      1200
+    ],
+    "honor_retry_after": true,
+    "daily_item_cap": 0,
+    "order": "magazine_then_date"
+  },
+  "images": {
+    "working_format": "jpg",
+    "working_height_px": 2200,
+    "jpeg_quality": 90,
+    "thumb_height_px": 300,
+    "thumb_quality": 80,
+    "processes": 6,
+    "keep_master_until": "assembled",
+    "keep_working_until": "frozen",
+    "min_free_gb": 400,
+    "reaper_order": "oldest_finished_first"
+  },
+  "reading": {
+    "engine": "surya",
+    "engine_version_pin": "0.22",
+    "workers": 2,
+    "servers": [],
+    "gpus": [
+      0,
+      1
+    ],
+    "retry_max": 2
+  },
+  "cleanup": {
+    "stage": "s04_rules",
+    "src": "routeA"
+  },
+  "lemma": {
+    "library": "spacy",
+    "model": "en_core_web_sm",
+    "model_version": "3.8.0",
+    "disable": [
+      "parser",
+      "ner"
+    ],
+    "batch_chars": 200000,
+    "processes": 8
+  },
+  "assembly": {
+    "engine": "s08_assemble_rules",
+    "rules_version": "2.3",
+    "cross_issue_pass": "per magazine, after all its issues are assembled"
+  },
+  "quality_score": {
+    "definition": "share of a story's tokens that are dictionary words (config/words.txt)",
+    "field": "ocr_quality"
+  },
+  "verification": {
+    "sample_issues": 150,
+    "strata": [
+      "decade",
+      "genre",
+      "format"
+    ],
+    "min_per_cell": 2,
+    "second_reader_share": 0.2,
+    "seed": 20261004
+  },
+  "control_set": {
+    "gutenberg_match": true,
+    "hand_regions": 300,
+    "strata": [
+      "decade",
+      "genre",
+      "ocr_engine"
+    ],
+    "seed": 20261004
+  },
+  "paths": {
+    "data_root": "data",
+    "corpus_state": "data/corpus/state",
+    "corpus_progress": "data/corpus/progress.json",
+    "masters": "data/masters",
+    "pages": "data/pages",
+    "thumbs": "data/thumbs"
+  }
+}
