@@ -38,6 +38,7 @@ import subprocess
 import sys
 import threading
 import time
+import types
 from collections import Counter, defaultdict
 from concurrent.futures import ProcessPoolExecutor
 
@@ -114,8 +115,22 @@ def read_issue(iid, server_url):
     if server_url:
         env["SURYA_INFERENCE_URL"] = server_url
     t0 = time.time()
-    r = subprocess.run([sys.executable, os.path.join(ROOT, "pipeline", "s02_layout_ocr.py"), "--issue", iid],
-                       env=env, cwd=ROOT, capture_output=True, text=True)
+    limit = settings()["reading"].get("issue_timeout_s", 3600)
+    import signal
+    # start_new_session: the subprocess and its surya child form their own process group (id = the child's pid),
+    # so a timeout can kill both and nothing else
+    proc = subprocess.Popen([sys.executable, os.path.join(ROOT, "pipeline", "s02_layout_ocr.py"), "--issue", iid],
+                            env=env, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
+    try:
+        out, err = proc.communicate(timeout=limit)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except Exception:
+            proc.kill()
+        proc.communicate()
+        raise RuntimeError(f"reading timed out after {limit} s (Read timed out)")        # "Read timed out" -> put back, not failed
+    r = types.SimpleNamespace(returncode=proc.returncode, stdout=out, stderr=err)
     out_dir = os.path.join(ROOT, "data", "text", iid, "routeA")
     n_pages = len([f for f in os.listdir(issue_dirs(iid)["pages"]) if f.endswith((".jpg", ".png"))])
     got = len([f for f in os.listdir(out_dir) if f.endswith(".txt")]) if os.path.isdir(out_dir) else 0
@@ -424,6 +439,8 @@ def run(args):
     queued_image, queued_post = set(), set()
     linked = set(s["stages"]["linked"]["magazine"] for s in states.values() if "linked" in s["stages"])
     last_progress = last_link = 0
+    last_read_done = time.time()
+    stall_noted = False
     min_free = st["images"]["min_free_gb"]
     try:
         while True:
@@ -461,6 +478,7 @@ def run(args):
             try:
                 while True:
                     kind, iid, rec, err = results.get_nowait()
+                    last_read_done = time.time()
                     if rec:
                         # the resume scan may have queued the issue already (the worker marks the state before it
                         # reports): then there is nothing to do — the stop of 4 October 18:52 was this case
@@ -481,10 +499,26 @@ def run(args):
                     log("run", f"{stage} failed {iid}: {str(err)[:300]}")
                 elif st["images"].get("keep_master_until", "assembled") == "assembled":
                     remove_master(iid)
-            # 5 every minute: progress, reaper, cross-issue links
+            # 5 every minute: progress, reaper, cross-issue links; the stall watch for the reading
             if time.time() - last_progress > 60:
                 states = all_states()
                 reap(states, min_free)
+                pending_read = [i["id"] for i in issues if "imaged" in states.get(i["id"], {"stages": {}})["stages"]
+                                and "read" not in states.get(i["id"], {"stages": {}})["stages"]]
+                if readers and pending_read and time.time() - last_read_done > 1200:
+                    srv_ok = all(server_healthy(u) for u in servers)
+                    if not stall_noted:
+                        log("run", f"reading stalled: no reading finished for 20 minutes with {len(pending_read)} issues waiting; "
+                                   f"server answering: {srv_ok}; the stacks of every thread go to run_faults.log")
+                        event("reading_stalled", pending=len(pending_read), server_ok=srv_ok)
+                        try:
+                            import faulthandler
+                            faulthandler.dump_traceback(file=open(os.path.join(ROOT, "data", "corpus", "run_faults.log"), "a"), all_threads=True)
+                        except Exception:
+                            pass
+                        stall_noted = True
+                else:
+                    stall_noted = False
                 if time.time() - last_link > 1800:
                     n = link_magazines(issues, states, linked)
                     if n:
@@ -588,6 +622,8 @@ if __name__ == "__main__":
         os.makedirs(os.path.join(ROOT, "data", "corpus"), exist_ok=True)
         _fault_file = open(os.path.join(ROOT, "data", "corpus", "run_faults.log"), "a")
         faulthandler.enable(file=_fault_file, all_threads=True)      # a crash of the interpreter itself leaves a trace
+        import signal
+        faulthandler.register(signal.SIGUSR1, file=_fault_file, all_threads=True)   # kill -USR1 <pid>: every thread's stack, for a look at a stuck run
     except Exception:
         pass
     try:

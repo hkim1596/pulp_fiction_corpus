@@ -145,12 +145,15 @@ def get_bytes(url, timeout=120):
             time.sleep(w)
 
 
-def download_file(url, dest, expect_size=None, expect_md5=None):
-    """Stream to dest.part, resuming with Range when a part exists; verify size/md5; rename to dest."""
+def download_file(url, dest, expect_size=None, expect_md5=None, max_tries=None):
+    """Stream to dest.part, resuming with Range when a part exists; verify size/md5; rename to dest.
+    Waits between tries follow settings.download.retry_backoff_s, capped at retry_wait_cap_s (300 s: a file the
+    archive keeps refusing must not hold a worker for half an hour); a 404 is final at once."""
     dl = settings()["download"]
     part = dest + ".part"
     os.makedirs(os.path.dirname(dest), exist_ok=True)
-    for attempt in range(dl["retry_max"] + 1):
+    tries = (max_tries or dl["retry_max"] + 1)
+    for attempt in range(tries):
         if stop_requested():
             raise Stop()
         have = os.path.getsize(part) if os.path.exists(part) else 0
@@ -192,16 +195,16 @@ def download_file(url, dest, expect_size=None, expect_md5=None):
             if e.code == 416:                           # range not satisfiable: the part is bad
                 if os.path.exists(part):
                     os.remove(part)
-            if attempt >= dl["retry_max"]:
+            if attempt >= tries - 1:
                 raise
-            w = retry_wait(attempt, e)
-            log("s01c", f"HTTP {e.code} on {url} — waiting {w}s (try {attempt + 1})")
+            w = min(retry_wait(attempt, e), dl.get("retry_wait_cap_s", 300))
+            log("s01c", f"HTTP {e.code} on {url} — waiting {w}s (try {attempt + 1} of {tries})")
             time.sleep(w)
         except Exception as e:
-            if attempt >= dl["retry_max"]:
+            if attempt >= tries - 1:
                 raise
-            w = retry_wait(attempt, e)
-            log("s01c", f"{type(e).__name__}: {e} on {url} — waiting {w}s (try {attempt + 1})")
+            w = min(retry_wait(attempt, e), dl.get("retry_wait_cap_s", 300))
+            log("s01c", f"{type(e).__name__}: {e} on {url} — waiting {w}s (try {attempt + 1} of {tries})")
             time.sleep(w)
 
 
@@ -263,7 +266,16 @@ def fetch_issue(issue, root=None):
         dest = dests[role]
         if os.path.exists(dest):
             got[role] = {"name": f["name"], "bytes": os.path.getsize(dest), "md5": f.get("md5")}; continue
-        n = download_file(f"{server}/{quote(f['name'])}", dest, int(f.get("size") or 0) or None, f.get("md5"))
+        try:
+            # the archive's text files are wanted, not essential: three tries, then the issue goes on without them
+            # (4 October: a worker sat 38 minutes on one scandata.xml the archive answered with HTTP 500 every time)
+            n = download_file(f"{server}/{quote(f['name'])}", dest, int(f.get("size") or 0) or None, f.get("md5"), max_tries=3)
+        except Stop:
+            raise
+        except Exception as e:
+            missing.append(f"{role} ({str(e)[:80]})")
+            manifest({"issue": iid, "ident": ident, "file": role, "name": f["name"], "missing": str(e)[:200]})
+            continue
         got[role] = {"name": f["name"], "bytes": n, "md5": f.get("md5")}
         manifest({"issue": iid, "ident": ident, "file": role, "name": f["name"], "bytes": n, "md5": f.get("md5")})
         time.sleep(dl["delay_between_files_s"])

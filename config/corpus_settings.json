@@ -52,7 +52,9 @@
     ],
     "honor_retry_after": true,
     "daily_item_cap": 0,
-    "order": "magazine_then_date"
+    "order": "magazine_then_date",
+    "retry_wait_cap_s": 300,
+    "_comment": "retry_backoff_s are the waits between tries, capped at retry_wait_cap_s; the archive's text files (djvu.txt, djvu.xml, scandata) get three tries and are then recorded as missing; the JP2 master gets retry_max+1 tries and its failure fails the issue."
   },
   "images": {
     "working_format": "jpg",
@@ -69,7 +71,7 @@
   "reading": {
     "engine": "surya",
     "engine_version_pin": "0.22",
-    "_comment": "One reading worker per URL in servers. Each URL is a Surya inference server (vLLM container) started by hand on its own GPU — docs/corpus-run.md, 'The reading servers': port 8020 on GPU 0 (Heejin, 4 October: 'Use only GPU 0. No GPU 2.'); 8022 on GPU 3 if Heejin frees it. PULP_SURYA_SERVERS in the environment overrides this list at run time (the pastes build it from the servers that answer). spawn_env is what a worker passes to Surya when servers is empty and Surya spawns its own server: VLLM_GPUS picks the card, VLLM_GPU_TYPE=h100 sizes the batches for an 80-97 GB card (surya's table has no entry for the RTX PRO 6000). A worker whose server stops answering waits for it and marks no issue failed.",
+    "_comment": "One reading worker per URL in servers. Each URL is a Surya inference server (vLLM container) started by hand on its own GPU — docs/corpus-run.md, 'The reading servers': port 8020 on GPU 0 (Heejin, 4 October: 'Use only GPU 0. No GPU 2.'); 8022 on GPU 3 if Heejin frees it. PULP_SURYA_SERVERS in the environment overrides this list at run time (the pastes build it from the servers that answer). spawn_env is what a worker passes to Surya when servers is empty and Surya spawns its own server: VLLM_GPUS picks the card, VLLM_GPU_TYPE=h100 sizes the batches for an 80-97 GB card (surya's table has no entry for the RTX PRO 6000). A worker whose server stops answering waits for it and marks no issue failed. SURYA_INFERENCE_PARALLEL=32 keeps two workers' requests (64) under the server's 104 sequences; with the default (96 each) the clients hung after their first batch on 4 October.",
     "servers": [
       "http://127.0.0.1:8020/v1"
     ],
@@ -78,9 +80,11 @@
     ],
     "spawn_env": {
       "VLLM_GPUS": "0",
-      "VLLM_GPU_TYPE": "h100"
+      "VLLM_GPU_TYPE": "h100",
+      "SURYA_INFERENCE_PARALLEL": "32"
     },
-    "retry_max": 2
+    "retry_max": 2,
+    "issue_timeout_s": 3600
   },
   "cleanup": {
     "stage": "s04_rules",

@@ -230,4 +230,44 @@ server's ~/shared/khj/.pulp_env; the key begins sk-ant-a…), with PULP_CLAUDE_M
 choice for s05). The box-linking stage reads ANTHROPIC_API_KEY from the same file; its model is set in
 config/corpus_settings.json (llm_link.escalate.model), not by PULP_CLAUDE_MODEL.
 
-(Next entries: the restart on p50f; the lane on GPU 2; the trial's report.)
+### 2026-10-04, 21:03 KST — the restart on p50f; the reading had not moved for an hour
+
+PASTE 7f (commit 260c781) and 7g: the stuck orchestrator ended by name, two failure marks cleared, the run
+restarted at 21:03 on p50f; the first status ticks every minute again (downloaded 96, imaged 95, read 12,
+assembled 12 at 21:04). Seen in the log: between the restart of 20:06 and the end at 21:03 no issue was read
+(read stayed at 12, pages read at 982) although the two reading workers were alive and waiting for their
+subprocesses — the reading server or the surya client had stalled; the subprocesses were ended with the
+orchestrator. PASTE 7h checks whether the reading moves now (read events by time, the subprocesses' age, the
+server's throughput lines and errors, GPU 0); PASTE 7i restarts the reading server if not — the workers put
+their issue back and wait for the server, so the orchestrator itself is not touched.
+
+### 2026-10-04, 21:22 KST — the reading check (PASTE 7h): the server idle, no reading subprocess, downloads held by refused files
+
+The reading server was healthy and idle (its last requests at 20:09, a burst answered at 2,903 tokens a second,
+then "Running: 0 reqs"); no s02 subprocess existed at 21:22, nineteen minutes after the restart; no
+"reading_server_down" event; GPU 0 at 94 GB with the vLLM engine (83 GB), the stylometry process (1.6 GB) and the
+other python process (9.4 GB). So between 20:06 and 21:03 the two s02 clients sent one batch of requests, got
+their answers, and then hung; after 21:03 the workers started no reading at all — the stacks of the threads
+(PASTE 7k) will say where they wait. Meanwhile the downloads: three of the four download workers were sitting in
+long waits (up to 1,200 s, try 6) on files the archive answers with HTTP 500 every time (a scandata.xml, a
+djvu.xml, a jp2.zip), so "downloaded" stood at 96 for forty minutes. Changes (p50g): the archive's text files get
+three tries and are then recorded as missing (the issue goes on with its master); waits are capped at 300 s; a
+request limit of 32 per reading worker (two workers, 64 requests, under the server's 104 sequences — the
+default, 96 each, is the suspect for the hang); `kill -USR1 <pid>` writes every thread's stack to
+run_faults.log.
+
+### 2026-10-04, 21:56 KST — the reading moved again after a restart; the stuck state recorded (PASTE 7k)
+
+Before the restart the 21:03 process had 123 issues in its reading queue, ten threads alive, no thread error in
+the console log, no reading finished — the two reading workers sat idle with a healthy server; why is not yet
+known. The restart at 21:56 (still p50f: the p50g files had not reached the clone, the device link being down)
+read three issues in four minutes (21:56, 21:58, 22:00; 200 requests to the server in four minutes; two s02
+processes alive). The paste then sent USR1 to the new process, which on the p50f code has no handler and ends
+the process — my mistake: the paste should have checked the code version first. The run therefore needs PASTE
+7l after PASTE 7j. p50g adds, besides the download policy and the 32-request limit: a reading that takes longer
+than settings.reading.issue_timeout_s (3,600 s) is killed with its surya child (its own process group) and put
+back; a stall watch in the main loop — no reading finished for 20 minutes while readings wait and the server
+answers — writes every thread's stack to run_faults.log and an event "reading_stalled", so the next stuck
+state explains itself.
+
+(Next entries: the run on p50g; the lane on GPU 2; the trial's report.)
