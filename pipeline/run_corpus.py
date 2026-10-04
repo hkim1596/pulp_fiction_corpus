@@ -317,7 +317,7 @@ def progress(issues, states, started, extra=None):
     rec = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "issues": len(issues), "done": dict(c), "pages": dict(pages),
            "given_up": dict(failed), "per_hour_since_start": {k: round(v, 1) for k, v in rate.items()},
            "hours_left_at_this_rate": eta, "free_gb": round(free_gb(), 1),
-           "disk_gb": {k: round(v, 1) for k, v in disk_use().items()}, "process_started": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(started)),
+           "disk_gb": disk_use(), "process_started": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(started)),
            "stop_file": os.path.exists(STOP_FILE)}
     if extra:
         rec.update({k: v for k, v in extra.items() if k != "base"})
@@ -325,22 +325,44 @@ def progress(issues, states, started, extra=None):
     return rec
 
 
+_DISK = {"ts": None, "gb": {}}
+
+
 def disk_use():
+    """The cached directory sizes, measured by a background thread every half hour (never in the main loop: on
+    4 October seven `du` calls per minute over a growing tree stalled the loop for minutes at a time — the
+    reported 0.0 sizes were their timeouts — and a STOP took longer than 25 minutes to be noticed)."""
+    return dict(_DISK["gb"], as_of=_DISK["ts"])
+
+
+def _measure_disk():
     out = {}
     for k in ("masters", "pages", "thumbs"):
-        p = os.path.join(ROOT, settings()["paths"][k])
-        out[k] = du(p) / 1e9
+        out[k] = round(du(os.path.join(ROOT, settings()["paths"][k])) / 1e9, 1)
     for k in ("raw", "layout", "text", "assembly_v2"):
-        out[k] = du(os.path.join(ROOT, "data", k)) / 1e9
-    return out
+        out[k] = round(du(os.path.join(ROOT, "data", k)) / 1e9, 1)
+    _DISK["gb"] = out
+    _DISK["ts"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+
+
+def disk_thread():
+    while not STOP_WORKERS.is_set():
+        try:
+            _measure_disk()
+        except Exception:
+            pass
+        for _ in range(180):                       # 30 minutes, checked every 10 s so the thread ends with the run
+            if STOP_WORKERS.is_set():
+                return
+            time.sleep(10)
 
 
 def du(path):
-    """Fast directory size via the system `du` (Python's walk is slow over a million files)."""
+    """Directory size via the system `du`, at the lowest disk priority; 0 when it takes longer than 20 minutes."""
     if not os.path.isdir(path):
         return 0
     try:
-        r = subprocess.run(["du", "-sb", path], capture_output=True, text=True, timeout=600)
+        r = subprocess.run(["nice", "-n", "19", "ionice", "-c", "3", "du", "-sb", path], capture_output=True, text=True, timeout=1200)
         return int(r.stdout.split()[0])
     except Exception:
         return 0
@@ -395,6 +417,7 @@ def run(args):
             t.start(); readers.append(t)
     queued_read = set()
 
+    threading.Thread(target=disk_thread, daemon=True).start()
     image_pool = ProcessPoolExecutor(max_workers=st["images"].get("processes", 4))
     post_pool = ProcessPoolExecutor(max_workers=st["lemma"].get("processes", 4))
     image_futs, post_futs = {}, {}

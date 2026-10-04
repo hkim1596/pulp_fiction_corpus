@@ -215,4 +215,19 @@ platform.claude.com on 4 October 2026: claude-opus-5-5 $4/$20, claude-fable-5-1 
 $2/$10 per million tokens. PASTE 8a reads the lab's own lane configuration (image, model, mounts) so the GPU 2
 lane uses a model already on the machine.
 
-(Next entries: the fix on the server; the lane on GPU 2; the trial's report.)
+### 2026-10-04, 20:30 KST — the fix on the server (p50e, commit dd8c5bb); a STOP that was not noticed
+
+PASTE 7c put p50e on the server. PASTE 7d touched the STOP file and waited 25 minutes: the orchestrator (p50d
+code) did not end. The cause is in the same main loop: progress() ran seven `du -sb` calls a minute over the
+growing data tree, each allowed 600 s; on this disk they took minutes (the 0.0 directory sizes in the first
+STATUS were their timeouts), so the loop stalled between ticks and the STOP file went unread. Fixed (p50f):
+the sizes are measured by a background thread every half hour at the lowest disk priority (`nice`, `ionice`),
+never in the loop. PASTE 7g ends the stuck process (tmux session, then the orchestrator and its reading
+subprocesses by name) and restarts on p50f; an issue mid-reading is read again from the start.
+
+The Anthropic API key: saved since 20 August 2026 in the Dropbox folder, secrets/pulp_env.txt (a mirror of the
+server's ~/shared/khj/.pulp_env; the key begins sk-ant-a…), with PULP_CLAUDE_MODEL=claude-h… (Haiku, the pilot's
+choice for s05). The box-linking stage reads ANTHROPIC_API_KEY from the same file; its model is set in
+config/corpus_settings.json (llm_link.escalate.model), not by PULP_CLAUDE_MODEL.
+
+(Next entries: the restart on p50f; the lane on GPU 2; the trial's report.)
