@@ -112,13 +112,22 @@ issues; 1,071 duplicate scans as alternates; 589 undated; 1,582 magazines. md5 o
 10bc79121c3405d6b1257d405d8e0f6a. The differences from the sandbox (7,467) come from the enrich records
 (detected language, page counts) and one item fewer in the collection.
 
-Settings for the run (p50b): 12 imaging and 12 lemma processes; one reading server per card (vLLM container
-with surya's own command; VLLM_GPU_TYPE h100: 104 sequences, 16,384 batched tokens, 85% of the card's memory):
-port 8020 on GPU 0 (the other project gave it up later the same evening), 8021 on GPU 2, and 8022 on GPU 3 when
-Heejin frees it. Expected at the pilot's speed of 0.92 s a page on one card (1,286 pages in 1,183 s on
-20 August 2026, 24 GB batch settings): about 980,000 pages → ten days on one card, five on two, three and a half
-on three; the larger batch settings should shorten that. The download (about 0.7 TB) takes about a day; imaging
-keeps pace. A reading worker whose server stops answering waits and marks nothing failed.
+Settings for the run (p50b, p50c): 12 imaging and 12 lemma processes; the reading server a vLLM container
+started with surya's own command (VLLM_GPU_TYPE h100: 104 sequences, 16,384 batched tokens, 85% of the card's
+memory) on port 8020 on GPU 0 — the other project gave up GPU 0 later the same evening, and Heejin decided
+"Use only GPU 0. No GPU 2."; a second server on GPU 3 (port 8022) only if he frees it. The CHECK of 17:55 KST:
+GPU 0 1,651 MiB used (a small process of the stylometry project), GPU 1 89,423 MiB (vllm-qwen3-14b, port 8004),
+GPU 2 575 MiB, GPU 3 89,061 MiB at 100% (vllm-9b-gpu3, port 8006). Expected at the pilot's speed of 0.92 s a
+page on one card (1,286 pages in 1,183 s on 20 August 2026, 24 GB batch settings): about 980,000 pages → ten
+days on one card; the larger batch settings should shorten that. The download (about 0.7 TB) takes about a
+day; imaging keeps pace. A reading worker whose server stops answering waits and marks nothing failed.
+
+### 2026-10-04, 17:56 KST — the list approved
+
+PASTE 3 (Mac): config/corpus_issues.json and selection_counts.json copied from the server;
+`s00b_select.py --approve "Heejin Kim"` wrote config/corpus_approval.json: 7,440 issues, fingerprint
+a8a60adbbe26…; commit af5562a pushed and pulled on the server. The approved list is archived as
+pilot_export/p50_corpus_issues.json (Dropbox) with p50_selection_counts.json.
 
 (Next entries: the approval; the twenty-issue trial; the reading server; the start of the run; the first
 progress reports.)

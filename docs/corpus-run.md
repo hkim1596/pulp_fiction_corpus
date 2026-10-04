@@ -87,12 +87,14 @@ data/masters` before a download; the stages follow the link.) The reaper measure
    `settings.reading.servers`, or from the environment variable PULP_SURYA_SERVERS (comma-separated), one worker
    per URL; `settings.reading.spawn_env` is what a worker passes to surya when there is no URL. On 4 October
    GPUs 0, 1 and 3 held about 89–90 GB each (other models; GPU 3 is Heejin's own) and GPU 2 was empty; the
-   same evening the other project gave up GPU 0, so the run starts on two cards: port 8020 on GPU 0 and 8021 on
-   GPU 2 (PASTE 4b starts a server only on a card holding less than 10 GB, so it is safe to run blind). A third
-   server on GPU 3 (port 8022) comes when Heejin frees it (PASTE 6: start the server, STOP the run, start it
-   again; PASTE 5 and 6 build the server list from the ports that answer). A worker whose server stops
-   answering waits for it, puts the issue in hand back and marks nothing failed (events "reading_server_down",
-   "reading_server_error" in events.jsonl).
+   same evening the other project gave up GPU 0 and Heejin decided "Use only GPU 0. No GPU 2.", so the run
+   reads on one card: port 8020 on GPU 0 (PASTE 4b refuses to start a server on a card holding 10 GB or more).
+   A second server on GPU 3 (port 8022) comes if Heejin frees it (PASTE 6: start the server, STOP the run,
+   start it again; PASTE 5 and 6 build the server list from the ports that answer). A worker whose server
+   stops answering waits for it, puts the issue in hand back and marks nothing failed (events
+   "reading_server_down", "reading_server_error" in events.jsonl). GPUs 1 and 3 hold two vLLM lanes of other
+   work (vllm-qwen3-14b on port 8004, vllm-9b-gpu3 on port 8006); a small process of Heejin's stylometry
+   project holds about 0.5 GB on every card and 1.6 GB on GPU 0 — harmless.
 6. The run, in tmux so it survives the login: `tmux new -s corpus` then
    `python3 pipeline/run_corpus.py --run 2>&1 | tee -a data/corpus/run.log`. Detach with Ctrl-B D.
 7. Watching: `python3 pipeline/run_corpus.py --status` (counts per stage, pages read, rates since the process
