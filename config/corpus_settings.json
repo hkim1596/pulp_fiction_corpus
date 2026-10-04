@@ -143,12 +143,13 @@
     "_comment": "s12_llm_link: the box-linking stage (Heejin, 4 October 2026). local = the vLLM lane on GPU 2 (PASTE 8b starts it; model and port filled in from the lab's own lane configuration); escalate = the Claude API with the page image (model ids and prices from platform.claude.com/docs/en/models/overview on 4 October 2026: claude-opus-5-5 $4/$20 per million tokens in/out, claude-fable-5-1 $10/$50, claude-sonnet-5-5 $2/$10); thresholds = below accept_local a page goes to the API, below accept_api it is flagged for a person; the trial sets them.",
     "local": {
       "base_url": "http://127.0.0.1:8023/v1",
-      "model": "TO-BE-FILLED-FROM-PASTE-8A",
+      "model": "qwen3-14b",
       "api_key": "EMPTY",
       "concurrency": 6,
       "max_tokens": 1500,
       "temperature": 0,
-      "timeout_s": 300
+      "timeout_s": 300,
+      "_comment": "the lane on GPU 2 (PASTE 8b): vllm/vllm-openai:latest serving the lab's own copy of Qwen3-14B at /home/tailab/shared/models/qwen3-14b, port 8023, 80% of the card; PULP_LLM_BASE_URL and PULP_LLM_MODEL in the environment override these two for a trial of another lane or model (the lab also has qwen3.5-9b)"
     },
     "escalate": {
       "provider": "anthropic",

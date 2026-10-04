@@ -270,4 +270,16 @@ back; a stall watch in the main loop — no reading finished for 20 minutes whil
 answers — writes every thread's stack to run_faults.log and an event "reading_stalled", so the next stuck
 state explains itself.
 
-(Next entries: the run on p50g; the lane on GPU 2; the trial's report.)
+### 2026-10-04, 22:05 KST — the run on p50g (commit a18d083); the lab's lanes read (PASTE 8a)
+
+PASTE 7j and 7l: p50g on the server, the run restarted at 22:05 with two reading workers at 32 requests each;
+a reading finished at 22:05 and two s02 processes were three minutes old at the check. PASTE 8a: the lab's two
+lanes are vllm/vllm-openai:latest serving Qwen3-14B (GPU 1, port 8004, from /home/tailab/shared/models/qwen3-14b,
+32,768 context, thinking parser on) and qwen3.5-9b (GPU 3, port 8006); the Hugging Face cache holds smaller
+models only (Qwen2.5-7B-Instruct, gpt-oss-20b, Llama-2-7b, BERT variants, surya-ocr-2); GPU 2 held 4,583 MiB
+(the stylometry job's share grows there too); the Anthropic key is in the server's environment file. Decision:
+the box-linking lane on GPU 2 serves the lab's own copy of Qwen3-14B (container pulp-llm-8023, port 8023, 80% of
+the card, 64 sequences, thinking off per request, JSON answers enforced); qwen3.5-9b stays available for a
+comparison through the PULP_LLM_MODEL/PULP_LLM_BASE_URL overrides.
+
+(Next entries: the lane up; the first issue through the three tiers; the trial's report.)

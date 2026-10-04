@@ -167,6 +167,17 @@ def _post_json(url, body, headers, timeout):
         return json.loads(r.read().decode("utf-8"))
 
 
+def local_cfg():
+    """settings.llm_link.local, with PULP_LLM_BASE_URL / PULP_LLM_MODEL from the environment on top (a trial of
+    another lane or model without touching the tracked settings file on the server)."""
+    cfg = dict(settings()["llm_link"]["local"])
+    if os.environ.get("PULP_LLM_BASE_URL"):
+        cfg["base_url"] = os.environ["PULP_LLM_BASE_URL"]
+    if os.environ.get("PULP_LLM_MODEL"):
+        cfg["model"] = os.environ["PULP_LLM_MODEL"]
+    return cfg
+
+
 def ask_local(user_text, cfg):
     """The local lane: an OpenAI-style chat endpoint (vLLM). Returns (text, usage, seconds)."""
     body = {"model": cfg["model"], "temperature": cfg.get("temperature", 0), "max_tokens": cfg.get("max_tokens", 1500),
@@ -330,9 +341,10 @@ def link_issue(iid, meta, dry_run_page=None, log_fn=None):
         # tier 1: the local lane
         ans = None
         try:
-            txt, usage, secs = ask_local(prompt, cfg["local"])
+            lc = local_cfg()
+            txt, usage, secs = ask_local(prompt, lc)
             ans = parse_answer(txt, n_boxes)
-            rec["local"] = {"model": cfg["local"]["model"], "seconds": secs, "usage": usage, "parsed": ans is not None}
+            rec["local"] = {"model": lc["model"], "seconds": secs, "usage": usage, "parsed": ans is not None, "raw": None if ans else txt[:600]}
         except Exception as e:
             rec["local"] = {"error": str(e)[:300]}
         tier = "local"
@@ -543,7 +555,9 @@ def issues_assembled(limit=None):
 def trial(n, workers):
     load_pulp_env()
     ids, meta = issues_assembled(n)
-    log("s12", f"trial on {len(ids)} assembled issues, {workers} at a time; budget ${settings()['llm_link']['escalate']['budget_usd']}")
+    lc = local_cfg()
+    log("s12", f"trial on {len(ids)} assembled issues, {workers} at a time; local {lc['model']} at {lc['base_url']}; "
+               f"api {settings()['llm_link']['escalate']['model']}; budget ${settings()['llm_link']['escalate']['budget_usd']}")
     results = {}
     t0 = time.time()
     with ThreadPoolExecutor(max_workers=workers) as ex:
