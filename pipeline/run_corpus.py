@@ -433,16 +433,20 @@ def run(args):
                 if rec and readers and iid not in queued_read:
                     read_q.put(iid); queued_read.add(iid)
                 elif err:
-                    log("run", f"imaging failed {iid}: {err}")
+                    log("run", f"imaging failed {iid}: {str(err)[:300]}")
             # 3 reading done
             try:
                 while True:
                     kind, iid, rec, err = results.get_nowait()
-                    if rec and iid not in queued_post:
-                        post_futs[post_pool.submit(_post_job, iid, meta[iid])] = iid
-                        queued_post.add(iid)
+                    if rec:
+                        # the resume scan may have queued the issue already (the worker marks the state before it
+                        # reports): then there is nothing to do — the stop of 4 October 18:52 was this case
+                        # falling into the failure branch with err=None
+                        if iid not in queued_post:
+                            post_futs[post_pool.submit(_post_job, iid, meta[iid])] = iid
+                            queued_post.add(iid)
                     else:
-                        log("run", f"reading failed {iid}: {err[:300]}")
+                        log("run", f"reading failed {iid}: {str(err)[:300]}")
             except queue.Empty:
                 pass
             # 4 post-processing done -> masters go
@@ -451,7 +455,7 @@ def run(args):
                 _iid, stage, err = f.result()
                 queued_post.discard(iid)
                 if err:
-                    log("run", f"{stage} failed {iid}: {err[:300]}")
+                    log("run", f"{stage} failed {iid}: {str(err)[:300]}")
                 elif st["images"].get("keep_master_until", "assembled") == "assembled":
                     remove_master(iid)
             # 5 every minute: progress, reaper, cross-issue links

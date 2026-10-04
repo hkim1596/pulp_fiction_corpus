@@ -190,4 +190,29 @@ done twice). Change made at once (p50d): the orchestrator now writes its own log
 and a crash note (run_crash.log; run_faults.log for a crash of the interpreter itself) that do not depend on the
 console pipe, and logs its own end.
 
-(Next entries: the cause of the stop; the restart; the next STATUS.)
+### 2026-10-04, 20:05 KST — the cause of the stop; the restart (PASTE 7a, 7b)
+
+The console log held the traceback the pane had scrolled past: `run_corpus.py` line 445, `log("run", f"reading
+failed {iid}: {err[:300]}")`, TypeError on None — a reading result had arrived for an issue the resume scan had
+already queued for post-processing (the worker marks the state file before it reports), the code fell into the
+failure branch with no error text, and the orchestrator died at 18:51:10. Fixed (p50e): a result for an
+already-queued issue is simply skipped. Also in the log: two issues whose imaging failed with "broken data
+stream when reading image file" (a_fighting_man_of_mars_1931, a_town_is_drowning_1955) — a JP2 leaf Pillow
+cannot decode; from p50e such a leaf becomes a blank page recorded in the state (bad_leaves) and
+`s01c_fetch.py --repair` re-renders it from the archive's PDF (the PDF holds the leaves marked
+addToAccessFormats in scandata.xml, in order). Python on the server is 3.10.12; no memory pressure (45 GB of
+503 used); no kernel kill. Restarted at 20:05 with the p50d code (crash notes to a file) — the race could
+recur until p50e is on the server (PASTE 7c, 7d). Progress at the restart: downloaded 89, imaged 83, read 12,
+assembled 12.
+
+### 2026-10-04, evening — the box-linking stage designed and built (s12_llm_link)
+
+Heejin: a language model is to decide, box by box after the layout detection, what continues what; the local
+model first, the Claude API (Fable or Opus) when it is unsure, a person when it is still unsure; GPU 2 for the
+local lane; a trial first. Built in the sandbox with a self-test (prompt, answer parsing, record building,
+comparison with the rules): docs/corpus-run.md, "The box-linking stage". Model ids and prices from
+platform.claude.com on 4 October 2026: claude-opus-5-5 $4/$20, claude-fable-5-1 $10/$50, claude-sonnet-5-5
+$2/$10 per million tokens. PASTE 8a reads the lab's own lane configuration (image, model, mounts) so the GPU 2
+lane uses a model already on the machine.
+
+(Next entries: the fix on the server; the lane on GPU 2; the trial's report.)

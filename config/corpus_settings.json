@@ -134,5 +134,41 @@
     "masters": "data/masters",
     "pages": "data/pages",
     "thumbs": "data/thumbs"
+  },
+  "llm_link": {
+    "_comment": "s12_llm_link: the box-linking stage (Heejin, 4 October 2026). local = the vLLM lane on GPU 2 (PASTE 8b starts it; model and port filled in from the lab's own lane configuration); escalate = the Claude API with the page image (model ids and prices from platform.claude.com/docs/en/models/overview on 4 October 2026: claude-opus-5-5 $4/$20 per million tokens in/out, claude-fable-5-1 $10/$50, claude-sonnet-5-5 $2/$10); thresholds = below accept_local a page goes to the API, below accept_api it is flagged for a person; the trial sets them.",
+    "local": {
+      "base_url": "http://127.0.0.1:8023/v1",
+      "model": "TO-BE-FILLED-FROM-PASTE-8A",
+      "api_key": "EMPTY",
+      "concurrency": 6,
+      "max_tokens": 1500,
+      "temperature": 0,
+      "timeout_s": 300
+    },
+    "escalate": {
+      "provider": "anthropic",
+      "model": "claude-opus-5-5",
+      "alternative_model": "claude-fable-5-1",
+      "with_image": true,
+      "image_height_px": 1400,
+      "max_tokens": 1500,
+      "timeout_s": 180,
+      "budget_usd": 50,
+      "price_in_per_mtok": 4.0,
+      "price_out_per_mtok": 20.0
+    },
+    "thresholds": {
+      "accept_local": 0.85,
+      "accept_api": 0.8
+    },
+    "context": {
+      "text_head_chars": 350,
+      "text_tail_chars": 250,
+      "prev_page_tail_chars": 400
+    },
+    "trial": {
+      "issues": 100
+    }
   }
 }

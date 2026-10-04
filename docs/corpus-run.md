@@ -42,13 +42,13 @@ The peak is far below 4 TB because nothing is kept that can be re-fetched:
 | what | size for the whole corpus | kept until |
 |---|---|---|
 | JP2 masters (zipped) | ~0.7 TB if all were on disk at once | the issue is assembled, then deleted (`images.keep_master_until`) |
-| working JPEG pages 2,200 px | ~0.45 TB | the corpus is frozen (`images.keep_working_until`); earlier only if free space falls under `images.min_free_gb` (400 GB), oldest assembled issues first |
+| working JPEG pages 2,200 px | ~0.9 TB (measured 4 October: about 0.9 MB a page at quality 90) | the corpus is frozen (`images.keep_working_until`); earlier only if free space falls under `images.min_free_gb` (400 GB), oldest assembled issues first |
 | thumbnails 300 px | ~25 GB | always |
 | archive text + positional OCR + scandata | ~25 GB | always |
 | layout JSON, Surya text, cleaned text, lemmas, assembly | ~40 GB | always |
 
-Because the download runs days ahead of the reading, most masters will sit on disk at once (~0.7 TB) next to the
-working pages (~0.45 TB): about 1.2 TB at the peak. /mnt/sdb turned out not to be writable by our account
+Because the download runs days ahead of the reading, most masters will sit on disk at once (~0.5–0.7 TB) next
+to the working pages (~0.9 TB): about 1.5 TB at the peak. /mnt/sdb turned out not to be writable by our account
 (PASTE 2, 4 October), so everything stays on /mnt/sda, which had 2.7 TB free that day — enough with room to
 spare. (If /mnt/sdb is ever opened to us: `mkdir -p /mnt/sdb/pulp_masters && ln -s /mnt/sdb/pulp_masters
 data/masters` before a download; the stages follow the link.) The reaper measures free space on `data/`
@@ -92,7 +92,10 @@ data/masters` before a download; the stages follow the link.) The reaper measure
    A second server on GPU 3 (port 8022) comes if Heejin frees it (PASTE 6: start the server, STOP the run,
    start it again; PASTE 5 and 6 build the server list from the ports that answer). A worker whose server
    stops answering waits for it, puts the issue in hand back and marks nothing failed (events
-   "reading_server_down", "reading_server_error" in events.jsonl). GPUs 1 and 3 hold two vLLM lanes of other
+   "reading_server_down", "reading_server_error" in events.jsonl). Measured on the first issue (4 October):
+   158 pages in 165 s, 1.04 s a page, with the client process busy for 119 s of CPU — the client, not the card,
+   is the limit, so PASTE 5 lists the server twice and two reading workers share it (the vLLM server queues
+   what it cannot batch); if the first STATUS shows no gain over one worker, list it once. GPUs 1 and 3 hold two vLLM lanes of other
    work (vllm-qwen3-14b on port 8004, vllm-9b-gpu3 on port 8006); a small process of Heejin's stylometry
    project holds about 0.5 GB on every card and 1.6 GB on GPU 0 — harmless.
 6. The run, in tmux so it survives the login: `tmux new -s corpus` then
@@ -136,6 +139,32 @@ merge (Zane Grey's Western, British Edition — both editions are in the list un
 item is never merged; `format` is "unknown" for every issue because pulp or digest cannot be read from the
 archive's records — the imaging step records the master's pixel size and the nominal dpi, and a later pass can set
 the format from the measured trim size (the dpi values are unreliable: one 1904 weekly claims 96 dpi).
+
+## The box-linking stage (s12_llm_link), decided 4 October
+
+Heejin: "After layout detection let the high performance LLM read the content and decide whether a box is
+connected to the next one or not. If the local LLM is not sure about it, let it use Fable or Opus API. If it is
+still uncertain let it flag it and a human solve the case. Let's have this system built." — "Use GPU 2. trial
+first."
+
+`pipeline/s12_llm_link.py` runs after the assembly. For every page, in order, a language model sees the page's
+text boxes in reading order (label, position, the head and tail of the text), the piece open at the end of the
+previous page, and the rules engine's proposal as a hint, and answers for every box: continues the previous
+piece / begins a new piece (title, author, kind) / furniture / advertisement / caption / notice, with a
+confidence. Tier 1 is the local lane (a vLLM server on GPU 2, port 8023, settings.llm_link.local); a page with
+a box under `thresholds.accept_local` goes to tier 2, the Claude API with the page image attached
+(settings.llm_link.escalate: claude-opus-5-5 by default, $4/$20 per million tokens; claude-fable-5-1 as the
+alternative, $10/$50 — ids and prices read on platform.claude.com on 4 October 2026); a page with a box still
+under `thresholds.accept_api` is flagged for a person (flags.jsonl; the workbench). The API spend is counted in
+data/corpus/llm_link_spend.json against `escalate.budget_usd`. Output per issue under data/assembly_v2/llm/<id>/:
+pages.jsonl (every decision with its tier, model, tokens, seconds, cost), articles.json (the records built
+from the chains of "previous" links, in the rules assembly's shape), flags.jsonl, compare.json (agreement with
+the rules, box by box, with the disagreements). The trial (`--trial 100`) runs the first hundred assembled
+issues and writes data/corpus/llm_link_trial.json: pages, boxes, agreement with the rules, the escalation share,
+the flag share, the cost, seconds a page — the numbers that set the thresholds and the budget for the full run.
+Rough cost at the trial's scale: a page sent to the API with its image is about 4,000 tokens in and 200 out,
+about $0.02 on Opus 5.5 and $0.05 on Fable 5.1; at a 5% escalation share the whole corpus (980,000 pages) would
+cost about $1,000 on Opus, $2,500 on Fable.
 
 ## Decisions taken on 4 October (Heejin)
 

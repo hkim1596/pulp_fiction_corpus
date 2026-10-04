@@ -299,6 +299,27 @@ def fetch_issue(issue, root=None):
 # ----------------------------------------------------------------------------------------------------------------
 # imaging
 # ----------------------------------------------------------------------------------------------------------------
+def decode_jp2(data, working_h):
+    """Decode one JP2 leaf with Pillow: first at half resolution when the leaf is large (a quarter of the time),
+    then at full resolution if that fails; None when neither works."""
+    from PIL import Image, ImageFile
+    for reduce, tolerant in ((True, False), (False, False), (False, True)):
+        try:
+            ImageFile.LOAD_TRUNCATED_IMAGES = tolerant        # third try: a partly decoded page beats a blank one
+            im = Image.open(io.BytesIO(data))
+            if reduce:
+                if im.height < 2 * working_h:
+                    continue                                 # nothing to gain; the full decode follows
+                im.reduce = 1                                # Pillow's JPEG 2000 plugin reads this at load()
+            im.load()
+            return im
+        except Exception:
+            continue
+        finally:
+            ImageFile.LOAD_TRUNCATED_IMAGES = False
+    return None
+
+
 def _save_working(im, out_path, thumb_path, img):
     """One decoded page -> working JPEG at the working height + thumbnail."""
     from PIL import Image
@@ -332,6 +353,7 @@ def image_issue(iid, root=None):
     master = masters[0]
     t0 = time.time()
     sizes = []
+    bad_leaves = []
     n = 0
     if master.lower().endswith(".zip"):
         with zipfile.ZipFile(master) as z:
@@ -341,14 +363,17 @@ def image_issue(iid, root=None):
                 if os.path.exists(out) and os.path.exists(os.path.join(thumbs_dir, f"page_{i:04d}.jpg")):
                     n += 1; continue
                 data = z.read(nm)
-                im = Image.open(io.BytesIO(data))
-                sizes.append(im.size)
-                # decode at half resolution when the master is at least twice the working height: Pillow's
-                # JPEG 2000 plugin reads the attribute `reduce` at load() (documented), and a half-size decode
-                # takes about a quarter of the time
-                if im.height >= 2 * img["working_height_px"]:
-                    im.reduce = 1
-                im.load()
+                im = decode_jp2(data, img["working_height_px"])
+                if im is None:
+                    # a leaf Pillow cannot decode (seen 4 October: "broken data stream", 2 of the first 83
+                    # issues): the page is written blank at the median size so numbering stays intact, and the
+                    # leaf is recorded for the repair pass that re-renders it from the archive's PDF
+                    mleaf = re.search(r"(\d+)\.jp2$", nm.lower())
+                    bad_leaves.append({"page": i, "leaf": int(mleaf.group(1)) if mleaf else i - 1, "name": nm})
+                    w, h = (sorted(sizes)[len(sizes) // 2] if sizes else (1500, 2200))
+                    im = Image.new("L", (max(100, w), max(100, h)), 255)
+                else:
+                    sizes.append(im.size)
                 _save_working(im, out, os.path.join(thumbs_dir, f"page_{i:04d}.jpg"), img)
                 n += 1
     else:                                                   # pdf fallback
@@ -375,6 +400,8 @@ def image_issue(iid, root=None):
             ppi, ppi_source = int(m.group(1)), "djvu_xml (nominal)"
     med = sorted(sizes)[len(sizes) // 2] if sizes else None
     rec = {"pages": n, "master_px": list(med) if med else None, "ppi": ppi, "ppi_source": ppi_source, "seconds": round(time.time() - t0, 1)}
+    if bad_leaves:
+        rec["bad_leaves"] = bad_leaves                      # blank pages to repair from the PDF (s01c --repair)
     if ppi and med:
         rec["trim_in"] = [round(med[0] / ppi, 2), round(med[1] / ppi, 2)]     # the scanned leaf in inches (from a nominal dpi: a hint, not a measurement)
     return rec
@@ -468,6 +495,56 @@ def run(issues, workers, image_processes, image_only=False):
     log("s01c", f"done: {done_dl:,} downloaded, {n_fail:,} failed, {n_img:,} imaged")
 
 
+def repair_bad_leaves(iid, root=None):
+    """Re-render the blank pages of an issue (state imaged.bad_leaves) from the archive's PDF: the PDF holds the
+    leaves marked addToAccessFormats in scandata.xml, in order, so leaf N is PDF page (number of such leaves
+    before N) + 1. Returns the pages repaired."""
+    from PIL import Image
+    from corpus_lib import load_state
+    root = root or ROOT
+    st = load_state(iid)
+    bad = (st["stages"].get("imaged") or {}).get("bad_leaves") or []
+    if not bad:
+        return 0
+    paths = issue_dirs(iid)
+    img = settings()["images"]
+    meta = json.load(open(os.path.join(paths["raw"], "meta.json"), encoding="utf-8"))
+    pdf = choose_files(meta)["pdf"] or pick(meta.get("files", []), lambda n: n.lower().endswith(".pdf"))
+    if not pdf:
+        mark(iid, "repaired", fail=True, error="no pdf in the item for the bad leaves")
+        return 0
+    ident = meta.get("metadata", {}).get("identifier") or st["stages"]["downloaded"].get("ia_identifier")
+    pdf_path = os.path.join(paths["raw"], "repair.pdf")
+    if not os.path.exists(pdf_path):
+        download_file(f"https://archive.org/download/{ident}/{quote(pdf['name'])}", pdf_path, int(pdf.get("size") or 0) or None, pdf.get("md5"))
+    # leaf -> pdf page
+    access = []
+    sd = os.path.join(paths["raw"], "scandata.xml")
+    if os.path.exists(sd):
+        txt = open(sd, encoding="utf-8", errors="replace").read()
+        for m in re.finditer(r'<page leafNum="(\d+)">(.*?)</page>', txt, re.S):
+            if "<addToAccessFormats>true</addToAccessFormats>" in m.group(2):
+                access.append(int(m.group(1)))
+    done = 0
+    for b in bad:
+        leaf = b["leaf"]
+        pdf_page = (access.index(leaf) + 1) if leaf in access else (leaf + 1)
+        tmp = os.path.join(paths["pages"], f"_repair_{leaf}")
+        os.makedirs(tmp, exist_ok=True)
+        r = subprocess.run(["pdftoppm", "-jpeg", "-r", "200", "-f", str(pdf_page), "-l", str(pdf_page), pdf_path, os.path.join(tmp, "p")],
+                           capture_output=True, text=True)
+        got = sorted(glob.glob(os.path.join(tmp, "p*.jpg")))
+        if r.returncode == 0 and got:
+            im = Image.open(got[0])
+            _save_working(im, os.path.join(paths["pages"], f"page_{b['page']:04d}.jpg"), os.path.join(paths["thumbs"], f"page_{b['page']:04d}.jpg"), img)
+            done += 1
+        shutil.rmtree(tmp, ignore_errors=True)
+    os.remove(pdf_path)
+    mark(iid, "repaired", pages=done, of=len(bad), pdf=pdf["name"])
+    manifest({"issue": iid, "event": "leaves_repaired", "pages": done, "of": len(bad)})
+    return done
+
+
 def smoke(ident):
     """Fetch and image one arbitrary item into data/corpus/smoke/ — a test of the machinery, not corpus data."""
     root = os.path.join(CORPUS_DIR, "smoke")
@@ -489,9 +566,18 @@ def main():
     ap.add_argument("--workers", type=int, default=0, help="download workers (default: settings.download.workers)")
     ap.add_argument("--image-processes", type=int, default=0, help="imaging processes (default: settings.images.processes)")
     ap.add_argument("--smoke", metavar="IA_IDENTIFIER", help="fetch one arbitrary item into data/corpus/smoke/ (a test)")
+    ap.add_argument("--repair", action="store_true", help="re-render the blank pages (bad JP2 leaves) of imaged issues from the archive's PDF")
     args = ap.parse_args()
     if args.smoke:
         smoke(args.smoke); return
+    if args.repair:
+        from corpus_lib import all_states
+        n = 0
+        for iid, st in all_states().items():
+            if (st["stages"].get("imaged") or {}).get("bad_leaves") and "repaired" not in st["stages"]:
+                log("s01c", f"repair {iid}: {len(st['stages']['imaged']['bad_leaves'])} bad leaves")
+                n += repair_bad_leaves(iid)
+        log("s01c", f"repaired {n} pages"); return
     cfg = corpus_config()
     require_approved(cfg, "download")
     issues = cfg["issues"]

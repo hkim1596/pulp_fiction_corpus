@@ -757,6 +757,13 @@ duplicate rule and its known limits. In short:
                       magazine; masters deleted once assembled; working
                       images reaped under 400 GB free; progress.json every
                       minute; a STOP file or Ctrl-C stops it, --run resumes.
+    s12_llm_link      the box-linking stage (2026-10-04): a language model
+                      decides, box by box, what continues what — the
+                      local lane on GPU 2 first, the Claude API with the
+                      page image when unsure, a flag for a person when
+                      still unsure; records in the rules assembly's
+                      shape under data/assembly_v2/llm/<id>/; --trial N;
+                      docs/corpus-run.md, "The box-linking stage".
     scripts/corpus_reaper.py   the same space rules by hand.
     docs/corpus-build-log.md   the dated build log for the data paper
                       (Journal of Open Humanities Data) and the Zenodo
