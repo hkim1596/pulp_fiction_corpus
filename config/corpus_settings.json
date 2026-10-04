@@ -145,13 +145,14 @@
       "base_url": "http://127.0.0.1:8023/v1",
       "model": "qwen3-14b",
       "api_key": "EMPTY",
-      "concurrency": 6,
-      "max_tokens": 1500,
+      "concurrency": 1,
+      "max_tokens": 4000,
       "temperature": 0,
       "timeout_s": 300,
-      "_comment": "the lane on GPU 2 (PASTE 8b): vllm/vllm-openai:latest serving the lab's own copy of Qwen3-14B at /home/tailab/shared/models/qwen3-14b, port 8023, 80% of the card; PULP_LLM_BASE_URL and PULP_LLM_MODEL in the environment override these two for a trial of another lane or model (the lab also has qwen3.5-9b)",
+      "_comment": "the lane on GPU 2 (PASTE 8b): vllm/vllm-openai:latest serving the lab's own copy of Qwen3-14B at /home/tailab/shared/models/qwen3-14b, port 8023, 80% of the card; PULP_LLM_BASE_URL and PULP_LLM_MODEL in the environment override these two for a trial of another lane or model (the lab also has qwen3.5-9b); page_concurrency: the pages of an issue are asked in parallel (each page's 'piece open from the previous page' is the rules' view, so pages are independent); concurrency: issues at a time (1: the pages already fill the lane).",
       "thinking": false,
-      "max_tokens_thinking": 6000
+      "max_tokens_thinking": 6000,
+      "page_concurrency": 48
     },
     "escalate": {
       "provider": "anthropic",
@@ -159,7 +160,7 @@
       "alternative_model": "claude-fable-5-1",
       "with_image": true,
       "image_height_px": 1400,
-      "max_tokens": 1500,
+      "max_tokens": 2500,
       "timeout_s": 180,
       "budget_usd": 50,
       "price_in_per_mtok": 4.0,

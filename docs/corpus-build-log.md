@@ -297,4 +297,27 @@ details about the construction"). The ssh session then broke ("Can't assign requ
 single-issue run and the trial did not start; PASTE 8f runs the trial in tmux where a dropped session cannot
 end it.
 
-(Next entries: the trial's first issues; the report.)
+### 2026-10-04, 23:40 KST — the trial's first issue (PASTE 8f); three faults in the stage, fixed in p50j
+
+The trial (tmux llmtrial, --trial 100 --tag qwen14b_nothink, one issue at a time) started at 23:27 on p50i. Its
+first issue ('47, 1,562 boxes) agreed with the rules engine on 81.4% of the boxes (0.8143). The two large
+disagreement classes were the ones that matter for assembly: 132 boxes the rules joined to the previous piece
+that the model called the start of a new one (rules=previous / model=new), and 78 the other way round
+(rules=new / model=previous); the rest were furniture, advertisement and caption labels. Which side is right in
+each class is not known from this run and is the next thing to look at (PASTE 8h prints samples of both classes
+with the box text). Three faults showed in the same output. (1) Every escalation to the Claude API failed: the
+request carried temperature 0, and claude-opus-5-5 answers "temperature is deprecated for this model" (HTTP
+400); 23 pages of the first issue were affected, so the API tier had not been tested at all. (2) Some local
+answers were unusable: the model pretty-printed the JSON over many lines and the 1,500-token answer limit cut
+it off, so the parser saw an incomplete answer and the page went up a tier for the wrong reason. (3) The lane
+was almost idle: six requests in flight, 254 output tokens a second, 4.5% of the key-value cache in use — the
+stage asked one page at a time within an issue, because each page's prompt was built from the previous page's
+answer (the open piece). p50j fixes the three: no temperature is sent to the API (max_tokens 2,500); the system
+prompt asks for compact one-line JSON and the local answer limit is 4,000 tokens; and the pages of an issue are
+asked in parallel (48 at a time) with the open piece taken from the rules engine's view of the previous page
+rather than from the model's own previous answer — the pages become independent, the question to the model is
+the same, and the chains are still built page by page afterwards. At most six API calls are in flight at a
+time; the API spend file now also counts input and output tokens. The trial is restarted on p50j (same tag,
+--redo); the first run's outputs are overwritten, its log lines stay in data/corpus/llm_link_trial.log.
+
+(Next entries: the restarted trial's first issues; the report.)

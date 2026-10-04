@@ -147,9 +147,12 @@ connected to the next one or not. If the local LLM is not sure about it, let it 
 still uncertain let it flag it and a human solve the case. Let's have this system built." — "Use GPU 2. trial
 first."
 
-`pipeline/s12_llm_link.py` runs after the assembly. For every page, in order, a language model sees the page's
-text boxes in reading order (label, position, the head and tail of the text), the piece open at the end of the
-previous page, and the rules engine's proposal as a hint, and answers for every box: continues the previous
+`pipeline/s12_llm_link.py` runs after the assembly. For every page a language model sees the page's text boxes
+in reading order (label, position, the head and tail of the text), the piece open at the end of the previous
+page (taken from the rules engine's view of that page, so that the pages of an issue are independent and can
+be asked in parallel — 48 at a time, settings.llm_link.local.page_concurrency; the first trial asked them one
+after another and left the lane nearly idle), and the rules engine's proposal as a hint, and answers for every
+box: continues the previous
 piece / begins a new piece (title, author, kind) / furniture / advertisement / caption / notice, with a
 confidence. Tier 1 is the local lane (a vLLM server on GPU 2, port 8023, settings.llm_link.local); a page with
 a box under `thresholds.accept_local` goes to tier 2, the Claude API with the page image attached
@@ -161,7 +164,11 @@ pages.jsonl (every decision with its tier, model, tokens, seconds, cost), articl
 from the chains of "previous" links, in the rules assembly's shape), flags.jsonl, compare.json (agreement with
 the rules, box by box, with the disagreements). The trial (`--trial 100`) runs the first hundred assembled
 issues and writes data/corpus/llm_link_trial.json: pages, boxes, agreement with the rules, the escalation share,
-the flag share, the cost, seconds a page — the numbers that set the thresholds and the budget for the full run.
+the flag share, the cost, seconds a page — the numbers that set the thresholds and the budget for the full run
+(`--tag <name>` names the report llm_link_trial_<name>.json; `--redo` runs issues already linked again, for a
+second trial with other settings — PULP_LLM_THINKING=1 for Qwen's thinking mode, PULP_LLM_MODEL and
+PULP_LLM_BASE_URL for another lane). The Claude API is asked without a temperature (claude-opus-5-5 rejects
+the parameter); at most six API calls are in flight at a time.
 Rough cost at the trial's scale: a page sent to the API with its image is about 4,000 tokens in and 200 out,
 about $0.02 on Opus 5.5 and $0.05 on Fable 5.1; at a 5% escalation share the whole corpus (980,000 pages) would
 cost about $1,000 on Opus, $2,500 on Fable.

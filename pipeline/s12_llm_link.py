@@ -59,15 +59,16 @@ from timing_util import stage_timer, load_pulp_env  # noqa: E402
 
 OUT_VARIANT = "llm"
 _spend_lock = threading.Lock()
+_api_slots = threading.Semaphore(6)                 # at most six API calls in flight (the pages of an issue are asked in parallel)
 SPEND_PATH = os.path.join(ROOT, "data", "corpus", "llm_link_spend.json")
 
 SYSTEM = """You are assembling the contents of a scanned American fiction magazine (a pulp, 1890-1955) from the text boxes a layout detector found on each page. The boxes are given in reading order. Decide for every box whether it continues the piece of the box before it, or begins a new piece, or is something else, and say how sure you are.
 
 Rules of the magazines: a story or article usually opens with a display title, often a by-line ("By John Smith"), sometimes a type label ("A Complete Novelet") and a teaser blurb, then body text in columns; it runs over several pages and may be interrupted by a page of advertising, after which it continues; running heads (the magazine's name, the story's title at the top of a page) and page numbers are furniture; "(Continued on page 98)" and "THE END" are notices; the text under an illustration is a caption. A box continues the previous piece when its text carries on the sentence or the narrative; a mid-sentence start is a strong sign of continuation.
 
-Answer with JSON only, no prose before or after, in this exact shape:
-{"boxes": [{"k": 1, "joins": "previous|new|furniture|advert|caption|notice", "kind": "story|serial|poem|article|department|letters|contents|filler|ad|other", "title": "...or null", "author": "...or null", "confidence": 0.0, "why": "a few words"}], "page_note": "anything odd about the page, or null"}
-confidence is your probability that the "joins" decision is right. Use the rule-based proposal as a hint, not as truth: when the text shows otherwise, say so with your reasons."""
+Answer with JSON only, no prose before or after, on one line with no indentation, in this exact shape:
+{"boxes":[{"k":1,"joins":"previous|new|furniture|advert|caption|notice","kind":"story|serial|poem|article|department|letters|contents|filler|ad|other","title":"...or null","author":"...or null","confidence":0.0,"why":"at most eight words"}],"page_note":"anything odd about the page, or null"}
+confidence is your probability that the "joins" decision is right. Use the rule-based proposal as a hint, not as truth: when the text shows otherwise, say so. Keep "why" to eight words; the answer for a page of twenty boxes must stay short."""
 
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -125,15 +126,34 @@ def rules_hint(key, owner, furn, prev_key):
     return f"begins the {what}" if rec["type"] != "ad" else f"advertisement ({rec.get('ad_class') or 'ad'})"
 
 
+def rules_open_piece(pages, owner, furn, pno, ctx):
+    """What the rules engine says was open at the end of the page before pno: the record owning the last story-like
+    text box of that page, with that box's tail. None on the first page or when the rules left nothing open."""
+    prev = pno - 1
+    if prev not in pages:
+        return None
+    regs = pages[prev]["regions"]
+    for i in range(len(regs) - 1, -1, -1):
+        key = f"{prev}:{i}"
+        t = region_text(regs[i])
+        if not t or key in furn or key not in owner:
+            continue
+        rec, role = owner[key]
+        if rec["type"] in ("ad", "house", "toc"):
+            continue
+        return {"kind": rec["type"], "title": rec.get("title"), "author": rec.get("author"), "tail": t, "source": "rules"}
+    return None
+
+
 def page_prompt(iid, meta, pno, page, pages, owner, furn, open_piece, ctx):
     """The user message for one page."""
     lines = [f"Magazine: {meta.get('magazine', '?')}, issue dated {meta.get('cover_date', '?')}. Scan page {pno} of {len(pages)}."]
     if open_piece:
-        lines.append(f"The piece open at the end of the previous page: {open_piece['kind']} \"{open_piece.get('title') or '?'}\""
+        lines.append(f"According to the rule-based pass, the piece open at the end of the previous page: {open_piece['kind']} \"{open_piece.get('title') or '?'}\""
                      + (f" by {open_piece['author']}" if open_piece.get("author") else "")
                      + f". Its last words: \"{clip(open_piece.get('tail') or '', 0, ctx['prev_page_tail_chars'])}\"")
     else:
-        lines.append("No piece is open from the previous page (this is the first page, or the previous page ended a piece).")
+        lines.append("No piece is open from the previous page (this is the first page, or the rule-based pass left nothing open there).")
     lines.append("")
     lines.append("The boxes of this page, in reading order (position as percent of the page width and height):")
     W, H = max(1, page.get("width") or 1), max(1, page.get("height") or 1)
@@ -233,7 +253,7 @@ def ask_api(user_text, iid, pno, cfg, model=None):
             content.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": b64}})
             user_text = "The page image is attached; the boxes below are the text the detector read from it.\n\n" + user_text
     content.append({"type": "text", "text": user_text})
-    body = {"model": model, "max_tokens": cfg.get("max_tokens", 1500), "temperature": 0, "system": SYSTEM,
+    body = {"model": model, "max_tokens": cfg.get("max_tokens", 2500), "system": SYSTEM,       # no temperature: Opus 5.5 rejects it
             "messages": [{"role": "user", "content": content}]}
     headers = {"Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01"}
     t0 = time.time()
@@ -296,7 +316,8 @@ def parse_answer(txt, n_boxes):
 # ----------------------------------------------------------------------------------------------------------------
 # spend
 # ----------------------------------------------------------------------------------------------------------------
-def spend(add=0.0, add_calls=0):
+def spend(add=0.0, add_calls=0, usage=None):
+    """The running total of what the Claude API has cost (data/corpus/llm_link_spend.json); read with no arguments."""
     with _spend_lock:
         d = {"usd": 0.0, "calls": 0, "input_tokens": 0, "output_tokens": 0}
         if os.path.exists(SPEND_PATH):
@@ -307,6 +328,9 @@ def spend(add=0.0, add_calls=0):
         if add or add_calls:
             d["usd"] = round(d["usd"] + add, 4)
             d["calls"] += add_calls
+            if usage:
+                d["input_tokens"] += int(usage.get("input_tokens") or 0)
+                d["output_tokens"] += int(usage.get("output_tokens") or 0)
             d["updated"] = time.strftime("%Y-%m-%dT%H:%M:%S")
             write_json_atomic(SPEND_PATH, d)
         return d
@@ -324,26 +348,30 @@ def link_issue(iid, meta, dry_run_page=None, log_fn=None):
     owner, furn, rules_doc = load_rules(iid)
     out_dir = os.path.join(ROOT, "data", "assembly_v2", OUT_VARIANT, iid)
     os.makedirs(out_dir, exist_ok=True)
-    open_piece = None
-    page_records = []
     flags = []
     n_api = n_flag = 0
     cost = 0.0
     t_start = time.time()
+    jobs = []
     for pno in sorted(pages):
         page = pages[pno]
+        open_piece = rules_open_piece(pages, owner, furn, pno, cfg["context"])
         prompt, keymap = page_prompt(iid, meta, pno, page, pages, owner, furn, open_piece, cfg["context"])
-        n_boxes = len(keymap)
         if dry_run_page is not None:
             if pno == dry_run_page:
                 print(SYSTEM); print("\n----- user -----\n"); print(prompt)
                 return None
             continue
+        jobs.append((pno, prompt, keymap))
+    if dry_run_page is not None:
+        return None
+
+    def one_page(job):
+        pno, prompt, keymap = job
+        n_boxes = len(keymap)
         if n_boxes == 0:
-            page_records.append({"page": pno, "boxes": {}, "tier": "none", "n_boxes": 0})
-            continue
+            return {"page": pno, "boxes": {}, "tier": "none", "n_boxes": 0}, None, 0.0, False
         rec = {"page": pno, "n_boxes": n_boxes, "keymap": {str(k): i for k, i in keymap.items()}}
-        # tier 1: the local lane
         ans = None
         try:
             lc = local_cfg()
@@ -354,37 +382,48 @@ def link_issue(iid, meta, dry_run_page=None, log_fn=None):
             rec["local"] = {"error": str(e)[:300]}
         tier = "local"
         low = (ans is None) or min(b["confidence"] for b in ans["boxes"].values()) < cfg["thresholds"]["accept_local"]
-        # tier 2: the API, with the page image
+        page_cost = 0.0
+        used_api = False
         if low:
             if spend()["usd"] >= cfg["escalate"]["budget_usd"]:
                 rec["api"] = {"skipped": "budget spent"}
             else:
                 try:
-                    txt, usage, secs, c = ask_api(prompt, iid, pno, cfg["escalate"])
+                    with _api_slots:
+                        txt, usage, secs, c = ask_api(prompt, iid, pno, cfg["escalate"])
                     ans2 = parse_answer(txt, n_boxes)
-                    spend(c, 1); cost += c; n_api += 1
-                    rec["api"] = {"model": cfg["escalate"]["model"], "seconds": secs, "usage": usage, "cost_usd": c, "parsed": ans2 is not None}
+                    spend(c, 1, usage); page_cost = c; used_api = True
+                    rec["api"] = {"model": cfg["escalate"]["model"], "seconds": secs, "usage": usage, "cost_usd": c, "parsed": ans2 is not None,
+                                  "raw": None if ans2 else txt[:600]}
                     if ans2 is not None:
                         rec["local_answer"] = ans["boxes"] if ans else None
                         ans, tier = ans2, "api"
                 except Exception as e:
                     rec["api"] = {"error": str(e)[:300]}
+        flag = None
         if ans is None:
-            # nothing usable from either tier: the rules' view stands for this page and the page is flagged
             ans = {"boxes": {k: {"joins": "previous", "kind": None, "title": None, "author": None, "confidence": 0.0,
                                  "why": "no model answer; rules kept"} for k in keymap}, "page_note": None}
             tier = "rules"
         still_low = min(b["confidence"] for b in ans["boxes"].values()) < cfg["thresholds"]["accept_api"]
         if tier == "rules" or (low and still_low):
-            n_flag += 1
-            flags.append({"page": pno, "tier": tier, "boxes": {str(k): b for k, b in ans["boxes"].items() if b["confidence"] < cfg["thresholds"]["accept_api"]},
-                          "page_note": ans.get("page_note")})
+            flag = {"page": pno, "tier": tier, "boxes": {str(k): b for k, b in ans["boxes"].items() if b["confidence"] < cfg["thresholds"]["accept_api"]},
+                    "page_note": ans.get("page_note")}
         rec["tier"] = tier
         rec["boxes"] = {str(k): b for k, b in ans["boxes"].items()}
         rec["page_note"] = ans.get("page_note")
-        page_records.append(rec)
-        # the open piece for the next page
-        open_piece = trailing_piece(page, keymap, ans["boxes"], open_piece)
+        return rec, flag, page_cost, used_api
+
+    page_records = []
+    with ThreadPoolExecutor(max_workers=max(1, int(cfg["local"].get("page_concurrency", 48)))) as ex:
+        for rec, flag, page_cost, used_api in ex.map(one_page, jobs):
+            page_records.append(rec)
+            if flag:
+                flags.append(flag); n_flag += 1
+            cost += page_cost
+            n_api += 1 if used_api else 0
+    page_records.sort(key=lambda r: r["page"])
+    flags.sort(key=lambda f: f["page"])
     secs = round(time.time() - t_start, 1)
     with open(os.path.join(out_dir, "pages.jsonl"), "w", encoding="utf-8") as f:
         for r in page_records:
