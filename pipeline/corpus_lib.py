@@ -80,8 +80,23 @@ def issues_config():
     return json.load(open(issues_config_path(), encoding="utf-8"))
 
 
+LOG_PATH = os.path.join(ROOT, "data", "corpus", "orchestrator.log")
+
+
 def log(stage, msg):
-    print(f"[{stage}] {time.strftime('%H:%M:%S')} {msg}", flush=True)
+    """Console line plus the same line appended to data/corpus/orchestrator.log — the file does not depend on the
+    console pipe (a console that goes away must not stop or blind the run)."""
+    line = f"[{stage}] {time.strftime('%Y-%m-%d %H:%M:%S')} {msg}"
+    try:
+        os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+        with open(LOG_PATH, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except Exception:
+        pass
+    try:
+        print(line, flush=True)
+    except Exception:
+        pass
 
 
 def write_json_atomic(path, obj):

@@ -129,5 +129,65 @@ PASTE 3 (Mac): config/corpus_issues.json and selection_counts.json copied from t
 a8a60adbbe26…; commit af5562a pushed and pulled on the server. The approved list is archived as
 pilot_export/p50_corpus_issues.json (Dropbox) with p50_selection_counts.json.
 
-(Next entries: the approval; the twenty-issue trial; the reading server; the start of the run; the first
-progress reports.)
+### 2026-10-04, 18:02–18:05 KST — the first twenty issues downloaded and imaged (PASTE 4)
+
+Commit fe29714 (p50c: the reading on GPU 0 only) on the server. `s01c_fetch.py --run --limit 20`: twenty
+issues downloaded (0 failed) and imaged in about two minutes end to end, four downloads at a time at 15–60 s
+per issue (28–86 MB each; the archive's datanodes differ in speed), the imaging in parallel at 0.4–0.6 s a page
+per process (68 pages in 27–57 s, 148 pages in 78 s, 158 pages in 67 s). Masters on disk: 1.3 GB for the
+twenty — about 65 MB per issue, 0.7 MB per page, which puts the whole corpus's masters near 0.5 TB. The state
+record of the first issue (10 Short Novels Magazine v01 n01 [1938-10], archive item
+10-short-novels-magazine-v-01-n-01-1938-10, uploaded 2021-10-07, archive OCR tesseract 5.0.0-beta-20210815)
+holds the four files' names, sizes and md5s, 148 leaves, master 1920 × 2980 px, scandata ppi 600 → a nominal
+3.2 × 4.97 in, which is not the magazine's size: the dpi values in the archive's records are unreliable (another
+issue claims 20 × 27.6 in), as expected; the format question (pulp or digest) will need a measurement of the
+page images against the printed text size, later. /mnt/sda: 751 GB used, 2.7 TB free.
+
+### 2026-10-04, 18:11–18:21 KST — the reading server on GPU 0; the first issue read (PASTE 4b)
+
+The first try stopped itself: GPU 0 held 11,057 MiB (1,628 MiB of the stylometry process and 9,406 MiB of
+another python process, PID 448434), over the paste's 10 GB limit. The paste was changed to allow a neighbour of
+up to 20 GB and to give the server what is free less a 6 GB margin: a share of 0.83 of the card. The pilot's
+stale server record (port 56169, container gone) was removed. surya-ocr on the server is 0.22.1; its vLLM image
+vllm/vllm-openai:v0.20.1 was not on the machine and was pulled (the pilot's run of August used an earlier
+image); the server (container surya-vllm-8020, model datalab-to/surya-ocr-2, 104 sequences, 16,384 batched
+tokens, max model length 18,000) answered after 230 s including the pull; GPU 0 then at 94,282 MiB.
+
+The first issue of the list, '47 — The Magazine of the Year, March 1947 (158 pages, archive item
+47themagazineoftheyearv01n01194703bones): 158 pages read in 164.9 s — 1.04 s a page, the pilot's speed
+(0.92) despite the larger batches, with the client process itself busy for 118.6 s of CPU (image loading and
+encoding, result parsing): the client, not the card, looks like the limit, so the run starts with two reading
+workers on the one server. Page 3 reads cleanly ("A Statement of Intention … IN THE first issue of a new
+magazine it is customary to proclaim one's special identity. '47 is the only national magazine owned and
+controlled by people who write, paint, and photograph professionally…"). Working images measured: 100 MB for
+100 pages, 123 MB for 148, 59 MB for 68 — about 0.9 MB a page at 2,200 px and JPEG quality 90, twice the
+estimate; the corpus's working images will come to about 0.9 TB, the masters about 0.5–0.7 TB: a peak near
+1.5 TB on the 2.7 TB free, and the reaper's floor of 400 GB stands.
+
+### 2026-10-04, 18:38 KST — the run started (PASTE 5)
+
+`run_corpus.py --run` in tmux session `corpus` with PULP_SURYA_SERVERS naming the GPU 0 server twice (two reading
+workers on one server), code fe29714, 7,440 issues. The first two minutes of the pane: downloads of 10-Story
+Detective issues (114–116 leaves, 69–88 MB) at 16–53 s each, four at a time; one HTTP 500 from the archive on a
+JP2 zip, answered by the downloader with a 30 s wait and a retry, as designed. The console goes to
+data/corpus/run.log; the per-minute counts to data/corpus/progress.json; every stage event to events.jsonl.
+
+### 2026-10-04, 18:50 KST — the first STATUS; the run stopped by itself at about 18:52
+
+STATUS at 18:50:20 (twelve minutes in): downloaded 81, imaged 76, read 9, cleaned 9, lemmatized 9,
+assembled 9, masters removed 9; pages imaged 8,617, read 782; rates since the start: downloads 304 an hour
+(24 hours left), imaging 279 an hour, reading 44.8 an hour with two workers on the one server — against the 26
+an hour one worker would give, so the second worker nearly doubles the rate; 166 hours (seven days) of reading
+left at that rate; GPU 0 at 86% utilisation (so a third worker would gain little); free space 2,919 GB; no
+issue given up. The nine assembled issues had their masters deleted as designed.
+
+Then the pane showed the last download line at 18:52:20 followed by CORPUS-DONE: the orchestrator process had
+ended without a word — no "nothing left to do", no traceback in the pane — with 7,355 issues still in the
+download queue, 65 in the reading queue, and progress.json last written at 18:50:20 (the main loop had not
+ticked for two minutes before the end). The reading server stayed up. Cause under investigation (PASTE 7b reads
+the console log, the pane's scrollback, the kernel log and the last events, then restarts the run; nothing is
+done twice). Change made at once (p50d): the orchestrator now writes its own log (data/corpus/orchestrator.log)
+and a crash note (run_crash.log; run_faults.log for a crash of the interpreter itself) that do not depend on the
+console pipe, and logs its own end.
+
+(Next entries: the cause of the stop; the restart; the next STATUS.)

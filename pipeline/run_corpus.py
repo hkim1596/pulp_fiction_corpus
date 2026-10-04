@@ -542,5 +542,34 @@ def main():
     run(args)
 
 
+def _crash_note(exc):
+    """Whatever ends the orchestrator abnormally is written to a file of its own, not only to the console."""
+    import traceback
+    path = os.path.join(ROOT, "data", "corpus", "run_crash.log")
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(f"=== {time.strftime('%Y-%m-%d %H:%M:%S')} pid {os.getpid()}\n{traceback.format_exc()}\n")
+        event("run_crash", error=repr(exc)[:500])
+    except Exception:
+        pass
+
+
 if __name__ == "__main__":
-    main()
+    import faulthandler
+    try:
+        os.makedirs(os.path.join(ROOT, "data", "corpus"), exist_ok=True)
+        _fault_file = open(os.path.join(ROOT, "data", "corpus", "run_faults.log"), "a")
+        faulthandler.enable(file=_fault_file, all_threads=True)      # a crash of the interpreter itself leaves a trace
+    except Exception:
+        pass
+    try:
+        main()
+    except SystemExit as e:
+        if e.code not in (None, 0):
+            _crash_note(e)
+        raise
+    except BaseException as e:                                       # includes KeyboardInterrupt: noted, then re-raised
+        _crash_note(e)
+        raise
+    log("run", "orchestrator process ended")
