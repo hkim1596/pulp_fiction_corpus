@@ -92,5 +92,33 @@ Heejin: "I got the green light to go. Don't worry about the protocol anymore. Ju
 we can publish our database and write in https://openhumanitiesdata.metajnl.com". The run starts with
 `pilot_export/p50_pastes.txt` (Dropbox). Every paste's output is appended here, with the date.
 
-(Next entries: the server's machine facts; the server's selection counts with the enrich records; the approval;
-the twenty-issue trial; the start of the run; the Surya server; the first progress reports.)
+### 2026-10-04 (evening, KST) — the code on the server; the machine; the selection on the server
+
+PASTE 1 (Mac): commit 2724719 "p50: the corpus stages …" pushed to github.com/hkim1596/pulp_fiction_corpus and
+pulled on the server; the site restarted as v0.16.2.
+
+PASTE 2 (server): 64 cores; 503 GB of memory (469 available); disks: root 1.8 TB with 445 GB free, /mnt/sda
+3.6 TB with 2.7 TB free (the project's data), /mnt/sdb 3.6 TB with 3.3 TB free but not writable by our
+account (so the masters stay on /mnt/sda). GPUs: four NVIDIA RTX PRO 6000 Blackwell Max-Q (97,887 MiB each);
+memory in use: GPU 0 90,137 MiB, GPU 1 89,423 MiB, GPU 2 575 MiB, GPU 3 89,061 MiB — GPU 2 free for the
+reading. Installed: spaCy 3.8.16, en_core_web_sm 3.8.0 (self-test ok: pipes tok2vec, tagger, attribute_ruler,
+lemmatizer), internetarchive; Pillow 10.4.0 with JPEG 2000; pdftoppm present. Survey of the day: 28,410 items
+(19,486 marked English, 2,961 unmarked, 5,963 other languages; 14,499 fiction magazines of all years with
+822,692 page images in their records, 2,430 magazine names); enrich: 28,286 records from September kept, 164
+fetched. Selection (17:18 KST): 28,410 → 22,447 English or unmarked (123 more set aside because the archive's
+own text was detected as not English) → 21,214 dated + 1,110 undated kept → 11,501 in 1890–1955 → 8,511
+fiction magazines (comic 263, dime novel 2,387, general-interest 277, non-fiction 1,173 set aside) → 7,440
+issues; 1,071 duplicate scans as alternates; 589 undated; 1,582 magazines. md5 of the list:
+10bc79121c3405d6b1257d405d8e0f6a. The differences from the sandbox (7,467) come from the enrich records
+(detected language, page counts) and one item fewer in the collection.
+
+Settings for the run (p50b): 12 imaging and 12 lemma processes; one reading server per card (vLLM container
+with surya's own command; VLLM_GPU_TYPE h100: 104 sequences, 16,384 batched tokens, 85% of the card's memory):
+port 8020 on GPU 0 (the other project gave it up later the same evening), 8021 on GPU 2, and 8022 on GPU 3 when
+Heejin frees it. Expected at the pilot's speed of 0.92 s a page on one card (1,286 pages in 1,183 s on
+20 August 2026, 24 GB batch settings): about 980,000 pages → ten days on one card, five on two, three and a half
+on three; the larger batch settings should shorten that. The download (about 0.7 TB) takes about a day; imaging
+keeps pace. A reading worker whose server stops answering waits and marks nothing failed.
+
+(Next entries: the approval; the twenty-issue trial; the reading server; the start of the run; the first
+progress reports.)

@@ -48,17 +48,17 @@ The peak is far below 4 TB because nothing is kept that can be re-fetched:
 | layout JSON, Surya text, cleaned text, lemmas, assembly | ~40 GB | always |
 
 Because the download runs days ahead of the reading, most masters will sit on disk at once (~0.7 TB) next to the
-working pages (~0.45 TB): about 1.2 TB at the peak. To spread the load, the masters can live on the empty disk:
-
-    mkdir -p /mnt/sdb/pulp_masters && ln -s /mnt/sdb/pulp_masters ~/shared/khj/pulp_fiction_corpus/data/masters
-
-(do this before the first download; the stages follow the link). The reaper measures free space on `data/`
+working pages (~0.45 TB): about 1.2 TB at the peak. /mnt/sdb turned out not to be writable by our account
+(PASTE 2, 4 October), so everything stays on /mnt/sda, which had 2.7 TB free that day — enough with room to
+spare. (If /mnt/sdb is ever opened to us: `mkdir -p /mnt/sdb/pulp_masters && ln -s /mnt/sdb/pulp_masters
+data/masters` before a download; the stages follow the link.) The reaper measures free space on `data/`
 (/mnt/sda).
 
 ## The run, step by step
 
 0. Look at the machine and write the answers into the journal: `nproc`, `free -g`, `df -h /mnt/sda /mnt/sdb /`,
-   `nvidia-smi`. Set `images.processes` and `lemma.processes` in the settings to about half the cores.
+   `nvidia-smi`. Set `images.processes` and `lemma.processes` in the settings to about a fifth of the cores
+   (4 October: 64 cores, 503 GB of memory → 12 and 12; the reading and the downloads need cores too).
 1. Code and dependencies: `git pull`; `pip install --user spacy==3.8.16` and the `en_core_web_sm-3.8.0` wheel from
    spaCy's release page (the pin is checked at start); `pip install --user internetarchive` and `ia configure`
    (Heejin types the archive.org login; optional — it makes the downloader an authenticated, better-treated client).
@@ -76,12 +76,23 @@ working pages (~0.45 TB): about 1.2 TB at the peak. To spread the load, the mast
    (`pilot_export/p50_corpus_issues.json`) for the record.
 4. A trial: `python3 pipeline/s01c_fetch.py --run --limit 20` (twenty issues, no GPU), look at `data/pages/<id>/`
    on the site, and at `data/corpus/state/<id>.json`.
-5. The reading servers. With `reading.servers` empty, Surya starts its own server on GPU 0 when the first issue
-   is read (as in the pilot) and one reading worker runs. For two cards, start a second server on GPU 1 and list
-   both URLs in `reading.servers` — how Surya 0.22 starts its server is to be read off the running container
-   (`docker ps`, `docker inspect <container>`: the image, the command, the port; the same command with
-   `--gpus '"device=1"'` and another port starts the second), and recorded in the journal. Both GPUs are the
-   project's (approved 20 August: GPUs 0 and 1).
+5. The reading servers. Surya 0.22 reads through a vLLM server in a docker container; without a URL it
+   spawns one itself on the GPU named by the environment variable VLLM_GPUS (default "0") with batch sizes from
+   VLLM_GPU_TYPE (default "4090", a 24 GB card; "h100" sizes them for an 80–97 GB card: 104 sequences, 16,384
+   batched tokens — surya's table has no entry for the RTX PRO 6000), reserving 85% of the card's memory. Surya
+   keeps one spawned server per machine (a sentinel in ~/.cache/datalab/surya/), so a second server is started
+   by hand with the same `docker run` command surya uses (PASTE 4b and 6 in pilot_export/p50_pastes.txt have it:
+   image vllm/vllm-openai:v0.20.1, model datalab-to/surya-ocr-2, port 8021 on GPU 2, 8022 on GPU 3), and each
+   reading worker is pointed at its server with SURYA_INFERENCE_URL. The orchestrator takes the URLs from
+   `settings.reading.servers`, or from the environment variable PULP_SURYA_SERVERS (comma-separated), one worker
+   per URL; `settings.reading.spawn_env` is what a worker passes to surya when there is no URL. On 4 October
+   GPUs 0, 1 and 3 held about 89–90 GB each (other models; GPU 3 is Heejin's own) and GPU 2 was empty; the
+   same evening the other project gave up GPU 0, so the run starts on two cards: port 8020 on GPU 0 and 8021 on
+   GPU 2 (PASTE 4b starts a server only on a card holding less than 10 GB, so it is safe to run blind). A third
+   server on GPU 3 (port 8022) comes when Heejin frees it (PASTE 6: start the server, STOP the run, start it
+   again; PASTE 5 and 6 build the server list from the ports that answer). A worker whose server stops
+   answering waits for it, puts the issue in hand back and marks nothing failed (events "reading_server_down",
+   "reading_server_error" in events.jsonl).
 6. The run, in tmux so it survives the login: `tmux new -s corpus` then
    `python3 pipeline/run_corpus.py --run 2>&1 | tee -a data/corpus/run.log`. Detach with Ctrl-B D.
 7. Watching: `python3 pipeline/run_corpus.py --status` (counts per stage, pages read, rates since the process
@@ -95,14 +106,20 @@ working pages (~0.45 TB): about 1.2 TB at the peak. To spread the load, the mast
 10. At the end: `python3 pipeline/run_corpus.py --link` once more (the cross-issue pass over every magazine), then
     the Phase 2 steps of the plan (the quality score, the paratext parallel corpus, the sample for verification).
 
-## The sandbox counts of 4 October (the rule on the survey of 4 October, no enrich records)
+## The counts of 4 October
 
-    0 items in the collection                      28,411
-    1 English or no language record                22,448   (set aside: not English 5,963)
-    2 dated 21,249; undated (kept)                  1,199
-    3 in the window 1890–1955                      11,513   (set aside: outside 9,736)
-    4 fiction magazine                              8,538   (comic 337, dime novel 2,387, general-interest 277, non-fiction 1,173)
-    5 issues in the corpus                          7,467   (duplicate scans kept as alternates 1,071; undated among the issues 604; magazines 1,605)
+On the server (PASTE 2, 17:18 KST; survey of the day, enrich records for every item) — the list that was approved:
+
+    0 items in the collection                      28,410
+    1 English or no language record                22,447   (set aside: not English 5,963; archive text not English 123)
+    2 dated 21,214; undated (kept)                  1,110
+    3 in the window 1890–1955                      11,501   (set aside: outside 9,713)
+    4 fiction magazine                              8,511   (comic 263, dime novel 2,387, general-interest 277, non-fiction 1,173)
+    5 issues in the corpus                          7,440   (duplicate scans kept as alternates 1,071; undated among the issues 589; magazines 1,582)
+    md5 of config/corpus_issues.json               10bc79121c3405d6b1257d405d8e0f6a
+
+In the sandbox earlier that day (no enrich records): 28,411 → 22,448 → 11,513 → 8,538 → 7,467 issues (1,071
+alternates, 604 undated, 1,605 magazines).
 
 The duplicate rule (same_issue in s00b): two items of one magazine are one issue when both carry a volume and
 number and they agree; or both carry a whole number (#24) and it and the year agree; or the cover month agrees

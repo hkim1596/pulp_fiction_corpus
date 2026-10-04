@@ -18,9 +18,10 @@ Every step is recorded in data/corpus/state/<id>.json (corpus_lib.mark) and noth
 process at any time (a file data/corpus/STOP, or Ctrl-C) and start it again. data/corpus/progress.json is
 rewritten every minute (counts, rates, free space, failures, the estimated finish); --status prints it.
 
-Reading on more than one GPU: start a Surya inference server per GPU (docs/corpus-run.md) and list their URLs
+Reading: start a Surya inference server per GPU (docs/corpus-run.md, "The reading servers") and list their URLs
 in settings.reading.servers; one reading worker runs per URL. With the list empty, one worker runs and Surya
-starts its own server on GPU 0, as in the pilot.
+starts its own server on the GPU named in settings.reading.spawn_env (VLLM_GPUS). To add a server later: touch
+data/corpus/STOP, add the URL to the settings, start again with --run (nothing is done twice).
 
     python3 pipeline/run_corpus.py --run                 # everything, resumable
     python3 pipeline/run_corpus.py --run --no-read       # download, image, clean the archive text only (no GPU)
@@ -102,6 +103,8 @@ def py_env():
     env = os.environ.copy()
     env["PULP_ISSUES"] = os.path.relpath(CORPUS_CONFIG, ROOT)
     env.setdefault("SURYA_INFERENCE_KEEP_ALIVE", "true")
+    for k, v in (settings()["reading"].get("spawn_env") or {}).items():   # which GPU and batch sizes when Surya spawns its own server
+        env.setdefault(k, str(v))
     return env
 
 
@@ -123,13 +126,41 @@ def read_issue(iid, server_url):
     return {"pages": got, "seconds": round(time.time() - t0, 1), "server": server_url or "spawned"}
 
 
+def server_healthy(server_url):
+    """Does the reading server answer at /health? (None = no URL: surya spawns its own, nothing to probe.)"""
+    if not server_url:
+        return True
+    import urllib.request
+    base = server_url.rstrip("/")
+    base = base[:-3] if base.endswith("/v1") else base
+    try:
+        with urllib.request.urlopen(base + "/health", timeout=5) as r:
+            return r.status == 200
+    except Exception:
+        return False
+
+
+UNREACHABLE = ("not reachable", "Connection refused", "Connection reset", "Remote end closed", "Max retries", "Read timed out")
+
+
 def reading_worker(name, server_url, q, results):
+    """One worker per reading server. A server that is down does not cost an issue a failure mark: the worker waits
+    for it (a message every ten minutes) and puts the issue back when the error says the server was unreachable."""
+    down_since = None
     while True:
+        if os.path.exists(STOP_FILE) or STOP_WORKERS.is_set():
+            return                                   # a STOP ends the worker after the issue in hand, queue or no queue
+        if not server_healthy(server_url):
+            if down_since is None or time.time() - down_since > 600:
+                log("run", f"{name}: reading server {server_url} not answering at /health — waiting (no issue is marked failed for this)")
+                event("reading_server_down", worker=name, server=server_url)
+                down_since = time.time()
+            time.sleep(30)
+            continue
+        down_since = None
         try:
             iid = q.get(timeout=5)
         except queue.Empty:
-            if os.path.exists(STOP_FILE) or STOP_WORKERS.is_set():
-                return
             continue
         if iid is None:
             return
@@ -139,6 +170,12 @@ def reading_worker(name, server_url, q, results):
             results.put(("read", iid, rec, None))
         except Exception as e:
             msg = f"{type(e).__name__}: {e}"
+            if any(k in msg for k in UNREACHABLE) or not server_healthy(server_url):
+                log("run", f"{name}: {iid} put back — the server failed during the reading ({msg[:160]})")
+                event("reading_server_error", worker=name, server=server_url, issue=iid, error=msg[:300])
+                q.put(iid)
+                time.sleep(60)
+                continue
             mark(iid, "read", fail=True, error=msg[:1000])
             results.put(("read", iid, None, msg))
 
@@ -345,8 +382,11 @@ def run(args):
     for t in dl_threads:
         t.start()
 
-    # reading workers (one per server URL; or one that lets surya spawn its own server)
-    servers = st["reading"].get("servers") or [None]
+    # reading workers (one per server URL; or one that lets surya spawn its own server). PULP_SURYA_SERVERS, a
+    # comma-separated list of URLs, overrides the settings without editing the tracked file on the server.
+    servers = [u.strip() for u in os.environ.get("PULP_SURYA_SERVERS", "").split(",") if u.strip()] or st["reading"].get("servers") or [None]
+    event("reading_servers", servers=servers)
+    log("run", f"reading servers: {servers}")
     read_q, results = queue.Queue(), queue.Queue()
     readers = []
     if not args.no_read:
@@ -433,6 +473,12 @@ def run(args):
             if os.path.exists(STOP_FILE):
                 STOP_WORKERS.set()
                 if not image_futs and not post_futs and not dl_alive:
+                    busy_readers = [t for t in readers if t.is_alive()]
+                    if busy_readers:
+                        log("run", f"STOP: waiting for {len(busy_readers)} reading worker(s) to finish the issue in hand")
+                        for t in busy_readers:
+                            t.join(timeout=1800)
+                        # their last results -> post-processing is left for the restart (the state says "read")
                     log("run", "STOP: queues drained, exiting (restart with --run to continue)")
                     break
             elif not dl_alive and not image_futs and not post_futs and dl_results.empty() and results.empty() and read_q.empty():

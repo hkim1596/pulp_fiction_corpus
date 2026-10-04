@@ -1,0 +1,54 @@
+{
+ "_comment": "The approval of the corpus issue list (the Registered Report audit trail). list_sha256 is the fingerprint of the approved config/corpus_issues.json; the stages refuse any other list.",
+ "approved": true,
+ "approved_by": "Heejin Kim",
+ "approved_date": "2026-10-04",
+ "approved_at": "2026-10-04T17:56:48",
+ "issues": 7440,
+ "undated": 589,
+ "list_sha256": "a8a60adbbe26a9e624ca36943ec3ac6bb49b21f28e6b42191b4a099f2dc6c66e",
+ "list_path": "config/corpus_issues.json",
+ "counts": {
+  "0 items in the collection": 28410,
+  "1 English or no language record": 22447,
+  "1 set aside: not English": 5963,
+  "1b set aside: archive text not English": 123,
+  "2 dated": 21214,
+  "2 undated (kept, out of dated analyses)": 1110,
+  "3 in the window": 11501,
+  "3 set aside: outside the window": 9713,
+  "4 fiction magazine": 8511,
+  "4 set aside: comic magazine": 263,
+  "4 set aside: dime novel": 2387,
+  "4 set aside: general-interest magazine": 277,
+  "4 set aside: non-fiction magazine": 1173,
+  "5 issues in the corpus": 7440,
+  "5 set aside: duplicate scan (kept as alternate)": 1071,
+  "5a of them undated": 589,
+  "5b magazines": 1582
+ },
+ "selection_settings": {
+  "collection": "pulpmagazinearchive",
+  "year_from": 1890,
+  "year_to": 1955,
+  "languages": [
+   "english",
+   "unmarked"
+  ],
+  "kinds_in": [
+   "fiction magazine"
+  ],
+  "general_interest_subcollections": [
+   "libertymagazine",
+   "colliersmagazine",
+   "mccallsmagazine",
+   "mccluresmagazine"
+  ],
+  "duplicate_rule": "same magazine; same volume+number, or same whole number in the same year, or same full date, or same cover month for magazines that are not more than monthly; year-only records never merge; the item with more pages is kept, the others are alternates",
+  "date_sources": [
+   "date",
+   "year",
+   "title"
+  ]
+ }
+}
