@@ -126,6 +126,17 @@ record's own annotation history shows live events only. A rebuild of
 the explorer that fails on a half-written source file (a pipeline stage
 still running) keeps the old database and retries.
 
+Since v0.19.0 (2026-10-05, p50p; Heejin: "Quick review page"): the
+model check review, /review/model (webapp/model_review_pages.py; Workroom,
+"Model check"). One disagreement between the model and the rules at a
+time, on the scan (the box in question red, the record blue), with the
+texts around the box; the reader says the rules are right, the model is
+right, neither, or can't tell (keys 1-4); the log is
+data/review/model_check.jsonl; the cases (data/review/
+model_disagreements.jsonl, from s13's published.json notes, gathered by
+the refresh) are spread over the kinds of change and the magazines; the
+counts by kind are on the page and on /run.
+
 Since v0.18.1 (2026-10-05, p50o; Heejin's choice after the pilot score,
 on which the rules alone were exactly right on 65 of the 74 verified
 records and the rules as the model changed them on 50): a corpus record

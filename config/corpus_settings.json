@@ -212,5 +212,9 @@
   "site": {
     "_comment": "scripts/site_refresh.py: how often the site's own database (authors, magazines, issues, stories, the workbench list) is brought up to date with the corpus run; the /run board reads the run's progress file at every visit.",
     "refresh_minutes": 5
+  },
+  "review": {
+    "_comment": "the model check review (/review/model, site v0.19.0; Heejin, 5 October 2026: a quick review page): about this many judgments of each kind of disagreement (a split, a join, a box added, a box moved out as advertising, as page furniture, to the piece before, a new piece begun inside a record) before the counts decide, kind by kind, whether the model's change is applied, ignored, or kept as a flag.",
+    "per_kind_target": 25
   }
 }

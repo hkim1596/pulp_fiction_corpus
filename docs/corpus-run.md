@@ -242,6 +242,14 @@ model left open, and one with a box the model was under 0.9 sure of need a look.
 choice (rules_flagged; llm would publish the model's records, rules the rules' alone); a change there is applied to
 every issue at the next refresh.
 
+Who is right where they disagree (site v0.19.0, Heejin's choice of 5 October, 11:58): /review/model ("Model check" in
+the Workroom) shows one disagreement at a time — the scan with the box in question in red and the record in blue, the
+texts around the box, what the model would change — and records THE RULES ARE RIGHT, THE MODEL IS RIGHT, NEITHER or
+CAN'T TELL in data/review/model_check.jsonl. The cases are spread over the kinds of change (about 25 each,
+settings.review.per_kind_target) and the magazines; the counts by kind are on the page and on /run. With about 25 of
+each kind, Heejin decides kind by kind whether the model's change is applied, ignored, or kept as a flag. The pool of
+cases is data/review/model_disagreements.jsonl, written by the refresh from what s13 published.
+
 What a person sees: Authors, Magazines, Issues and Stories cover every assembled issue; the Workbench list (/articles)
 shows every record with how it was assembled, the model's confidence and its flags, and a filter for the records that
 need a look; an issue or record opens on the scans as the pilot's do, with the flags in full; /run shows the run, the

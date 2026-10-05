@@ -651,3 +651,73 @@ PASTE 8v (Mac) commits p50o; 8w (server) restarts the refresh and the site; 8x s
 pilot, which kinds of the model's changes broke records the rules had right (the first list for improving the model).
 
 (Next entries: the refresh's numbers; the model's pace against the reading's; the kinds of change that broke records.)
+
+### 2026-10-05, 11:58 KST — p50o live; the model's first numbers on corpus issues; what broke the pilot's records
+
+PASTE 8v committed p50o (fa02c5a). PASTE 8w restarted the refresh and the site (v0.18.1); the follower kept running.
+PASTE 8x (11:55):
+
+- The refresh made every live file again in the new mode in one cycle of 47 s: 445 issues, 18 of them checked by the
+  model, 427 not yet. The explorer: 17,803 records, 4,291 stories, 1,568 authors, 1,581 magazines; 685 records checked
+  by the model, which disagrees with 182 (27%); 185 records need a look; 74 verified (the pilot's verifications, now
+  counted; the front page had said 22). A database build takes 2.2 s; an ordinary cycle 2.8 s.
+- The follower (from 11:36): 20 issues by 11:55, 110 s an issue, two at a time (about 65 issues an hour against the
+  reading's 31): it is working through the 445 issues assembled before it started and should reach the reading in
+  about half a day. 1,777 pages: none unreadable, 20 asked again (1.1%), 3 flagged for an open decision (0.17%).
+- On the corpus so far the model would change 172 of the 757 rules' records it checked (23%): a box added to a record
+  61 times, a record split 58, a box moved out as page furniture 37, out as advertising 35, a box moved to the piece
+  before 15, a record joined to the one before 13 (a record can have several).
+- The pilot's lesson (llm_pilot_p50m against the rules, on the 74 verified records): the model's changes broke 16
+  records the rules had right — a box added 7 times (as a caption, a notice or a continuation), a split 4, a box out
+  as furniture 4, a join 1, a change on a neighbouring record 3 — and put 1 right (a box added). The broken examples
+  include the serial "The Demolished Man" split at 134:16 (0.95; 531 boxes lost to the new piece), "The Return of the
+  Undead" split at 138:16 (0.98), and boxes added as captions or notices at 0.99. The model's confidence on these wrong
+  changes is 0.95 to 0.99: its confidence does not tell its right changes from its wrong ones.
+- Four records that need a look, picked at random, show both sides: the model would join a by-line the rules had made a
+  record of its own ("By Mary England") to its story, and would take apart a "feature" the rules made of what reads
+  like a pipe advertisement — both look right at first sight; it would split "Hot Dogies for the Lone Star" at box 6C,
+  where the rules had followed the story's "continued from page 6" notices — a case for a person; and one record ("By
+  Edouarde": a by-line taken as a title) needs a look only because the model was 0.8 sure of one of its boxes.
+- The corpus run at 11:55: 2,447 downloaded, 445 read and assembled, 166.8 downloads and 31.1 readings an hour, 2,426 GB
+  free, nothing given up.
+
+What it means: at about one record in four, "needs a look" is too long a list for people to go through for the whole
+corpus (about 75,000 records at this rate). On the pilot nearly all the model's disagreements were wrong; on corpus
+issues, which the rules were not written on, some are clearly right. Which kinds of disagreement can be trusted is a
+question for a small human check of the corpus disagreements, by kind (put to Heejin).
+
+### 2026-10-05, 12:10 KST — Heejin: a quick review page for the model's disagreements (p50p, site v0.19.0)
+
+The question put to Heejin at 11:57, with the numbers above: "On corpus issues the model disagrees with about 1 record
+in 4. That is about 75,000 'needs a look' records for the whole corpus, too many to check. … To learn which kinds of
+disagreement to trust, how should people check them?" — a quick review page, the workbench as it is, or waiting for
+more issues. Heejin (11:58): "Quick review page (Recommended)": one disagreement at a time on the scan, with three
+buttons — rules right, model right, neither; about 150 random cases spread over the kinds of change; then, for each
+kind, the model's change is applied, ignored, or kept as a flag.
+
+p50p and site v0.19.0:
+- /review/model (Workroom, "Model check"; webapp/model_review_pages.py). A case is one change the model would make to
+  one of the rules' records (a join, seen from both records, is one case). The page shows the issue and the record,
+  what the model would change in plain words, the scan of the page with the box of the question in red, the record as
+  the rules made it in blue (the other record of a join or a move in purple, other records and page furniture in grey
+  dashes), and the text of the box and of the boxes before and after it. A person chooses THE RULES ARE RIGHT, THE
+  MODEL IS RIGHT, NEITHER (with a note on the right fix) or CAN'T TELL (keys 1 to 4). Each judgment is one line of
+  data/review/model_check.jsonl (time, reader, case, issue, record, kind, box, the change, the model's confidence,
+  verdict, note); a named account is needed, as for corrections.
+- The next case: the kind of change judged least so far (settings.review.per_kind_target, 25 each), in it the magazine
+  judged least so far, a case nobody has judged yet, at random. The kinds: a split, a join, a box added, a box moved
+  out as advertising, out as page furniture, to the piece before, a new piece begun inside a record, a record taken
+  apart. The counts by kind (rules right, model right, neither, can't tell, and the model's share of the decided ones)
+  are on the page and on /run.
+- s13 lists each issue's cases in its note (data/articles/<id>/published.json, version 2; every issue is made again
+  once to add them) and the refresh gathers them into data/review/model_disagreements.jsonl, the page's pool, whenever
+  something was published. The boxes are named as on the workbench (12D: page 12, fourth box in reading order).
+- What the counts will decide, kind by kind, once each kind has about 25 (Heejin's decision then): apply the model's
+  change (it is right most of the time), ignore it (it is wrong most of the time; the record no longer needs a look for
+  it), or keep it as a flag. Applying only some kinds needs s12's record builder to take a list of kinds; that is built
+  when the counts call for it.
+
+The cases come from the issues the model has checked so far, which follow the corpus list's order (magazines in
+alphabetical order, then dates), so the first cases come from a few magazines; the choice of the magazine judged least
+spreads them as the model goes on. PASTE 8y (Mac) commits p50p; 8z (server) restarts the refresh and the site; 9a is
+the check, now with the review's counts.

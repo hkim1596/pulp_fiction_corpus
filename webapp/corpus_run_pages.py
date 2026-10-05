@@ -284,7 +284,7 @@ def run_page(qs=None, render=None):
     body = (_G["howto"]("The corpus run on the lab server, as it stands: what has been downloaded from the Internet Archive, read, "
                         "assembled into records, checked by the language model and put on this site, how fast, and how long the "
                         "rest will take at that pace; then the accuracy measured so far. The page reloads itself every minute.")
-            + "<h1>Corpus run</h1>" + board_html(compact=False) + evals_html()
+            + "<h1>Corpus run</h1>" + board_html(compact=False) + (_G["MR"].run_lines() if "MR" in _G else "") + evals_html()
             + "<p class='fine'>Everything done, decided and measured, day by day: <a href='/log'>the build log</a>.</p>"
             + "<script>setTimeout(function(){location.reload()},60000)</script>")
     return (render or _G["page"])("Corpus run", body, path="/run")

@@ -8,7 +8,9 @@ Every settings.site.refresh_minutes (default 5):
   2. r00 --corpus exports every issue whose live records or corrections changed (data/export/corpus/<id>.jsonl), and
      the pilot's file (data/pilot_stories.jsonl) when a pilot issue's records or corrections changed;
   3. the explorer database (authors, magazines, issues, stories, the workbench list) is rebuilt from the exports — in a
-     file beside the old one, then moved into place, so the site never reads a half-built database.
+     file beside the old one, then moved into place, so the site never reads a half-built database;
+  4. (when something was published) the model's disagreements of every issue are gathered for the review page
+     (data/review/model_disagreements.jsonl, s13 write_pool).
 The site only reads (the file data/explorer.static tells it never to rebuild at request time). The run's board (/run)
 reads the run's own progress file at every visit and does not wait for this loop. data/corpus/site_refresh.json holds
 the last cycle's numbers; the file data/corpus/STOP_SITE stops the loop.
@@ -34,6 +36,12 @@ def cycle(first=False):
     t0 = time.time()
     open(os.path.join(ROOT, "data", "explorer.static"), "a").close()
     pub = s13_publish.publish_all()
+    n_pool = None
+    if first or pub["published"] or not os.path.exists(s13_publish.POOL):
+        try:
+            n_pool = s13_publish.write_pool()          # the model's disagreements, for the review page (/review/model)
+        except Exception:
+            traceback.print_exc()
     n_exp = r00.export_corpus(log=lambda *a, **k: None)
     try:
         n_pilot = r00.export_pilot_live(log=lambda m: print(m, flush=True) if "not written" in m else None)   # the pilot's corrections
@@ -41,6 +49,7 @@ def cycle(first=False):
         traceback.print_exc()
         n_pilot = 0
     rec = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "published": pub, "exported": n_exp, "pilot_exported": n_pilot,
+           "review_pool": n_pool,
            "issues_assembled": sum(1 for s in all_states().values() if "assembled" in s.get("stages", {}))}
     if first or pub["published"] or n_exp or n_pilot:
         b0 = time.time()

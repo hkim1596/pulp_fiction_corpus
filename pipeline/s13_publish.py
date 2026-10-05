@@ -52,6 +52,8 @@ from corpus_lib import ROOT, settings, all_states, event, log, write_json_atomic
 LIVE = os.path.join(ROOT, "data", "articles")
 ANN = os.path.join(ROOT, "data", "annotations")
 MODES = ("rules_flagged", "llm", "rules")
+S13_NOTE = 2                  # the version of data/articles/<id>/published.json: 2 = with the disagreements (p50p)
+POOL = os.path.join(ROOT, "data", "review", "model_disagreements.jsonl")
 
 
 def _mt(p):
@@ -111,25 +113,19 @@ def _open_decisions(var_dir, page_records=None):
 
 
 class Labels:
-    """Region key "12:3" -> the workbench's name of the box, "12D" (page 12, fourth box in reading order)."""
+    """Region key "12:3" -> the workbench's name of the box, "12D". A region's id is its place on the page in reading
+    order (s08 and the site both sort a page's regions by their order field), and the workbench names the boxes in the
+    same order: A, B, C … (after Z: Z26, Z27 …)."""
 
-    def __init__(self, iid):
-        self.iid, self.pages = iid, {}
+    def __init__(self, iid=None):
+        self.iid = iid
 
     def __call__(self, key):
         try:
             pno, idx = map(int, key.split(":"))
         except ValueError:
             return key
-        if pno not in self.pages:
-            try:
-                regs = json.load(open(os.path.join(ROOT, "data", "layout", self.iid, f"page_{pno:04d}.json"), encoding="utf-8")).get("regions", [])
-                order = sorted(range(len(regs)), key=lambda r: regs[r].get("order", r))
-                self.pages[pno] = {r: i for i, r in enumerate(order)}
-            except Exception:
-                self.pages[pno] = {}
-        i = self.pages[pno].get(idx)
-        return key if i is None else f"{pno}{chr(65 + i) if i < 26 else 'Z' + str(i)}"
+        return f"{pno}{chr(65 + idx) if idx < 26 else 'Z' + str(idx)}"
 
 
 def plain(change, labels, titles):
@@ -162,6 +158,58 @@ def plain(change, labels, titles):
     if m:
         return f"the model would join {name(m.group(1))} to this record at box {labels(m.group(2))} (sure {m.group(3)})"
     return "the model would change this record: " + re.sub(r"\b\d+:\d+\b", lab, change)
+
+
+KINDS = {                     # the kinds of disagreement, in the words of the review page (/review/model)
+    "split": "the model would split the record",
+    "join": "the model would join two records",
+    "box_in": "the model would add a box to the record",
+    "out_ad": "the model would move a box out of the record as advertising",
+    "out_furniture": "the model would move a box out of the record as page furniture",
+    "out_continues": "the model would move a box to the piece before",
+    "out_new": "the model would begin a new piece at a box inside the record",
+    "apart": "the model would take the record apart",
+}
+_PATTERNS = [(re.compile(p), k, ik, io, ic) for p, k, ik, io, ic in (
+    (r"^split at (\d+:\d+): the rest is (\S+) \(([\d.]+)\)$", "split", 1, None, 3),
+    (r"^(\d+:\d+) out as advertising \(([\d.]+)\)$", "out_ad", 1, None, 2),
+    (r"^(\d+:\d+) out as furniture \(([\d.]+)\)$", "out_furniture", 1, None, 2),
+    (r"^(\d+:\d+) out: a piece begins there \(([\d.]+)\)$", "out_new", 1, None, 2),
+    (r"^(\d+:\d+) out: it continues (\S+) \(([\d.]+)\)$", "out_continues", 1, 2, 3),
+    (r"^(\d+:\d+) in \((\w+), ([\d.]+)\)$", "box_in", 1, None, 3),
+    (r"^(\S+) joined at (\d+:\d+) \(([\d.]+)\)$", "join", 2, 1, 3),
+    (r"^(\S+) joined to (\S+) at (\d+:\d+) \(([\d.]+)\)$", "join", 3, 2, 4),
+    (r"^(\S+) taken apart$", "apart", None, None, None))]
+
+
+def parse_change(c):
+    """(kind, box key, the other record or None, confidence or None) of one of the model's change notes."""
+    for rx, kind, ik, io, ic in _PATTERNS:
+        m = rx.match(c)
+        if m:
+            return kind, (m.group(ik) if ik else None), (m.group(io) if io else None), (float(m.group(ic)) if ic else None)
+    return "other", None, None, None
+
+
+def cases_of(iid, doc, view):
+    """The disagreements of one issue, one per change the model would make (a join, seen from both records, once):
+    what the review page (/review/model) asks people to judge."""
+    out, seen = [], set()
+    for r in doc.get("articles", []):
+        v = view.get(r["article_id"]) or {}
+        keys = [f"{f['page']}:{i}" for f in r.get("fragments", []) for i in f.get("region_ids", [])]
+        for raw, plain_text in zip(v.get("changes") or [], v.get("notes") or []):
+            kind, key, other, conf = parse_change(raw)
+            key = key or (keys[0] if keys else None)
+            if key is None:
+                continue
+            cid = f"{iid}|join|{key}" if kind == "join" else f"{iid}|{kind}|{r['article_id']}|{key}"
+            if cid in seen:
+                continue
+            seen.add(cid)
+            out.append({"case": cid, "record": r["article_id"], "title": r.get("title"), "type": r.get("type"), "kind": kind,
+                        "key": key, "other": other, "conf": conf, "change": raw, "plain": plain_text})
+    return out
 
 
 def model_view(iid, rules_doc, llm_doc, page_records, open_dec):
@@ -199,6 +247,7 @@ def model_view(iid, rules_doc, llm_doc, page_records, open_dec):
                      f"at box {labels(k)} (sure {c})"]
         else:
             agrees = False
+            raw = [f"{aid} taken apart"]
             notes = ["the model would take this record apart: none of its boxes stays together as one piece"]
         opens = [open_dec[k] for k in keys if k in open_dec]
         out[aid] = {"agrees": agrees, "notes": notes, "changes": raw, "open": opens,
@@ -274,13 +323,15 @@ def publish_issue(iid, mode="rules_flagged", look_below=0.9, force=False):
             pub = json.load(open(side_p, encoding="utf-8"))
         except Exception:
             pub = {}                                         # written before p50o: made again in the current mode
-        if pub.get("mode") == mode and pub.get("source") == source:
+        if pub.get("mode") == mode and pub.get("source") == source and pub.get("s13") == S13_NOTE:
             return "current", source, 0, 0
     doc = json.load(open(src_p, encoding="utf-8"))
+    cases = []
     if source == "rules+model":
         prs = _page_records(llm_dir)
         open_dec = _open_decisions(llm_dir, prs)
         view = model_view(iid, doc, json.load(open(llm_p, encoding="utf-8")), prs, open_dec)
+        cases = cases_of(iid, doc, view)
         n_look = annotate(doc, source, look_below, view=view)
     elif source == "llm":
         n_look = annotate(doc, source, look_below, open_dec=_open_decisions(llm_dir))
@@ -291,7 +342,8 @@ def publish_issue(iid, mode="rules_flagged", look_below=0.9, force=False):
                         "by": "pipeline/s13_publish.py"}
     os.makedirs(live_dir, exist_ok=True)
     write_json_atomic(live_p, doc)
-    write_json_atomic(side_p, dict(doc["published"], records=len(doc.get("articles", [])), needs_look=n_look))
+    write_json_atomic(side_p, dict(doc["published"], s13=S13_NOTE, records=len(doc.get("articles", [])), needs_look=n_look,
+                                   disagreements=cases))
     return "published", source, len(doc.get("articles", [])), n_look
 
 
@@ -326,6 +378,34 @@ def publish_all(force=False):
     return counts
 
 
+def write_pool():
+    """Every published issue's disagreements in one file, data/review/model_disagreements.jsonl (the review page's
+    pool), with the issue's magazine and date. Written by scripts/site_refresh.py when something was published.
+    Returns the number of cases."""
+    from corpus_lib import corpus_config
+    out, seen = [], set()
+    for i in corpus_config()["issues"]:
+        iid = i["id"]
+        if iid in seen:
+            continue
+        seen.add(iid)
+        try:
+            pub = json.load(open(os.path.join(LIVE, iid, "published.json"), encoding="utf-8"))
+        except Exception:
+            continue
+        if pub.get("source") != "rules+model":
+            continue
+        for c in pub.get("disagreements") or []:
+            out.append(dict(c, issue=iid, magazine=i.get("magazine"), cover_date=i.get("cover_date"), published=pub.get("ts")))
+    os.makedirs(os.path.dirname(POOL), exist_ok=True)
+    tmp = POOL + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        for c in out:
+            f.write(json.dumps(c, ensure_ascii=False) + "\n")
+    os.replace(tmp, POOL)
+    return len(out)
+
+
 def selftest():
     """The model's view of the rules' records, on a made-up issue (no files needed)."""
     rules = {"articles": [
@@ -352,6 +432,12 @@ def selftest():
     assert n == 4 and a["t_a003"]["needs_look"] and a["t_a003"]["assembly"].endswith("agrees"), (n, a["t_a003"])   # agrees, but only 0.8 sure
     assert a["t_a002"]["flags"][0] == "a rules note" and a["t_a001"]["assembly"].endswith("(see the flags)")
     assert a["t_a004"]["model_check"] == {"agrees": False, "changes": ["5:1 out as advertising (0.98)"], "open": 1}
+    cs = cases_of("t", rules, v)
+    kinds = sorted((c["kind"], c["key"]) for c in cs)
+    assert kinds == [("join", "3:2"), ("out_ad", "5:1"), ("split", "3:1")], kinds          # the join seen from both records, once
+    assert parse_change("3:4 in (caption, 0.99)") == ("box_in", "3:4", None, 0.99)
+    assert parse_change("7:2 out: it continues t_a001 (0.97)") == ("out_continues", "7:2", "t_a001", 0.97)
+    assert parse_change("t_a009 taken apart")[0] == "apart" and parse_change("something else")[0] == "other"
     print("s13 selftest ok")
 
 

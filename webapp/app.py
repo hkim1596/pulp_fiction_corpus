@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.18.1"
+APP_VERSION = "0.19.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -1428,7 +1428,7 @@ def esc(s):
 NAV_EXPLORE = [("/overview", "Overview"), ("/authors", "Authors"), ("/magazines", "Magazines"), ("/issues", "Issues"),
                ("/stories", "Stories"), ("/pairs", "Pairs"), ("/reuse", "Reuse"), ("/collection", "Collection"),
                ("/corpus", "Corpus"), ("/datasheet", "Datasheet"), ("/method", "Method")]
-NAV_WORKROOM = [("/guide", "Guide"), ("/articles", "Workbench"), ("/reuse/validate", "Paraphrase review"),
+NAV_WORKROOM = [("/guide", "Guide"), ("/articles", "Workbench"), ("/review/model", "Model check"), ("/reuse/validate", "Paraphrase review"),
                 ("/reuse/cases", "Cases"), ("/reuse/progress", "Progress"), ("/run", "Corpus run"), ("/log", "Build log"), ("/assembly", "Assembly"),
                 ("/timing", "Timing"), ("/activity", "Activity"), ("/feedback", "Feedback")]
 
@@ -1601,11 +1601,13 @@ import explore_pages as EX  # noqa: E402
 import review_pages as RV  # noqa: E402
 import collection_pages as CP  # noqa: E402
 import corpus_run_pages as CR  # noqa: E402      the corpus run, live (v0.17.0)
+import model_review_pages as MR  # noqa: E402     the model check review (v0.19.0)
 RP.bind(globals())
 EX.bind(globals())
 RV.bind(globals())
 CP.bind(globals())
 CR.bind(globals())
+MR.bind(globals())
 
 
 # ---------------- request handler ----------------
@@ -1969,6 +1971,8 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, CR.log_page(qs, render=self._page))
         if path == "/reuse/validate":
             return self._send(200, RV.validate_page(qs, self.user, render=self._page))
+        if path == "/review/model":
+            return self._send(200, MR.review_page(qs, self.user, render=self._page))
         if path == "/reuse/cases":
             return self._send(200, RV.cases_page(qs, self.user, render=self._page))
         m = re.fullmatch(r"/reuse/cluster/(\w+)/(exact|para)/(\d+)/(\d+)", path)
@@ -2043,6 +2047,13 @@ class H(BaseHTTPRequestHandler):
             if is_admin(self.user):
                 feedback_update(get("id"), self.user, True, done=(get("done") == "1"))
             return self._redirect("/feedback?fb=saved")
+        if path == "/review/model":
+            if self.user == "guest":
+                return self._send(403, self._page("No", howto(
+                    "Judging needs a named account, so the log shows who did it.")
+                    + "<h1>Guests cannot judge</h1>"))
+            MR.append_judgment(self.user, get)
+            return self._redirect("/review/model")
         if path in ("/reuse/validate", "/reuse/case"):
             if self.user == "guest":
                 return self._send(403, self._page("No", howto(
