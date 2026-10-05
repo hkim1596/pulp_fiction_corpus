@@ -15,6 +15,9 @@ written again only when an issue's live records or corrections changed:
 
     python3 pipeline/r00_export_stories.py --corpus [--issue <id>] [--force]
 
+With --pilot-live: data/pilot_stories.jsonl alone (the explorer's file for the pilot), when a pilot issue's records
+or corrections changed; scripts/site_refresh.py does this every cycle.
+
 Output: data/pilot_stories.jsonl — every article of every type (stories,
 serial parts, poems, features, letters, advertisements, contents pages),
 with its metadata and reading text. Later stages select by type; a record
@@ -146,6 +149,42 @@ def main():
           f"({n_corpus['story fragments']} story records under {MIN_STORY_WORDS} words among them)")
 
 
+def export_pilot_live(force=False, log=print):
+    """data/pilot_stories.jsonl again — the file the website's explorer reads for the ten pilot issues — when a pilot
+    issue's live records or its correction log changed since it was written (scripts/site_refresh.py, every cycle;
+    5 October 2026: the explorer still counted the pilot's verified records of 31 August). Only this file is written:
+    the reuse stages' inputs (data/export/stories.jsonl, paratext.jsonl) are written by main() when a reuse run is
+    made. Returns 1 when the file was written, else 0."""
+    issues = {i["id"]: i for i in app.cfg().get("issues", [])}
+    src = max([_mt(os.path.join(ROOT, "data", "articles", iid, "articles.json")) for iid in issues]
+              + [_mt(os.path.join(ROOT, "data", "annotations", f"{iid}.jsonl")) for iid in issues] + [0.0])
+    if not force and os.path.exists(OUT) and _mt(OUT) >= src:
+        return 0
+    tmp = OUT + ".tmp"
+    n = n_ver = 0
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            for iid, meta in issues.items():
+                doc = app.effective_doc(iid)
+                if not doc:
+                    continue
+                for a in doc["articles"]:
+                    rec = record_of(a, iid, meta)
+                    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                    n += 1
+                    n_ver += rec["status"] == "verified"
+    except Exception as e:                       # a half-written correction log, say: the old file stays, the next cycle tries again
+        log(f"[r00] pilot: not written ({e!r}); the old file is kept")
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+        return 0
+    os.replace(tmp, OUT)
+    log(f"[r00] pilot: {n} records ({n_ver} verified) to {os.path.relpath(OUT, ROOT)}")
+    return 1
+
+
 CORPUS_EXPORT = os.path.join(ROOT, "data", "export", "corpus")
 
 
@@ -191,5 +230,7 @@ if __name__ == "__main__":
     if "--corpus" in sys.argv:
         ids = [sys.argv[sys.argv.index("--issue") + 1]] if "--issue" in sys.argv else None
         export_corpus(ids, force="--force" in sys.argv)
+    elif "--pilot-live" in sys.argv:
+        export_pilot_live(force="--force" in sys.argv)
     else:
         main()

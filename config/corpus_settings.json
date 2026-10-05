@@ -205,8 +205,8 @@
     }
   },
   "publish": {
-    "_comment": "s13: what the website shows for a corpus issue. prefer: the model-checked records (s12) when the issue has them, else the rules'. look_below: a record the model was less sure of than this needs a look (with any change the model made and any decision it left open).",
-    "prefer": "llm",
+    "_comment": "s13: what the website shows for a corpus issue. prefer: rules_flagged = the rules' records, each checked against the model's reading (s12): where the model would change a record, the record stays as the rules made it, the change is listed in its flags and the record needs a look (Heejin's choice on 5 October 2026, after the pilot score: on the 74 records people verified the rules alone were exactly right on 65, the rules as the model changed them on 50); llm = the records as the model changed them (v0.18.0: 5 October, from 11:36 until p50o); rules = the rules' records only. look_below: a record with a box the model was less sure of than this needs a look too.",
+    "prefer": "rules_flagged",
     "look_below": 0.9
   },
   "site": {

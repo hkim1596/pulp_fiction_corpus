@@ -5,7 +5,8 @@ doing here. It must lively update eveything.").
 Every settings.site.refresh_minutes (default 5):
   1. s13 publishes every assembled corpus issue whose assembly is newer than its live records (data/articles), with how
      it was assembled, the model's confidence and its flags;
-  2. r00 --corpus exports every issue whose live records or corrections changed (data/export/corpus/<id>.jsonl);
+  2. r00 --corpus exports every issue whose live records or corrections changed (data/export/corpus/<id>.jsonl), and
+     the pilot's file (data/pilot_stories.jsonl) when a pilot issue's records or corrections changed;
   3. the explorer database (authors, magazines, issues, stories, the workbench list) is rebuilt from the exports — in a
      file beside the old one, then moved into place, so the site never reads a half-built database.
 The site only reads (the file data/explorer.static tells it never to rebuild at request time). The run's board (/run)
@@ -34,9 +35,14 @@ def cycle(first=False):
     open(os.path.join(ROOT, "data", "explorer.static"), "a").close()
     pub = s13_publish.publish_all()
     n_exp = r00.export_corpus(log=lambda *a, **k: None)
-    rec = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "published": pub, "exported": n_exp,
+    try:
+        n_pilot = r00.export_pilot_live(log=lambda m: print(m, flush=True) if "not written" in m else None)   # the pilot's corrections
+    except Exception:
+        traceback.print_exc()
+        n_pilot = 0
+    rec = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "published": pub, "exported": n_exp, "pilot_exported": n_pilot,
            "issues_assembled": sum(1 for s in all_states().values() if "assembled" in s.get("stages", {}))}
-    if first or pub["published"] or n_exp:
+    if first or pub["published"] or n_exp or n_pilot:
         b0 = time.time()
         r = subprocess.run([sys.executable, os.path.join(ROOT, "webapp", "explore_pages.py"), "--build"], cwd=ROOT,
                            capture_output=True, text=True, timeout=3 * 3600)
@@ -48,20 +54,23 @@ def cycle(first=False):
             counts = json.loads(out[j + 1:] if j >= 0 else out)["counts"]
             rec.update({"records": counts.get("records", 0), "stories": counts.get("stories", 0), "authors": counts.get("authors", 0),
                         "magazines": counts.get("magazines", 0), "needs_look": counts.get("needs_look", 0),
-                        "model_checked": counts.get("model_checked", 0),
+                        "model_checked": counts.get("model_checked", 0), "model_disagrees": counts.get("model_disagrees", 0),
+                        "verified": counts.get("verified", 0),
                         "corpus_issues_shown_as_pilot": counts.get("corpus_issues_shown_as_pilot", 0)})
         except Exception:
             rec["build_tail"] = (r.stderr or out)[-800:]
     else:
         try:
             rec.update({k: v for k, v in json.load(open(os.path.join(ROOT, "data", "corpus", "site_refresh.json"))).items()
-                        if k in ("records", "stories", "authors", "magazines", "needs_look", "model_checked", "build_seconds")})
+                        if k in ("records", "stories", "authors", "magazines", "needs_look", "model_checked", "model_disagrees",
+                                 "verified", "build_seconds")})
         except Exception:
             pass
     rec["seconds"] = round(time.time() - t0, 1)
     write_json_atomic(os.path.join(ROOT, "data", "corpus", "site_refresh.json"), rec)
-    log("site", f"refresh: published {pub['published']} ({pub['from_llm']} checked by the model), exported {n_exp}, "
-               f"records {rec.get('records', '?')}, needs a look {rec.get('needs_look', '?')}, {rec['seconds']} s")
+    log("site", f"refresh: published {pub['published']} ({pub.get('from_rules_and_model', 0) + pub.get('from_llm', 0)} checked by the model), "
+               f"exported {n_exp}{' and the pilot' if n_pilot else ''}, records {rec.get('records', '?')}, needs a look "
+               f"{rec.get('needs_look', '?')}, {rec['seconds']} s")
     return rec
 
 

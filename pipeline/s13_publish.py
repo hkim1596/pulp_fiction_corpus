@@ -5,25 +5,36 @@ assembled automatically, and show confidence scores and flags when automation is
 fix some of them and the algorithm can improve accordingly. … It must lively update everything.")
 
 The site's workbench and explorer read an issue's records from data/articles/<id>/articles.json, the "live" assembly
-on which people's corrections are replayed. For every assembled corpus issue this stage writes that file from the best
-assembly there is:
+on which people's corrections are replayed. For every assembled corpus issue this stage writes that file. What it
+writes depends on settings.publish.prefer:
 
-    data/assembly_v2/llm/<id>/articles.json     the rules' records checked by the language model (s12 --follow)
-    data/assembly_v2/rules/<id>/articles.json   the rules' records (s08), until the model has checked the issue
+    rules_flagged  (the default since p50o, 5 October 2026; Heejin's decision at 11:40 after the pilot score: on the 74 records
+                   people verified, the rules alone were exactly right on 65, the rules as the model changed them on
+                   50) — the rules' records (data/assembly_v2/rules/<id>), each checked against the language model's
+                   reading of its boxes (s12 --follow, data/assembly_v2/llm/<id>): where the model would change the
+                   record, the record stays as the rules made it and the change the model would make is listed in its
+                   flags, for a person to decide
+    llm            the records as the model changed them (v0.18.0: 5 October, from 11:36 until p50o)
+    rules          the rules' records only
 
 and adds to every record what the site shows about how sure the automation is:
 
-    assembly     "rules, checked by the model" or "rules (not yet checked by the model)"
+    assembly     "rules (not yet checked by the model)", "rules, checked by the model: agrees",
+                 "rules, checked by the model: disagrees (see the flags)" (prefer llm: "rules, checked by the model"
+                 with " (changed)")
     confidence   the model's lowest confidence on the record's boxes (None until checked)
-    flags        the rules' own notes, each change the model made to the record, every decision the model left open
-                 on one of its boxes (s12's flags.jsonl)
-    needs_look   true when the model changed the record, left a decision on it open, or was under
-                 settings.publish.look_below sure of it
+    flags        the rules' own notes, what the model would change (or changed), every decision the model left open on
+                 one of its boxes (s12's flags.jsonl)
+    needs_look   true when the model disagrees (or changed the record), left a decision on it open, or was under
+                 settings.publish.look_below sure of one of its boxes
+    model_check  rules_flagged: {"agrees", "changes" (the model's own notes), "open"} — what the model said, kept with
+                 the record for the comparison with people's decisions
 
 When the rules' records changed after the model checked them (the cross-issue pass adds serial links), the model's
 records are first rebuilt from its stored decisions (s12 rebuild_issue; no model is asked). An issue someone has
 corrected (data/annotations/<id>.jsonl) is not written again: the corrections are replayed on the records they were
-made on. Rerun freely: an issue is written only when its source is newer than the live file.
+made on. Rerun freely: an issue is written only when one of its sources is newer than the live file, or when the live
+file was written in another mode.
 
     python3 pipeline/s13_publish.py              # every assembled corpus issue whose source changed
     python3 pipeline/s13_publish.py --issue <id>
@@ -31,6 +42,7 @@ made on. Rerun freely: an issue is written only when its source is newer than th
 import argparse
 import json
 import os
+import re
 import sys
 import time
 
@@ -39,6 +51,7 @@ from corpus_lib import ROOT, settings, all_states, event, log, write_json_atomic
 
 LIVE = os.path.join(ROOT, "data", "articles")
 ANN = os.path.join(ROOT, "data", "annotations")
+MODES = ("rules_flagged", "llm", "rules")
 
 
 def _mt(p):
@@ -48,18 +61,37 @@ def _mt(p):
         return 0.0
 
 
-def _open_decisions(var_dir):
-    """region key -> the open decision the model left on it (from flags.jsonl and the page keymaps)."""
-    fj, pj = os.path.join(var_dir, "flags.jsonl"), os.path.join(var_dir, "pages.jsonl")
-    if not os.path.exists(fj) or not os.path.exists(pj):
-        return {}
-    keymaps = {}
+def _page_records(var_dir):
+    pj = os.path.join(var_dir, "pages.jsonl")
+    if not os.path.exists(pj):
+        return []
+    out = []
     for line in open(pj, encoding="utf-8"):
         try:
-            r = json.loads(line)
-            keymaps[r["page"]] = r.get("keymap") or {}
+            out.append(json.loads(line))
         except Exception:
             pass
+    return out
+
+
+def _decisions(page_records):
+    """region key -> (joins, confidence): the model's final decision on every box (pages.jsonl)."""
+    out = {}
+    for r in page_records:
+        km = r.get("keymap") or {}
+        for k, b in (r.get("boxes") or {}).items():
+            i = km.get(str(k))
+            if i is not None and isinstance(b, dict):
+                out[f"{r['page']}:{i}"] = (b.get("joins"), float(b.get("confidence") or 0.0))
+    return out
+
+
+def _open_decisions(var_dir, page_records=None):
+    """region key -> the open decision the model left on it (from flags.jsonl and the page keymaps)."""
+    fj = os.path.join(var_dir, "flags.jsonl")
+    if not os.path.exists(fj):
+        return {}
+    keymaps = {r["page"]: r.get("keymap") or {} for r in (page_records if page_records is not None else _page_records(var_dir))}
     out = {}
     for line in open(fj, encoding="utf-8"):
         try:
@@ -78,80 +110,213 @@ def _open_decisions(var_dir):
     return out
 
 
-def annotate(doc, source, open_dec, look_below):
-    """Every record gets assembly, confidence, flags and needs_look (see the module's docstring)."""
+class Labels:
+    """Region key "12:3" -> the workbench's name of the box, "12D" (page 12, fourth box in reading order)."""
+
+    def __init__(self, iid):
+        self.iid, self.pages = iid, {}
+
+    def __call__(self, key):
+        try:
+            pno, idx = map(int, key.split(":"))
+        except ValueError:
+            return key
+        if pno not in self.pages:
+            try:
+                regs = json.load(open(os.path.join(ROOT, "data", "layout", self.iid, f"page_{pno:04d}.json"), encoding="utf-8")).get("regions", [])
+                order = sorted(range(len(regs)), key=lambda r: regs[r].get("order", r))
+                self.pages[pno] = {r: i for i, r in enumerate(order)}
+            except Exception:
+                self.pages[pno] = {}
+        i = self.pages[pno].get(idx)
+        return key if i is None else f"{pno}{chr(65 + i) if i < 26 else 'Z' + str(i)}"
+
+
+def plain(change, labels, titles):
+    """One of the model's change notes (s12 build_records) as a sentence for the site, about what the model would do."""
+    def lab(m):
+        return labels(m.group(0))
+    def name(aid):
+        t = titles.get(aid)
+        return f"“{t}”" if t else "another record"
+    m = re.match(r"^split at (\d+:\d+): the rest is \S+ \(([\d.]+)\)$", change)
+    if m:
+        return f"the model would split this record: a new piece begins at {labels(m.group(1))} (sure {m.group(2)})"
+    m = re.match(r"^(\d+:\d+) out as advertising \(([\d.]+)\)$", change)
+    if m:
+        return f"the model would move box {labels(m.group(1))} out of this record as advertising (sure {m.group(2)})"
+    m = re.match(r"^(\d+:\d+) out as furniture \(([\d.]+)\)$", change)
+    if m:
+        return f"the model would move box {labels(m.group(1))} out of this record as page furniture (sure {m.group(2)})"
+    m = re.match(r"^(\d+:\d+) out: a piece begins there \(([\d.]+)\)$", change)
+    if m:
+        return f"the model would move box {labels(m.group(1))} out of this record: a new piece begins there (sure {m.group(2)})"
+    m = re.match(r"^(\d+:\d+) out: it continues (\S+) \(([\d.]+)\)$", change)
+    if m:
+        return f"the model would move box {labels(m.group(1))} to {name(m.group(2))}, which it continues (sure {m.group(3)})"
+    m = re.match(r"^(\d+:\d+) in \((\w+), ([\d.]+)\)$", change)
+    if m:
+        how = {"previous": "it reads the box as continuing this text", "caption": "as a caption", "notice": "as a notice"}.get(m.group(2), m.group(2))
+        return f"the model would add box {labels(m.group(1))} to this record ({how}; sure {m.group(3)})"
+    m = re.match(r"^(\S+) joined at (\d+:\d+) \(([\d.]+)\)$", change)
+    if m:
+        return f"the model would join {name(m.group(1))} to this record at box {labels(m.group(2))} (sure {m.group(3)})"
+    return "the model would change this record: " + re.sub(r"\b\d+:\d+\b", lab, change)
+
+
+def model_view(iid, rules_doc, llm_doc, page_records, open_dec):
+    """For each of the rules' records: does the model agree with it, what would it change, which decisions did it leave
+    open, how sure was it (its lowest confidence on the record's boxes)."""
+    dec = _decisions(page_records)
+    labels = Labels(iid)
+    titles = {a["article_id"]: a.get("title") for a in rules_doc.get("articles", [])}
+    by_id = {a["article_id"]: a for a in llm_doc.get("articles", [])}
+    joined = {}                                            # rules id -> (the record it would join, box, confidence)
+    for a in llm_doc.get("articles", []):
+        for c in (a.get("llm") or {}).get("changes", []):
+            m = re.match(r"^(\S+) joined at (\d+:\d+) \(([\d.]+)\)$", c)
+            if m:
+                joined[m.group(1)] = (a, m.group(2), m.group(3))
+    out = {}
+    for R in rules_doc.get("articles", []):
+        aid = R["article_id"]
+        keys = [f"{f['page']}:{i}" for f in R.get("fragments", []) for i in f.get("region_ids", [])]
+        confs = [dec[k][1] for k in keys if k in dec]
+        L = by_id.get(aid)
+        raw = []
+        if L is not None and (L.get("llm") or {}).get("kept"):
+            agrees, notes = True, []
+        elif L is not None:
+            agrees = False
+            raw = [c for c in (L.get("llm") or {}).get("changes", [])
+                   if not c.startswith(("split from", "advertising from", "a piece begins at", "text before any title"))]
+            notes = [plain(c, labels, titles) for c in raw] or ["the model would change this record (its boxes differ from the rules')"]
+        elif aid in joined:
+            agrees = False
+            P, k, c = joined[aid]
+            raw = [f"{aid} joined to {P['article_id']} at {k} ({c})"]
+            notes = [f"the model would join this record to “{P.get('title') or titles.get(P['article_id']) or 'the piece before it'}” "
+                     f"at box {labels(k)} (sure {c})"]
+        else:
+            agrees = False
+            notes = ["the model would take this record apart: none of its boxes stays together as one piece"]
+        opens = [open_dec[k] for k in keys if k in open_dec]
+        out[aid] = {"agrees": agrees, "notes": notes, "changes": raw, "open": opens,
+                    "confidence": round(min(confs), 3) if confs else None}
+    return out
+
+
+def annotate(doc, source, look_below, view=None, open_dec=None):
+    """Every record gets assembly, confidence, flags and needs_look (see the module's docstring). Returns the number of
+    records that need a look."""
     n_look = 0
+    open_dec = open_dec or {}
     for r in doc.get("articles", []):
-        llm = r.get("llm") or {}
         flags = list(r.get("flags") or [])
-        if source == "llm":
+        if source == "rules+model":
+            v = (view or {}).get(r["article_id"]) or {"agrees": True, "notes": [], "changes": [], "open": [], "confidence": None}
+            r["assembly"] = "rules, checked by the model: " + ("agrees" if v["agrees"] else "disagrees (see the flags)")
+            r["confidence"] = v["confidence"]
+            flags += v["notes"] + [f"the model left a decision open — {o}" for o in v["open"]]
+            r["model_check"] = {"agrees": v["agrees"], "changes": v["changes"], "open": len(v["open"])}
+            r["needs_look"] = bool((not v["agrees"]) or v["open"] or (v["confidence"] is not None and v["confidence"] < look_below))
+        elif source == "llm":
+            llm = r.get("llm") or {}
             r["assembly"] = "rules, checked by the model" + (" (changed)" if not llm.get("kept", True) else "")
             conf = llm.get("confidence_min")
             r["confidence"] = round(float(conf), 3) if conf is not None else None
             changes = [c for c in llm.get("changes", []) if not c.startswith("split from") and not c.startswith("advertising from")]
-            flags += [f"model: {c}" for c in changes]
+            keys = [f"{f['page']}:{i}" for f in r.get("fragments", []) for i in f.get("region_ids", [])]
+            opens = [open_dec[k] for k in keys if k in open_dec]
+            flags += [f"model: {c}" for c in changes] + [f"model: {o}" for o in opens]
+            r["needs_look"] = bool(changes or opens or (r["confidence"] is not None and r["confidence"] < look_below))
         else:
             r["assembly"] = "rules (not yet checked by the model)"
             r["confidence"] = None
-            changes = []
-        keys = [f"{f['page']}:{i}" for f in r.get("fragments", []) for i in f.get("region_ids", [])]
-        opens = [open_dec[k] for k in keys if k in open_dec]
-        flags += [f"model: {o}" for o in opens]
+            r["needs_look"] = False
         r["flags"] = flags
-        r["needs_look"] = bool(changes or opens or (r["confidence"] is not None and r["confidence"] < look_below))
         n_look += r["needs_look"]
     return n_look
 
 
-def publish_issue(iid, prefer="llm", look_below=0.9, force=False):
-    """Write data/articles/<iid>/articles.json from the best assembly. Returns (what, source, records, needs_look)."""
+def publish_issue(iid, mode="rules_flagged", look_below=0.9, force=False):
+    """Write data/articles/<iid>/articles.json. Returns (what, source, records, needs_look)."""
+    mode = mode if mode in MODES else "rules_flagged"
     rules_p = os.path.join(ROOT, "data", "assembly_v2", "rules", iid, "articles.json")
     llm_dir = os.path.join(ROOT, "data", "assembly_v2", "llm", iid)
     llm_p = os.path.join(llm_dir, "articles.json")
+    pages_p, flags_p = os.path.join(llm_dir, "pages.jsonl"), os.path.join(llm_dir, "flags.jsonl")
     live_dir = os.path.join(LIVE, iid)
     live_p = os.path.join(live_dir, "articles.json")
     if not os.path.exists(rules_p):
         return "no assembly", None, 0, 0
     if os.path.exists(live_p) and os.path.exists(os.path.join(ANN, f"{iid}.jsonl")):
         return "held (corrected by a person)", None, 0, 0
-    source, src_p = "rules", rules_p
-    if prefer == "llm" and os.path.exists(llm_p):
-        if _mt(rules_p) > _mt(llm_p):                  # the rules' records changed after the check (cross-issue links)
-            try:
-                import s12_llm_link as s12
-                s12.rebuild_issue(iid, "llm")
-            except Exception as e:
-                log("s13", f"{iid}: the model's records could not be rebuilt on the new rules' records ({e!r}); the rules' are published")
-        if _mt(llm_p) >= _mt(rules_p):
-            source, src_p = "llm", llm_p
-    newest = max(_mt(src_p), _mt(os.path.join(llm_dir, "flags.jsonl")) if source == "llm" else 0.0)
+    checked = mode != "rules" and os.path.exists(llm_p) and os.path.exists(pages_p)
+    if checked and _mt(rules_p) > _mt(llm_p):          # the rules' records changed after the check (cross-issue links)
+        try:
+            import s12_llm_link as s12
+            s12.rebuild_issue(iid, "llm")
+        except Exception as e:
+            log("s13", f"{iid}: the model's records could not be rebuilt on the new rules' records ({e!r}); the rules' alone are published")
+            checked = False
+        checked = checked and _mt(llm_p) >= _mt(rules_p)
+    if mode == "llm" and checked:
+        source, src_p = "llm", llm_p
+    elif mode == "rules_flagged" and checked:
+        source, src_p = "rules+model", rules_p
+    else:
+        source, src_p = "rules", rules_p
+    newest = max(_mt(rules_p), *((_mt(llm_p), _mt(pages_p), _mt(flags_p)) if checked else (0.0,)))
+    side_p = os.path.join(live_dir, "published.json")       # a small note of how the live file was made (read every cycle)
     if not force and os.path.exists(live_p) and _mt(live_p) >= newest:
-        return "current", source, 0, 0
+        try:
+            pub = json.load(open(side_p, encoding="utf-8"))
+        except Exception:
+            pub = {}                                         # written before p50o: made again in the current mode
+        if pub.get("mode") == mode and pub.get("source") == source:
+            return "current", source, 0, 0
     doc = json.load(open(src_p, encoding="utf-8"))
-    n_look = annotate(doc, source, _open_decisions(llm_dir) if source == "llm" else {}, look_below)
-    doc["published"] = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "source": source,
-                        "from": os.path.relpath(src_p, ROOT), "by": "pipeline/s13_publish.py"}
+    if source == "rules+model":
+        prs = _page_records(llm_dir)
+        open_dec = _open_decisions(llm_dir, prs)
+        view = model_view(iid, doc, json.load(open(llm_p, encoding="utf-8")), prs, open_dec)
+        n_look = annotate(doc, source, look_below, view=view)
+    elif source == "llm":
+        n_look = annotate(doc, source, look_below, open_dec=_open_decisions(llm_dir))
+    else:
+        n_look = annotate(doc, source, look_below)
+    doc["published"] = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "mode": mode, "source": source,
+                        "from": [os.path.relpath(p, ROOT) for p in ((rules_p, llm_dir) if source == "rules+model" else (src_p,))],
+                        "by": "pipeline/s13_publish.py"}
     os.makedirs(live_dir, exist_ok=True)
     write_json_atomic(live_p, doc)
+    write_json_atomic(side_p, dict(doc["published"], records=len(doc.get("articles", [])), needs_look=n_look))
     return "published", source, len(doc.get("articles", [])), n_look
 
 
 def publish_all(force=False):
-    """Every assembled corpus issue whose source is newer than its live file. Returns counts."""
+    """Every assembled corpus issue whose source is newer than its live file (or written in another mode). Returns
+    counts."""
     cfg = settings().get("publish", {})
-    prefer, look_below = cfg.get("prefer", "llm"), float(cfg.get("look_below", 0.9))
+    mode, look_below = cfg.get("prefer", "rules_flagged"), float(cfg.get("look_below", 0.9))
     from corpus_lib import corpus_config
     states = all_states()
-    counts = {"published": 0, "current": 0, "held": 0, "from_llm": 0, "from_rules": 0, "needs_look": 0}
+    counts = {"mode": mode, "published": 0, "current": 0, "held": 0, "from_rules_and_model": 0, "from_llm": 0, "from_rules": 0,
+              "needs_look": 0}
+    seen = set()
     for i in corpus_config()["issues"]:
         iid = i["id"]
+        if iid in seen:
+            continue
+        seen.add(iid)
         st = states.get(iid)
         if not st or "assembled" not in st["stages"]:
             continue
-        what, source, n, n_look = publish_issue(iid, prefer, look_below, force)
+        what, source, n, n_look = publish_issue(iid, mode, look_below, force)
         if what == "published":
             counts["published"] += 1
-            counts["from_" + source] += 1
+            counts[{"rules+model": "from_rules_and_model", "llm": "from_llm"}.get(source, "from_rules")] += 1
             counts["needs_look"] += n_look
             event("done", issue=iid, stage="published", source=source, records=n, needs_look=n_look)   # events.jsonl only: the run owns the state files
         elif what == "current":
@@ -161,14 +326,47 @@ def publish_all(force=False):
     return counts
 
 
+def selftest():
+    """The model's view of the rules' records, on a made-up issue (no files needed)."""
+    rules = {"articles": [
+        {"article_id": "t_a001", "title": "The Red Moon", "fragments": [{"page": 1, "region_ids": [1, 2]}, {"page": 3, "region_ids": [0, 1]}], "flags": []},
+        {"article_id": "t_a002", "title": "Wolves", "fragments": [{"page": 3, "region_ids": [2, 3]}], "flags": ["a rules note"]},
+        {"article_id": "t_a003", "title": "Next Month", "fragments": [{"page": 4, "region_ids": [0]}], "flags": []},
+        {"article_id": "t_a004", "title": "Letters", "fragments": [{"page": 5, "region_ids": [0, 1]}], "flags": []}]}
+    llm = {"articles": [
+        {"article_id": "t_a001", "llm": {"kept": False, "changes": ["split at 3:1: the rest is t_a9001 (0.97)", "t_a002 joined at 3:2 (0.96)"]}},
+        {"article_id": "t_a9001", "llm": {"kept": False, "changes": ["split from t_a001 at 3:1 (0.97)"]}},
+        {"article_id": "t_a003", "llm": {"kept": True, "changes": []}},
+        {"article_id": "t_a004", "llm": {"kept": False, "changes": ["5:1 out as advertising (0.98)"]}}]}
+    prs = [{"page": 1, "keymap": {"1": 1, "2": 2}, "boxes": {"1": {"joins": "new", "confidence": 0.99}, "2": {"joins": "previous", "confidence": 0.97}}},
+           {"page": 4, "keymap": {"1": 0}, "boxes": {"1": {"joins": "new", "confidence": 0.8}}}]
+    v = model_view("selftest_no_such_issue", rules, llm, prs, {"5:0": "open decision, page 5: first reading new (0.90), second previous (0.70)"})
+    assert not v["t_a001"]["agrees"] and len(v["t_a001"]["notes"]) == 2 and "split" in v["t_a001"]["notes"][0], v["t_a001"]
+    assert "join" in v["t_a002"]["notes"][0] and "The Red Moon" in v["t_a002"]["notes"][0], v["t_a002"]
+    assert v["t_a003"]["agrees"] and v["t_a003"]["confidence"] == 0.8, v["t_a003"]
+    assert not v["t_a004"]["agrees"] and "advertising" in v["t_a004"]["notes"][0] and v["t_a004"]["open"], v["t_a004"]
+    assert v["t_a001"]["confidence"] == 0.97
+    doc = json.loads(json.dumps(rules))
+    n = annotate(doc, "rules+model", 0.9, view=v)
+    a = {r["article_id"]: r for r in doc["articles"]}
+    assert n == 4 and a["t_a003"]["needs_look"] and a["t_a003"]["assembly"].endswith("agrees"), (n, a["t_a003"])   # agrees, but only 0.8 sure
+    assert a["t_a002"]["flags"][0] == "a rules note" and a["t_a001"]["assembly"].endswith("(see the flags)")
+    assert a["t_a004"]["model_check"] == {"agrees": False, "changes": ["5:1 out as advertising (0.98)"], "open": 1}
+    print("s13 selftest ok")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--issue")
     ap.add_argument("--force", action="store_true", help="write even when the live file is current")
+    ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args()
+    if args.selftest:
+        selftest()
+        return
+    cfg = settings().get("publish", {})
     if args.issue:
-        cfg = settings().get("publish", {})
-        print(publish_issue(args.issue, cfg.get("prefer", "llm"), float(cfg.get("look_below", 0.9)), args.force))
+        print(publish_issue(args.issue, cfg.get("prefer", "rules_flagged"), float(cfg.get("look_below", 0.9)), args.force))
         return
     c = publish_all(args.force)
     log("s13", "publish: " + json.dumps(c))

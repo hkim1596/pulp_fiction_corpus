@@ -595,3 +595,59 @@ once); the site restarted on v0.18.0. PASTE 8u: the refresh's numbers, the follo
 pilot score.
 
 (Next entries: the first refresh cycles; the follower's pace; the p50m pilot score.)
+
+### 2026-10-05, 11:50 KST — the p50m pilot score; Heejin: the rules' records, with the model's view as flags (p50o, site v0.18.1)
+
+PASTE 8s committed p50n (88431b3). PASTE 8t (11:36): the job of 10:29 had finished the p50m pilot at 10:45, scored it,
+and begun the 100-issue p50m trial, which 8t stopped (its folder llm_trial_qwen14b_p50m stays, unfinished);
+data/assembly_v2/llm became llm_pilot_p50k; the pilot runs were scored side by side; the follower (s12 --follow) began
+at 11:36; tmux siterefresh began at 11:36; the site restarted on v0.18.0. PASTE 8u (11:37): the first refresh cycle was
+still running (it had published the rules' records of 432 issues; the explorer database was still the old one). By 11:39
+the public front page showed 443 issues read, 17,162 records, 4,121 stories and 35,849,273 words of story text —
+and 22 records verified: the explorer still read the pilot's export of 31 August, made before the 74 verifications of 8
+September (fixed in p50o). The corpus run at 11:37: 2,409 issues downloaded, 433 read and assembled, 167.7 downloads
+and 30.9 readings an hour, 2,431 GB free, nothing given up.
+
+The pilot score (data/assembly_v2/eval_pilot_all.txt; every model run rebuilt with the p50m builder: the model's
+decisions applied to the rules' records):
+
+    run              exact of 74   overlap   clean of 108   cover   chapter splits   records   stories without author
+    rules                 65         0.99         106        0.95          2            588              4
+    llm_pilot_p50k        48         0.96          99        0.80         16            643             16
+    llm_pilot_p50l        51         0.95          99        0.91         16            613             12
+    llm_pilot_p50m        50         0.97         103        0.88          5            617             11
+
+(live — the assembly people corrected — 62 exact; rules_on_model as rules.) The p50m prompt and hints (a piece begins
+only at its record's first box; a resumption after another piece is named as such) cut the chapter splits from 16 to 5,
+but the model's changes still lose against the rules alone: 15 fewer verified records exactly right, 29 more records,
+7 more stories without an author. The pilot is the rules' home ground (they were written on these issues), so this does
+not say what the model does on corpus issues; it says the model's changes cannot be taken as they come.
+
+The question put to Heejin at 11:40, with these numbers: which version should the website show as each corpus record —
+"Rules + model flags (Recommended): Show the rules' records. Where the model disagrees, mark the record 'needs a look'
+and say what the model would change. A person decides; those decisions later tell us whether the model or the rules is
+right more often on corpus issues." or "Model's changes (as now)". Heejin: "Rules + model flags (Recommended)".
+
+p50o and site v0.18.1:
+- s13 publishes in the mode settings.publish.prefer = rules_flagged: the rules' records, each compared with the model's
+  reading of its boxes. A record the model would keep as it is: "rules, checked by the model: agrees". A record the
+  model would change: "rules, checked by the model: disagrees (see the flags)", the record unchanged, and in its flags
+  what the model would do, in plain words and with the workbench's names of the boxes ("the model would split this
+  record: a new piece begins at 12F (sure 0.98)"; "… move box 14C out of this record as advertising …"; "… join this
+  record to “The Red Moon” at box 15A …"). The confidence is the model's lowest on the record's boxes. A record needs a
+  look when the model disagrees, left a decision on it open, or was under 0.9 sure of one of its boxes. What the model
+  said stays with the record (model_check: agrees, its own change notes, open decisions), for the comparison with
+  people's decisions. The modes llm (the model's records, v0.18.0) and rules (the rules' alone) remain. A small note,
+  data/articles/<id>/published.json, says how each live file was made; the files v0.18.0 made from the model's records
+  are made again in the new mode in the first cycle.
+- r00 --pilot-live, run by the refresh: the pilot's file for the explorer (data/pilot_stories.jsonl) is written again
+  when a pilot issue's records or corrections change, so the explorer counts the pilot's verified records as they are
+  (the reuse stages' inputs, data/export/stories.jsonl and paratext.jsonl, are left to a reuse run).
+- The explorer counts the records the model disagrees with and the records people verified; /run shows them with the
+  last refresh. The workbench's wording says that a record the model disagrees with keeps the rules' form.
+- The follower (s12 --follow) is not changed and keeps running.
+
+PASTE 8v (Mac) commits p50o; 8w (server) restarts the refresh and the site; 8x shows the refresh's numbers and, on the
+pilot, which kinds of the model's changes broke records the rules had right (the first list for improving the model).
+
+(Next entries: the refresh's numbers; the model's pace against the reading's; the kinds of change that broke records.)

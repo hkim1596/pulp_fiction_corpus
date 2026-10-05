@@ -212,8 +212,11 @@ def board_html(compact=False):
     if rf:
         out.append(f"<p class='fine'>The site's own database (authors, magazines, issues, stories, the workbench list) was last rebuilt "
                    f"{_esc(rf.get('ts', ''))} in {rf.get('build_seconds', '?')} s: {rf.get('records', 0):,} records of {rf.get('issues_assembled', 0):,} "
-                   f"assembled issues, {rf.get('needs_look', 0):,} of them flagged for a look; it is rebuilt every few minutes "
-                   "(scripts/site_refresh.py).</p>")
+                   f"assembled issues and the ten pilot issues; {rf.get('model_checked', 0):,} checked by the language model, which "
+                   f"disagrees with {rf.get('model_disagrees', 0):,}; {rf.get('needs_look', 0):,} flagged for a look; "
+                   f"{rf.get('verified', 0):,} verified by people. It is rebuilt every few minutes (scripts/site_refresh.py). Where the "
+                   "model disagrees, the record stays as the rules made it and its flags say what the model would change "
+                   "(Heejin's choice after the pilot score, 5 October).</p>")
     gu = p.get("given_up") or {}
     ev = stage_counts()
     out.append("<p class='fine'>Given up after retries: " + (", ".join(f"{_esc(k)} {v}" for k, v in gu.items()) if gu else "none")

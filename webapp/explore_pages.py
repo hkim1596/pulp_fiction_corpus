@@ -295,9 +295,19 @@ def build_db(sig, path, log=None):
     D = _G["DATA"]
     t0 = time.time()
     say = log or (lambda *a: None)
-    tmp = path + ".building"
-    if os.path.exists(tmp):
-        os.remove(tmp)
+    for old in glob.glob(path + ".building*"):        # a build stopped half-way leaves its file; another one may be running
+        pid = old.rsplit(".", 1)[-1]
+        if pid.isdigit():
+            try:
+                os.kill(int(pid), 0)
+                continue                                   # that build is still running: its file stays
+            except OSError:
+                pass
+        try:
+            os.remove(old)
+        except OSError:
+            pass
+    tmp = path + f".building.{os.getpid()}"               # one file per build: two builds at once cannot mix their rows
     con = sqlite3.connect(tmp)
     con.execute("PRAGMA journal_mode=OFF")
     con.execute("PRAGMA synchronous=OFF")
@@ -602,7 +612,9 @@ def build_db(sig, path, log=None):
               "house_excerpts": sum(1 for row in rec_rows if row[29]),
               "corpus_issues": n_corpus, "corpus_issues_shown_as_pilot": len(also_pilot),
               "needs_look": sum(1 for row in rec_rows if row[-1]),
-              "model_checked": sum(1 for row in rec_rows if (row[-2] or "").startswith("rules, checked"))}
+              "model_checked": sum(1 for row in rec_rows if (row[-2] or "").startswith("rules, checked")),
+              "model_disagrees": sum(1 for row in rec_rows if "disagrees" in (row[-2] or "") or "(changed)" in (row[-2] or "")),
+              "verified": sum(1 for row in rec_rows if row[19] == "verified")}
     meta = {"signature": _signature(sig), "built": time.strftime("%Y-%m-%d %H:%M:%S"),
             "build_seconds": round(time.time() - t0, 2), "counts": json.dumps(counts),
             "sources": json.dumps([os.path.relpath(p, _G["ROOT"]) for p, _, _ in sig]),
@@ -610,7 +622,7 @@ def build_db(sig, path, log=None):
             "summary": json.dumps(_json(os.path.join(D, "reuse", "background", "summary_machine.json")) or {}),
             "overlap": json.dumps(_json(os.path.join(D, "reuse", "machine_region_overlap.json")) or {}),
             "survey": json.dumps(_json(os.path.join(D, "survey", "summary.json")) or {}),
-            "corpus_included": "true", "version": "0.18.0"}
+            "corpus_included": "true", "version": "0.18.1"}
     con.executemany("INSERT INTO meta VALUES (?,?)", list(meta.items()))
     con.commit()
     con.close()

@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.18.0"
+APP_VERSION = "0.18.1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -188,6 +188,10 @@ def automation_cells(a):
     short = "rules + model" if asm.startswith("rules, checked") else ("rules" if asm else "")
     if "(changed)" in asm:
         short += " (changed)"
+    elif "disagrees" in asm:
+        short += " (disagrees)"
+    elif asm.endswith("agrees"):
+        short += " (agrees)"
     conf = a.get("confidence")
     n_fl = len(a.get("flags") or []) if not isinstance(a.get("flags"), str) else len(json.loads(a.get("flags") or "[]"))
     look = a.get("needs_look")
@@ -2559,10 +2563,14 @@ click first.</p>"""
                  f"unsorted, kept for review</p>")
         pub = doc.get("published") or {}
         how = (f"<p class='fine'>Assembled automatically: the rules engine (s08)"
-               + (", then checked box by box by the language model (s12), which kept or changed each record" if pub.get("source") == "llm" else "")
+               + (", then checked box by box by the language model (s12), which kept or changed each record" if pub.get("source") == "llm" else
+                  ", then checked box by box by the language model (s12); where the model disagrees, the record stays as the rules "
+                  "made it and what the model would change is listed in its flags, for a person to decide (on the pilot the rules "
+                  "alone were right more often)" if pub.get("source") == "rules+model" else
+                  " (not yet checked by the language model)")
                + f"; on this site since {esc(pub.get('ts', '')[:16].replace('T', ' '))}. The confidence is the model's lowest on the "
-               "record's boxes; ⚑ marks a record the model changed, left a decision open on, or was unsure of — the ones to look at "
-               "first.</p>") if pub else ""
+               "record's boxes; ⚑ marks a record the model disagrees with, left a decision open on, or was unsure of — the ones to "
+               "look at first.</p>") if pub else ""
         return (f"<h2>Articles in this issue ({len(doc['articles'])})</h2>" + how +
                 "<table><tr><th>Title as printed</th><th>Author</th>"
                 "<th>Type</th><th>Status</th><th>Assembly</th><th>Confidence</th><th>Flags</th><th>Pages</th></tr>"
@@ -2767,7 +2775,8 @@ click first.</p>"""
         body = (howto(
             "Every separately printed unit — stories, serial instalments, poems, features, letters pages, advertisements — of every "
             "issue on the site: the ten pilot issues and the corpus run's issues as they are assembled. Each row says how the "
-            "automation made the record (the rules engine, and whether the language model checked it and kept or changed it), the "
+            "automation made the record (the rules engine, and whether the language model has checked it and agrees or disagrees; "
+            "where it disagrees, the record stays as the rules made it and the flags say what the model would change), the "
             "model's lowest confidence on its boxes, and its flags; ⚑ marks the records the automation is least sure of. Choose "
             "'needs a look' to see those first. Click a title to view it on the scans — and, with an annotator account, to fix and "
             "verify it; every correction is kept and replayed, and the corrections are what the rules and the model are improved from.")

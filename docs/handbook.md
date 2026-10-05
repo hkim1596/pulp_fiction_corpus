@@ -126,6 +126,18 @@ record's own annotation history shows live events only. A rebuild of
 the explorer that fails on a half-written source file (a pipeline stage
 still running) keeps the old database and retries.
 
+Since v0.18.1 (2026-10-05, p50o; Heejin's choice after the pilot score,
+on which the rules alone were exactly right on 65 of the 74 verified
+records and the rules as the model changed them on 50): a corpus record
+on the site is the rules' record; s13 compares it with the model's
+reading of its boxes ("rules, checked by the model: agrees" or
+"… disagrees (see the flags)") and lists what the model would change in
+its flags, for a person to decide; settings.publish.prefer =
+rules_flagged (llm and rules remain as modes). The refresh also writes
+the pilot's file for the explorer again when the pilot's corrections
+change (r00 --pilot-live), so the explorer counts the pilot's verified
+records as they are.
+
 Since v0.18.0 (2026-10-05, Heejin: "What I expect is whole corpus now
 run on the same way … It must lively update eveything."): the corpus
 issues are on the site as the pilot's are. pipeline/s13_publish.py
@@ -820,11 +832,14 @@ duplicate rule and its known limits. In short:
                       images reaped under 400 GB free; progress.json every
                       minute; a STOP file or Ctrl-C stops it, --run resumes.
     s13_publish       the corpus issues on the website (2026-10-05): each
-                      assembled issue's live records from the model-checked
-                      or the rules' assembly, with assembly, confidence,
-                      flags and needs_look; an issue someone corrected is
-                      held. Run by scripts/site_refresh.py every five
-                      minutes, with r00 --corpus and the explorer build.
+                      assembled issue's live records — the rules' records,
+                      checked against the model's reading (p50o: what the
+                      model would change goes into the flags) — with
+                      assembly, confidence, flags, needs_look and
+                      model_check; an issue someone corrected is held. Run
+                      by scripts/site_refresh.py every five minutes, with
+                      r00 --corpus, r00 --pilot-live and the explorer
+                      build. --selftest.
     s12_llm_link      the box-linking stage (2026-10-04; reworked in
                       p50k and p50l, 2026-10-05): a language model decides,
                       box by box, what kind of box it is and whether a

@@ -213,7 +213,7 @@ Measured in the first trial (5 October): first-reading answers 47 s each with 48
 page overall, which would take about 13 days for the corpus (980,000 pages) on one lane. p50l shortens the answers
 (a reason only when unsure) and adds the second reading for the doubtful boxes; the second trial measures both.
 
-## The website, live (s13, scripts/site_refresh.py; site v0.18.0, 5 October)
+## The website, live (s13, scripts/site_refresh.py; site v0.18.0 and v0.18.1, 5 October)
 
 Heejin: "What I expect is whole corpus now run on the same way. Show them by authors, Magazines, issues, and stories.
 And Workbench shows how they are assembled automatically, and show confidence scores and flags when automation is not so
@@ -230,8 +230,17 @@ Three processes keep the site current, each in its own tmux session on the serve
 - `siterefresh` — scripts/site_refresh.py: every 5 minutes s13 publishes the assembled issues whose assembly is newer than
   their live records (data/articles/<id>/articles.json, with assembly, confidence, flags and needs_look on every record;
   an issue someone corrected is held), r00 --corpus exports the issues whose records or corrections changed
-  (data/export/corpus/<id>.jsonl), and the explorer database is rebuilt from the exports and moved into place. Stop it
-  with `touch data/corpus/STOP_SITE`. The site itself only reads (data/explorer.static).
+  (data/export/corpus/<id>.jsonl) and the pilot's file for the explorer when the pilot's corrections changed
+  (data/pilot_stories.jsonl), and the explorer database is rebuilt from the exports and moved into place. Stop it with
+  `touch data/corpus/STOP_SITE`. The site itself only reads (data/explorer.static).
+
+What a corpus record is on the site (Heejin's choice, 5 October, 11:40, after the pilot score: on the 74 records people
+verified, the rules alone were exactly right on 65, the rules as the model changed them on 50): the rules' record. The
+model's reading of its boxes is compared with it: "rules, checked by the model: agrees", or "… disagrees (see the
+flags)" with what the model would change in the flags, for a person to decide. Such a record, one with a decision the
+model left open, and one with a box the model was under 0.9 sure of need a look. settings.publish.prefer holds the
+choice (rules_flagged; llm would publish the model's records, rules the rules' alone); a change there is applied to
+every issue at the next refresh.
 
 What a person sees: Authors, Magazines, Issues and Stories cover every assembled issue; the Workbench list (/articles)
 shows every record with how it was assembled, the model's confidence and its flags, and a filter for the records that
