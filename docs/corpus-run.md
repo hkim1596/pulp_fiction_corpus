@@ -140,67 +140,71 @@ item is never merged; `format` is "unknown" for every issue because pulp or dige
 archive's records — the imaging step records the master's pixel size and the nominal dpi, and a later pass can set
 the format from the measured trim size (the dpi values are unreliable: one 1904 weekly claims 96 dpi).
 
-## The box-linking stage (s12_llm_link), decided 4 October; reworked after the first trial (p50k, 5 October)
+## The box-linking stage (s12_llm_link), decided 4 October; reworked after the first trial (p50k and p50l, 5 October)
 
-Heejin: "After layout detection let the high performance LLM read the content and decide whether a box is
-connected to the next one or not. If the local LLM is not sure about it, let it use Fable or Opus API. If it is
+Heejin, 4 October: "After layout detection let the high performance LLM read the content and decide whether a box
+is connected to the next one or not. If the local LLM is not sure about it, let it use Fable or Opus API. If it is
 still uncertain let it flag it and a human solve the case. Let's have this system built." — "Use GPU 2. trial
-first."
+first." On 5 October, after the first trial: "Using api costs too much. Was there any gain by using it? Let the
+local model do the job as much as possible and if unavoidable let it flag them for a person."
 
-`pipeline/s12_llm_link.py` runs after the assembly. For every page a language model sees the page's text boxes
-in reading order (label, position, the head and tail of the text; shorter on pages of more than 60 boxes), the
+`pipeline/s12_llm_link.py` runs after the assembly. For every page a language model sees the page's text boxes in
+reading order (label, position, the head and tail of the text; shorter on pages of more than 60 boxes), the
 editorial piece the rules engine had open before the page (from the rules' records, up to four pages back, so a
 story interrupted by a page of advertising is still shown as open), and the rules' decision for every box as a
 hint, and answers for every box with one of: previous (continues the open editorial piece, also across
 advertising), new (a new editorial piece: kind, title, author), advert (every box of an advertisement), caption,
-notice, furniture; with a confidence and a short reason. The pages of an issue are independent and are asked in
-parallel (48 at a time, settings.llm_link.local.page_concurrency; two issues at a time, .concurrency).
+notice, furniture; with a confidence, and a short reason when it is less than 0.95 sure. The pages of an issue are
+independent and are asked in parallel (48 at a time, settings.llm_link.local.page_concurrency; two issues at a
+time, .concurrency).
 
-Tier 1 is the local lane (a vLLM server on GPU 2, port 8023, the lab's Qwen3-14B). Its answer is held to a JSON
-schema (ANSWER_SCHEMA in the code): the server lets the model write only boxes with the allowed fields and
-values. The first trial had plain JSON mode and 24% of its answers could not be read (the model wrote a box as a
-quoted string, which is valid JSON). A lane that refuses the schema is asked for plain JSON, then for nothing,
-and the step down is logged. The answer limit grows with the page (about 60 tokens a box, at least 4,000, at most
-12,000); an answer cut off at the limit is asked again with twice the room, an unreadable one once more with a
-little randomness (temperature 0.3). Tier 2 is the Claude API with the page image (settings.llm_link.escalate:
-claude-opus-5-5, $4/$20 per million tokens; claude-fable-5-1 as the alternative, $10/$50 — ids and prices read
-on platform.claude.com on 4 October 2026), for a page with a box under thresholds.accept_local (0.85) or an
-unreadable local answer. Flagged for a person (flags.jsonl, with the reason): a page the API answered with a box
-under thresholds.accept_api (0.80); a page whose local answer was not trusted and that the API did not answer; a
-page no model answered, which keeps the rules' decisions. The API is asked without a temperature (Opus 5.5
-rejects the parameter), at most six calls at a time. It is not asked again in a run after a refusal that
-retrying cannot cure (no credit, a refused key, an unknown model) — on 5 October at 00:36 the account's credit
-ran out after $12.65 and 4,183 calls failed —, nor once the run has spent escalate.budget_usd ($50) or all runs
-together escalate.budget_total_usd ($100, data/corpus/llm_link_spend.json); those pages are flagged instead.
+Two readings, both by the local model (Qwen3-14B on GPU 2, port 8023; more lanes serving the same model can be
+listed in local.extra_lanes and are asked in turn — the lab's own lane on GPU 1 only with Heejin's leave). The
+first reading has thinking off and its answer is held to a JSON schema (ANSWER_SCHEMA in the code: the server lets
+the model write only boxes with the allowed fields and values; the first trial had plain JSON mode and 24% of its
+answers could not be read). A box the first reading is less than thresholds.accept_local (0.95) sure of, or a page
+whose answer could not be read, gets a second reading: the same model with thinking on (it reasons before it
+answers; temperature 0.6, top_p 0.95, top_k 20, as Qwen recommends for that mode), told what the first reading
+said and asked about the doubtful boxes only (local.second_pass). A doubtful box is settled when the two readings
+agree or the second is at least thresholds.accept_second (0.85) sure; the final decision is the second reading's.
+A page is flagged for a person (flags.jsonl: both readings of each open box, with its text) only when a box stays
+unsettled and one of the readings gives it previous, new or advert (thresholds.flag_joins: the decisions that move
+a piece's beginning or end or put advertising in a story); an unsettled caption, notice or furniture box takes the
+second reading without a flag. A page no reading could read keeps the rules' decisions and is flagged. The answer
+limit grows with the page (about 60 tokens a box); a cut-off answer is asked again with twice the room, an
+unreadable one once more. The calibration behind 0.95 (5 October, the first trial's 209 pages read by both the
+local model and Opus 5.5 with the page image): the two gave the same answer on 95% of the boxes the local model was
+at least 0.95 sure of (99% of the begins-or-continues decisions), on 71% at 0.85–0.95 and 44% at 0.70–0.85.
 
-Output per issue under data/assembly_v2/<variant>/<id>/: pages.jsonl (every decision with its tier, model,
-tokens, seconds, cost, how the answer ended, the format used), articles.json (the records, in the rules
-assembly's shape: "new" opens an editorial record, "previous", "caption" and "notice" join the open one,
-advertising and furniture in between leave it open, a run of "advert" boxes is one advertisement record),
+The Claude API path is kept but off (escalate.enabled false). When on, the API gives the second reading instead,
+with the page image, within escalate.budget_usd per run and escalate.budget_total_usd in all, and stops for the run
+after a refusal that retrying cannot cure. The first trial (4–5 October) used it for 322 pages ($12.65, $0.039 a
+page) before the account's credit ran out.
+
+Output per issue under data/assembly_v2/<variant>/<id>/: pages.jsonl (every decision with both readings'
+provenance: model, lane, tokens, seconds, how the answer ended, the length of the reasoning), articles.json (the
+records, in the rules assembly's shape: "new" opens an editorial record, "previous", "caption" and "notice" join the
+open one, advertising and furniture in between leave it open, a run of "advert" boxes is one advertisement record),
 flags.jsonl, compare.json; and data/assembly_v2/<variant>/summary.jsonl, one line per issue. <variant> is llm for
-the corpus and the pilot issues, llm_trial_<tag> for a trial.
+the corpus and the pilot issues, llm_trial_<tag> for a trial, llm_pilot_<tag> for a tagged pilot run.
 
 The comparison with the rules (compare.json) asks two questions apart: the kind of every box (editorial,
-advertising, furniture) and, for a box both call editorial, whether a piece begins there. The rules' side is
-computed in reading order across the issue, a piece running on across furniture and advertising. (The first
-trial compared a box with the box just before it, so a continuation after a running head counted as a rules
-"new", and boxes inside an advertisement that the model chained to its first box counted as disagreements; the
-model's hints had the same fault. Both are corrected.)
+advertising, furniture) and, for a box both call editorial, whether a piece begins there; the rules' side runs in
+reading order across the issue, a piece running on across furniture and advertising. Accuracy against people:
+s09 scores the llm variants with the others — on the pilot issues against the human-verified records and the
+contents pages (`s09_assembly_eval.py --all --variant llm_pilot_<tag> --out data/assembly_v2/eval_pilot_<tag>.json`),
+on a trial's corpus issues against the contents pages and the structural checks (`--issues-dir
+data/assembly_v2/llm_trial_<tag> --variant llm_trial_<tag>`).
 
 Runs: `--trial N --tag NAME` (the first N assembled issues; `--same-as OLD` takes the issues of trial OLD;
-resumable; report data/corpus/llm_link_trial_NAME.json with the shares of unreadable, escalated, answered and
-flagged pages, cost, the two agreements, and which decisions the local model was unsure of); `--pilot` (the ten
-pilot issues into data/assembly_v2/llm, report data/corpus/llm_link_pilot.json). Accuracy: s09 scores the llm
-variant with the others — on the pilot issues against the human-verified records and the contents pages
-(`s09_assembly_eval.py --all --out data/assembly_v2/eval_pilot_llm.json`), on a trial's corpus issues against
-the contents pages and the structural checks (`--issues-dir data/assembly_v2/llm_trial_NAME --variant
-llm_trial_NAME`). Environment overrides for a trial: PULP_LLM_THINKING=1 (Qwen's thinking mode),
-PULP_LLM_MODEL and PULP_LLM_BASE_URL (another lane).
+resumable; report data/corpus/llm_link_trial_NAME.json: pages, unreadable answers, pages asked again, doubtful boxes
+settled by agreement or by the second reading's confidence, boxes and pages flagged, the two agreements with the
+rules, seconds); `--pilot [--tag NAME]` (the ten pilot issues). Environment overrides for a trial:
+PULP_LLM_THINKING=1 (thinking for the first reading too), PULP_LLM_MODEL and PULP_LLM_BASE_URL (another lane).
 
-Measured in the first trial (5 October; docs/corpus-build-log.md): local answers 47 s each with 48 in flight,
-827 tokens out, 1.17 s a page overall; the API 10.2 s a page, 4,337 tokens in and 1,097 out, $0.039 a page with
-the image on Opus 5.5. At 15–20% of pages to the API the corpus (980,000 pages) would cost about $5,500–7,500 on
-Opus 5.5, half that on Sonnet 5.5: the second trial and the calibration decide the threshold and the model.
+Measured in the first trial (5 October): first-reading answers 47 s each with 48 in flight, 827 tokens out, 1.17 s a
+page overall, which would take about 13 days for the corpus (980,000 pages) on one lane. p50l shortens the answers
+(a reason only when unsure) and adds the second reading for the doubtful boxes; the second trial measures both.
 
 ## Decisions taken on 4 October (Heejin)
 

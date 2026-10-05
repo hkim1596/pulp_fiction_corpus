@@ -1070,10 +1070,19 @@ def progress_page(render=None):
         "annotation logs, the live ones and those archived by an assembly switch: what each "
         "annotator did per day, and how the count of verified and modified records grew. The "
         "pipeline board lists every result file the reuse pipeline has produced on this server, "
-        "with its settings and time."),
+        "with its settings and time. Above them, since v0.17.0, the corpus run on the lab server, live."),
         "<h1>Progress</h1>"]
+    # ---- the corpus run, live (data/corpus/progress.json and events.jsonl; v0.17.0)
+    CR = _G.get("CR")
+    if CR is not None:
+        try:
+            out.append(CR.board_html(compact=True))
+        except Exception as e:      # the board must never take the page down
+            out.append(f"<div class='empty'>Corpus run board unavailable: {_esc(str(e))}</div>")
     # ---- the whole process, every issue at every step (explorer database), against the survey
-    out.append("<h2>The whole process, against the archive's collection</h2>")
+    out.append("<h2>The pilot issues and the explorer, against the archive's collection</h2>"
+               "<p class='fine'>The table below follows the explorer's own issues (the pilot list until the corpus records are "
+               "exported to it); the downloaded and assembled counts of the year strip and the collection bar include the corpus run.</p>")
     EX = _G.get("EX")
     if EX is not None:
         try:

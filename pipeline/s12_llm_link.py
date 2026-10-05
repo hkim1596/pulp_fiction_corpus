@@ -25,14 +25,20 @@ page before), so they are asked in parallel. The local lane is held to the answe
 the server lets the model write only what the schema allows (24% of the first trial's answers, without it, could
 not be read: the model wrote a box as a quoted string partway through the list).
 
-Three tiers (settings.llm_link): the local lane first (a vLLM server on GPU 2); a page with any box under
-thresholds.accept_local, or whose answer could not be read, is asked again from the Claude API with the page
-image attached (escalate.model); a page the API answered with a box under thresholds.accept_api, a page whose
-local answer was not trusted and that the API did not answer, and a page no model answered (the rules' decisions
-are kept for it) are flagged for a person (flags.jsonl; the workbench). Every answer is kept with its provenance
-(tier, model, tokens, seconds, cost, how the answer ended). The API is not asked again in a run once it refuses
-for a reason that retrying will not cure (no credit, a refused key, an unknown model), once the run has spent
-escalate.budget_usd, or once the total spend of all runs reaches escalate.budget_total_usd.
+Two readings, both local (Heejin, 5 October 2026: "Using api costs too much. … Let the local model do the job as
+much as possible and if unavoidable let it flag them for a person."). The first reading (the local lane on GPU 2,
+thinking off, the answer held to a JSON schema) answers every box. A box it gives less than
+thresholds.accept_local (0.95: in the first trial the local model and Opus 5.5 agreed on 95% of such boxes, 99%
+of the piece-begins-or-continues decisions, against 44-71% below it), or a page whose answer could not be read,
+gets a second reading: the same model in its thinking mode (it reasons before it answers; Qwen's recommended
+sampling for that mode), told what the first reading said and asked about the doubtful boxes only. A doubtful box
+is settled when the two readings agree or the second is at least thresholds.accept_second (0.85) sure. A page is
+flagged for a person (flags.jsonl, with both readings of the boxes in question) only when a box stays unsettled
+and its decision changes a piece — previous, new or advert (thresholds.flag_joins); an unsettled caption, notice
+or furniture box takes the second reading without a flag. A page no model could read keeps the rules' decisions
+and is flagged. The Claude API path is kept but off (settings.llm_link.escalate.enabled false); when on, the API
+gives the second reading instead, within escalate.budget_usd per run and escalate.budget_total_usd in all, and a
+refusal that retrying cannot cure (no credit, a refused key, an unknown model) stops it for the run.
 
 Output, per issue, in the rules assembly's record shape so that the harness (s09), the audits and the export read
 it unchanged:
@@ -78,6 +84,7 @@ _summary_lock = threading.Lock()
 _api_slots = threading.Semaphore(6)                 # at most six API calls in flight (the pages of an issue are asked in parallel)
 _API = {"off": None, "run_usd": 0.0}                # off: why the API is not asked any more in this run
 _LOCAL_FMT = {"level": None}                        # the answer format the lane accepted: schema, json or none
+_LANES = {"n": 0, "models": {}}                     # round robin over the lanes; the model name each lane serves
 
 JOINS = ("previous", "new", "advert", "caption", "notice", "furniture")
 KINDS = ("story", "serial", "poem", "article", "department", "letters", "contents", "filler", "ad", "other")
@@ -99,8 +106,8 @@ notice = "Continued on page 98", "THE END", a next-issue line, belonging to the 
 furniture = running head, page number, the magazine's name.
 
 Answer with JSON only, on one line, for example:
-{"boxes":[{"k":1,"joins":"furniture","confidence":0.99,"why":"running head"},{"k":2,"joins":"new","kind":"story","title":"The Red Moon","author":"A. Merritt","confidence":0.95,"why":"display title and by-line"},{"k":3,"joins":"previous","confidence":0.97,"why":"body text of the story"}]}
-Give kind, title and author only with joins "new" and leave them out otherwise; add "page_note" only when something about the page is odd. confidence is your probability that the joins decision is right. why: at most six words. Use the rule-based decision as a hint, not as truth: when the text shows otherwise, say so. Answer every box from 1 to the last."""
+{"boxes":[{"k":1,"joins":"furniture","confidence":0.99},{"k":2,"joins":"new","kind":"story","title":"The Red Moon","author":"A. Merritt","confidence":0.97},{"k":3,"joins":"previous","confidence":0.8,"why":"could be a caption"}]}
+Give kind, title and author only with joins "new" and leave them out otherwise; add "page_note" only when something about the page is odd. confidence is your probability that the joins decision is right. Add "why" (at most six words) only when your confidence is below 0.95. Use the rule-based decision as a hint, not as truth: when the text shows otherwise, say so. Answer every box from 1 to the last, unless the request names the boxes to answer."""
 
 ANSWER_SCHEMA = {
     "type": "object",
@@ -115,7 +122,7 @@ ANSWER_SCHEMA = {
                 "author": {"type": "string"},
                 "confidence": {"type": "number"},
                 "why": {"type": "string"}},
-            "required": ["k", "joins", "confidence", "why"],
+            "required": ["k", "joins", "confidence"],
             "additionalProperties": False}},
         "page_note": {"type": "string"}},
     "required": ["boxes"],
@@ -305,6 +312,34 @@ def local_cfg():
     return cfg
 
 
+def lanes(cfg):
+    """The lanes the local model is asked on: base_url/model, then settings.llm_link.local.extra_lanes (a list of
+    {"base_url", "model"}; model "auto" = the one the lane serves), in turn."""
+    out = [(cfg["base_url"], cfg["model"])]
+    if not os.environ.get("PULP_LLM_BASE_URL"):
+        for ln in cfg.get("extra_lanes") or []:
+            out.append((ln["base_url"], ln.get("model", "auto")))
+    return out
+
+
+def lane_model(base_url, model):
+    if model != "auto":
+        return model
+    if base_url not in _LANES["models"]:
+        req = urllib.request.Request(base_url.rstrip("/") + "/models", headers={"Authorization": "Bearer EMPTY"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            _LANES["models"][base_url] = json.loads(r.read().decode("utf-8"))["data"][0]["id"]
+    return _LANES["models"][base_url]
+
+
+def next_lane(cfg):
+    ls = lanes(cfg)
+    with _state_lock:
+        _LANES["n"] += 1
+        i = _LANES["n"] % len(ls)
+    return ls[i]
+
+
 def local_max_tokens(cfg, n_boxes, thinking):
     """Room for the answer: about 60 tokens a box (the first trial: 827 tokens for 19 boxes on average), never less
     than the setting, at most max_tokens_cap (a page of 100 boxes gets 6,400)."""
@@ -324,19 +359,22 @@ def _fmt_body(level):
     return None
 
 
-def ask_local(user_text, cfg, n_boxes, temperature=None, max_tokens=None):
-    """The local lane: an OpenAI-style chat endpoint (vLLM). The answer is held to ANSWER_SCHEMA; a lane that refuses
-    the schema is asked for plain JSON, then for nothing (and the step down is kept for the rest of the run).
-    Returns (text, usage, seconds, finish_reason, format, max_tokens)."""
+def ask_local(user_text, cfg, n_boxes, temperature=None, max_tokens=None, extra=None):
+    """The local lane: an OpenAI-style chat endpoint (vLLM). Thinking off: the answer is held to ANSWER_SCHEMA, and a
+    lane that refuses the schema is asked for plain JSON, then for nothing (the step down is kept for the run).
+    Thinking on: no format (the JSON is read out of the answer after the reasoning). extra: more sampling settings
+    (top_p, top_k …). Returns a dict: text, usage, seconds, finish, format, max_tokens, reasoning_chars, lane."""
     thinking = bool(cfg.get("thinking", False))
     mt = int(max_tokens or local_max_tokens(cfg, n_boxes, thinking))
-    body = {"model": cfg["model"], "temperature": cfg.get("temperature", 0) if temperature is None else temperature,
+    base_url, model = next_lane(cfg)
+    body = {"model": lane_model(base_url, model), "temperature": cfg.get("temperature", 0) if temperature is None else temperature,
             "max_tokens": mt,
             "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user_text}],
             "chat_template_kwargs": {"enable_thinking": thinking}}
-    level = "none" if thinking else (_LOCAL_FMT["level"] or "schema")     # with thinking on, the JSON is read out of the answer
+    body.update(extra or {})
+    level = "none" if thinking else (_LOCAL_FMT["level"] or "schema")
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {cfg.get('api_key') or 'EMPTY'}"}
-    url = cfg["base_url"].rstrip("/") + "/chat/completions"
+    url = base_url.rstrip("/") + "/chat/completions"
     t0 = time.time()
     last = None
     tries = 0
@@ -347,9 +385,12 @@ def ask_local(user_text, cfg, n_boxes, temperature=None, max_tokens=None):
         else:
             body.pop("response_format", None)
         try:
-            d = _post_json(url, body, headers, cfg.get("timeout_s", 300))
+            d = _post_json(url, body, headers, cfg.get("timeout_s", 300) * (3 if thinking else 1))
             ch = d["choices"][0]
-            return (ch["message"].get("content") or ""), d.get("usage") or {}, round(time.time() - t0, 2), ch.get("finish_reason"), level, mt
+            msg = ch["message"]
+            return {"text": msg.get("content") or "", "usage": d.get("usage") or {}, "seconds": round(time.time() - t0, 2),
+                    "finish": ch.get("finish_reason"), "format": level, "max_tokens": mt, "lane": base_url,
+                    "reasoning_chars": len(msg.get("reasoning_content") or msg.get("reasoning") or "")}
         except urllib.error.HTTPError as e:
             msg = e.read()[:400].decode("utf-8", "replace")
             last = f"HTTP {e.code}: {msg}"
@@ -432,9 +473,9 @@ def ask_api(user_text, iid, pno, cfg, n_boxes, model=None):
     raise RuntimeError(f"api failed: {last}")
 
 
-def parse_answer(txt, n_boxes):
+def parse_answer(txt, n_boxes, need=None):
     """The JSON in the model's answer; lenient about text around it. Returns the dict, or None when the answer cannot
-    be read or does not cover every box (then the tier above is asked)."""
+    be read or does not cover every box asked for (need: those box numbers; default all)."""
     if not txt:
         return None
     s = re.sub(r"<think>.*?</think>", "", txt, flags=re.S).strip()
@@ -470,7 +511,11 @@ def parse_answer(txt, n_boxes):
         out[k] = {"joins": joins, "kind": kind if joins == "new" else None,
                   "title": (b.get("title") or None) if joins == "new" else None,
                   "author": (b.get("author") or None) if joins == "new" else None, "confidence": conf, "why": (b.get("why") or "")[:200]}
-    if len(out) < n_boxes:
+    if need is not None:
+        if not set(need) <= set(out):
+            return None
+        out = {k: b for k, b in out.items() if k in need}
+    elif len(out) < n_boxes:
         return None
     return {"boxes": out, "page_note": d.get("page_note")}
 
@@ -531,6 +576,81 @@ def fallback_answer(pno, keymap, rl):
     return {"boxes": boxes, "page_note": None}
 
 
+def ask_and_read(prompt, lc, n_boxes, need=None, extra=None, max_tokens=None):
+    """One reading by the local model, with one more try: a cut-off answer is asked again with twice the room, an
+    unreadable one again with a little randomness (thinking off) or a fresh sample (thinking on).
+    Returns (answer or None, info)."""
+    ans, info, res = None, {}, None
+    thinking = bool(lc.get("thinking"))
+    for attempt in (1, 2):
+        temp, mt = None, max_tokens
+        if attempt == 2:
+            if res and res["finish"] == "length":
+                mt = min(int(lc.get("max_tokens_cap", 12000)), 2 * int(res["max_tokens"]))
+                if mt <= int(res["max_tokens"]):
+                    break
+            elif not thinking:
+                temp = 0.3
+        try:
+            res = ask_local(prompt, lc, n_boxes, temperature=temp, max_tokens=mt, extra=extra)
+        except Exception as e:
+            info = {"error": str(e)[:300], "attempts": attempt}
+            break
+        ans = parse_answer(res["text"], n_boxes, need=need)
+        info = {"model": lc["model"], "thinking": thinking, "seconds": res["seconds"], "usage": res["usage"], "finish": res["finish"],
+                "format": res["format"], "max_tokens": res["max_tokens"], "reasoning_chars": res["reasoning_chars"], "attempts": attempt,
+                "lane": res["lane"], "parsed": ans is not None, "raw": None if ans else res["text"][:600]}
+        if ans is not None:
+            break
+    return ans, info
+
+
+def second_prompt(prompt, first, doubtful, n_boxes):
+    """The first reading's answers, and the boxes to look at again (or the whole page when it could not be read)."""
+    lines = [prompt, ""]
+    if first:
+        lines.append("A first, quick reading of this page answered: " + "; ".join(
+            f"[{k}] {b['joins']}" + (f" {b['kind']}" if b.get("kind") else "") + f" ({b['confidence']:.2f})"
+            for k, b in sorted(first["boxes"].items())) + ".")
+        ks = sorted(doubtful)
+        one = len(ks) == 1
+        lines.append(f"It was unsure of {'box' if one else 'boxes'} {', '.join(map(str, ks))}. Look again at {'that box' if one else 'those boxes'} "
+                     "with care — the text before and after, the boxes around it, the piece open from the previous pages — think it "
+                     f"through, and answer for {'that box' if one else 'those boxes'} only.")
+    else:
+        lines.append(f"A first, quick reading of this page could not be read. Read the page with care, think it through, and answer "
+                     f"for every box 1 to {n_boxes}.")
+    return "\n".join(lines)
+
+
+def settle(first, second, doubtful, accept_second, flag_joins, fallback):
+    """The final decision for every box after a second reading of the doubtful ones. A doubtful box is settled when
+    the two readings agree or the second is accept_second sure; an unsettled box is flagged when its decision changes
+    a piece (flag_joins), or when no reading answered it. Returns (answer, boxes to flag, counts)."""
+    base = first["boxes"] if first else fallback["boxes"]
+    final = {k: dict(b) for k, b in base.items()}
+    flag_boxes, c = {}, Counter()
+    for k in sorted(doubtful):
+        p1 = first["boxes"].get(k) if first else None
+        p2 = second["boxes"].get(k) if second else None
+        ok = False
+        if p2 is not None:
+            agreed = p1 is not None and p1["joins"] == p2["joins"]
+            final[k] = dict(p2, agreed=agreed, first=({"joins": p1["joins"], "confidence": p1["confidence"]} if p1 else None))
+            ok = agreed or p2["confidence"] >= accept_second
+            c["settled_agreement" if agreed else ("settled_confidence" if ok else "unsettled")] += 1
+        else:
+            c["unsettled"] += 1
+        if not ok:
+            j1, j2 = (p1 or {}).get("joins"), (p2 or {}).get("joins")
+            if j1 in flag_joins or j2 in flag_joins or (p1 is None and p2 is None):
+                flag_boxes[k] = {"first": p1, "second": p2}
+                c["unsettled_flagged"] += 1
+                c["unsettled_label:" + str(j2 or j1)] += 1
+    note = (second or {}).get("page_note") or (first or {}).get("page_note")
+    return {"boxes": final, "page_note": note}, flag_boxes, c
+
+
 def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, mark_stage="linked_llm"):
     log_fn = log_fn or (lambda m: log("s12", m))
     cfg = settings()["llm_link"]
@@ -557,7 +677,9 @@ def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, m
         return None
     out_dir = os.path.join(ROOT, "data", "assembly_v2", variant, iid)
     os.makedirs(out_dir, exist_ok=True)
-    acc_local, acc_api = cfg["thresholds"]["accept_local"], cfg["thresholds"]["accept_api"]
+    thr = cfg["thresholds"]
+    acc_local = thr["accept_local"]
+    flag_joins = set(thr.get("flag_joins") or ("previous", "new", "advert"))
     esc = cfg["escalate"]
     t_start = time.time()
 
@@ -568,42 +690,27 @@ def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, m
             return {"page": pno, "boxes": {}, "tier": "none", "n_boxes": 0}, None, 0.0
         rec = {"page": pno, "n_boxes": n_boxes, "keymap": {str(k): i for k, i in keymap.items()}}
         lc = local_cfg()
-        ans, info, finish, used_mt = None, {}, None, None
-        for attempt in (1, 2):                       # a second try: a larger answer limit after a cut-off answer, else a little randomness
-            temp, mt = None, None
-            if attempt == 2:
-                if finish == "length":
-                    mt = min(int(lc.get("max_tokens_cap", 12000)), 2 * int(used_mt or 0))
-                    if mt <= int(used_mt or 0):
-                        break
-                else:
-                    temp = 0.3
-            try:
-                txt, usage, secs, finish, fmt, used_mt = ask_local(prompt, lc, n_boxes, temperature=temp, max_tokens=mt)
-            except Exception as e:
-                info = {"error": str(e)[:300], "attempts": attempt}
-                break
-            ans = parse_answer(txt, n_boxes)
-            info = {"model": lc["model"], "seconds": secs, "usage": usage, "finish": finish, "format": fmt, "max_tokens": used_mt,
-                    "attempts": attempt, "parsed": ans is not None, "raw": None if ans else txt[:600]}
-            if ans is not None:
-                break
-        rec["local"] = info
-        low = [b for b in ans["boxes"].values() if b["confidence"] < acc_local] if ans else []
-        wanted = ans is None or bool(low)
-        rec["api_wanted"] = wanted
-        if low:
-            rec["low_labels"] = dict(Counter(b["joins"] for b in low))
-        tier = "local"
+        first, rec["local"] = ask_and_read(prompt, lc, n_boxes)
+        doubtful = {k for k, b in first["boxes"].items() if b["confidence"] < acc_local} if first else set(keymap)
+        rec["asked_again"] = bool(doubtful)
+        if first and doubtful:
+            rec["low_labels"] = dict(Counter(first["boxes"][k]["joins"] for k in doubtful))
         cost = 0.0
-        if wanted:
+        fallback = fallback_answer(pno, keymap, rl)
+        if not doubtful:
+            rec["tier"] = "local"
+            rec["boxes"] = {str(k): b for k, b in first["boxes"].items()}
+            rec["page_note"] = first.get("page_note")
+            return rec, None, 0.0
+        second = None
+        if esc.get("enabled"):                                  # the Claude API as the second reading (off since 5 October)
             why_not = api_unavailable(esc)
             if why_not:
                 rec["api"] = {"skipped": why_not}
             else:
                 try:
                     with _api_slots:
-                        why_not = api_unavailable(esc)               # again: another page may have met a refusal meanwhile
+                        why_not = api_unavailable(esc)
                         if why_not:
                             raise ApiSkipped(why_not)
                         txt, usage, secs, c, stop = ask_api(prompt, iid, pno, esc, n_boxes)
@@ -611,12 +718,9 @@ def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, m
                     spend(c, 1, usage)
                     with _state_lock:
                         _API["run_usd"] += c
-                    ans2 = parse_answer(txt, n_boxes)
+                    second = parse_answer(txt, n_boxes)
                     rec["api"] = {"model": esc["model"], "seconds": secs, "usage": usage, "cost_usd": c, "stop": stop,
-                                  "parsed": ans2 is not None, "raw": None if ans2 else txt[:600]}
-                    if ans2 is not None:
-                        rec["local_answer"] = ans["boxes"] if ans else None
-                        ans, tier = ans2, "api"
+                                  "parsed": second is not None, "raw": None if second else txt[:600]}
                 except ApiSkipped as e:
                     rec["api"] = {"skipped": str(e)}
                 except ApiRefused as e:
@@ -624,24 +728,26 @@ def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, m
                     rec["api"] = {"error": str(e)[:300], "refused": True}
                 except Exception as e:
                     rec["api"] = {"error": str(e)[:300]}
-        if ans is None:
-            ans = fallback_answer(pno, keymap, rl)
-            tier = "rules"
-        if tier == "rules":
-            flagged, reason = True, "no model answer (the rules' decisions are kept)"
-        elif tier == "api":
-            flagged = any(b["confidence"] < acc_api for b in ans["boxes"].values())
-            reason = "the API was unsure"
-        else:
-            flagged = wanted                                  # the local answer was not trusted and the API did not answer
-            a = rec.get("api") or {}
-            reason = "the local model was unsure; the API " + (a.get("skipped") and f"was not asked ({a['skipped']})"
-                                                                 or ("refused" if a.get("refused") else "failed" if "error" in a else "answered unreadably"))
+            limit = thr.get("accept_api", 0.8)
+        else:                                                   # the local model again, thinking, on the doubtful boxes
+            sp = dict(lc.get("second_pass") or {})
+            lc2 = dict(lc, thinking=True, temperature=sp.get("temperature", 0.6))    # Qwen's sampling for its thinking mode
+            need = None if first is None else doubtful
+            mt2 = int(sp.get("max_tokens", 6000)) + 60 * (n_boxes if need is None else len(need))
+            second, rec["second"] = ask_and_read(second_prompt(prompt, first, doubtful, n_boxes), lc2, n_boxes, need=need,
+                                                 extra={k: sp[k] for k in ("top_p", "top_k", "min_p", "presence_penalty") if k in sp} or None,
+                                                 max_tokens=mt2) if sp.get("enabled", True) else (None, {"skipped": "second_pass.enabled is false"})
+            limit = thr.get("accept_second", 0.85)
+        ans, flag_boxes, counts = settle(first, second, doubtful, limit, flag_joins, fallback)
+        rec["settle"] = dict(counts)
+        tier = ("api" if esc.get("enabled") else "local2") if second else ("local" if first else "rules")
         flag = None
-        if flagged:
-            lim = acc_api if tier == "api" else acc_local
+        if flag_boxes:
+            reason = ("no reading could be read; the rules' decisions are kept" if not first and not second else
+                      f"{len(flag_boxes)} decision(s) that change a piece stay open after the second reading")
             flag = {"page": pno, "tier": tier, "reason": reason,
-                    "boxes": {str(k): b for k, b in ans["boxes"].items() if b["confidence"] < lim}, "page_note": ans.get("page_note")}
+                    "boxes": {str(k): dict(v, text=clip(region_text(pages[pno]["regions"][keymap[k]]), 160, 60)) for k, v in flag_boxes.items()},
+                    "page_note": ans.get("page_note")}
         rec["tier"] = tier
         rec["boxes"] = {str(k): b for k, b in ans["boxes"].items()}
         rec["page_note"] = ans.get("page_note")
@@ -678,7 +784,16 @@ def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, m
                "local_errors": sum(1 for r in page_records if "error" in (r.get("local") or {})),
                "local_retried": sum(1 for r in page_records if (r.get("local") or {}).get("attempts", 1) > 1),
                "local_cut_off": sum(1 for r in page_records if (r.get("local") or {}).get("finish") == "length"),
-               "api_wanted": sum(1 for r in page_records if r.get("api_wanted")),
+               "asked_again": sum(1 for r in page_records if r.get("asked_again")),
+               "second_answered": sum(1 for r in page_records if r["tier"] in ("local2", "api")),
+               "second_unreadable": sum(1 for r in page_records if (r.get("second") or {}).get("parsed") is False),
+               "second_errors": sum(1 for r in page_records if "error" in (r.get("second") or {})),
+               "second_seconds": round(sum((r.get("second") or {}).get("seconds") or 0 for r in page_records), 1),
+               "doubtful_boxes": sum(sum(v for k, v in (r.get("settle") or {}).items() if k in ("settled_agreement", "settled_confidence", "unsettled")) for r in page_records),
+               "settled_agreement": sum((r.get("settle") or {}).get("settled_agreement", 0) for r in page_records),
+               "settled_confidence": sum((r.get("settle") or {}).get("settled_confidence", 0) for r in page_records),
+               "unsettled_boxes": sum((r.get("settle") or {}).get("unsettled", 0) for r in page_records),
+               "flagged_boxes": sum((r.get("settle") or {}).get("unsettled_flagged", 0) for r in page_records),
                "api_answered": sum(1 for r in page_records if r["tier"] == "api"),
                "api_unreadable": sum(1 for r in page_records if (r.get("api") or {}).get("parsed") is False),
                "api_failed": sum(1 for r in page_records if "error" in (r.get("api") or {})),
@@ -693,8 +808,9 @@ def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, m
     if mark_stage:
         mark(iid, mark_stage, **{k: v for k, v in summary.items() if k not in ("issue", "ts")})
     log_fn(f"{iid}: {len(pages)} pages, {summary['boxes']} boxes; with the rules: kind of box {fmt3(cmp['type_agreement'])}, "
-           f"piece starts {fmt3(cmp['boundary_agreement'])}; unreadable {summary['local_unreadable']}, api wanted {summary['api_wanted']} "
-           f"answered {summary['api_answered']}, flagged {len(flags)}, ${cost:.3f}, {secs}s, {doc['checks']['records']} records")
+           f"piece starts {fmt3(cmp['boundary_agreement'])}; unreadable {summary['local_unreadable']}, asked again {summary['asked_again']} "
+           f"({summary['doubtful_boxes']} boxes: {summary['settled_agreement']} agreed, {summary['settled_confidence']} sure the second time, "
+           f"{summary['unsettled_boxes']} open), flagged {len(flags)} pages, {secs}s, {doc['checks']['records']} records")
     return summary
 
 
@@ -880,13 +996,17 @@ def aggregate(summaries):
         tiers.update(s.get("tiers") or {})
         low.update(s.get("low_labels") or {})
     asked = max(1, tot("pages") - tiers.get("none", 0))
+    again = tot("asked_again") or tot("api_wanted")            # api_wanted: the reports before p50l
     return {"issues_done": len(S), "pages": tot("pages"), "pages_asked": asked, "boxes": tot("boxes"), "tiers": dict(tiers),
             "local_unreadable": tot("local_unreadable"), "local_errors": tot("local_errors"), "local_retried": tot("local_retried"),
-            "local_cut_off": tot("local_cut_off"), "api_wanted": tot("api_wanted"), "api_answered": tot("api_answered"),
-            "api_unreadable": tot("api_unreadable"), "api_failed": tot("api_failed"), "api_skipped": tot("api_skipped"),
-            "flagged_pages": tot("flagged_pages"), "cost_usd": round(tot("cost_usd"), 3),
-            "unreadable_share": round(tot("local_unreadable") / asked, 4), "escalation_share": round(tot("api_wanted") / asked, 4),
-            "answered_share": round(tot("api_answered") / asked, 4), "flag_share": round(tot("flagged_pages") / asked, 4),
+            "local_cut_off": tot("local_cut_off"), "asked_again": again, "second_answered": tot("second_answered"),
+            "second_unreadable": tot("second_unreadable"), "second_errors": tot("second_errors"), "second_seconds": tot("second_seconds"),
+            "doubtful_boxes": tot("doubtful_boxes"), "settled_agreement": tot("settled_agreement"),
+            "settled_confidence": tot("settled_confidence"), "unsettled_boxes": tot("unsettled_boxes"), "flagged_boxes": tot("flagged_boxes"),
+            "api_answered": tot("api_answered"), "api_unreadable": tot("api_unreadable"), "api_failed": tot("api_failed"),
+            "api_skipped": tot("api_skipped"), "flagged_pages": tot("flagged_pages"), "cost_usd": round(tot("cost_usd"), 3),
+            "unreadable_share": round(tot("local_unreadable") / asked, 4), "asked_again_share": round(again / asked, 4),
+            "flag_share": round(tot("flagged_pages") / asked, 4),
             "type_agreement": wavg("type_agreement", "type_boxes"), "boundary_agreement": wavg("boundary_agreement", "boundary_boxes"),
             "agreement_with_rules": wavg("agreement_with_rules", "boxes"), "low_labels": dict(low.most_common()),
             "seconds_per_issue_mean": round(tot("seconds") / max(1, len(S)), 1)}
@@ -909,8 +1029,10 @@ def run_report(kind, variant, ids, tag, seconds, ran):
     lc = local_cfg()
     esc = settings()["llm_link"]["escalate"]
     rep = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "run": kind, "tag": tag, "variant": variant,
-           "local_model": lc["model"], "thinking": bool(lc.get("thinking")), "local_format": _LOCAL_FMT["level"] or "schema",
-           "api_model": esc["model"], "thresholds": settings()["llm_link"]["thresholds"],
+           "local_model": lc["model"], "lanes": [b for b, _m in lanes(lc)], "thinking": bool(lc.get("thinking")),
+           "local_format": _LOCAL_FMT["level"] or "schema",
+           "second_reading": (f"api {esc['model']}" if esc.get("enabled") else "local, thinking"),
+           "thresholds": settings()["llm_link"]["thresholds"],
            "issues": len(ids), "ran_now": len(ran), "seconds_this_run": round(seconds, 1),
            "api_off": _API["off"], "api_spent_this_run": round(_API["run_usd"], 3)}
     rep.update(aggregate(sm[i] for i in ids if i in sm))
@@ -929,8 +1051,10 @@ def trial(n, workers, redo=False, tag=None, same_as=None):
     else:
         ids, _m = issues_assembled(n)
     lc = local_cfg()
+    esc = settings()["llm_link"]["escalate"]
     log("s12", f"trial {tag or ''}: {len(ids)} issues{' (those of ' + same_as + ')' if same_as else ''}, {workers} at a time -> data/assembly_v2/{variant}; "
-               f"local {lc['model']} at {lc['base_url']} (thinking {'on' if lc.get('thinking') else 'off'}); api {settings()['llm_link']['escalate']['model']}")
+               f"local {lc['model']} on {len(lanes(lc))} lane(s), thinking {'on' if lc.get('thinking') else 'off'}; second reading: "
+               + (f"the Claude API ({esc['model']})" if esc.get("enabled") else "the local model, thinking"))
     t0 = time.time()
     ran = run_many(ids, meta, variant, workers, redo, None)           # a trial leaves the issues' state files alone
     rep = run_report("trial", variant, ids, tag, time.time() - t0, ran)
@@ -940,18 +1064,19 @@ def trial(n, workers, redo=False, tag=None, same_as=None):
     return rep
 
 
-def pilot(workers, redo=False):
-    """The ten pilot issues (config/pilot_issues.json), into data/assembly_v2/llm/, where s09 scores them against the
-    human-verified records and the contents pages."""
+def pilot(workers, redo=False, tag=None):
+    """The ten pilot issues (config/pilot_issues.json), into data/assembly_v2/llm/ (llm_pilot_<tag> with a tag),
+    where s09 scores them against the human-verified records and the contents pages."""
     load_pulp_env()
     cfg = json.load(open(PILOT_CONFIG, encoding="utf-8"))
     meta = {i["id"]: i for i in cfg["issues"]}
     ids = [i for i in meta if glob.glob(os.path.join(ROOT, "data", "layout", i, "page_*.json"))]
-    log("s12", f"pilot: {len(ids)} issues, {workers} at a time -> data/assembly_v2/{OUT_VARIANT}")
+    variant = f"llm_pilot_{tag}" if tag else OUT_VARIANT
+    log("s12", f"pilot{' ' + tag if tag else ''}: {len(ids)} issues, {workers} at a time -> data/assembly_v2/{variant}")
     t0 = time.time()
-    ran = run_many(ids, meta, OUT_VARIANT, workers, redo, None)
-    rep = run_report("pilot", OUT_VARIANT, ids, None, time.time() - t0, ran)
-    write_json_atomic(os.path.join(ROOT, "data", "corpus", "llm_link_pilot.json"), rep)
+    ran = run_many(ids, meta, variant, workers, redo, None)
+    rep = run_report("pilot", variant, ids, tag, time.time() - t0, ran)
+    write_json_atomic(os.path.join(ROOT, "data", "corpus", f"llm_link_pilot{('_' + tag) if tag else ''}.json"), rep)
     log("s12", "pilot report: " + json.dumps({k: v for k, v in rep.items() if k not in ("spend_total", "thresholds")}))
     event("llm_link_pilot", **{k: v for k, v in rep.items() if k != "spend_total"})
     return rep
@@ -1010,9 +1135,27 @@ def selftest():
     assert local_max_tokens({"max_tokens": 4000, "max_tokens_cap": 12000}, 19, False) == 4000
     assert local_max_tokens({"max_tokens": 4000, "max_tokens_cap": 12000}, 100, False) == 6400
     assert local_max_tokens({"max_tokens": 4000, "max_tokens_cap": 12000}, 300, False) == 12000
-    agg = aggregate([{"pages": 10, "boxes": 100, "tiers": {"local": 8, "none": 2}, "api_wanted": 2, "type_agreement": 0.9, "type_boxes": 100,
+    agg = aggregate([{"pages": 10, "boxes": 100, "tiers": {"local": 8, "none": 2}, "asked_again": 2, "type_agreement": 0.9, "type_boxes": 100,
                       "boundary_agreement": 0.8, "boundary_boxes": 50, "agreement_with_rules": 0.85, "seconds": 10}])
-    assert agg["pages_asked"] == 8 and agg["escalation_share"] == 0.25 and agg["type_agreement"] == 0.9, agg
+    assert agg["pages_asked"] == 8 and agg["asked_again_share"] == 0.25 and agg["type_agreement"] == 0.9, agg
+    # parse with the boxes asked for
+    two = '{"boxes":[{"k":3,"joins":"previous","confidence":0.9},{"k":5,"joins":"new","kind":"poem","confidence":0.7}]}'
+    a2 = parse_answer(two, 6, need={3, 5})
+    assert a2 and set(a2["boxes"]) == {3, 5} and a2["boxes"][5]["kind"] == "poem" and parse_answer(two, 6, need={3, 4}) is None, a2
+    # the settling of doubtful boxes
+    first = {"boxes": {1: {"joins": "furniture", "confidence": 0.99}, 2: {"joins": "new", "confidence": 0.7},
+                       3: {"joins": "previous", "confidence": 0.6}, 4: {"joins": "caption", "confidence": 0.5},
+                       5: {"joins": "previous", "confidence": 0.8}}, "page_note": None}
+    second = {"boxes": {2: {"joins": "new", "confidence": 0.6}, 3: {"joins": "previous", "confidence": 0.95},
+                        4: {"joins": "notice", "confidence": 0.5}, 5: {"joins": "new", "confidence": 0.6}}, "page_note": None}
+    fb = {"boxes": {k: {"joins": "previous", "confidence": 0.0} for k in range(1, 6)}}
+    ans, fl, c = settle(first, second, {2, 3, 4, 5}, 0.85, {"previous", "new", "advert"}, fb)
+    assert c["settled_agreement"] == 2 and c["unsettled"] == 2 and set(fl) == {5}, (c, fl)     # 2 and 3 agree; 4 is a caption/notice doubt (no flag); 5 is open
+    assert ans["boxes"][5]["joins"] == "new" and ans["boxes"][1]["joins"] == "furniture" and ans["boxes"][3]["agreed"], ans
+    ans, fl, c = settle(None, None, {1, 2}, 0.85, {"previous", "new", "advert"}, fb)
+    assert set(fl) == {1, 2} and ans["boxes"][1]["confidence"] == 0.0, fl                    # nothing could be read: the rules, flagged
+    ans, fl, c = settle(first, None, {3, 4}, 0.85, {"previous", "new", "advert"}, fb)
+    assert set(fl) == {3} and ans["boxes"][3]["joins"] == "previous", fl                       # the second reading failed: the first stands, flagged where it matters
     print("s12 selftest ok")
 
 
@@ -1021,7 +1164,7 @@ def main():
     ap.add_argument("--issue")
     ap.add_argument("--pilot", action="store_true", help="the pilot issues -> data/assembly_v2/llm (then s09 --all scores the llm variant)")
     ap.add_argument("--trial", type=int, metavar="N", help="the first N assembled issues (or N of those of --same-as)")
-    ap.add_argument("--tag", help="the trial's name: outputs in data/assembly_v2/llm_trial_<tag>, report data/corpus/llm_link_trial_<tag>.json")
+    ap.add_argument("--tag", help="a trial's (or pilot run's) name: outputs in data/assembly_v2/llm_trial_<tag> (llm_pilot_<tag>), report data/corpus/llm_link_trial_<tag>.json (llm_link_pilot_<tag>.json)")
     ap.add_argument("--same-as", metavar="TAG", help="with --trial: the issues of the trial TAG, for a comparison on the same issues")
     ap.add_argument("--workers", type=int, default=0, help="issues at a time (default settings.llm_link.local.concurrency)")
     ap.add_argument("--redo", action="store_true", help="ask again for issues already done in this variant")
@@ -1045,7 +1188,7 @@ def main():
             link_issue(args.issue, m)
         return
     if args.pilot:
-        pilot(workers, redo=args.redo)
+        pilot(workers, redo=args.redo, tag=args.tag)
         return
     if args.trial:
         trial(args.trial, workers, redo=args.redo, tag=args.tag, same_as=args.same_as)

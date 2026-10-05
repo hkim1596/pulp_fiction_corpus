@@ -420,4 +420,52 @@ the pilot issues, s09 on the pilot issues (rules and llm against the human-verif
 pages: the first accuracy figure for the box links against people's corrections), the second trial on the same
 100 issues (tag qwen14b_schema), and s09 over those issues for the rules and both trials.
 
-(Next entries: the calibration; the pilot accuracy; the second trial.)
+### 2026-10-05, 10:05 KST — the calibration (PASTE 8k); Heejin: no API; p50l; the site's live corpus board (v0.17.0)
+
+PASTE 8j committed p50k (92b116f); the server pulled it. PASTE 8k moved the first trial's outputs to
+data/assembly_v2/llm_trial_qwen14b_nothink and read them again. The 2,827 unreadable answers: 78 showed a box written
+as a quoted string within their first 600 characters (the raw answer was kept only that far), 3 had been cut off at
+the 4,000-token limit; the rest broke later in the list or left boxes out (they were 925 output tokens long at the
+median, about the length of a readable answer, and their pages had 21.5 boxes on average against 19.2). The
+calibration, on the 209 pages both the local model and the API (Opus 5.5, with the page image) answered: the two
+gave the same answer on 95.1% of the 1,804 boxes the local model was at least 0.95 sure of (98.8% of the 1,471
+begins-or-continues decisions among them), 70.9% at 0.85–0.95 (671 boxes; 85.7%), 44.0% at 0.70–0.85 (448; 57.3%),
+61.4% at 0.50–0.70 (44), 84.0% below 0.50 (25). Where they differed: local new / API previous 193, local previous /
+API advert 116 (mostly the second and later boxes of an advertisement, which the old prompt let the local model call
+"previous"), local previous / API new 56, local new / API advert 41, local new / API caption 33, local previous /
+API furniture 31, local previous / API caption 27. Read together: on the boxes it was very sure of, the local model
+and Opus agreed almost always; below 0.95 they parted often. The API changed about 560 box decisions on those 209
+pages (one in five), about 0.25% of the trial's boxes; whether its changes were corrections is not known without
+people's corrections (the pilot run now in progress measures the local model against them). The pilot run on p50k
+started at 09:49 (tmux llmjob; the API was refused again on its first call, as the credit is spent, so it measures
+the first reading alone).
+
+Heejin, 10:00: "Using api costs too much. Was there any gain by using it? Let the local model do the job as much as
+possible and if unavoidable let it flag them for a person." — and "The website download count hasn't changed I
+think. No live update on the website??"
+
+p50l: the API path is off (settings.llm_link.escalate.enabled false; the code is kept). The doubtful boxes get a
+second reading by the same local model with thinking on, asked about those boxes only, told what the first reading
+said, with Qwen's sampling for its thinking mode (temperature 0.6, top_p 0.95, top_k 20). Thresholds from the
+calibration: a box under 0.95 in the first reading is doubtful; it is settled when the two readings agree or the
+second is at least 0.85 sure; a page is flagged only when an unsettled box's decision moves a piece (previous, new,
+advert), each flag carrying both readings and the box's text; a page no reading could read keeps the rules'
+decisions and is flagged. The first reading gives a reason only when it is less than 0.95 sure (shorter answers).
+The local model can be asked on several lanes in turn (local.extra_lanes; empty: the lab's own Qwen3-14B lane on
+GPU 1 was idle at both checks this morning, but it is the lab's and needs Heejin's leave). Pilot runs take a tag
+(data/assembly_v2/llm_pilot_<tag>) so that runs can be compared on the human-verified records.
+
+The website (v0.17.0): every count on it came from the explorer database, which is built from the pilot list, so the
+corpus run never showed. webapp/corpus_run_pages.py reads data/corpus/progress.json (rewritten by the run every
+minute) and data/corpus/events.jsonl (incrementally) at request time; /run (Workroom, "Corpus run") shows the
+totals, rates, hours left, failures, a year strip of the selection against what has been downloaded, read and
+assembled, the latest events and the box-linking runs, and reloads itself every minute; the same board heads the
+Progress page; the explorer's downloaded and assembled counts (year strip, collection bar) add the corpus run's
+issues.
+
+The corpus run at 09:50: 2,030 downloaded and imaged, 370 read and assembled, 368 masters removed, no failures, no
+stall-watch events, 2,499 GB free; 160.8 downloads and 30.2 readings an hour since 22:05; the readings then running
+still carried the 32-request limit (they had started before the pull), the next ones carry 48. One download was
+waiting out the archive's errors (Blue Book 1939-07, try 6 of 7).
+
+(Next entries: the p50k pilot's score; the p50l pilot and trial.)

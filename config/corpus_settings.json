@@ -140,7 +140,7 @@
     "thumbs": "data/thumbs"
   },
   "llm_link": {
-    "_comment": "s12_llm_link: the box-linking stage (Heejin, 4 October 2026). local = the vLLM lane on GPU 2 (PASTE 8c started it: the lab's own Qwen3-14B, port 8023); escalate = the Claude API with the page image (model ids and prices read on platform.claude.com on 4 October 2026: claude-opus-5-5 $4/$20 per million tokens in/out, claude-fable-5-1 $10/$50, claude-sonnet-5-5 $2/$10); thresholds = below accept_local (or an unreadable answer) a page goes to the API, below accept_api after the API a page is flagged for a person; the trials set them (the first, 5 October: docs/corpus-build-log.md).",
+    "_comment": "s12_llm_link: the box-linking stage (Heejin, 4 October 2026; on 5 October: \"Using api costs too much. … Let the local model do the job as much as possible and if unavoidable let it flag them for a person.\"). local = the vLLM lane on GPU 2 (PASTE 8c: the lab's own Qwen3-14B, port 8023): a first reading of every page, and a second, thinking reading of the boxes the first was less than accept_local sure of; a page is flagged for a person only when a decision that changes a piece (flag_joins) stays open. escalate = the Claude API, off (enabled false) since 5 October; the first trial's numbers are in docs/corpus-build-log.md.",
     "local": {
       "base_url": "http://127.0.0.1:8023/v1",
       "model": "qwen3-14b",
@@ -153,7 +153,17 @@
       "thinking": false,
       "max_tokens_thinking": 6000,
       "page_concurrency": 48,
-      "max_tokens_cap": 12000
+      "max_tokens_cap": 12000,
+      "second_pass": {
+        "_comment": "the second reading: the same model with thinking on, asked about the doubtful boxes only; Qwen's recommended sampling for its thinking mode (temperature 0.6, top_p 0.95, top_k 20; greedy decoding makes it repeat itself); max_tokens covers the reasoning and the answer (plus 60 a box)",
+        "enabled": true,
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "max_tokens": 6000
+      },
+      "extra_lanes": [],
+      "_comment_extra_lanes": "more lanes serving the same model, asked in turn with the first (e.g. the lab's own Qwen3-14B lane on GPU 1, {\"base_url\": \"http://127.0.0.1:8004/v1\", \"model\": \"auto\"} — only with Heejin's leave: it is the lab's)"
     },
     "escalate": {
       "provider": "anthropic",
@@ -168,11 +178,19 @@
       "price_out_per_mtok": 20.0,
       "max_tokens_cap": 8000,
       "budget_total_usd": 100,
-      "_comment": "budget_usd: the most one run (a trial, the pilot run, the corpus run) spends on the API; budget_total_usd: the most all runs together spend (data/corpus/llm_link_spend.json), raised by hand. A refusal that retrying cannot cure (no credit — the account ran dry at 00:36 on 5 October after $12.65 —, a refused key, an unknown model) stops the API for the run; the pages are flagged instead."
+      "_comment": "budget_usd: the most one run (a trial, the pilot run, the corpus run) spends on the API; budget_total_usd: the most all runs together spend (data/corpus/llm_link_spend.json), raised by hand. A refusal that retrying cannot cure (no credit — the account ran dry at 00:36 on 5 October after $12.65 —, a refused key, an unknown model) stops the API for the run; the pages are flagged instead.",
+      "enabled": false
     },
     "thresholds": {
-      "accept_local": 0.85,
-      "accept_api": 0.8
+      "accept_local": 0.95,
+      "accept_api": 0.8,
+      "accept_second": 0.85,
+      "flag_joins": [
+        "previous",
+        "new",
+        "advert"
+      ],
+      "_comment": "accept_local: a box the first reading is less sure of goes to the second reading (0.95: in the first trial the local model and Opus 5.5 gave the same answer on 95% of the boxes the local model was at least 0.95 sure of, 99% of the begins-or-continues decisions, against 44-71% below). accept_second: a doubtful box is settled when the second reading is this sure, or when the two readings agree. flag_joins: an unsettled box is flagged only when one of the readings gives it one of these (they change where a piece begins or ends, or put advertising in a story). accept_api: the API's own threshold, when it is on."
     },
     "context": {
       "text_head_chars": 350,

@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.16.2"
+APP_VERSION = "0.17.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -1372,7 +1372,7 @@ NAV_EXPLORE = [("/overview", "Overview"), ("/authors", "Authors"), ("/magazines"
                ("/stories", "Stories"), ("/pairs", "Pairs"), ("/reuse", "Reuse"), ("/collection", "Collection"),
                ("/corpus", "Corpus"), ("/datasheet", "Datasheet"), ("/method", "Method")]
 NAV_WORKROOM = [("/guide", "Guide"), ("/articles", "Workbench"), ("/reuse/validate", "Paraphrase review"),
-                ("/reuse/cases", "Cases"), ("/reuse/progress", "Progress"), ("/assembly", "Assembly"),
+                ("/reuse/cases", "Cases"), ("/reuse/progress", "Progress"), ("/run", "Corpus run"), ("/assembly", "Assembly"),
                 ("/timing", "Timing"), ("/activity", "Activity"), ("/feedback", "Feedback")]
 
 
@@ -1543,10 +1543,12 @@ import reuse_pages as RP  # noqa: E402
 import explore_pages as EX  # noqa: E402
 import review_pages as RV  # noqa: E402
 import collection_pages as CP  # noqa: E402
+import corpus_run_pages as CR  # noqa: E402      the corpus run, live (v0.17.0)
 RP.bind(globals())
 EX.bind(globals())
 RV.bind(globals())
 CP.bind(globals())
+CR.bind(globals())
 
 
 # ---------------- request handler ----------------
@@ -1904,6 +1906,8 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, RP.assembly_page(qs, render=self._page))
         if path == "/reuse/progress":
             return self._send(200, RP.progress_page(render=self._page))
+        if path == "/run":
+            return self._send(200, CR.run_page(qs, render=self._page))
         if path == "/reuse/validate":
             return self._send(200, RV.validate_page(qs, self.user, render=self._page))
         if path == "/reuse/cases":

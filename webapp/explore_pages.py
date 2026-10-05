@@ -1346,8 +1346,15 @@ def is_downloaded(row):
     return bool((_j(row["ia"], {}) or {}).get("title") or row["pages"] or row["layout_pages"] or row["complete"])
 
 
+def corpus_extra():
+    """The corpus run's downloaded/read/assembled totals (webapp/corpus_run_pages.py; zeros without it)."""
+    CR = _G.get("CR")
+    return CR.extra_counts() if CR is not None else {"downloaded": 0, "read": 0, "assembled": 0}
+
+
 def n_downloaded(con):
-    return sum(1 for r in _rows(con, "SELECT ia, pages, layout_pages, complete FROM issues") if is_downloaded(r))
+    """The explorer's issues that are on this machine, plus the issues the corpus run has downloaded (v0.17.0)."""
+    return sum(1 for r in _rows(con, "SELECT ia, pages, layout_pages, complete FROM issues") if is_downloaded(r)) + corpus_extra()["downloaded"]
 
 
 def year_progress_layers(con, lo=YEAR_LO, hi=YEAR_HI):
@@ -1369,11 +1376,23 @@ def year_progress_layers(con, lo=YEAR_LO, hi=YEAR_HI):
             done[y] = done.get(y, 0) + 1
         if r["stories"] and r["verified"] == r["stories"]:
             ver[y] = ver.get(y, 0) + 1
+    CR = _G.get("CR")
+    if CR is not None:                       # the corpus run's issues, by year (v0.17.0)
+        try:
+            cy = CR.by_year()
+            for y, n in cy.get("downloaded", {}).items():
+                if lo <= y <= hi:
+                    dl[y] = dl.get(y, 0) + n
+            for y, n in cy.get("assembled", {}).items():
+                if lo <= y <= hi:
+                    done[y] = done.get(y, 0) + n
+        except Exception:
+            pass
     return [("In the archive", "#1baf7a", archive, None), ("Downloaded", "#2a78d6", dl, archive),
             ("Assembled", "#eb6834", done, archive), ("Verified", "var(--accent)", ver, archive)]
 
 
-def year_strip(layers, lo=YEAR_LO, hi=YEAR_HI, width=980, label_w=100):
+def year_strip(layers, lo=YEAR_LO, hi=YEAR_HI, width=980, label_w=100, ref_tip="fiction-magazine items in the archive"):
     """The progress strip (design of 2026-09-05, after the centre's causal-inference
     site): one row per layer, one cell per year, darker meaning a fuller year — the
     archive row relative to its fullest year, the process rows relative to the
@@ -1396,7 +1415,7 @@ def year_strip(layers, lo=YEAR_LO, hi=YEAR_HI, width=980, label_w=100):
                 continue
             if denom is None:
                 op = 0.3 + 0.7 * (v / mx if mx else 1)
-                tip = f"{yr}: {v:,} fiction-magazine items in the archive"
+                tip = f"{yr}: {v:,} {ref_tip}"
             else:
                 d = denom.get(yr, 0)
                 share = (v / d) if d else 1.0
@@ -1474,7 +1493,7 @@ def explore_progress_html(con=None):
         n_dl = n_downloaded(con)
         n_fv = _val(con, "SELECT COUNT(*) FROM issues WHERE stories>0 AND verified=stories") or 0
         out.append(year_strip_html(con))
-        out.append(collection_bar(fr, n_dl, n_c, n_fv))
+        out.append(collection_bar(fr, n_dl, n_c + corpus_extra()["assembled"], n_fv))
         out.append(f"<p class='muted' style='font-size:12.5px'>{n_c:,} complete of {fr['fiction']:,} fiction-magazine items "
                    f"({_fmt(100 * n_c / fr['fiction'] if fr['fiction'] else 0)}%). Survey of {_esc(fr['generated'])}, metadata only "
                    f"(pipeline/s00_survey.py).</p>")
@@ -1522,8 +1541,8 @@ def process_board_html():
                   f"<span class='muted'>{fr['fiction_pages']:,} page images, {fr['fiction_magazines']:,} magazine names; the rest: "
                   + ", ".join(f"{k} {v:,}" for k, v in wbk.items() if k != "fiction magazine") + "</span>"]]
         out.append(year_strip_html(con))
-        out.append(collection_bar(fr, sum(1 for i in iss if is_downloaded(i)),
-                                  sum(1 for i in iss if i["assembled"] or i["exported"]),
+        out.append(collection_bar(fr, sum(1 for i in iss if is_downloaded(i)) + corpus_extra()["downloaded"],
+                                  sum(1 for i in iss if i["assembled"] or i["exported"]) + corpus_extra()["assembled"],
                                   sum(1 for i in iss if i["stories"] and i["verified"] == i["stories"])))
         out.append(_table(["the collection", "#items", "share of the collection", "note"], crows))
         dec = fr["fiction_by_decade"]

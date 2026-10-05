@@ -123,7 +123,9 @@ def collection_page(qs, render=None):
         n_c = EX._val(con, "SELECT COUNT(*) FROM issues WHERE complete=1") or 0
         n_fv = EX._val(con, "SELECT COUNT(*) FROM issues WHERE stories>0 AND verified=stories") or 0
         out.append(EX.year_strip_html(con))
-        out.append(EX.collection_bar(fr, n_dl, n_c, n_fv))
+        out.append(EX.collection_bar(fr, n_dl, n_c + EX.corpus_extra()["assembled"], n_fv))
+        out.append("<p class='fine'>The downloaded and assembled counts include the corpus run on the lab server, live "
+                   "(<a href='/run'>corpus run</a>).</p>")
         out.append("<h3>The era year by year</h3><p class='fine'>Items the archive holds for each year of the era, and what this site has read of them; "
                    "a year opens its issues.</p>" + EX.year_grid_html(con))
     out.append("<div class='row' style='display:flex;gap:24px;flex-wrap:wrap'>"

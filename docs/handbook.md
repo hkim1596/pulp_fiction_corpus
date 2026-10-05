@@ -126,6 +126,21 @@ record's own annotation history shows live events only. A rebuild of
 the explorer that fails on a half-written source file (a pipeline stage
 still running) keeps the old database and retries.
 
+Since v0.17.0 (2026-10-05, Heejin: "The website download count hasn't
+changed I think. No live update on the website??"): /run (Workroom,
+"Corpus run") is the corpus run, live — webapp/corpus_run_pages.py
+reads data/corpus/progress.json (the orchestrator rewrites it every
+minute) and data/corpus/events.jsonl (read incrementally, only the
+lines added since the last visit) at request time: totals, rates,
+hours left, failures, a year strip of the selection against what has
+been downloaded, read and assembled, the latest events, the box-linking
+runs; the page reloads itself every minute. The same board heads the
+Progress page, and the explorer's own downloaded/assembled counts (the
+year strip, the collection bar on /collection, /overview and Progress)
+now add the corpus run's issues. Before, every count came from the
+explorer database, built from the pilot list, so the corpus run never
+showed.
+
 Routes since v0.14.0 (2026-09-04, built to the protocol as written):
 /collection (the collection and the sample: transmission history,
 provenance, the sample by decade / genre / magazine / publisher /
@@ -776,15 +791,19 @@ duplicate rule and its known limits. In short:
                       images reaped under 400 GB free; progress.json every
                       minute; a STOP file or Ctrl-C stops it, --run resumes.
     s12_llm_link      the box-linking stage (2026-10-04; reworked in
-                      p50k, 2026-10-05): a language model decides, box by
-                      box, what kind of box it is and whether a piece
-                      begins there — the local lane on GPU 2 first (its
-                      answer held to a JSON schema), the Claude API with
-                      the page image when unsure, a flag for a person when
-                      still unsure; records in the rules assembly's shape
-                      under data/assembly_v2/llm/<id>/ (llm_trial_<tag>
-                      for a trial); --trial N --tag, --same-as, --pilot;
-                      docs/corpus-run.md, "The box-linking stage".
+                      p50k and p50l, 2026-10-05): a language model decides,
+                      box by box, what kind of box it is and whether a
+                      piece begins there — a first reading on the local
+                      lane on GPU 2 (its answer held to a JSON schema), a
+                      second, thinking reading of the boxes the first was
+                      less than 0.95 sure of, a flag for a person only when
+                      a decision that changes a piece stays open; the
+                      Claude API path is off (Heejin, 5 October: it costs
+                      too much); records in the rules assembly's shape
+                      under data/assembly_v2/llm/<id>/ (llm_trial_<tag>,
+                      llm_pilot_<tag>); --trial N --tag, --same-as,
+                      --pilot [--tag]; docs/corpus-run.md, "The
+                      box-linking stage".
     scripts/corpus_reaper.py   the same space rules by hand.
     docs/corpus-build-log.md   the dated build log for the data paper
                       (Journal of Open Humanities Data) and the Zenodo
