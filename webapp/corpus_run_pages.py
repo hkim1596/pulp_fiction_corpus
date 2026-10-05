@@ -198,7 +198,22 @@ def board_html(compact=False):
         rows.append([_esc(label), E.N(v), E._bar(v, n_sel, 260, 12) + f" <span class='fine'>{(100 * v / n_sel if n_sel else 0):.1f}% of {n_sel:,}</span>",
                      E.N(f"{r:,.1f}" if r is not None else ""),
                      E.N(("" if h is None else f"{h:,.0f} h (about {h / 24:,.1f} days)") if st in rate else "")])
+    ev0 = stage_counts()
+    for st, label in (("linked_llm", "checked box by box by the language model (s12)"), ("published", "on this website, with confidence and flags (s13)")):
+        v = len(ev0["done"].get(st, ()))
+        rows.append([_esc(label), E.N(v), E._bar(v, n_sel, 260, 12) + f" <span class='fine'>{(100 * v / n_sel if n_sel else 0):.1f}% of {n_sel:,}</span>",
+                     E.N(""), E.N("")])
     out.append(E._table(["stage", "#issues", "share of the selection", "#per hour since the start", "#left at this rate"], rows))
+    rf = None
+    try:
+        rf = json.load(open(_data("corpus", "site_refresh.json"), encoding="utf-8"))
+    except Exception:
+        pass
+    if rf:
+        out.append(f"<p class='fine'>The site's own database (authors, magazines, issues, stories, the workbench list) was last rebuilt "
+                   f"{_esc(rf.get('ts', ''))} in {rf.get('build_seconds', '?')} s: {rf.get('records', 0):,} records of {rf.get('issues_assembled', 0):,} "
+                   f"assembled issues, {rf.get('needs_look', 0):,} of them flagged for a look; it is rebuilt every few minutes "
+                   "(scripts/site_refresh.py).</p>")
     gu = p.get("given_up") or {}
     ev = stage_counts()
     out.append("<p class='fine'>Given up after retries: " + (", ".join(f"{_esc(k)} {v}" for k, v in gu.items()) if gu else "none")
@@ -225,11 +240,12 @@ def board_html(compact=False):
     if llm:
         rows = [[_esc(n), E.N(i), E.N(pg), E.N(f"{u:.1f}%"), E.N(f"{w:.1f}%"), E.N(f"{f:.1f}%"), E.N(f"${c:,.2f}"), _esc(ts[5:16].replace("T", " "))]
                 for n, i, pg, u, w, f, c, ts in llm]
-        out.append("<h3>Box linking (the language model on GPU 2; trials and the pilot)</h3>"
+        out.append("<h3>Box linking (the language model on GPU 2: the corpus, the pilot runs, the trials)</h3>"
                    + E._table(["run", "#issues", "#pages", "#answers unreadable", "#pages asked again", "#pages flagged for a person",
                                "#API cost", "last issue"], rows)
-                   + "<p class='fine'>llm and llm_pilot_… = the ten pilot issues (scored against people's corrections); llm_trial_… = "
-                     "trials on the first hundred corpus issues. A page is asked again when the first reading is less than 0.95 sure of a "
+                   + "<p class='fine'>llm = the corpus run's own box linking (s12 --follow: every assembled corpus issue, as it is "
+                     "assembled; from 5 October); llm_pilot_… = the ten pilot issues (scored against people's corrections); "
+                     "llm_trial_… = trials on the first hundred corpus issues. A page is asked again when the first reading is less than 0.95 sure of a "
                      "box, or could not be read: by the Claude API until 5 October, by the local model's second, thinking reading since "
                      "(p50l); a page is flagged only when a decision that changes a piece stays open.</p>")
     if compact:
@@ -237,10 +253,95 @@ def board_html(compact=False):
     return "".join(out)
 
 
+def evals_html():
+    """The accuracy tables (s09): every data/assembly_v2/eval_*.txt, its header and its ALL lines."""
+    out = []
+    for f in sorted(glob.glob(_data("assembly_v2", "eval*.txt")), key=os.path.getmtime, reverse=True):
+        try:
+            lines = open(f, encoding="utf-8").read().splitlines()
+        except Exception:
+            continue
+        keep = [ln for ln in lines[:1] + [ln for ln in lines if ln.startswith("ALL")]]
+        if len(keep) < 2:
+            continue
+        ts = time.strftime("%Y-%m-%d %H:%M", time.localtime(os.path.getmtime(f)))
+        out.append(f"<p class='fine'><b>{_esc(os.path.basename(f))}</b> · {ts}</p><pre style='font-size:11.5px;overflow-x:auto'>"
+                   + _esc("\n".join(keep)) + "</pre>")
+    if not out:
+        return ""
+    return ("<h3>Accuracy (s09): each way of assembling against people's corrections and the contents pages</h3>"
+            "<p class='fine'>pieces = entries on the contents pages; found, title, author, clean = how many of them a record starts, names "
+            "and covers without splitting or running over; verif / exact / jacc = the records people verified on the workbench, how "
+            "many a variant reproduces exactly, and the mean overlap; recs = records; chap = story records starting at a chapter "
+            "head; noauth = story records without an author. rules = the rules engine; llm… = the rules' records checked by the "
+            "language model.</p>" + "".join(out))
+
+
 def run_page(qs=None, render=None):
     body = (_G["howto"]("The corpus run on the lab server, as it stands: what has been downloaded from the Internet Archive, read, "
-                        "and assembled into records, how fast, and how long the rest will take at that pace. The page reloads "
-                        "itself every minute.")
-            + "<h1>Corpus run</h1>" + board_html(compact=False)
+                        "assembled into records, checked by the language model and put on this site, how fast, and how long the "
+                        "rest will take at that pace; then the accuracy measured so far. The page reloads itself every minute.")
+            + "<h1>Corpus run</h1>" + board_html(compact=False) + evals_html()
+            + "<p class='fine'>Everything done, decided and measured, day by day: <a href='/log'>the build log</a>.</p>"
             + "<script>setTimeout(function(){location.reload()},60000)</script>")
     return (render or _G["page"])("Corpus run", body, path="/run")
+
+
+def _md_inline(t):
+    """`code`, **bold**, and links [text](url) in one escaped line of the build log."""
+    import re
+    t = _esc(t)
+    t = re.sub(r"`([^`]+)`", r"<code>\1</code>", t)
+    t = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", t)
+    t = re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", r"<a href='\2'>\1</a>", t)
+    return t
+
+
+def log_page(qs=None, render=None):
+    """docs/corpus-build-log.md as a page: what was done, decided and measured, day by day (the record for the data paper)."""
+    p = os.path.join(_G["ROOT"], "docs", "corpus-build-log.md")
+    try:
+        lines = open(p, encoding="utf-8").read().splitlines()
+    except Exception:
+        lines = []
+    out, para, code = [], [], None
+
+    def flush():
+        if para:
+            out.append("<p>" + _md_inline(" ".join(x.strip() for x in para)) + "</p>")
+            para.clear()
+    for ln in lines:
+        if code is not None:
+            if ln.strip().startswith("```"):
+                out.append("<pre style='font-size:12px;overflow-x:auto'>" + _esc("\n".join(code)) + "</pre>")
+                code = None
+            else:
+                code.append(ln)
+            continue
+        if ln.strip().startswith("```"):
+            flush()
+            code = []
+            continue
+        if ln.startswith("    ") and not para and ln.strip():
+            out.append("<pre style='font-size:12px;overflow-x:auto;margin:2px 0'>" + _esc(ln[4:]) + "</pre>")
+            continue
+        if ln.startswith("#"):
+            flush()
+            n = len(ln) - len(ln.lstrip("#"))
+            tag = {1: "h1", 2: "h2", 3: "h3"}.get(n, "h4")
+            out.append(f"<{tag} id='s{len(out)}'>" + _md_inline(ln.lstrip("#").strip()) + f"</{tag}>")
+            continue
+        if not ln.strip():
+            flush()
+            continue
+        if ln.lstrip().startswith(("- ", "* ")) and not para:
+            out.append("<p style='margin:2px 0 2px 18px'>• " + _md_inline(ln.lstrip()[2:]) + "</p>")
+            continue
+        para.append(ln)
+    flush()
+    ts = time.strftime("%Y-%m-%d %H:%M", time.localtime(os.path.getmtime(p))) if os.path.exists(p) else "?"
+    body = (_G["howto"]("The build log of the corpus (docs/corpus-build-log.md in the repository): every run, decision, fault and "
+                        "measurement, in order, as recorded during the work — the record the database release and the data paper "
+                        "are written from. It is the version on this server, brought up to date with every change of the code.")
+            + f"<p class='fine'>Last changed {ts}. <a href='/run'>The corpus run, live</a>.</p>" + "".join(out))
+    return (render or _G["page"])("Build log", body, path="/log")

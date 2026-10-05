@@ -137,6 +137,11 @@ class ApiSkipped(RuntimeError):
     """The API is not asked: refused earlier in this run, or a budget is spent."""
 
 
+class LaneDown(RuntimeError):
+    """The local lane did not answer on many pages of an issue: nothing is written for the issue (its pages would
+    otherwise fall back to the rules' decisions and all be flagged for a person); it is asked again later."""
+
+
 # ----------------------------------------------------------------------------------------------------------------
 # inputs
 # ----------------------------------------------------------------------------------------------------------------
@@ -326,6 +331,19 @@ def lanes(cfg):
         for ln in cfg.get("extra_lanes") or []:
             out.append((ln["base_url"], ln.get("model", "auto")))
     return out
+
+
+def lanes_answer(cfg=None):
+    """True when at least one local lane answers its model list within 15 s (the follower waits while none does)."""
+    for base_url, _m in lanes(cfg or local_cfg()):
+        try:
+            req = urllib.request.Request(base_url.rstrip("/") + "/models", headers={"Authorization": "Bearer EMPTY"})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                if r.status == 200:
+                    return True
+        except Exception:
+            pass
+    return False
 
 
 def lane_model(base_url, model):
@@ -657,7 +675,7 @@ def settle(first, second, doubtful, accept_second, flag_joins, fallback):
     return {"boxes": final, "page_note": note}, flag_boxes, c
 
 
-def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, mark_stage="linked_llm"):
+def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, mark_stage=None):
     log_fn = log_fn or (lambda m: log("s12", m))
     cfg = settings()["llm_link"]
     pages = load_pages(iid)
@@ -769,6 +787,9 @@ def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, m
             cost += c
     page_records.sort(key=lambda r: r["page"])
     flags.sort(key=lambda f: f["page"])
+    down = [r["page"] for r in page_records if "local lane failed" in str((r.get("local") or {}).get("error", ""))]
+    if len(down) >= max(3, len(page_records) // 10):
+        raise LaneDown(f"{iid}: the lane did not answer on {len(down)} of {len(page_records)} pages; nothing written")
     secs = round(time.time() - t_start, 1)
     with open(os.path.join(out_dir, "pages.jsonl"), "w", encoding="utf-8") as f:
         for r in page_records:
@@ -872,7 +893,7 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
     def new_rec(typ, title=None, author=None, why=""):
         nonlocal n_new
         n_new += 1
-        r = {"article_id": f"{iid}_m{n_new:03d}", "type": typ, "title": title, "author": author, "roles": {}, "flags": [], "toc": None,
+        r = {"article_id": f"{iid}_a{9000 + n_new}", "type": typ, "title": title, "author": author, "roles": {}, "flags": [], "toc": None,
              "_keys": set(), "_orig": None, "_changed": True, "llm": {"changes": [why] if why else [], "confidence_min": 1.0, "tiers": Counter()}}
         recs.append(r)
         return r
@@ -1205,6 +1226,83 @@ def pilot(workers, redo=False, tag=None):
     return rep
 
 
+def follow(workers, idle_s=120):
+    """The box linking of the corpus run: every assembled corpus issue not yet linked, in the list's order, `workers` at
+    a time, into data/assembly_v2/llm/<id> (events.jsonl: stage linked_llm, with the issue's numbers); when none is waiting it
+    looks again after idle_s seconds, so it keeps pace with the reading for as long as it runs. An issue that failed
+    twice is left for a person (data/corpus/llm_follow_failures.jsonl). The state files stay the run's own (two
+    writers on one file could lose a mark): an issue is done when data/assembly_v2/llm/<id>/compare.json exists, and
+    the fact goes to events.jsonl. The file data/corpus/STOP_LLM stops it after the issues in hand; s13 publishes what
+    it writes to the website."""
+    load_pulp_env()
+    from corpus_lib import corpus_config
+    stop = os.path.join(ROOT, "data", "corpus", "STOP_LLM")
+    log("s12", f"follow: the assembled corpus issues, {workers} at a time -> data/assembly_v2/{OUT_VARIANT} (stop: touch data/corpus/STOP_LLM)")
+    waited = False
+    fails = Counter()
+    fpath = os.path.join(ROOT, "data", "corpus", "llm_follow_failures.jsonl")
+    if os.path.exists(fpath):
+        for line in open(fpath, encoding="utf-8"):
+            try:
+                fails[json.loads(line)["issue"]] += 1
+            except Exception:
+                pass
+    while not os.path.exists(stop):
+        cfg = corpus_config()
+        meta = {i["id"]: i for i in cfg["issues"]}
+        states = all_states()
+        todo = []
+        for i in cfg["issues"]:
+            st = states.get(i["id"])
+            if not st or "assembled" not in st["stages"]:
+                continue
+            if os.path.exists(os.path.join(ROOT, "data", "assembly_v2", OUT_VARIANT, i["id"], "compare.json")):
+                continue
+            if fails.get(i["id"], 0) >= 2:
+                continue
+            todo.append(i["id"])
+        if not todo:
+            if not waited:
+                log("s12", f"follow: every assembled issue is linked; looking again every {idle_s} s")
+                waited = True
+            _sleep_unless(stop, idle_s)
+            continue
+        waited = False
+        if not lanes_answer():                         # a lane down is waited for, not counted against the issues
+            log("s12", "follow: the lane does not answer; looking again in 5 minutes")
+            _sleep_unless(stop, 300)
+            continue
+        batch = todo[: max(2 * workers, 4)]
+        lane_down = False
+        with ThreadPoolExecutor(max_workers=max(1, workers)) as ex:
+            futs = {ex.submit(link_issue, iid, meta[iid], OUT_VARIANT, None, None, None): iid for iid in batch}
+            for f in as_completed(futs):
+                iid = futs[f]
+                try:
+                    sm = f.result()
+                    if not sm:                         # e.g. no layout pages: counted as a failure, so it cannot hold the queue
+                        raise RuntimeError("no result (no layout pages?)")
+                    event("done", issue=iid, stage="linked_llm", **{k: sm.get(k) for k in (
+                        "pages", "boxes", "asked_again", "flagged_pages", "records", "records_changed", "seconds")})
+                except LaneDown as e:
+                    log("s12", f"follow: {e}; it is asked again when the lane answers")
+                    lane_down = True
+                except Exception as e:
+                    log("s12", f"{iid}: FAILED {e!r}")
+                    fails[iid] += 1
+                    with open(fpath, "a", encoding="utf-8") as fh:
+                        fh.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "issue": iid, "error": repr(e)[:500]}) + "\n")
+        if lane_down:
+            _sleep_unless(stop, 300)
+    log("s12", "follow: data/corpus/STOP_LLM found; stopped")
+
+
+def _sleep_unless(stop_file, seconds):
+    t0 = time.time()
+    while time.time() - t0 < seconds and not os.path.exists(stop_file):
+        time.sleep(5)
+
+
 def all_meta():
     """Issue id -> its entry in the pilot list or the corpus list (magazine, cover date)."""
     meta = {}
@@ -1217,6 +1315,35 @@ def all_meta():
     return meta
 
 
+def rebuild_issue(iid, variant=OUT_VARIANT, meta=None, old=None):
+    """One issue's records and comparison made again from its stored decisions (pages.jsonl) with the current code and
+    the current rules' records; no model is asked. Returns the new summary line, or None."""
+    d = os.path.join(ROOT, "data", "assembly_v2", variant)
+    pj = os.path.join(d, iid, "pages.jsonl")
+    if not os.path.exists(pj):
+        return None
+    pages = load_pages(iid)
+    if not pages:
+        return None
+    owner, furn, rules_doc = load_rules(iid)
+    rl = rules_labels(pages, owner, furn)
+    prs = [json.loads(line) for line in open(pj, encoding="utf-8")]
+    doc = build_records(iid, pages, prs, (meta or {}).get(iid, {"id": iid}), variant, rules_doc=rules_doc, rl=rl)
+    json.dump(doc, open(os.path.join(d, iid, "articles.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    cmp = compare_with_rules(iid, pages, prs, rl)
+    write_json_atomic(os.path.join(d, iid, "compare.json"), cmp)
+    sm = dict((old or {}).get(iid) or {"issue": iid, "variant": variant})
+    sm.update({"agreement_with_rules": cmp["agreement"], "type_agreement": cmp["type_agreement"], "type_boxes": cmp["type_boxes"],
+               "boundary_agreement": cmp["boundary_agreement"], "boundary_boxes": cmp["boundary_boxes"],
+               "records": doc["checks"]["records"], "story_records": doc["checks"]["story_records"],
+               "records_kept_from_rules": doc["checks"]["records_kept_from_rules"], "records_changed": doc["checks"]["records_changed"],
+               "rebuilt": time.strftime("%Y-%m-%dT%H:%M:%S")})
+    with _summary_lock:
+        with open(os.path.join(d, "summary.jsonl"), "a", encoding="utf-8") as f:
+            f.write(json.dumps(sm, ensure_ascii=False) + "\n")
+    return sm
+
+
 def rebuild(variant):
     """The records and the comparison of a run made again from its stored decisions with the current code; no model is
     asked. After a change to the record builder or the comparison, a run can be scored again at once (s09)."""
@@ -1225,28 +1352,8 @@ def rebuild(variant):
     meta = all_meta()
     n = 0
     for iid in sorted(os.listdir(d)):
-        pj = os.path.join(d, iid, "pages.jsonl")
-        if not os.path.exists(pj):
-            continue
-        pages = load_pages(iid)
-        if not pages:
-            continue
-        owner, furn, rules_doc = load_rules(iid)
-        rl = rules_labels(pages, owner, furn)
-        prs = [json.loads(line) for line in open(pj, encoding="utf-8")]
-        doc = build_records(iid, pages, prs, meta.get(iid, {"id": iid}), variant, rules_doc=rules_doc, rl=rl)
-        json.dump(doc, open(os.path.join(d, iid, "articles.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-        cmp = compare_with_rules(iid, pages, prs, rl)
-        write_json_atomic(os.path.join(d, iid, "compare.json"), cmp)
-        sm = dict(old.get(iid) or {"issue": iid, "variant": variant})
-        sm.update({"agreement_with_rules": cmp["agreement"], "type_agreement": cmp["type_agreement"], "type_boxes": cmp["type_boxes"],
-                   "boundary_agreement": cmp["boundary_agreement"], "boundary_boxes": cmp["boundary_boxes"],
-                   "records": doc["checks"]["records"], "story_records": doc["checks"]["story_records"],
-                   "records_kept_from_rules": doc["checks"]["records_kept_from_rules"], "records_changed": doc["checks"]["records_changed"],
-                   "rebuilt": time.strftime("%Y-%m-%dT%H:%M:%S")})
-        with open(os.path.join(d, "summary.jsonl"), "a", encoding="utf-8") as f:
-            f.write(json.dumps(sm, ensure_ascii=False) + "\n")
-        n += 1
+        if rebuild_issue(iid, variant, meta, old) is not None:
+            n += 1
     log("s12", f"rebuilt {n} issues of {variant} from their stored decisions (builder {build_records.__doc__.split(chr(10))[0][:60]}…)")
     return n
 
@@ -1304,12 +1411,12 @@ def selftest():
     split = [agree[0], agree[1], (3, [{"joins": "furniture"}, {"joins": "new", "kind": "story", "title": "Wolves"}, {"joins": "notice"}])]
     doc = build_records("t", pages, pr_(split), {"magazine": "Weird Tales"}, rules_doc=rules_doc, rl=rl)
     recs = {r["article_id"]: r for r in doc["articles"]}
-    assert recs["t_a1"]["pages"] == [1] and recs["t_m001"]["pages"] == [3] and recs["t_m001"]["title"] == "Wolves", recs      # split at 3:1
-    assert "wolves came down" in recs["t_m001"]["text"] and "THE END" not in recs["t_m001"]["text"], recs["t_m001"]
+    assert recs["t_a1"]["pages"] == [1] and recs["t_a9001"]["pages"] == [3] and recs["t_a9001"]["title"] == "Wolves", recs      # split at 3:1
+    assert "wolves came down" in recs["t_a9001"]["text"] and "THE END" not in recs["t_a9001"]["text"], recs["t_a9001"]
     adv = [(1, [{"joins": "furniture"}, {"joins": "new", "kind": "story"}, {"joins": "previous"}, {"joins": "advert"}]), agree[1], agree[2]]
     doc = build_records("t", pages, pr_(adv), {"magazine": "Weird Tales"}, rules_doc=rules_doc, rl=rl)
     recs = {r["article_id"]: r for r in doc["articles"]}
-    assert recs["t_a1"]["pages"] == [1, 3] and "moon rose red" not in recs["t_a1"]["text"] and recs["t_m001"]["type"] == "ad", recs
+    assert recs["t_a1"]["pages"] == [1, 3] and "moon rose red" not in recs["t_a1"]["text"] and recs["t_a9001"]["type"] == "ad", recs
     story_b = {"article_id": "t_a3", "type": "story", "title": None, "roles": {"3:2": "note"}, "fragments": [{"page": 3, "region_ids": [1, 2]}]}
     story_a = dict(story, fragments=[{"page": 1, "region_ids": [1, 2, 3]}])
     owner2 = {}
@@ -1365,6 +1472,7 @@ def main():
     ap.add_argument("--page", type=int, default=1)
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--rebuild", metavar="VARIANT", help="make a run's records and comparison again from its stored decisions (no model asked), e.g. llm_pilot_p50l")
+    ap.add_argument("--follow", action="store_true", help="the corpus run's box linking: every assembled issue not yet linked, then wait for more")
     args = ap.parse_args()
     if args.selftest:
         selftest()
@@ -1382,15 +1490,20 @@ def main():
             link_issue(args.issue, m, dry_run_page=args.page)
             return
         with stage_timer("s12_llm_link", args.issue):
-            link_issue(args.issue, m)
+            sm = link_issue(args.issue, m) or {}          # the state files stay the corpus run's own: the fact goes to events.jsonl
+            event("done", issue=args.issue, stage="linked_llm", **{k: sm.get(k) for k in (
+                "pages", "boxes", "asked_again", "flagged_pages", "records", "records_changed", "seconds")})
         return
     if args.pilot:
         pilot(workers, redo=args.redo, tag=args.tag)
         return
+    if args.follow:
+        follow(workers)
+        return
     if args.trial:
         trial(args.trial, workers, redo=args.redo, tag=args.tag, same_as=args.same_as)
         return
-    sys.exit("pass --issue <id>, --pilot, --trial N, --rebuild VARIANT, or --selftest")
+    sys.exit("pass --issue <id>, --pilot, --trial N, --follow, --rebuild VARIANT, or --selftest")
 
 
 if __name__ == "__main__":

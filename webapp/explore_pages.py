@@ -229,8 +229,10 @@ CREATE TABLE records(id TEXT PRIMARY KEY, issue TEXT, magazine TEXT, mag_slug TE
   n_exact INTEGER, n_para INTEGER, ad_class TEXT, advertiser TEXT, contains_excerpt INTEGER, excerpt_of TEXT,
   n_chapters INTEGER, chapters TEXT, announces TEXT, title_as_printed TEXT, author_as_printed TEXT, subtitle TEXT,
   title_source TEXT, author_source TEXT, flags TEXT, department TEXT, work_title TEXT, work_id TEXT, part_label TEXT,
-  part_n INTEGER, part_total INTEGER, serial TEXT, illustrator TEXT, author_credit TEXT, synopsis TEXT);
+  part_n INTEGER, part_total INTEGER, serial TEXT, illustrator TEXT, author_credit TEXT, synopsis TEXT,
+  confidence REAL, assembly TEXT, needs_look INTEGER);
 CREATE INDEX rec_adclass ON records(ad_class);
+CREATE INDEX rec_look ON records(needs_look, status);
 CREATE INDEX rec_issue ON records(issue);
 CREATE INDEX rec_author ON records(author_key);
 CREATE INDEX rec_story ON records(is_story, year);
@@ -340,12 +342,63 @@ def build_db(sig, path, log=None):
             "pages": pages, "layout_pages": layout_pages, "text_stages": stages, "assembled": n_assembled,
             "exported": 0, "events": 0, "complete": 0, "events_archived": 0,
         }
+    # ---- the corpus run's issues (config/corpus_issues.json; v0.18.0): every selected issue, its stages from the run's
+    # state file (cheap: no page or record file is opened), its archive record once downloaded; records from the
+    # per-issue export files below (pipeline/r00_export_stories.py --corpus, written by scripts/site_refresh.py)
+    corpus_cfg = _json(os.path.join(_G["ROOT"], "config", "corpus_issues.json")) or {}
+    sdir = os.path.join(D, "corpus", "state")
+    n_corpus = 0
+    # the ten pilot issues are in the corpus list too, under the archive item's own name (wt_1925_11 is
+    # weird_tales_1925_11_5192511sas): the explorer shows each of them once, with the pilot's checked records; the
+    # corpus run's own records of them stay on disk and on the workbench (they measure the corpus pipeline)
+    pilot_ia = {i.get("ia_identifier") for i in cfg.get("issues", []) if i.get("ia_identifier")}
+    also_pilot = set()
+    for i in corpus_cfg.get("issues", []):
+        iid = i["id"]
+        if iid in issues:
+            continue
+        if i.get("ia_identifier") in pilot_ia:
+            also_pilot.add(iid)
+            continue
+        stages = (_json(os.path.join(sdir, f"{iid}.json")) or {}).get("stages", {})
+        meta = _json(os.path.join(D, "raw", iid, "meta.json")) if "downloaded" in stages else None
+        md = meta.get("metadata", {}) if isinstance(meta, dict) else {}
+        y = _year(i.get("cover_date"))
+        issues[iid] = {
+            "id": iid, "magazine": i.get("magazine"), "mag_slug": mag_slug(i.get("magazine")),
+            "cover_date": i.get("cover_date"), "year": y, "decade": _decade(y), "genre": i.get("genre"),
+            "format": i.get("format"), "ia_identifier": i.get("ia_identifier"), "why": "corpus (Phase 0-1 selection, 4 October 2026)",
+            "gold": 0, "publisher": pubs.get(iid, {}).get("publisher"), "publisher_group": pubs.get(iid, {}).get("publisher_group"),
+            "publisher_source": pubs.get(iid, {}).get("source"),
+            "ia": {k: md.get(k) for k in ("title", "uploader", "addeddate", "publicdate", "scanner", "imagecount",
+                                          "collection", "ocr", "identifier-ark", "description", "contributor",
+                                          "source", "year")},
+            "ia_item_size": meta.get("item_size") if isinstance(meta, dict) else None,
+            "ia_files": sorted({f.get("format") for f in (meta.get("files") or []) if f.get("format")}) if isinstance(meta, dict) else [],
+            "downloaded": 1 if "downloaded" in stages else 0,
+            "records": 0, "stories": 0, "words": 0, "authors": set(), "verified": 0, "modified": 0,
+            "pages": int((stages.get("imaged") or {}).get("pages") or 0), "layout_pages": int((stages.get("read") or {}).get("pages") or 0),
+            "text_stages": [x for x in ("read", "cleaned", "lemmatized", "assembled", "linked") if x in stages],
+            "assembled": int((stages.get("assembled") or {}).get("records") or 0) if "assembled" in stages else 0,
+            "exported": 0, "events": 0, "complete": 0, "events_archived": 0,
+        }
+        n_corpus += 1
+    say(f"  corpus issues {n_corpus:,} (and {len(also_pilot)} shown as their pilot issue)")
     # ---- records from the export
     authors = {}
     n_rec = 0
     rec_rows = []
     story_meta = {}       # id -> (issue, author_key, magazine, genre, decade, year)
-    for r in _jsonl(os.path.join(D, "pilot_stories.jsonl")):
+    def all_records():
+        """The pilot's export, then every corpus issue's export file (v0.18.0)."""
+        for r in _jsonl(os.path.join(D, "pilot_stories.jsonl")):
+            yield r
+        for f in sorted(glob.glob(os.path.join(D, "export", "corpus", "*.jsonl"))):
+            if os.path.basename(f)[:-6] in also_pilot:
+                continue                  # shown once, as the pilot issue
+            for r in _jsonl(f):
+                yield r
+    for r in all_records():
         sid = r["story_id"]
         iss = issues.get(r["issue"])
         y = _year(r.get("cover_date"))
@@ -368,7 +421,9 @@ def build_db(sig, path, log=None):
                          r.get("department"), r.get("work_title"), r.get("work_id"), (r.get("serial") or {}).get("part_label"),
                          (r.get("serial") or {}).get("part_n"), (r.get("serial") or {}).get("part_total"),
                          (json.dumps(r["serial"], ensure_ascii=False) if r.get("serial") else None), r.get("illustrator"),
-                         r.get("author_credit"), r.get("synopsis")))
+                         r.get("author_credit"), r.get("synopsis"),
+                         (float(r["confidence"]) if r.get("confidence") is not None else None), r.get("assembly"),
+                         1 if r.get("needs_look") else 0))
         n_rec += 1
         story_meta[sid] = (r["issue"], key, r.get("magazine"), r.get("genre"), _decade(y), y, is_story)
         if iss is not None:
@@ -435,7 +490,7 @@ def build_db(sig, path, log=None):
         n_para[a["a"]] += 1
         n_para[a["b"]] += 1
     con.executemany("INSERT INTO aligns VALUES (?,?,?,?,?,?,?,?,?)", arows)
-    con.executemany("INSERT INTO records VALUES (" + ",".join("?" * 52) + ")",
+    con.executemany("INSERT INTO records VALUES (" + ",".join("?" * 55) + ")",
                     [row[:27] + (n_exact.get(row[0], 0), n_para.get(row[0], 0)) + row[27:] for row in rec_rows])
     degree = Counter()
     for (ka, kb), L in author_links.items():
@@ -544,7 +599,10 @@ def build_db(sig, path, log=None):
               "author_links": len(author_links), "magazine_links": len(mag_links),
               "ad_classes": dict(Counter(row[27] or "?" for row in rec_rows if row[9] in ("ad", "house"))),
               "house": sum(1 for row in rec_rows if row[9] == "house"),
-              "house_excerpts": sum(1 for row in rec_rows if row[29])}
+              "house_excerpts": sum(1 for row in rec_rows if row[29]),
+              "corpus_issues": n_corpus, "corpus_issues_shown_as_pilot": len(also_pilot),
+              "needs_look": sum(1 for row in rec_rows if row[-1]),
+              "model_checked": sum(1 for row in rec_rows if (row[-2] or "").startswith("rules, checked"))}
     meta = {"signature": _signature(sig), "built": time.strftime("%Y-%m-%d %H:%M:%S"),
             "build_seconds": round(time.time() - t0, 2), "counts": json.dumps(counts),
             "sources": json.dumps([os.path.relpath(p, _G["ROOT"]) for p, _, _ in sig]),
@@ -552,7 +610,7 @@ def build_db(sig, path, log=None):
             "summary": json.dumps(_json(os.path.join(D, "reuse", "background", "summary_machine.json")) or {}),
             "overlap": json.dumps(_json(os.path.join(D, "reuse", "machine_region_overlap.json")) or {}),
             "survey": json.dumps(_json(os.path.join(D, "survey", "summary.json")) or {}),
-            "version": "0.13.0"}
+            "corpus_included": "true", "version": "0.18.0"}
     con.executemany("INSERT INTO meta VALUES (?,?)", list(meta.items()))
     con.commit()
     con.close()
@@ -569,8 +627,8 @@ def ensure_db(force=False):
     path = _DB["path"]
     now = time.time()
     exists = os.path.exists(path)
-    if not force and exists and os.environ.get("PULP_EXPLORER_STATIC"):
-        return                     # corpus scale: the database is built by hand (--build), never at request time
+    if not force and exists and (os.environ.get("PULP_EXPLORER_STATIC") or os.path.exists(os.path.join(_G["DATA"], "explorer.static"))):
+        return                     # corpus scale: the database is built by scripts/site_refresh.py (or --build), never at request time
     if not force and exists and _DB["sig"] is not None and now - _DB["checked"] < CHECK_EVERY:
         return
     _DB["checked"] = now
@@ -1346,15 +1404,24 @@ def is_downloaded(row):
     return bool((_j(row["ia"], {}) or {}).get("title") or row["pages"] or row["layout_pages"] or row["complete"])
 
 
-def corpus_extra():
-    """The corpus run's downloaded/read/assembled totals (webapp/corpus_run_pages.py; zeros without it)."""
+def corpus_extra(con=None):
+    """The corpus run's downloaded/read/assembled totals to add to the explorer's own counts — zeros once the database
+    holds the corpus issues itself (v0.18.0, built by scripts/site_refresh.py); the live totals (webapp/corpus_run_pages.py)
+    only for a database built before that."""
+    zero = {"downloaded": 0, "read": 0, "assembled": 0}
+    try:
+        con = con or db()
+        if meta_json(con, "corpus_included", False):
+            return zero
+    except Exception:
+        return zero
     CR = _G.get("CR")
-    return CR.extra_counts() if CR is not None else {"downloaded": 0, "read": 0, "assembled": 0}
+    return CR.extra_counts() if CR is not None else zero
 
 
 def n_downloaded(con):
     """The explorer's issues that are on this machine, plus the issues the corpus run has downloaded (v0.17.0)."""
-    return sum(1 for r in _rows(con, "SELECT ia, pages, layout_pages, complete FROM issues") if is_downloaded(r)) + corpus_extra()["downloaded"]
+    return sum(1 for r in _rows(con, "SELECT ia, pages, layout_pages, complete FROM issues") if is_downloaded(r)) + corpus_extra(con)["downloaded"]
 
 
 def year_progress_layers(con, lo=YEAR_LO, hi=YEAR_HI):
@@ -1377,7 +1444,7 @@ def year_progress_layers(con, lo=YEAR_LO, hi=YEAR_HI):
         if r["stories"] and r["verified"] == r["stories"]:
             ver[y] = ver.get(y, 0) + 1
     CR = _G.get("CR")
-    if CR is not None:                       # the corpus run's issues, by year (v0.17.0)
+    if CR is not None and not meta_json(con, "corpus_included", False):     # the corpus run's issues, by year (v0.17.0; in the database since v0.18.0)
         try:
             cy = CR.by_year()
             for y, n in cy.get("downloaded", {}).items():
@@ -1493,7 +1560,7 @@ def explore_progress_html(con=None):
         n_dl = n_downloaded(con)
         n_fv = _val(con, "SELECT COUNT(*) FROM issues WHERE stories>0 AND verified=stories") or 0
         out.append(year_strip_html(con))
-        out.append(collection_bar(fr, n_dl, n_c + corpus_extra()["assembled"], n_fv))
+        out.append(collection_bar(fr, n_dl, n_c + corpus_extra(con)["assembled"], n_fv))
         out.append(f"<p class='muted' style='font-size:12.5px'>{n_c:,} complete of {fr['fiction']:,} fiction-magazine items "
                    f"({_fmt(100 * n_c / fr['fiction'] if fr['fiction'] else 0)}%). Survey of {_esc(fr['generated'])}, metadata only "
                    f"(pipeline/s00_survey.py).</p>")
@@ -1541,8 +1608,8 @@ def process_board_html():
                   f"<span class='muted'>{fr['fiction_pages']:,} page images, {fr['fiction_magazines']:,} magazine names; the rest: "
                   + ", ".join(f"{k} {v:,}" for k, v in wbk.items() if k != "fiction magazine") + "</span>"]]
         out.append(year_strip_html(con))
-        out.append(collection_bar(fr, sum(1 for i in iss if is_downloaded(i)) + corpus_extra()["downloaded"],
-                                  sum(1 for i in iss if i["assembled"] or i["exported"]) + corpus_extra()["assembled"],
+        out.append(collection_bar(fr, sum(1 for i in iss if is_downloaded(i)) + corpus_extra(con)["downloaded"],
+                                  sum(1 for i in iss if i["assembled"] or i["exported"]) + corpus_extra(con)["assembled"],
                                   sum(1 for i in iss if i["stories"] and i["verified"] == i["stories"])))
         out.append(_table(["the collection", "#items", "share of the collection", "note"], crows))
         dec = fr["fiction_by_decade"]
@@ -1581,14 +1648,20 @@ def process_board_html():
                + (f"; advertisements by class: " + ", ".join(f"{_esc(k)} {v:,}" for k, v in (counts.get("ad_classes") or {}).items())
                   + f"; {counts.get('house_excerpts', 0):,} house announcements quoting a story" if counts.get("ad_classes") else "") + ".</p>")
     irows = []
-    for i in iss:
+    # the issues that have begun (downloaded, or touched by an annotator), the latest steps first — at corpus scale every
+    # selected issue would be one row (v0.18.0: 7,440 rows, a page of two megabytes); every issue is on /issues
+    begun = [i for i in iss if is_downloaded(i) or i["events"] or i["events_archived"]]
+    begun.sort(key=lambda i: (-(i["verified"] or 0), -(i["events"] or 0), -(1 if i["complete"] else 0), -(i["layout_pages"] or 0), i["id"]))
+    shown = begun[:300]
+    for i in shown:
         stages = _j(i["text_stages"], [])
         done = "yes" if i["complete"] else "—"
         irows.append([_issue_link(con, i["id"], i), N(i["pages"]), N(i["layout_pages"]), _esc(", ".join(stages)) or "—",
                       N(i["assembled"] or ""), N(i["exported"] or ""), N(i["stories"] or ""),
                       N(i["events"] or "") + (f" <span class='muted'>+{i['events_archived']:,} archived</span>" if i["events_archived"] else ""),
                       N(i["modified"] or ""), N(i["verified"] or ""), done])
-    out.append("<h3>Every issue, every step</h3>")
+    out.append(f"<h3>Every issue, every step ({len(shown):,} shown of the {len(begun):,} begun; the {len(iss):,} selected are on "
+               f"<a href='/issues'>issues</a>)</h3>")
     out.append(_table(["issue", "#pages", "#layout pages", "text stages", "#assembled", "#exported", "#stories", "#actions",
                        "#modified", "#verified", "complete"], irows))
     out.append("<p class='muted'>Complete = assembled into records by the machine; such issues appear on the explorer "
@@ -1714,7 +1787,8 @@ def magazines_page(qs=None, render=None):
     qs = qs or {}
     con = db()
     q = _g(qs, "q").strip().lower()
-    sort = _g(qs, "sort", "first") or "first"
+    corpus = meta_value(con, "corpus_included") == "true"          # v0.18.0: most selected magazines wait for the run
+    sort = _g(qs, "sort", "stories" if corpus else "first") or ("stories" if corpus else "first")
     sl = _slice(qs)
     conds, args = [], []
     if q:
@@ -1763,7 +1837,11 @@ def magazines_page(qs=None, render=None):
                    "says which). 'Shares passages with' lists the three magazines whose stories share most six-word "
                    "passages with this one's, one per line; the magazine's own page has the full list and its issues. "
                    "One hundred magazines a page.")
-            + f"<h1>Magazines ({total:,})</h1>" + form + pager
+            + f"<h1>Magazines ({total:,})</h1>"
+            + (f"<p class='muted'>{_val(con, f'SELECT COUNT(*) FROM magazines{where}' + (' AND' if where else ' WHERE') + ' records>0', args) or 0:,} "
+               "of them have assembled records so far; the others are selected for the corpus and wait for the run "
+               "(<a href='/run'>the corpus run, live</a>). Sorted by stories unless you choose another order.</p>" if corpus else "")
+            + form + pager
             + _table(["magazine", "genre · format · publisher", "what the explorer holds", "shares passages with"], rows)
             + pager + f"<p class='muted'>{_raw_link('/raw/magazines', 'raw list')}</p>")
     return _render(render, "Magazines", body, "/magazines")

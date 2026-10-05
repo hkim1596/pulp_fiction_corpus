@@ -213,6 +213,46 @@ Measured in the first trial (5 October): first-reading answers 47 s each with 48
 page overall, which would take about 13 days for the corpus (980,000 pages) on one lane. p50l shortens the answers
 (a reason only when unsure) and adds the second reading for the doubtful boxes; the second trial measures both.
 
+## The website, live (s13, scripts/site_refresh.py; site v0.18.0, 5 October)
+
+Heejin: "What I expect is whole corpus now run on the same way. Show them by authors, Magazines, issues, and stories.
+And Workbench shows how they are assembled automatically, and show confidence scores and flags when automation is not so
+sure. … It must lively update eveything."
+
+Three processes keep the site current, each in its own tmux session on the server:
+- `corpus` — the run itself (run_corpus.py); it rewrites data/corpus/progress.json every minute and appends every stage it
+  finishes to data/corpus/events.jsonl. The /run page reads both at every visit.
+- `llmjob` — s12 --follow: every assembled corpus issue checked by the language model on GPU 2, into
+  data/assembly_v2/llm/<id>, two at a time, in the list's order; it waits for more when it has caught up, and waits
+  while the lane does not answer (an issue the lane failed on is not written; it is asked again later). An issue that
+  fails twice for another reason is listed in data/corpus/llm_follow_failures.jsonl for a person. Stop it with
+  `touch data/corpus/STOP_LLM`.
+- `siterefresh` — scripts/site_refresh.py: every 5 minutes s13 publishes the assembled issues whose assembly is newer than
+  their live records (data/articles/<id>/articles.json, with assembly, confidence, flags and needs_look on every record;
+  an issue someone corrected is held), r00 --corpus exports the issues whose records or corrections changed
+  (data/export/corpus/<id>.jsonl), and the explorer database is rebuilt from the exports and moved into place. Stop it
+  with `touch data/corpus/STOP_SITE`. The site itself only reads (data/explorer.static).
+
+What a person sees: Authors, Magazines, Issues and Stories cover every assembled issue; the Workbench list (/articles)
+shows every record with how it was assembled, the model's confidence and its flags, and a filter for the records that
+need a look; an issue or record opens on the scans as the pilot's do, with the flags in full; /run shows the run, the
+model's progress, the last refresh and the accuracy tables; /log shows the build log. A correction made on the workbench
+is on the explorer within about five minutes.
+
+Folders: data/assembly_v2/llm holds the corpus's box linking only; the pilot runs are llm_pilot_p50k (the p50k decisions,
+rebuilt on the rules' records), llm_pilot_p50l and llm_pilot_p50m, and the trials llm_trial_<tag>. The ten pilot issues are
+also in the corpus list under their archive names (wt_1925_11 = weird_tales_1925_11_5192511sas): the explorer shows each
+once, with the pilot's checked records; the corpus run's records of them stay on the workbench.
+
+To start again after a restart of the server (each is safe to start when it is already stopped; check with `tmux ls`):
+
+    cd ~/shared/khj/pulp_fiction_corpus
+    tmux new-session -d -s llmjob "cd ~/shared/khj/pulp_fiction_corpus && python3 pipeline/s12_llm_link.py --follow 2>&1 | tee -a data/corpus/llm_follow.log; sleep 86400"
+    tmux new-session -d -s siterefresh "cd ~/shared/khj/pulp_fiction_corpus && python3 scripts/site_refresh.py 2>&1 | tee -a data/corpus/site_refresh.log; sleep 86400"
+
+(remove data/corpus/STOP_LLM or STOP_SITE first if they were used). The lane on GPU 2 (pulp-llm-8023) must be up for
+the follower: `curl -sf http://127.0.0.1:8023/health`.
+
 ## Decisions taken on 4 October (Heejin)
 
 - The green light: "I got the green light to go. Don't worry about the protocol anymore. Just keep log of

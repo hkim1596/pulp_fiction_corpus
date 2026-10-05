@@ -10,6 +10,11 @@ server, or the Studio while it is the live server):
 
     cd <project folder> && python3 pipeline/r00_export_stories.py
 
+With --corpus (since 5 October 2026): the corpus issues, one file per issue in data/export/corpus/,
+written again only when an issue's live records or corrections changed:
+
+    python3 pipeline/r00_export_stories.py --corpus [--issue <id>] [--force]
+
 Output: data/pilot_stories.jsonl — every article of every type (stories,
 serial parts, poems, features, letters, advertisements, contents pages),
 with its metadata and reading text. Later stages select by type; a record
@@ -33,6 +38,65 @@ STORY_CORPUS_TYPES = ("story",)      # the story-level corpus (protocol section 
 MIN_STORY_WORDS = 50                 # the reuse stages' floor (r02.MIN_TOKENS): shorter story records are fragments
 
 
+def record_of(a, iid, meta):
+    """One record of the live assembly (people's corrections replayed) as an export line."""
+    text = (a.get("text") or "").strip()
+    rec = {
+        "story_id": a["article_id"],
+        "issue": iid,
+        "magazine": meta.get("magazine"),
+        "cover_date": meta.get("cover_date"),
+        "genre": meta.get("genre"),
+        "format": meta.get("format"),
+        "type": a.get("type") or "other",
+        "title": a.get("title"),
+        "author": a.get("author"),
+        "teaser": a.get("teaser"),
+        "author_credit": a.get("author_credit"),        # "Author of 'Men Like Gods,' etc." (assembly v2.1.2)
+        "illustrator": a.get("illustrator"),            # "Illustrated by WILLER" (assembly v2.2)
+        "synopsis": a.get("synopsis"),                  # the recap on a later instalment: not story text, not in the reuse inventory
+        "department": a.get("department"),              # the standing department the record belongs to (config/departments.json)
+        "serial": a.get("serial"),                      # {part_label, part_n, part_total, source, prev, next} for a serial instalment
+        "work_title": a.get("work_title"),              # the work's title without the instalment marker
+        "work_id": a.get("work_id"),                    # shared by every instalment of one work (cross_issue pass)
+        "subtitle": a.get("subtitle"),
+        "title_as_printed": a.get("title_as_printed"),
+        "author_as_printed": a.get("author_as_printed"),
+        "title_source": a.get("title_source"),
+        "author_source": a.get("author_source"),
+        # advertisements (assembly v2.1): class, advertiser, the works a house
+        # announcement names, and whether it quotes one of them verbatim
+        "ad_class": a.get("ad_class"),
+        "advertiser": a.get("advertiser"),
+        "announces": a.get("announces") or [],
+        "contains_excerpt": bool(a.get("contains_excerpt")),
+        "excerpt_of": a.get("excerpt_of"),
+        "chapters": [{k: c.get(k) for k in ("number", "n", "title", "page")} for c in (a.get("chapters") or [])],
+        "flags": a.get("flags") or [],
+        "date": meta.get("cover_date"),
+        "date_source": "issue",
+        "pages": a.get("pages") or [],
+        "status": a.get("status", "auto"),
+        "verified_by": a.get("verified_by"),
+        "modified_by": a.get("modified_by") or [],
+        "fragments": [app.fragkey(fr) for fr in a["fragments"]],
+        "n_words": len(text.split()),
+        "text_sha1": hashlib.sha1(text.encode("utf-8")).hexdigest(),
+        "text": text,
+    }
+    if rec["type"] == "serial_part":
+        rec["type"] = "story"                      # instalments are stories with serial fields since 2026-09-04
+        rec["serial"] = rec.get("serial") or {"part_label": None, "part_n": None, "part_total": None, "source": "annotator"}
+    rec["assembly"] = a.get("assembly")              # how the automation made it (s13; the corpus issues)
+    rec["confidence"] = a.get("confidence")          # the model's lowest confidence on its boxes, when it checked them
+    rec["needs_look"] = bool(a.get("needs_look"))    # a change by the model, an open decision, or low confidence
+    if rec["type"] in STORY_CORPUS_TYPES and rec["n_words"] >= MIN_STORY_WORDS:
+        rec["corpus"] = "story-level"
+    else:
+        rec["corpus"] = "parallel"
+    return rec
+
+
 def main():
     cfg = app.cfg()
     issues = {i["id"]: i for i in cfg.get("issues", [])}
@@ -48,53 +112,7 @@ def main():
                 print(f"[r00] {iid}: no article assembly yet, skipped")
                 continue
             for a in doc["articles"]:
-                text = (a.get("text") or "").strip()
-                rec = {
-                    "story_id": a["article_id"],
-                    "issue": iid,
-                    "magazine": meta.get("magazine"),
-                    "cover_date": meta.get("cover_date"),
-                    "genre": meta.get("genre"),
-                    "format": meta.get("format"),
-                    "type": a.get("type") or "other",
-                    "title": a.get("title"),
-                    "author": a.get("author"),
-                    "teaser": a.get("teaser"),
-                    "author_credit": a.get("author_credit"),        # "Author of 'Men Like Gods,' etc." (assembly v2.1.2)
-                    "illustrator": a.get("illustrator"),            # "Illustrated by WILLER" (assembly v2.2)
-                    "synopsis": a.get("synopsis"),                  # the recap on a later instalment: not story text, not in the reuse inventory
-                    "department": a.get("department"),              # the standing department the record belongs to (config/departments.json)
-                    "serial": a.get("serial"),                      # {part_label, part_n, part_total, source, prev, next} for a serial instalment
-                    "work_title": a.get("work_title"),              # the work's title without the instalment marker
-                    "work_id": a.get("work_id"),                    # shared by every instalment of one work (cross_issue pass)
-                    "subtitle": a.get("subtitle"),
-                    "title_as_printed": a.get("title_as_printed"),
-                    "author_as_printed": a.get("author_as_printed"),
-                    "title_source": a.get("title_source"),
-                    "author_source": a.get("author_source"),
-                    # advertisements (assembly v2.1): class, advertiser, the works a house
-                    # announcement names, and whether it quotes one of them verbatim
-                    "ad_class": a.get("ad_class"),
-                    "advertiser": a.get("advertiser"),
-                    "announces": a.get("announces") or [],
-                    "contains_excerpt": bool(a.get("contains_excerpt")),
-                    "excerpt_of": a.get("excerpt_of"),
-                    "chapters": [{k: c.get(k) for k in ("number", "n", "title", "page")} for c in (a.get("chapters") or [])],
-                    "flags": a.get("flags") or [],
-                    "date": meta.get("cover_date"),
-                    "date_source": "issue",
-                    "pages": a.get("pages") or [],
-                    "status": a.get("status", "auto"),
-                    "verified_by": a.get("verified_by"),
-                    "modified_by": a.get("modified_by") or [],
-                    "fragments": [app.fragkey(fr) for fr in a["fragments"]],
-                    "n_words": len(text.split()),
-                    "text_sha1": hashlib.sha1(text.encode("utf-8")).hexdigest(),
-                    "text": text,
-                }
-                if rec["type"] == "serial_part":
-                    rec["type"] = "story"                      # instalments are stories with serial fields since 2026-09-04
-                    rec["serial"] = rec.get("serial") or {"part_label": None, "part_n": None, "part_total": None, "source": "annotator"}
+                rec = record_of(a, iid, meta)
                 # the two corpora the protocol names: the story-level corpus (stories of fifty words or
                 # more) and the parallel corpus (advertisements, contents pages, editorial matter, house
                 # matter, poems, letters pages — and story records too short to be stories)
@@ -128,5 +146,50 @@ def main():
           f"({n_corpus['story fragments']} story records under {MIN_STORY_WORDS} words among them)")
 
 
+CORPUS_EXPORT = os.path.join(ROOT, "data", "export", "corpus")
+
+
+def _mt(p):
+    try:
+        return os.path.getmtime(p)
+    except OSError:
+        return 0.0
+
+
+def export_corpus(ids=None, force=False, log=print):
+    """The corpus issues (config/corpus_issues.json), one file per issue: data/export/corpus/<id>.jsonl, the records of
+    its live assembly (s13 publishes it; people's corrections replayed) as export lines. An issue is written again only
+    when its live records or its correction log are newer than its file, so a rerun every few minutes costs little
+    (pipeline/../scripts/site_refresh.py). The explorer database reads these files with the pilot's. Returns the number
+    of issues written."""
+    corpus = {i["id"]: i for i in json.load(open(os.path.join(ROOT, "config", "corpus_issues.json"), encoding="utf-8"))["issues"]}
+    os.makedirs(CORPUS_EXPORT, exist_ok=True)
+    n = 0
+    for iid in (ids or sorted(corpus)):
+        live = os.path.join(ROOT, "data", "articles", iid, "articles.json")
+        if not os.path.exists(live) or iid not in corpus:
+            continue
+        dst = os.path.join(CORPUS_EXPORT, f"{iid}.jsonl")
+        src_mt = max(_mt(live), _mt(os.path.join(ROOT, "data", "annotations", f"{iid}.jsonl")))
+        if not force and os.path.exists(dst) and _mt(dst) >= src_mt:
+            continue
+        doc = app.effective_doc(iid)
+        if not doc:
+            continue
+        tmp = dst + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            for a in doc["articles"]:
+                f.write(json.dumps(record_of(a, iid, corpus[iid]), ensure_ascii=False) + "\n")
+        os.replace(tmp, dst)
+        n += 1
+    if n:
+        log(f"[r00] corpus: {n} issues exported to data/export/corpus/")
+    return n
+
+
 if __name__ == "__main__":
-    main()
+    if "--corpus" in sys.argv:
+        ids = [sys.argv[sys.argv.index("--issue") + 1]] if "--issue" in sys.argv else None
+        export_corpus(ids, force="--force" in sys.argv)
+    else:
+        main()

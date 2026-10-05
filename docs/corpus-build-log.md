@@ -510,4 +510,88 @@ PASTE 8p (once the p50l pilot is scored): the p50l pilot's numbers and score; th
 restarted with 128; --rebuild of the p50k and p50l pilots and their score (the new builder alone, on the old
 decisions); the p50m pilot and its score; the p50m trial on the same 100 issues and its score.
 
-(Next entries: the rebuilt scores; the p50m pilot and trial.)
+### 2026-10-05, 11:10 KST — the whole corpus on the website, live; the box linking follows the corpus run (p50n, site v0.18.0)
+
+PASTE 8p committed p50m (a4b1071). PASTE 8q: the p50l pilot (two local readings, old builder) asked 6 of its 1,434 pages
+again at the 0.95 threshold (0.42%); of the 14 doubtful boxes the two readings agreed on 9 and the second was at least
+0.85 sure of 5, none stayed open, no page was flagged; 148.7 s an issue, the second readings 580 s in all. Its score:
+40 of 74 verified records exactly right (overlap 0.83), 103 of 108 contents pieces found, 93 clean, 16 chapter splits —
+the old builder's loss again. The p50m job rebuilt the p50k and p50l pilot runs on the rules' records (10:29),
+restarted our lane with room for 128 requests (up at 10:30) and began the p50m pilot. The first reading is almost never
+unsure (under 0.5% of pages below 0.95), so its confidence hardly separates its right answers from its wrong ones; what
+marks a record for people is mostly a disagreement — a change the model makes to the rules' records — and an open
+decision, not the confidence.
+
+Heejin, 10:33: "Why the website still shows 585 stories assembled only for pilot. What I expect is whole corpus
+now run on the same way. Show them by authors, Magazines, issues, and stories. And Workbench shows how they are
+assembled automatically, and show confidence scores and flags when automation is not so sure. Human annotator will fix
+some of them and the algorithm can improve accordingly. Let's the website shows everything we are doing here. It must
+lively update eveything."
+
+Why the site showed the pilot alone: its workbench and explorer read an issue's records from data/articles/<id> (the
+live assembly, on which people's corrections are replayed), and the explorer's database was built from the pilot list
+and the pilot's export; the corpus run's records stayed in data/assembly_v2/rules/<id>, which the site never read.
+
+p50n and site v0.18.0:
+- pipeline/s13_publish.py puts every assembled corpus issue on the site: data/articles/<id>/articles.json from the
+  model-checked records (s12) when the issue has them, else the rules'; every record carries how it was assembled
+  ("rules (not yet checked by the model)", "rules, checked by the model", "… (changed)"), the model's lowest confidence
+  on its boxes, its flags (the rules' notes, each change the model made, each decision it left open) and needs_look (a
+  change, an open decision, or a confidence under settings.publish.look_below, 0.9). An issue someone has corrected is
+  not written again (the corrections are replayed on the records they were made on).
+- pipeline/r00_export_stories.py --corpus exports the corpus issues one file each (data/export/corpus/<id>.jsonl),
+  again only when an issue's live records or its corrections changed.
+- The explorer database now holds every selected corpus issue (its stages from the run's state file, its archive record
+  once downloaded) and every exported corpus record, with three more columns (confidence, assembly, needs_look);
+  authors, magazines, issues and stories therefore cover the corpus as far as it is assembled.
+- scripts/site_refresh.py (tmux siterefresh) runs publish, export and rebuild every settings.site.refresh_minutes (5);
+  the database is built beside the old one and moved into place; the site never builds at request time (the file
+  data/explorer.static); data/corpus/site_refresh.json holds the last cycle's numbers, shown on /run.
+- The workbench list (/articles) reads the database, paged, with columns for the assembly, the confidence and the flags
+  (⚑ = needs a look) and a filter "needs a look"; the issue and record pages of the workbench show the same, and every
+  flag in full. Corpus issues open on the workbench like the pilot's (issue_by_id reads the corpus list too).
+- /log shows this build log; /run adds the issues checked by the model and those on the site, the last refresh, and the
+  accuracy tables (s09); the Progress page's per-issue table lists the issues begun (at most 300), not all 7,440.
+- s12 --follow checks every assembled corpus issue in the list's order, two at a time, and waits for more; it keeps its
+  bookkeeping out of the run's state files (an issue is done when its compare.json exists; the fact goes to
+  events.jsonl; failures to data/corpus/llm_follow_failures.jsonl), because two writers on one state file could lose a
+  mark. New records the model makes are numbered <issue>_a9001 on, which the site's record lookup recognises.
+
+The corrections loop: a person's corrections on the workbench are kept per issue (data/annotations/<id>.jsonl) and
+replayed on the records; the issue is held from republication; the refresh exports it within minutes, so the explorer
+shows the corrected records; s09 scores every way of assembling against the records people verify; s11 lists what
+people changed, box by box, for the next change to the rules (s08) or to the model's prompt and hints (s12).
+
+Five more points found while testing:
+- The ten pilot issues are in the corpus list too, under the archive item's own name (wt_1925_11 is
+  weird_tales_1925_11_5192511sas; all ten match by archive identifier). The explorer shows each of them once, with the
+  pilot's checked records; the corpus run's own records of them stay on disk and on the workbench, where they can be
+  scored against the pilot's verified records (a measure of the corpus pipeline on the same pages).
+- The corpus list keeps some issues the archive holds under two or three names when the magazine's name differs between
+  the records (Galaxy, March 1952: three items, one as "Galaxy Magazine (March"); the explorer shows every archive item,
+  so such an issue's stories can appear twice until a later duplicate check by text removes them. Not changed now.
+- The magazines list holds all 1,604 selected magazines; it is now sorted by stories (the ones with assembled records
+  first) and says how many have records so far. A corpus issue's page explains itself as a corpus issue (the pilot's
+  timing table does not apply). s12 --issue, like --follow, leaves the run's state files alone.
+- The public front page spoke of "a development set of 10 issues" (Heejin, earlier: "Forget about development set."); it
+  now says that the whole corpus is being built, with the number of selected issues from the run's progress file, and
+  its counters (issues, records, stories, words) include the corpus records.
+- The follower must not turn a stop of the lane into flags: while the lane on GPU 2 does not answer it waits (it looks
+  again every five minutes), and an issue on which the lane failed on many pages (3 or more, and at least a tenth) is not
+  written at all and is asked again later; otherwise every such page would fall back to the rules' decisions and be
+  flagged for a person. An issue that fails for another reason twice is left for a person
+  (data/corpus/llm_follow_failures.jsonl).
+
+The 100-issue p50m trial is dropped: the follower checks every assembled corpus issue the same way, so its numbers come
+from the whole corpus, and the lane is not shared between two jobs. The folder data/assembly_v2/llm held the p50k pilot
+run (the pilot runs before p50l had no name of their own); it becomes llm_pilot_p50k, so that data/assembly_v2/llm holds
+the corpus alone and the numbers on /run are the corpus's.
+
+PASTE 8s commits p50n. PASTE 8t (server): the p50m pilot's state; the old job stopped (the p50m pilot resumes: issues
+already done are not asked again, the one or two in progress start again); llm moved to llm_pilot_p50k; tmux llmjob:
+the p50m pilot finished, all pilot runs scored side by side (data/assembly_v2/eval_pilot_all.txt), then s12 --follow
+over the corpus; tmux siterefresh started (its first cycle publishes the rules' records of every assembled issue at
+once); the site restarted on v0.18.0. PASTE 8u: the refresh's numbers, the follower's pace against the reading's, the
+pilot score.
+
+(Next entries: the first refresh cycles; the follower's pace; the p50m pilot score.)

@@ -203,5 +203,14 @@
     "trial": {
       "issues": 100
     }
+  },
+  "publish": {
+    "_comment": "s13: what the website shows for a corpus issue. prefer: the model-checked records (s12) when the issue has them, else the rules'. look_below: a record the model was less sure of than this needs a look (with any change the model made and any decision it left open).",
+    "prefer": "llm",
+    "look_below": 0.9
+  },
+  "site": {
+    "_comment": "scripts/site_refresh.py: how often the site's own database (authors, magazines, issues, stories, the workbench list) is brought up to date with the corpus run; the /run board reads the run's progress file at every visit.",
+    "refresh_minutes": 5
   }
 }

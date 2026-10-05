@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.17.0"
+APP_VERSION = "0.18.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -135,11 +135,64 @@ def cfg():
         return {"approved": False, "issues": []}
 
 
+_CORPUS = {"mtime": None, "map": {}}
+
+
+def corpus_issue_map():
+    """The corpus list (config/corpus_issues.json) by id, re-read when the file changes (v0.18.0)."""
+    p = os.path.join(ROOT, "config", "corpus_issues.json")
+    try:
+        mt = os.path.getmtime(p)
+    except OSError:
+        return {}
+    if _CORPUS["mtime"] != mt:
+        try:
+            _CORPUS["map"] = {i["id"]: i for i in json.load(open(p, encoding="utf-8")).get("issues", [])}
+        except Exception:
+            _CORPUS["map"] = {}
+        _CORPUS["mtime"] = mt
+    return _CORPUS["map"]
+
+
 def issue_by_id(iid):
     for i in cfg()["issues"]:
         if i["id"] == iid:
             return i
+    i = corpus_issue_map().get(iid)
+    if i:
+        return dict({"genre": "", "format": "", "ia_identifier": ""}, **{k: (v if v is not None else "") for k, v in i.items()})
     return None
+
+
+def automation_html(a):
+    """How the automation made a record and how sure it is (the corpus issues; s13, v0.18.0)."""
+    asm = a.get("assembly")
+    fl = a.get("flags") or []
+    if not asm and not fl:
+        return ""
+    conf = a.get("confidence")
+    bits = []
+    if asm:
+        bits.append(f"assembled by the {esc(asm)}")
+    if conf is not None:
+        bits.append(f"the model's lowest confidence on its boxes {float(conf):.2f}")
+    head = ("<b style='color:var(--warn)'>needs a look</b> · " if a.get("needs_look") else "") + " · ".join(bits)
+    items = "".join(f"<li>{esc(f)}</li>" for f in fl[:30]) + (f"<li class='muted'>… {len(fl) - 30} more</li>" if len(fl) > 30 else "")
+    return ("<div class='fine' style='margin:6px 0 10px;padding:8px 10px;border:1px solid var(--grid2);border-radius:8px'>"
+            f"<div>{head or 'notes from the automation'}</div>" + (f"<ul style='margin:6px 0 0 18px'>{items}</ul>" if fl else "") + "</div>")
+
+
+def automation_cells(a):
+    """Three table cells for a record: how it was assembled, the model's confidence, its flags (v0.18.0)."""
+    asm = a.get("assembly") or ""
+    short = "rules + model" if asm.startswith("rules, checked") else ("rules" if asm else "")
+    if "(changed)" in asm:
+        short += " (changed)"
+    conf = a.get("confidence")
+    n_fl = len(a.get("flags") or []) if not isinstance(a.get("flags"), str) else len(json.loads(a.get("flags") or "[]"))
+    look = a.get("needs_look")
+    return (f"<td class='fine'>{esc(short)}</td><td class='num'>{'' if conf is None else f'{float(conf):.2f}'}</td>"
+            f"<td class='num'>{('<b style=color:var(--warn)>⚑ ' if look else '') + (str(n_fl) if n_fl else '') + ('</b>' if look else '')}</td>")
 
 
 def pages_of(iid):
@@ -1372,7 +1425,7 @@ NAV_EXPLORE = [("/overview", "Overview"), ("/authors", "Authors"), ("/magazines"
                ("/stories", "Stories"), ("/pairs", "Pairs"), ("/reuse", "Reuse"), ("/collection", "Collection"),
                ("/corpus", "Corpus"), ("/datasheet", "Datasheet"), ("/method", "Method")]
 NAV_WORKROOM = [("/guide", "Guide"), ("/articles", "Workbench"), ("/reuse/validate", "Paraphrase review"),
-                ("/reuse/cases", "Cases"), ("/reuse/progress", "Progress"), ("/run", "Corpus run"), ("/assembly", "Assembly"),
+                ("/reuse/cases", "Cases"), ("/reuse/progress", "Progress"), ("/run", "Corpus run"), ("/log", "Build log"), ("/assembly", "Assembly"),
                 ("/timing", "Timing"), ("/activity", "Activity"), ("/feedback", "Feedback")]
 
 
@@ -1908,6 +1961,8 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, RP.progress_page(render=self._page))
         if path == "/run":
             return self._send(200, CR.run_page(qs, render=self._page))
+        if path == "/log":
+            return self._send(200, CR.log_page(qs, render=self._page))
         if path == "/reuse/validate":
             return self._send(200, RV.validate_page(qs, self.user, render=self._page))
         if path == "/reuse/cases":
@@ -2317,6 +2372,18 @@ administrator approves them.</p>
         except Exception:
             n_issues = n_rec = n_story = n_words = n_ver = n_frame = 0
             strip = ""
+        try:
+            n_sel = (CR.progress() or {}).get("issues") or CR.corpus_list()["n"]
+        except Exception:
+            n_sel = 0
+        if n_sel:
+            lede_run = (f"The whole corpus is being built now: {n_sel:,} issues selected from the Internet Archive's "
+                        "pulp magazine collection are downloaded, read and cut into their printed pieces by a computer "
+                        "pipeline, a language model checks the cuts, and a small team checks and repairs the result.")
+        else:
+            lede_run = (f"{n} pilot issue{'s' if n != 1 else ''} are processed end to end: a computer pipeline reads "
+                        "the scanned pages and cuts each issue into its printed pieces, and a small team checks and "
+                        "repairs the result.")
         stats = stats_html([(n_frame, "fiction-magazine items in the archive"), (n_issues, "issues read"),
                             (n_rec, "records"), (n_story, "stories"), (n_words, "words of story text"), (n_ver, "records verified")])
         body = f"""<div class='wrap'>
@@ -2326,12 +2393,9 @@ administrator approves them.</p>
 <h1>Pulp Fiction Corpus</h1>
 <p class='lede'>A research archive in preparation: American pulp fiction magazines
 (1896–1959), rebuilt from library scans into clean, page-anchored text for
-a study of how often stories repeat one another. A development set of {n}
-issue{'s' if n != 1 else ''} is processed end to end: a computer pipeline reads the
-scanned pages and cuts each issue into its printed pieces, and a small team
-checks and repairs the result — every story, poem, feature and advertisement
-becomes its own verified record, traceable to the exact spot on the scan
-where it was printed.</p>
+a study of how often stories repeat one another. {lede_run} Every story, poem, feature and advertisement
+becomes its own record, traceable to the exact spot on the scan where it was printed, and every record says how
+sure the machine was of it.</p>
 <div class='grid2'>
 <div class='card pad'><h3>What the site can do</h3><p>Read everything in layers: an overview of charts,
 then lists of authors, magazines, issues, records and story pairs, then one page per entity, then the
@@ -2441,12 +2505,19 @@ click first.</p>"""
         empty = ("" if pngs else
                  "<div class='empty'>0 pages on disk for this issue — stage 1 "
                  "(download) has not run for it yet.</div>")
+        pilot = any(i.get("id") == iid for i in cfg().get("issues", []))
         body = (howto(
             "This is one pilot issue. The page grid opens the side-by-side "
             "viewer (scan next to text, stage by stage). The timing table is "
             "the measured wall-clock of every pipeline stage on this issue — "
             "these numbers, times the size of the full archive, are how we "
-            "decide the full-corpus method.")
+            "decide the full-corpus method." if pilot else
+            "This is one issue of the corpus run (the Phase 0–1 selection). The page grid opens the "
+            "side-by-side viewer (scan next to text, stage by stage). The records table says how each record "
+            "was assembled (the rules engine, then the language model's check), the model's lowest confidence "
+            "on its boxes and its flags; ⚑ marks a record that needs a look. A correction made on a record's "
+            "page is kept and replayed whenever the records are made again. The run's pace is on the "
+            "Corpus run page.")
             + f"<h1>{esc(info['magazine'])} — {esc(info['cover_date'])}</h1>"
             + f"<p class='muted'>Internet Archive item {esc(info['ia_identifier'])} · "
               f"genre {esc(info['genre'])} · format {esc(info['format'])}"
@@ -2458,7 +2529,9 @@ click first.</p>"""
             + ("<h2>Timing so far</h2><table><tr><th>Stage</th><th>Pages</th>"
                "<th>Seconds</th><th>Sec/page</th><th>Note</th></tr>"
                + trows + "</table>" if t else
-               "<div class='empty'>No timing rows for this issue yet.</div>")
+               ("<div class='empty'>No timing rows for this issue yet.</div>" if pilot else
+                "<p class='muted'>The corpus run records its times per issue in data/corpus/events.jsonl; "
+                "its pace is on the <a href='/run'>Corpus run</a> page.</p>"))
             + EX.issue_extra_html(iid))
         return self._page(info["magazine"], body, path=f"/issue/{iid}")
 
@@ -2474,6 +2547,7 @@ click first.</p>"""
             f"<td>{esc(EX.display_author(a.get('author') or ''))}</td>"
             f"<td>{esc(a.get('type') or '')}</td>"
             f"<td>{STATUS_CHIP.get(a.get('status'), '')}</td>"
+            + automation_cells(a) +
             f"<td class='num'>{a['pages'][0] if a['pages'] else '?'}–"
             f"{a['pages'][-1] if a['pages'] else '?'}</td></tr>"
             for a in doc["articles"])
@@ -2483,9 +2557,15 @@ click first.</p>"""
                  f"the machine + {len(doc.get('user_furniture', []))} marked "
                  f"by annotators · {len(doc.get('unsorted', []))} segments "
                  f"unsorted, kept for review</p>")
-        return (f"<h2>Articles in this issue ({len(doc['articles'])})</h2>"
+        pub = doc.get("published") or {}
+        how = (f"<p class='fine'>Assembled automatically: the rules engine (s08)"
+               + (", then checked box by box by the language model (s12), which kept or changed each record" if pub.get("source") == "llm" else "")
+               + f"; on this site since {esc(pub.get('ts', '')[:16].replace('T', ' '))}. The confidence is the model's lowest on the "
+               "record's boxes; ⚑ marks a record the model changed, left a decision open on, or was unsure of — the ones to look at "
+               "first.</p>") if pub else ""
+        return (f"<h2>Articles in this issue ({len(doc['articles'])})</h2>" + how +
                 "<table><tr><th>Title as printed</th><th>Author</th>"
-                "<th>Type</th><th>Status</th><th>Pages</th></tr>"
+                "<th>Type</th><th>Status</th><th>Assembly</th><th>Confidence</th><th>Flags</th><th>Pages</th></tr>"
                 + rows + "</table>" + extra)
 
     def viewer(self, iid, n, qs):
@@ -2617,80 +2697,86 @@ click first.</p>"""
                     path=f"/issue/{iid}/p/{n}")
 
     def articles_page(self, qs):
-        q = (qs.get("q", [""])[0] or "").strip().lower()
-        typ = (qs.get("type", [""])[0] or "").strip()
-        stat = (qs.get("status", [""])[0] or "").strip()
-        cfgmap = {i["id"]: i for i in cfg()["issues"]}
-        rows, types = [], set()
-        for iid in cfgmap:
-            doc = effective_doc(iid)
-            if not doc:
-                continue
-            for a in doc["articles"]:
-                types.add(a.get("type") or "other")
-                rows.append({**a, "issue": iid,
-                             "words": len((a.get("text") or "").split())})
-        total = len(rows)
+        """Every record of every issue on the site — the pilot's and the corpus run's — from the explorer database
+        (v0.18.0: the corpus is too large to read issue by issue at every visit), paged, with how each was assembled,
+        the model's confidence and its flags; "needs a look" lists the records the automation is least sure of first.
+        Statuses are as of the last refresh (scripts/site_refresh.py, every few minutes), the pilot's live."""
+        g = lambda k: (qs.get(k, [""])[0] or "").strip()      # noqa: E731
+        q, typ, stat, look, mag = g("q").lower(), g("type"), g("status"), g("look"), g("mag")
+        con = EX.db()
+        conds, args = [], []
         if q:
-            rows = [r for r in rows
-                    if q in (r.get("title") or "").lower()
-                    or q in (r.get("author") or "").lower()]
+            conds.append("(LOWER(title) LIKE ? OR LOWER(author) LIKE ? OR id LIKE ?)")
+            args += [f"%{q}%", f"%{q}%", f"%{q}%"]
         if typ:
-            rows = [r for r in rows if (r.get("type") or "other") == typ]
+            conds.append("type=?")
+            args.append(typ)
         if stat:
-            rows = [r for r in rows if r.get("status") == stat]
-        # stories first, and among them the verified and the modified ones (Heejin, 2026-09-04); then the
-        # other pieces, then the publisher's matter and the advertising; the file order inside each group
-        type_rank = {"story": 0, "serial_part": 0, "poem": 1, "feature": 2, "letters": 3, "other": 4, "toc": 5, "house": 6, "ad": 7}
-        stat_rank = {"verified": 0, "modified": 1, "auto": 2}
-        rows.sort(key=lambda r: (type_rank.get(r.get("type") or "other", 4), stat_rank.get(r.get("status"), 2)))
-        topts = "<option value=''>all types</option>" + "".join(
-            f"<option value='{esc(t)}' {'selected' if t == typ else ''}>"
-            f"{esc(t)}</option>" for t in sorted(types))
-        sopts = "<option value=''>all statuses</option>" + "".join(
-            f"<option value='{s}' {'selected' if s == stat else ''}>{s}"
-            f"</option>" for s in ("auto", "modified", "verified"))
-        form = (f"<form method='GET' action='/articles' "
-                f"style='margin:0 0 14px'>"
-                f"<input type='text' name='q' value='{esc(q)}' "
-                f"placeholder='title or author' "
-                f"style='font-size:14px;padding:4px;border:1px solid var(--grid2)'> "
-                f"<select name='type' style='font-size:14px;padding:4px'>"
-                f"{topts}</select> "
-                f"<select name='status' style='font-size:14px;padding:4px'>"
-                f"{sopts}</select> "
-                f"<button style='font-size:14px;padding:4px 10px'>Find"
-                f"</button></form>")
+            conds.append("status=?")
+            args.append(stat)
+        if look == "1":
+            conds.append("needs_look=1")
+        if mag:
+            conds.append("(mag_slug=? OR magazine=?)")
+            args += [mag, mag]
+        where = (" WHERE " + " AND ".join(conds)) if conds else ""
+        try:
+            total_all = EX._val(con, "SELECT COUNT(*) FROM records") or 0
+            total = EX._val(con, f"SELECT COUNT(*) FROM records{where}", args) or 0
+            n_look = EX._val(con, "SELECT COUNT(*) FROM records WHERE needs_look=1") or 0
+            n_ver = EX._val(con, "SELECT COUNT(*) FROM records WHERE status='verified'") or 0
+            types = [r["type"] for r in EX._rows(con, "SELECT DISTINCT type FROM records ORDER BY type") if r["type"]]
+        except Exception:                                   # a database from before v0.18.0 (no needs_look column yet)
+            return self._page("Articles", "<h1>Articles</h1><div class='empty'>The explorer database is being rebuilt with the "
+                                          "corpus; this page returns within minutes.</div>", path="/articles")
+        pager, lim, off = EX._pager(qs, total, "/articles")
+        order = ("needs_look DESC, " if look == "1" else "") + (
+            "CASE type WHEN 'story' THEN 0 WHEN 'serial_part' THEN 0 WHEN 'poem' THEN 1 WHEN 'feature' THEN 2 WHEN 'letters' THEN 3 "
+            "WHEN 'other' THEN 4 WHEN 'toc' THEN 5 WHEN 'house' THEN 6 WHEN 'ad' THEN 7 ELSE 4 END, "
+            "CASE status WHEN 'verified' THEN 0 WHEN 'modified' THEN 1 ELSE 2 END, year, issue, first_page")
+        rows = EX._rows(con, f"SELECT id, issue, magazine, cover_date, type, title, author, status, pages, n_words, confidence, assembly, "
+                             f"needs_look, flags FROM records{where} ORDER BY {order} LIMIT ? OFFSET ?", args + [lim, off])
+        live = {}
+        pilot = {i["id"] for i in cfg()["issues"]}
+        for iid in {r["issue"] for r in rows if r["issue"] in pilot}:
+            d = effective_doc(iid)
+            for a in (d or {}).get("articles", []):
+                live[a["article_id"]] = a.get("status")
+        built = EX.meta_value(con, "built") or ""
+
+        def sel(name, opts, cur):
+            return (f"<select name='{name}' style='font-size:14px;padding:4px'>"
+                    + "".join(f"<option value='{esc(v)}' {'selected' if v == cur else ''}>{esc(t)}</option>" for v, t in opts) + "</select>")
+        form = ("<form method='GET' action='/articles' style='margin:0 0 14px'>"
+                f"<input type='text' name='q' value='{esc(q)}' placeholder='title, author or id' "
+                "style='font-size:14px;padding:4px;border:1px solid var(--grid2)'> "
+                + sel("type", [("", "all types")] + [(t, t) for t in types], typ) + " "
+                + sel("status", [("", "all statuses"), ("auto", "auto"), ("modified", "modified"), ("verified", "verified")], stat) + " "
+                + sel("look", [("", "every record"), ("1", "needs a look (the automation unsure)")], look)
+                + (f"<input type='hidden' name='mag' value='{esc(mag)}'>" if mag else "")
+                + " <button style='font-size:14px;padding:4px 10px'>Find</button></form>")
         trows = ""
         for r in rows:
-            info = cfgmap.get(r["issue"], {})
-            trows += (f"<tr><td><a href='/article/{r['article_id']}'>"
-                      f"{esc(r.get('title') or '(untitled)')}</a></td>"
-                      f"<td>{esc(EX.display_author(r.get('author') or ''))}</td>"
-                      f"<td>{esc(r.get('type') or '')}</td>"
-                      f"<td>{STATUS_CHIP.get(r.get('status'), '')}</td>"
-                      f"<td><a href='/issue/{r['issue']}'>"
-                      f"{esc(info.get('magazine', r['issue']))} "
-                      f"{esc(info.get('cover_date', ''))}</a></td>"
-                      f"<td class='num'>{r['pages'][0] if r.get('pages') else ''}"
-                      f"–{r['pages'][-1] if r.get('pages') else ''}</td>"
-                      f"<td class='num'>{r.get('words', '')}</td></tr>")
-        nv = sum(1 for r in rows if r.get("status") == "verified")
+            pgs = EX._j(r["pages"], []) or []
+            st = live.get(r["id"], r["status"])
+            trows += (f"<tr><td><a href='/article/{esc(r['id'])}'>{esc(r['title'] or '(untitled)')}</a></td>"
+                      f"<td>{esc(EX.display_author(r['author'] or ''))}</td><td>{esc(r['type'] or '')}</td>"
+                      f"<td>{STATUS_CHIP.get(st, '')}</td>" + automation_cells(dict(r)) +
+                      f"<td><a href='/issue/{esc(r['issue'])}'>{esc(r['magazine'] or r['issue'])} {esc(r['cover_date'] or '')}</a></td>"
+                      f"<td class='num'>{pgs[0] if pgs else ''}–{pgs[-1] if pgs else ''}</td><td class='num'>{r['n_words'] or ''}</td></tr>")
         body = (howto(
-            "Every separately printed unit — stories, serial installments, "
-            "poems, features, letters pages, advertisements — one row each, "
-            "findable by title or author exactly as printed. The status "
-            "column shows whether a row is the machine's untouched output "
-            "(automatic), corrected by a person (modified), or checked and "
-            "confirmed (verified). Click a title to view — and, with an "
-            "annotator account, to fix and verify it.")
-            + f"<h1>Articles ({len(rows)} of {total} · {nv} verified)</h1>"
-            + form
-            + ("<table><tr><th>Title as printed</th><th>Author"
-               "</th><th>Type</th><th>Status</th><th>Issue</th><th>Pages"
-               "</th><th>Words</th></tr>" + trows + "</table>" if trows else
-               "<div class='empty'>0 articles match. If the whole table is "
-               "empty, the assembly stage (s07) has not run yet.</div>"))
+            "Every separately printed unit — stories, serial instalments, poems, features, letters pages, advertisements — of every "
+            "issue on the site: the ten pilot issues and the corpus run's issues as they are assembled. Each row says how the "
+            "automation made the record (the rules engine, and whether the language model checked it and kept or changed it), the "
+            "model's lowest confidence on its boxes, and its flags; ⚑ marks the records the automation is least sure of. Choose "
+            "'needs a look' to see those first. Click a title to view it on the scans — and, with an annotator account, to fix and "
+            "verify it; every correction is kept and replayed, and the corrections are what the rules and the model are improved from.")
+            + f"<h1>Articles ({total:,} of {total_all:,} · {n_ver:,} verified · {n_look:,} need a look)</h1>"
+            + f"<p class='fine'>As of the last refresh of the site's database, {esc(built)} (every few minutes while the corpus runs).</p>"
+            + form + pager
+            + ("<table><tr><th>Title as printed</th><th>Author</th><th>Type</th><th>Status</th><th>Assembly</th><th>Confidence</th>"
+               "<th>Flags</th><th>Issue</th><th>Pages</th><th>Words</th></tr>" + trows + "</table>" + pager if trows else
+               "<div class='empty'>0 articles match.</div>"))
         return self._page("Articles", body, path="/articles")
 
     def article_page(self, aid):
@@ -3245,7 +3331,7 @@ click first.</p>"""
                if art.get("title_source") else "")
             + f"<p class='muted'>{meta}</p>"
             + facts_html
-            + f"<p>{stline}</p>" + guestnote + metaform
+            + f"<p>{stline}</p>" + automation_html(art) + guestnote + metaform
             + "<div class='wb'><div class='wbleft'>" + pjump + left + "</div>"
             + "<div class='wbright'>" + sections
             + (("<h2>On these pages, assigned elsewhere</h2>" + oth)

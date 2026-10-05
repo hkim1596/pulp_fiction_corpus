@@ -126,6 +126,35 @@ record's own annotation history shows live events only. A rebuild of
 the explorer that fails on a half-written source file (a pipeline stage
 still running) keeps the old database and retries.
 
+Since v0.18.0 (2026-10-05, Heejin: "What I expect is whole corpus now
+run on the same way … It must lively update eveything."): the corpus
+issues are on the site as the pilot's are. pipeline/s13_publish.py
+writes each assembled corpus issue's live records (data/articles/<id>)
+from the model-checked assembly (data/assembly_v2/llm) or the rules'
+(data/assembly_v2/rules), with assembly, confidence, flags and
+needs_look on every record, and holds an issue someone corrected;
+pipeline/r00_export_stories.py --corpus exports one file per issue
+(data/export/corpus/<id>.jsonl) when its records or corrections change;
+the explorer database holds every selected corpus issue and every
+exported corpus record (columns confidence, assembly, needs_look);
+scripts/site_refresh.py (tmux siterefresh) runs the three every five
+minutes and the site never builds at request time (the marker file
+data/explorer.static). The Workbench list (/articles) reads the
+database, paged, with the automation columns and a "needs a look"
+filter; the issue and record pages show the flags in full; /log shows
+docs/corpus-build-log.md; /run adds the model's progress, the last
+refresh and the accuracy tables. s12 --follow (tmux llmjob) checks
+every assembled corpus issue as it comes; its bookkeeping stays out of
+the run's state files (two writers on one file could lose a mark).
+The ten pilot issues are also in the corpus list under their archive
+names (wt_1925_11 = weird_tales_1925_11_5192511sas): the explorer shows
+each once, with the pilot's checked records. The magazines list holds
+every selected magazine, sorted by stories so the ones with assembled
+records come first. A corpus issue's page explains itself as a corpus
+issue. The public front page says the whole corpus is being built (the
+number of selected issues from data/corpus/progress.json). Restart
+commands: docs/corpus-run.md, "The website, live".
+
 Since v0.17.0 (2026-10-05, Heejin: "The website download count hasn't
 changed I think. No live update on the website??"): /run (Workroom,
 "Corpus run") is the corpus run, live — webapp/corpus_run_pages.py
@@ -790,6 +819,12 @@ duplicate rule and its known limits. In short:
                       magazine; masters deleted once assembled; working
                       images reaped under 400 GB free; progress.json every
                       minute; a STOP file or Ctrl-C stops it, --run resumes.
+    s13_publish       the corpus issues on the website (2026-10-05): each
+                      assembled issue's live records from the model-checked
+                      or the rules' assembly, with assembly, confidence,
+                      flags and needs_look; an issue someone corrected is
+                      held. Run by scripts/site_refresh.py every five
+                      minutes, with r00 --corpus and the explorer build.
     s12_llm_link      the box-linking stage (2026-10-04; reworked in
                       p50k and p50l, 2026-10-05): a language model decides,
                       box by box, what kind of box it is and whether a
