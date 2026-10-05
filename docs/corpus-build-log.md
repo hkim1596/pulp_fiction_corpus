@@ -721,3 +721,22 @@ The cases come from the issues the model has checked so far, which follow the co
 alphabetical order, then dates), so the first cases come from a few magazines; the choice of the magazine judged least
 spreads them as the model goes on. PASTE 8y (Mac) commits p50p; 8z (server) restarts the refresh and the site; 9a is
 the check, now with the review's counts.
+
+### 2026-10-05, 12:15 KST — p50p live: 1,363 cases waiting for the model check review
+
+PASTE 8y committed p50p (1b15139); 8z restarted the refresh and the site (v0.19.0) at 12:12. The refresh made all 457
+issues again with their cases (47.7 s) and gathered 1,363 cases for /review/model from the 32 issues the model had
+checked, which belong to 8 magazines (the first in the list's alphabetical order). By kind: a box moved out of a record
+as advertising 565, a box added to a record 297, a box moved to the piece before 252, a box moved out as page furniture
+117, a split 92, a join 20, a record taken apart 18, a new piece begun inside a record 2. That is about 43 cases an
+issue, two in five of them "a box out as advertising", so the verdict on that kind matters most. The explorer: 18,553
+records, 4,412 stories; the model had checked 1,476 records and disagreed with 341 (23%); 350 need a look; 74 verified.
+
+The model's pace: 32 issues from 11:36 to 12:13 (about 52 an hour; 128 s an issue, two at a time) against 31 issues
+read an hour, so it should clear the 425 issues waiting in about a day and then keep pace with the reading. Its 3,233
+pages: 42 asked again (1.3%), 7 boxes left open, 4 pages flagged. At 12:13 the reading's GPU (0) showed 0% for a moment;
+the run had read 12 issues since 11:55, so this was a gap between issues, not a stall. The corpus run at 12:12: 2,477
+downloaded, 457 read and assembled, 165.5 downloads and 31.3 readings an hour, 2,422 GB free, nothing given up.
+
+Next: people with a named account judge about 25 cases of each kind on /review/model; PASTE 9a shows the counts; then
+Heejin decides, kind by kind, whether the model's change is applied, ignored, or kept as a flag.
