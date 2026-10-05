@@ -140,7 +140,7 @@ item is never merged; `format` is "unknown" for every issue because pulp or dige
 archive's records — the imaging step records the master's pixel size and the nominal dpi, and a later pass can set
 the format from the measured trim size (the dpi values are unreliable: one 1904 weekly claims 96 dpi).
 
-## The box-linking stage (s12_llm_link), decided 4 October; reworked after the first trial (p50k and p50l, 5 October)
+## The box-linking stage (s12_llm_link), decided 4 October; reworked after the first trial and the first pilot score (p50k, p50l, p50m, 5 October)
 
 Heejin, 4 October: "After layout detection let the high performance LLM read the content and decide whether a box
 is connected to the next one or not. If the local LLM is not sure about it, let it use Fable or Opus API. If it is
@@ -158,8 +158,8 @@ notice, furniture; with a confidence, and a short reason when it is less than 0.
 independent and are asked in parallel (48 at a time, settings.llm_link.local.page_concurrency; two issues at a
 time, .concurrency).
 
-Two readings, both by the local model (Qwen3-14B on GPU 2, port 8023; more lanes serving the same model can be
-listed in local.extra_lanes and are asked in turn — the lab's own lane on GPU 1 only with Heejin's leave). The
+Two readings, both by the local model (Qwen3-14B on GPU 2, port 8023, 128 requests at a time since p50m; more
+lanes serving the same model could be listed in local.extra_lanes — empty: Heejin, 5 October, "Don't use GPU 1."). The
 first reading has thinking off and its answer is held to a JSON schema (ANSWER_SCHEMA in the code: the server lets
 the model write only boxes with the allowed fields and values; the first trial had plain JSON mode and 24% of its
 answers could not be read). A box the first reading is less than thresholds.accept_local (0.95) sure of, or a page
@@ -182,10 +182,17 @@ after a refusal that retrying cannot cure. The first trial (4–5 October) used 
 page) before the account's credit ran out.
 
 Output per issue under data/assembly_v2/<variant>/<id>/: pages.jsonl (every decision with both readings'
-provenance: model, lane, tokens, seconds, how the answer ended, the length of the reasoning), articles.json (the
-records, in the rules assembly's shape: "new" opens an editorial record, "previous", "caption" and "notice" join the
-open one, advertising and furniture in between leave it open, a run of "advert" boxes is one advertisement record),
-flags.jsonl, compare.json; and data/assembly_v2/<variant>/summary.jsonl, one line per issue. <variant> is llm for
+provenance: model, lane, tokens, seconds, how the answer ended, the length of the reasoning), articles.json,
+flags.jsonl, compare.json; and data/assembly_v2/<variant>/summary.jsonl, one line per issue. The records
+(articles.json, p50m) are the rules' records with the model's corrections: where the model agrees, the rules' record
+is kept exactly (with its resumptions after fillers, advertising and jumps); where it disagrees, the record changes
+at that box — it splits (the model begins a piece where the rules continue one), it joins the piece before (the
+model continues where the rules begin a record), or a box moves out as advertising or furniture, or into the open
+piece; every change is listed with the model's confidence (llm.changes), and llm.kept marks the records left as the
+rules made them. (Until p50m the records were built from the model's links alone, and a story resumed after another
+piece became a record of its own: on the pilot issues that gave 36 of 74 human-verified records exactly right against
+the rules' 65, although the model agreed with the rules on 99.75% of the piece starts.) `--rebuild <variant>` makes a
+run's records and comparison again from its stored decisions, without asking the model. <variant> is llm for
 the corpus and the pilot issues, llm_trial_<tag> for a trial, llm_pilot_<tag> for a tagged pilot run.
 
 The comparison with the rules (compare.json) asks two questions apart: the kind of every box (editorial,

@@ -149,7 +149,7 @@
       "max_tokens": 4000,
       "temperature": 0,
       "timeout_s": 300,
-      "_comment": "the lane on GPU 2 (PASTE 8c): vllm/vllm-openai:latest serving the lab's own copy of Qwen3-14B at /home/tailab/shared/models/qwen3-14b, port 8023, 80% of the card; PULP_LLM_BASE_URL, PULP_LLM_MODEL and PULP_LLM_THINKING in the environment override base_url, model and thinking for a trial of another lane, model or mode (the lab also has qwen3.5-9b). The answer is held to a JSON schema (p50k; without it 24% of the first trial's answers could not be read). max_tokens grows with the page's boxes (about 60 a box) up to max_tokens_cap. page_concurrency: the pages of an issue asked at once; concurrency: issues at once (2 keeps the lane busy while an issue's last pages or its API calls finish).",
+      "_comment": "the lane on GPU 2 (PASTE 8c): vllm/vllm-openai:latest serving the lab's own copy of Qwen3-14B at /home/tailab/shared/models/qwen3-14b, port 8023, 80% of the card, 128 requests at a time since p50m (64 before: the lane ran full with 31 waiting and 38% of its memory for requests in use); PULP_LLM_BASE_URL, PULP_LLM_MODEL and PULP_LLM_THINKING in the environment override base_url, model and thinking for a trial of another lane, model or mode (the lab also has qwen3.5-9b). The answer is held to a JSON schema (p50k; without it 24% of the first trial's answers could not be read). max_tokens grows with the page's boxes (about 60 a box) up to max_tokens_cap. page_concurrency: the pages of an issue asked at once; concurrency: issues at once (2 keeps the lane busy while an issue's last pages or its API calls finish).",
       "thinking": false,
       "max_tokens_thinking": 6000,
       "page_concurrency": 48,
@@ -163,7 +163,7 @@
         "max_tokens": 6000
       },
       "extra_lanes": [],
-      "_comment_extra_lanes": "more lanes serving the same model, asked in turn with the first (e.g. the lab's own Qwen3-14B lane on GPU 1, {\"base_url\": \"http://127.0.0.1:8004/v1\", \"model\": \"auto\"} — only with Heejin's leave: it is the lab's)"
+      "_comment_extra_lanes": "more lanes serving the same model, asked in turn with the first. Empty: Heejin, 5 October 2026, \"Don't use GPU 1.\" (the lab's own Qwen3-14B lane there is not to be used)."
     },
     "escalate": {
       "provider": "anthropic",

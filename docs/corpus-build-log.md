@@ -468,4 +468,46 @@ stall-watch events, 2,499 GB free; 160.8 downloads and 30.2 readings an hour sin
 still carried the 32-request limit (they had started before the pull), the next ones carry 48. One download was
 waiting out the archive's errors (Blue Book 1939-07, try 6 of 7).
 
-(Next entries: the p50k pilot's score; the p50l pilot and trial.)
+### 2026-10-05, 10:45 KST — the first pilot score (PASTE 8n, 8o): why the model's records lost; p50m; GPU 1 not to be used
+
+PASTE 8m committed p50l and site v0.17.0 (b02bcfa). PASTE 8n: the site answered at v0.17.0, the readings carried 48
+requests each, the p50k job was stopped after its pilot had been scored, and the p50l pilot started at 10:10. The p50k
+pilot (the first reading alone; the API refused at once, the credit being spent): 10 issues, 1,434 pages, not one
+unreadable answer (the JSON schema works), 7 pages with a box under 0.85; agreement with the rules 99.5% on the kind of
+box and 99.75% on piece starts. Its score (s09) against the 74 human-verified records and the 108 pieces of the
+contents pages:
+
+    variant  pieces found title author clean cover xstart over | verified exact Jaccard | records chap noauth
+    rules       108   108   108  88/88   106  0.95      2    0 |       74    65    0.99 |     588    0      4
+    llm         108   104   100  87/87    95  0.75     16    0 |       74    36    0.84 |     264    7     20
+
+The model agreed with the rules on 99.75% of the piece starts, so the loss came from how its records were built, not
+from its judgment: a link from one box to the box before it cannot say that a story resumes after a filler, an
+advertisement or a jump ("Continued on page 98"), so every resumption became a record of its own — stories cut short
+(coverage 0.75), the fragments counted as chapter splits and as records without an author; and the hints had told the
+model that such boxes "begin" a piece. The pilot issues are also where the rules are at their best: the rules engine
+was written against them; the corpus issues will tell more.
+
+p50m: the model's decisions are applied to the rules' records instead of replacing them. Where the model agrees, the
+rules' record is kept as the rules made it, resumptions and all; where it disagrees, the record changes at that box:
+it splits (the model begins a piece where the rules continue one), it joins the piece before it (the model continues
+where the rules begin a record), or a box moves out as advertising or furniture, or into the open piece. Each change is
+listed in the record with the model's confidence (llm.changes; llm.kept marks the records left as the rules made
+them). The rules' decisions mark a piece's beginning only at its record's first box; a later box after another piece
+is hinted as "continues the story … (resumed after another piece)". The prompt says that a story resumes after
+advertising, a filler or a jump, and that a chapter heading inside a story continues it. A box takes the title role
+only when it carries the title. --rebuild <variant> remakes a run's records and comparison from its stored decisions,
+without asking the model, so the p50k and p50l pilots can be scored again with the new builder at once. The lane is
+restarted with room for 128 requests (at 10:11 it ran 64 with 31 waiting, 862 tokens a second, 38% of its request
+memory in use).
+
+Heejin, 10:40: "Don't use GPU 1." — settings.llm_link.local.extra_lanes stays empty.
+
+The corpus run at 10:10: 2,085 downloaded, 2,078 imaged, 381 read, cleaned, lemmatized and assembled, 379 masters
+removed, no failures, no stall-watch events, 2,482 GB free.
+
+PASTE 8p (once the p50l pilot is scored): the p50l pilot's numbers and score; that job stopped; tmux llmjob: the lane
+restarted with 128; --rebuild of the p50k and p50l pilots and their score (the new builder alone, on the old
+decisions); the p50m pilot and its score; the p50m trial on the same 100 issues and its score.
+
+(Next entries: the rebuilt scores; the p50m pilot and trial.)

@@ -95,10 +95,10 @@ KIND_TYPE = {"story": "story", "serial": "story", "poem": "poem", "article": "fe
 
 SYSTEM = """You are assembling the contents of a scanned American fiction magazine (a pulp, 1890-1955) from the text boxes a layout detector found on each page. The boxes are given in reading order. For every box decide what it is and whether it continues a piece or begins one, and say how sure you are.
 
-How these magazines are made: a story or article usually opens with a display title, often a by-line ("By John Smith"), sometimes a type label ("A Complete Novelet") and a teaser blurb, then body text in columns; it runs over several pages and may be interrupted by advertising, after which it continues; running heads (the magazine's name, the story's title at the top of a page) and page numbers are furniture; "(Continued on page 98)" and "THE END" are notices; the text under an illustration is a caption. A box that starts in the middle of a sentence continues a piece.
+How these magazines are made: a story or article usually opens with a display title, often a by-line ("By John Smith"), sometimes a type label ("A Complete Novelet") and a teaser blurb, then body text in columns; it runs over several pages and may be interrupted by advertising or a short filler, after which it continues; a chapter heading ("CHAPTER III", "II", a chapter title) inside a story continues the story; running heads (the magazine's name, the story's title at the top of a page) and page numbers are furniture; "(Continued on page 98)" and "THE END" are notices; the text under an illustration is a caption. A box that starts in the middle of a sentence continues a piece.
 
 The values of "joins":
-previous = the box continues the editorial piece that is open: the story, article, poem or department of the box before it, or, when advertising or furniture came in between, the one open before them.
+previous = the box continues a piece that began earlier: usually the story, article, poem or department of the box before it; a story also resumes after advertising, a filler or a jump ("Continued on page 98"), and the rule-based decision names the piece it continues.
 new = a new editorial piece begins in this box (give kind; title and author when printed). Never use new for advertising.
 advert = advertising: the first box of an advertisement and every following box of it.
 caption = an illustration caption, a pull-quote or a type label belonging to the open piece.
@@ -181,12 +181,15 @@ def is_ad_type(typ):
 
 
 def rules_labels(pages, owner, furn):
-    """The rules engine's records as box decisions in the model's terms, in reading order across the whole issue:
-    a box begins a piece when its record differs from the record of the last editorial box before it (furniture and
-    advertising in between do not break a piece). Used for the hints in the prompt, for a page no model answered,
-    and as the rules' side of the comparison. (Until p50k the hint compared a box with the box just before it on
-    the same page, so the first box of every page and the box after a running head were said to begin a piece.)"""
+    """The rules engine's records as box decisions in the model's terms, in reading order across the whole issue: a
+    box begins a piece only where its record's first box is; every later box of the record continues it, also when
+    other pieces came in between (a story resumed after a filler, a page of advertising, or a jump "Continued on
+    page 98"), and is marked "resumes" then. Used for the hints in the prompt, for a page no model answered, and as
+    the rules' side of the comparison. (Until p50k the hint compared a box with the box just before it on the same
+    page; until p50m a box resuming a story after another piece was said to begin a piece — the first pilot run
+    showed what that cost: stories cut at every resumption.)"""
     out = {}
+    seen = set()
     last_ed = None
     for pno in sorted(pages):
         for i, r in enumerate(pages[pno]["regions"]):
@@ -203,17 +206,20 @@ def rules_labels(pages, owner, furn):
             if is_ad_type(rec["type"]):
                 out[key] = {"joins": "advert", "record": rec["article_id"], "ad_class": rec.get("ad_class") or rec["type"]}
                 continue
-            if rec["article_id"] != last_ed:
+            rid = rec["article_id"]
+            if rid not in seen:
                 j = "new"
+                seen.add(rid)
             elif role in ("caption", "teaser", "subtitle"):
                 j = "caption"
             elif role == "note":
                 j = "notice"
             else:
                 j = "previous"
-            last_ed = rec["article_id"]
             out[key] = {"joins": j, "kind": RULES_KIND.get(rec["type"], "other"), "title": rec.get("title"),
-                        "author": rec.get("author"), "record": rec["article_id"], "role": role}
+                        "author": rec.get("author"), "record": rid, "role": role,
+                        "resumes": j != "new" and last_ed is not None and last_ed != rid}
+            last_ed = rid
     return out
 
 
@@ -230,7 +236,7 @@ def rules_hint(lab):
         return f"begins the {what}"
     if j in ("caption", "notice"):
         return f"{lab.get('role') or j} of the {what}"
-    return f"continues the {what}"
+    return f"continues the {what}" + (" (resumed after another piece)" if lab.get("resumes") else "")
 
 
 def rules_open_piece(pages, owner, furn, pno, ctx, back=4):
@@ -770,7 +776,7 @@ def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, m
     with open(os.path.join(out_dir, "flags.jsonl"), "w", encoding="utf-8") as f:
         for fl in flags:
             f.write(json.dumps(fl, ensure_ascii=False) + "\n")
-    doc = build_records(iid, pages, page_records, meta, variant)
+    doc = build_records(iid, pages, page_records, meta, variant, rules_doc=_rules_doc, rl=rl)
     json.dump(doc, open(os.path.join(out_dir, "articles.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     cmp = compare_with_rules(iid, pages, page_records, rl)
     write_json_atomic(os.path.join(out_dir, "compare.json"), cmp)
@@ -801,7 +807,9 @@ def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, m
                "flagged_pages": len(flags), "cost_usd": round(cost, 4), "low_labels": dict(low_labels),
                "agreement_with_rules": cmp["agreement"], "type_agreement": cmp["type_agreement"], "type_boxes": cmp["type_boxes"],
                "boundary_agreement": cmp["boundary_agreement"], "boundary_boxes": cmp["boundary_boxes"],
-               "records": doc["checks"]["records"], "story_records": doc["checks"]["story_records"], "seconds": secs}
+               "records": doc["checks"]["records"], "story_records": doc["checks"]["story_records"],
+               "records_kept_from_rules": doc["checks"]["records_kept_from_rules"], "records_changed": doc["checks"]["records_changed"],
+               "seconds": secs}
     with _summary_lock:
         with open(os.path.join(ROOT, "data", "assembly_v2", variant, "summary.jsonl"), "a", encoding="utf-8") as f:
             f.write(json.dumps(summary, ensure_ascii=False) + "\n")
@@ -818,83 +826,197 @@ def fmt3(x):
     return "-" if x is None else f"{x:.3f}"
 
 
-def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT):
-    """The decisions -> records in the rules assembly's shape. "new" opens an editorial record; "previous", "caption"
-    and "notice" go to the editorial record that is open (advertising and furniture in between leave it open);
-    "advert" boxes form advertisement records (a run of them is one record; "new" with kind ad starts another)."""
-    records, furniture = [], []
-    n = 0
-    open_rec = None
-    ad_rec = None
+def is_title_box(title, k, pages):
+    """The box carries the title itself (not body text the model gave the piece's title with): its text begins with
+    the title, or is not much longer than it."""
+    pn, i = map(int, k.split(":"))
+    t = " ".join(region_text(pages[pn]["regions"][i]).lower().split())
+    ti = " ".join(str(title).lower().split())
+    return bool(ti) and (t.startswith(ti[: max(4, len(ti) // 2)]) or len(t) <= 1.5 * len(ti) + 4)
 
-    def new_rec(typ, title=None, author=None):
-        nonlocal n
-        n += 1
-        return {"article_id": f"{iid}_a{n:03d}", "type": typ, "title": title, "author": author, "pages": [], "fragments": [],
-                "roles": {}, "flags": [], "toc": None, "keys": [], "llm": {"confidence_min": 1.0, "tiers": Counter()}}
 
-    def add(rec, pno, i, role, conf, tier):
-        rec["keys"].append((pno, i))
-        if role:
-            rec["roles"][f"{pno}:{i}"] = role
-        rec["llm"]["confidence_min"] = min(rec["llm"]["confidence_min"], conf)
-        rec["llm"]["tiers"][tier] += 1
+def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc=None, rl=None):
+    """The model's decisions applied to the rules' records (p50m). Where the model agrees with the rules, the rules'
+    record is kept as it is — with its resumptions after fillers, advertising and jumps, which links from box to box
+    cannot express. Where it disagrees, the record is changed at that box:
+        new where the rules continue a record         the record splits: this box and its later boxes form a new one
+        previous/caption/notice where the rules begin  the rules' record joins the piece open before it
+        advert where the rules have editorial text     the box moves to an advertisement record
+        furniture                                      the box leaves its record
+        editorial where the rules have advertising,    the box joins the open piece (previous …) or begins one (new)
+        furniture or nothing
+    Every change is listed in the record's llm.changes with the model's confidence. Without the rules' records (no
+    assembly), the records are built from the decisions alone."""
+    from s08_assemble_rules import clean_text, join_boxes
+    order, n = {}, 0
+    for pno in sorted(pages):
+        for i, r in enumerate(pages[pno]["regions"]):
+            if region_text(r):
+                order[f"{pno}:{i}"] = n
+                n += 1
+    pos = lambda k: order.get(k, 0)        # noqa: E731
+    recs, assign = [], {}
+    for a in (rules_doc or {}).get("articles", []):
+        rec = {k: v for k, v in a.items() if k not in ("fragments", "pages", "text", "n_regions", "keys")}
+        rec.update({"roles": dict(a.get("roles") or {}), "flags": list(a.get("flags") or []), "_keys": set(), "_orig": a, "_changed": False,
+                    "llm": {"changes": [], "confidence_min": 1.0, "tiers": Counter()}})
+        for f in a.get("fragments", []):
+            for i in f.get("region_ids", []):
+                k = f"{f['page']}:{i}"
+                rec["_keys"].add(k)
+                assign[k] = rec
+        recs.append(rec)
+    furniture = {f"{f['page']}:{f['idx']}" for f in (rules_doc or {}).get("furniture", [])}
+    n_new = 0
 
+    def new_rec(typ, title=None, author=None, why=""):
+        nonlocal n_new
+        n_new += 1
+        r = {"article_id": f"{iid}_m{n_new:03d}", "type": typ, "title": title, "author": author, "roles": {}, "flags": [], "toc": None,
+             "_keys": set(), "_orig": None, "_changed": True, "llm": {"changes": [why] if why else [], "confidence_min": 1.0, "tiers": Counter()}}
+        recs.append(r)
+        return r
+
+    def move(k, dst):
+        """A box to another record (None: to no record), with its role."""
+        src = assign.get(k)
+        if src is dst:
+            return
+        role = None
+        if src is not None:
+            src["_keys"].discard(k)
+            role = src["roles"].pop(k, None)
+            src["_changed"] = True
+        if dst is None:
+            assign.pop(k, None)
+        else:
+            dst["_keys"].add(k)
+            dst["_changed"] = True
+            if role and not is_ad_type(dst["type"]):
+                dst["roles"][k] = role
+            assign[k] = dst
+
+    decisions = []
     for pr in page_records:
         pno = pr["page"]
-        page = pages[pno]
         keymap = {int(k): i for k, i in (pr.get("keymap") or {}).items()}
-        tier = pr.get("tier", "none")
         for k in sorted(keymap):
             b = pr["boxes"].get(str(k))
-            if not b:
-                continue
-            i = keymap[k]
-            conf = b.get("confidence", 0.0)
-            j = b["joins"]
-            if j == "furniture":
-                furniture.append({"page": pno, "idx": i})
-                continue
-            if j == "new" and (b.get("kind") or "") == "ad":
-                ad_rec = None                                   # a new advertisement
-                j = "advert"
-            if j == "advert":
-                if ad_rec is None:
-                    ad_rec = new_rec("ad", title=" ".join(region_text(page["regions"][i]).split()[:12]) or None)
-                    records.append(ad_rec)
-                add(ad_rec, pno, i, None, conf, tier)
-                continue
-            ad_rec = None
+            if b:
+                decisions.append((f"{pno}:{keymap[k]}", b, pr.get("tier", "none")))
+    decisions.sort(key=lambda d: pos(d[0]))
+    rl = rl or {}
+    last_ed, llm_ad = None, None
+    for k, b, tier in decisions:
+        j = b["joins"]
+        conf = float(b.get("confidence") or 0.0)
+        R = assign.get(k)
+        r_ed = R is not None and not is_ad_type(R["type"])
+        if j == "new" and (b.get("kind") or "") == "ad":
+            j = "advert"
+        if j == "furniture":
+            if R is not None:
+                R["llm"]["changes"].append(f"{k} out as furniture ({conf:.2f})")
+                move(k, None)
+            furniture.add(k)
+            continue
+        furniture.discard(k)
+        if j == "advert":
+            if R is not None and is_ad_type(R["type"]):
+                llm_ad = R
+            else:
+                if llm_ad is None:                                          # a run of advertising boxes is one record
+                    llm_ad = new_rec("ad", " ".join(region_text(pages[int(k.split(':')[0])]["regions"][int(k.split(':')[1])]).split()[:12]) or None,
+                                     why=f"advertising from {k} ({conf:.2f})")
+                if R is not None:
+                    R["llm"]["changes"].append(f"{k} out as advertising ({conf:.2f})")
+                move(k, llm_ad)
+            R = assign.get(k)
+        else:
+            llm_ad = None
             if j == "new":
-                typ = KIND_TYPE.get((b.get("kind") or "story").lower(), "other")
-                open_rec = new_rec(typ, b.get("title"), b.get("author"))
-                if b.get("kind") == "serial":
-                    open_rec["serial"] = True
-                records.append(open_rec)
-                add(open_rec, pno, i, "title" if b.get("title") else None, conf, tier)
-                continue
-            if open_rec is None:
-                open_rec = new_rec("story", None, None)
-                open_rec["flags"].append("text before any title: a piece continued from an earlier scan or an unmarked start")
-                records.append(open_rec)
-            role = {"caption": "caption", "notice": "note"}.get(j)
-            add(open_rec, pno, i, role, conf, tier)
-    for rec in records:
-        rec["keys"].sort()
-        frags = {}
-        for pn, i in rec["keys"]:
-            frags.setdefault(pn, []).append(i)
-        rec["fragments"] = [{"page": pn, "region_ids": frags[pn]} for pn in sorted(frags)]
-        rec["pages"] = sorted(frags)
-        body = [region_text(pages[pn]["regions"][i]) for pn, i in rec["keys"] if rec["roles"].get(f"{pn}:{i}") not in ("title", "caption", "note")]
-        rec["text"] = "\n\n".join(t for t in body if t)
-        rec["n_regions"] = len(rec["keys"])
-        rec["llm"]["tiers"] = dict(rec["llm"]["tiers"])
-        del rec["keys"]
-    return {"issue": iid, "backend": "llm_link_v2", "variant": variant, "built": time.strftime("%Y-%m-%dT%H:%M:%S"),
-            "magazine": meta.get("magazine"), "articles": records, "furniture": furniture, "unsorted": [],
-            "checks": {"records": len(records), "story_records": sum(1 for r in records if r["type"] == "story"),
-                       "unassigned_regions": 0, "double_owned_regions": 0, "flags": sum(len(r["flags"]) for r in records)}}
+                if r_ed and rl.get(k, {}).get("joins") == "new":
+                    pass                                                    # the rules begin this record here too
+                elif r_ed:                                                  # the rules continue R here: R splits
+                    R2 = new_rec(KIND_TYPE.get((b.get("kind") or "story").lower(), "other"), b.get("title"), b.get("author"),
+                                 why=f"split from {R['article_id']} at {k} ({conf:.2f})")
+                    for kk in sorted([x for x in R["_keys"] if pos(x) >= pos(k)], key=pos):
+                        move(kk, R2)
+                    R["llm"]["changes"].append(f"split at {k}: the rest is {R2['article_id']} ({conf:.2f})")
+                    R = R2
+                else:                                                       # advertising, furniture or nothing in the rules' view
+                    R2 = new_rec(KIND_TYPE.get((b.get("kind") or "story").lower(), "other"), b.get("title"), b.get("author"),
+                                 why=f"a piece begins at {k} ({conf:.2f})")
+                    if R is not None:
+                        R["llm"]["changes"].append(f"{k} out: a piece begins there ({conf:.2f})")
+                    move(k, R2)
+                    R = R2
+                if b.get("title") and R is not None and R.get("_orig") is None and is_title_box(b["title"], k, pages):
+                    R["roles"][k] = "title"
+            else:                                                           # previous, caption, notice
+                if r_ed:
+                    if rl.get(k, {}).get("joins") == "new" and last_ed is not None and last_ed is not R:
+                        P = last_ed                                         # the rules begin R here; the model continues: R joins P
+                        P["llm"]["changes"].append(f"{R['article_id']} joined at {k} ({conf:.2f})")
+                        for kk in list(R["_keys"]):
+                            move(kk, P)
+                        if P["roles"].get(k) == "title":
+                            P["roles"].pop(k)                               # no longer the start of a piece
+                        R = P
+                elif last_ed is not None:                                   # advertising, furniture or nothing in the rules' view
+                    if R is not None:
+                        R["llm"]["changes"].append(f"{k} out: it continues {last_ed['article_id']} ({conf:.2f})")
+                    move(k, last_ed)
+                    last_ed["llm"]["changes"].append(f"{k} in ({j}, {conf:.2f})")
+                    R = last_ed
+                elif R is None:                                             # text before any piece the rules or the model began
+                    R = new_rec("story", why=f"text before any title at {k}")
+                    R["flags"].append("text before any title: a piece continued from an earlier scan or an unmarked start")
+                    move(k, R)
+                role = {"caption": "caption", "notice": "note"}.get(j)
+                if role and R is not None and R.get("_changed"):
+                    R["roles"][k] = role
+            if R is not None and not is_ad_type(R["type"]):
+                last_ed = R
+        if R is not None:
+            R["llm"]["confidence_min"] = min(R["llm"]["confidence_min"], conf)
+            R["llm"]["tiers"][tier] += 1
+    out = []
+    for r in recs:
+        if not r["_keys"]:
+            continue
+        o = r.pop("_orig")
+        changed = r.pop("_changed")
+        keys = r.pop("_keys")
+        r["llm"]["tiers"] = dict(r["llm"]["tiers"])
+        if o is not None and not changed:
+            for f in ("fragments", "pages", "text", "n_regions"):
+                if f in o:
+                    r[f] = o[f]
+            r["llm"]["kept"] = True
+        else:
+            ks = sorted(keys, key=lambda x: (int(x.split(":")[0]), int(x.split(":")[1])))
+            frags = {}
+            for x in ks:
+                pn, i = map(int, x.split(":"))
+                frags.setdefault(pn, []).append(i)
+            r["fragments"] = [{"page": pn, "region_ids": frags[pn]} for pn in sorted(frags)]
+            r["pages"] = sorted(frags)
+            body = [region_text(pages[pn]["regions"][i]) for pn in sorted(frags) for i in frags[pn]
+                    if r["roles"].get(f"{pn}:{i}") not in ("title", "subtitle", "author", "teaser", "caption", "note", "synopsis")]
+            r["text"] = clean_text(join_boxes([t for t in body if t]))
+            r["n_regions"] = len(ks)
+            r["roles"] = {k: v for k, v in r["roles"].items() if k in keys}
+            r["llm"]["kept"] = False
+        out.append(r)
+    out.sort(key=lambda r: min((pos(f"{f['page']}:{i}") for f in r["fragments"] for i in f["region_ids"]), default=0))
+    return {"issue": iid, "backend": "llm_link_v3_on_rules", "variant": variant, "built": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "magazine": meta.get("magazine"), "articles": out,
+            "furniture": [{"page": int(x.split(":")[0]), "idx": int(x.split(":")[1])} for x in sorted(furniture, key=pos)], "unsorted": [],
+            "checks": {"records": len(out), "story_records": sum(1 for r in out if r["type"] == "story"),
+                       "records_kept_from_rules": sum(1 for r in out if r["llm"].get("kept")),
+                       "records_changed": sum(1 for r in out if not r["llm"].get("kept")),
+                       "unassigned_regions": 0, "double_owned_regions": 0, "flags": sum(len(r.get("flags") or []) for r in out)}}
 
 
 def model_type(b):
@@ -1005,6 +1127,7 @@ def aggregate(summaries):
             "settled_confidence": tot("settled_confidence"), "unsettled_boxes": tot("unsettled_boxes"), "flagged_boxes": tot("flagged_boxes"),
             "api_answered": tot("api_answered"), "api_unreadable": tot("api_unreadable"), "api_failed": tot("api_failed"),
             "api_skipped": tot("api_skipped"), "flagged_pages": tot("flagged_pages"), "cost_usd": round(tot("cost_usd"), 3),
+            "records": tot("records"), "records_kept_from_rules": tot("records_kept_from_rules"), "records_changed": tot("records_changed"),
             "unreadable_share": round(tot("local_unreadable") / asked, 4), "asked_again_share": round(again / asked, 4),
             "flag_share": round(tot("flagged_pages") / asked, 4),
             "type_agreement": wavg("type_agreement", "type_boxes"), "boundary_agreement": wavg("boundary_agreement", "boundary_boxes"),
@@ -1082,6 +1205,52 @@ def pilot(workers, redo=False, tag=None):
     return rep
 
 
+def all_meta():
+    """Issue id -> its entry in the pilot list or the corpus list (magazine, cover date)."""
+    meta = {}
+    for path in (PILOT_CONFIG, os.path.join(ROOT, "config", "corpus_issues.json")):
+        try:
+            for i in json.load(open(path, encoding="utf-8")).get("issues", []):
+                meta.setdefault(i["id"], i)
+        except Exception:
+            pass
+    return meta
+
+
+def rebuild(variant):
+    """The records and the comparison of a run made again from its stored decisions with the current code; no model is
+    asked. After a change to the record builder or the comparison, a run can be scored again at once (s09)."""
+    d = os.path.join(ROOT, "data", "assembly_v2", variant)
+    old = read_summaries(variant)
+    meta = all_meta()
+    n = 0
+    for iid in sorted(os.listdir(d)):
+        pj = os.path.join(d, iid, "pages.jsonl")
+        if not os.path.exists(pj):
+            continue
+        pages = load_pages(iid)
+        if not pages:
+            continue
+        owner, furn, rules_doc = load_rules(iid)
+        rl = rules_labels(pages, owner, furn)
+        prs = [json.loads(line) for line in open(pj, encoding="utf-8")]
+        doc = build_records(iid, pages, prs, meta.get(iid, {"id": iid}), variant, rules_doc=rules_doc, rl=rl)
+        json.dump(doc, open(os.path.join(d, iid, "articles.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        cmp = compare_with_rules(iid, pages, prs, rl)
+        write_json_atomic(os.path.join(d, iid, "compare.json"), cmp)
+        sm = dict(old.get(iid) or {"issue": iid, "variant": variant})
+        sm.update({"agreement_with_rules": cmp["agreement"], "type_agreement": cmp["type_agreement"], "type_boxes": cmp["type_boxes"],
+                   "boundary_agreement": cmp["boundary_agreement"], "boundary_boxes": cmp["boundary_boxes"],
+                   "records": doc["checks"]["records"], "story_records": doc["checks"]["story_records"],
+                   "records_kept_from_rules": doc["checks"]["records_kept_from_rules"], "records_changed": doc["checks"]["records_changed"],
+                   "rebuilt": time.strftime("%Y-%m-%dT%H:%M:%S")})
+        with open(os.path.join(d, "summary.jsonl"), "a", encoding="utf-8") as f:
+            f.write(json.dumps(sm, ensure_ascii=False) + "\n")
+        n += 1
+    log("s12", f"rebuilt {n} issues of {variant} from their stored decisions (builder {build_records.__doc__.split(chr(10))[0][:60]}…)")
+    return n
+
+
 def selftest():
     txt = '```json\n{"boxes":[{"k":1,"joins":"furniture","confidence":0.99,"why":"running head"},{"k":2,"joins":"new","kind":"story","title":"The Red Moon","author":"A. Merritt","confidence":0.9,"why":"display title and by-line"},{"k":3,"joins":"previous","confidence":0.95,"why":"mid-sentence"}]}\n```'
     a = parse_answer(txt, 3)
@@ -1113,23 +1282,47 @@ def selftest():
     rl = rules_labels(pages, owner, furn)
     assert [rl[k]["joins"] for k in ("1:0", "1:1", "1:2", "1:3", "2:0", "2:1", "3:0", "3:1", "3:2")] == \
         ["furniture", "new", "previous", "previous", "advert", "advert", "furniture", "previous", "notice"], rl
+    assert rl["3:1"]["resumes"] is False and rl["1:2"]["resumes"] is False, rl          # an advertising page between does not count as another piece
     op = rules_open_piece(pages, owner, furn, 3, {})
     assert op and op["page"] == 1 and op["skipped"] == 1 and op["title"] == "The Red Moon", op         # across the advertising page
     prompt, keymap = page_prompt("t", {"magazine": "Weird Tales", "cover_date": "1934-05"}, 3, pages[3], pages, rl, op, settings()["llm_link"]["context"])
     assert "[2] label=Text" in prompt and "rule-based decision: continues the story \"The Red Moon\"" in prompt and "page 1 (the 1 page(s) between" in prompt, prompt
-    prs = [{"page": 1, "n_boxes": 4, "keymap": {"1": 0, "2": 1, "3": 2, "4": 3}, "tier": "local", "boxes": {
-        "1": {"joins": "furniture", "confidence": 0.99}, "2": {"joins": "new", "kind": "story", "title": "The Red Moon", "author": "A. Merritt", "confidence": 0.9},
-        "3": {"joins": "previous", "confidence": 0.9}, "4": {"joins": "previous", "confidence": 0.95}}},
-           {"page": 2, "n_boxes": 2, "keymap": {"1": 0, "2": 1}, "tier": "local", "boxes": {
-        "1": {"joins": "new", "kind": "ad", "confidence": 0.8}, "2": {"joins": "advert", "confidence": 0.8}}},
-           {"page": 3, "n_boxes": 3, "keymap": {"1": 0, "2": 1, "3": 2}, "tier": "local", "boxes": {
-        "1": {"joins": "furniture", "confidence": 0.99}, "2": {"joins": "previous", "confidence": 0.97}, "3": {"joins": "notice", "confidence": 0.9}}}]
-    doc = build_records("t", pages, prs, {"magazine": "Weird Tales"})
-    recs = doc["articles"]
-    assert len(recs) == 2 and recs[0]["type"] == "story" and recs[0]["pages"] == [1, 3] and recs[1]["type"] == "ad" and recs[1]["pages"] == [2], recs
-    assert "moon rose red" in recs[0]["text"] and "wolves came down" in recs[0]["text"] and "THE END" not in recs[0]["text"], recs[0]
-    cmp = compare_with_rules("t", pages, prs, rl)
+    rules_doc = {"articles": [dict(story, pages=[1, 3], text="(rules text)", n_regions=5), dict(ad, pages=[2], text="(ad)", n_regions=2)],
+                 "furniture": [{"page": 1, "idx": 0}, {"page": 3, "idx": 0}]}
+
+    def pr_(answers):
+        return [{"page": pno, "n_boxes": len(a), "keymap": {str(k + 1): k for k in range(len(a))}, "tier": "local",
+                 "boxes": {str(k + 1): dict(b, confidence=b.get("confidence", 0.97)) for k, b in enumerate(a)}} for pno, a in answers]
+    agree = [(1, [{"joins": "furniture"}, {"joins": "new", "kind": "story"}, {"joins": "previous"}, {"joins": "previous"}]),
+             (2, [{"joins": "advert"}, {"joins": "advert"}]),
+             (3, [{"joins": "furniture"}, {"joins": "previous"}, {"joins": "notice"}])]
+    doc = build_records("t", pages, pr_(agree), {"magazine": "Weird Tales"}, rules_doc=rules_doc, rl=rl)
+    assert [r["article_id"] for r in doc["articles"]] == ["t_a1", "t_a2"] and doc["checks"]["records_kept_from_rules"] == 2, doc
+    assert doc["articles"][0]["text"] == "(rules text)" and doc["articles"][0]["pages"] == [1, 3], doc    # kept as the rules made it
+    cmp = compare_with_rules("t", pages, pr_(agree), rl)
     assert cmp["type_agreement"] == 1.0 and cmp["boundary_agreement"] == 1.0 and cmp["boundary_boxes"] == 5, cmp
+    split = [agree[0], agree[1], (3, [{"joins": "furniture"}, {"joins": "new", "kind": "story", "title": "Wolves"}, {"joins": "notice"}])]
+    doc = build_records("t", pages, pr_(split), {"magazine": "Weird Tales"}, rules_doc=rules_doc, rl=rl)
+    recs = {r["article_id"]: r for r in doc["articles"]}
+    assert recs["t_a1"]["pages"] == [1] and recs["t_m001"]["pages"] == [3] and recs["t_m001"]["title"] == "Wolves", recs      # split at 3:1
+    assert "wolves came down" in recs["t_m001"]["text"] and "THE END" not in recs["t_m001"]["text"], recs["t_m001"]
+    adv = [(1, [{"joins": "furniture"}, {"joins": "new", "kind": "story"}, {"joins": "previous"}, {"joins": "advert"}]), agree[1], agree[2]]
+    doc = build_records("t", pages, pr_(adv), {"magazine": "Weird Tales"}, rules_doc=rules_doc, rl=rl)
+    recs = {r["article_id"]: r for r in doc["articles"]}
+    assert recs["t_a1"]["pages"] == [1, 3] and "moon rose red" not in recs["t_a1"]["text"] and recs["t_m001"]["type"] == "ad", recs
+    story_b = {"article_id": "t_a3", "type": "story", "title": None, "roles": {"3:2": "note"}, "fragments": [{"page": 3, "region_ids": [1, 2]}]}
+    story_a = dict(story, fragments=[{"page": 1, "region_ids": [1, 2, 3]}])
+    owner2 = {}
+    for rec in (story_a, ad, story_b):
+        for fr in rec["fragments"]:
+            for i in fr["region_ids"]:
+                owner2[f"{fr['page']}:{i}"] = (rec, rec["roles"].get(f"{fr['page']}:{i}"))
+    rl2 = rules_labels(pages, owner2, furn)
+    assert rl2["3:1"]["joins"] == "new", rl2
+    doc = build_records("t", pages, pr_(agree), {"magazine": "Weird Tales"}, rl=rl2,
+                        rules_doc={"articles": [story_a, ad, story_b], "furniture": rules_doc["furniture"]})
+    recs = {r["article_id"]: r for r in doc["articles"]}
+    assert "t_a3" not in recs and recs["t_a1"]["pages"] == [1, 3] and "wolves came down" in recs["t_a1"]["text"], recs   # the rules' split undone
     fb = fallback_answer(3, {1: 0, 2: 1, 3: 2}, rl)
     assert [fb["boxes"][k]["joins"] for k in (1, 2, 3)] == ["furniture", "previous", "notice"] and fb["boxes"][2]["confidence"] == 0.0, fb
     assert local_max_tokens({"max_tokens": 4000, "max_tokens_cap": 12000}, 19, False) == 4000
@@ -1171,9 +1364,13 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="with --issue and --page: print the prompt, call nothing")
     ap.add_argument("--page", type=int, default=1)
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--rebuild", metavar="VARIANT", help="make a run's records and comparison again from its stored decisions (no model asked), e.g. llm_pilot_p50l")
     args = ap.parse_args()
     if args.selftest:
         selftest()
+        return
+    if args.rebuild:
+        rebuild(args.rebuild)
         return
     load_pulp_env()
     cfg = settings()["llm_link"]
@@ -1193,7 +1390,7 @@ def main():
     if args.trial:
         trial(args.trial, workers, redo=args.redo, tag=args.tag, same_as=args.same_as)
         return
-    sys.exit("pass --issue <id>, --pilot, --trial N, or --selftest")
+    sys.exit("pass --issue <id>, --pilot, --trial N, --rebuild VARIANT, or --selftest")
 
 
 if __name__ == "__main__":

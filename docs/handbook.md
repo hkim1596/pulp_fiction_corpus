@@ -799,11 +799,13 @@ duplicate rule and its known limits. In short:
                       less than 0.95 sure of, a flag for a person only when
                       a decision that changes a piece stays open; the
                       Claude API path is off (Heejin, 5 October: it costs
-                      too much); records in the rules assembly's shape
-                      under data/assembly_v2/llm/<id>/ (llm_trial_<tag>,
+                      too much); GPU 1 is not used (Heejin, 5 October);
+                      the records are the rules' records with the
+                      model's corrections (p50m), under
+                      data/assembly_v2/llm/<id>/ (llm_trial_<tag>,
                       llm_pilot_<tag>); --trial N --tag, --same-as,
-                      --pilot [--tag]; docs/corpus-run.md, "The
-                      box-linking stage".
+                      --pilot [--tag], --rebuild <variant>;
+                      docs/corpus-run.md, "The box-linking stage".
     scripts/corpus_reaper.py   the same space rules by hand.
     docs/corpus-build-log.md   the dated build log for the data paper
                       (Journal of Open Humanities Data) and the Zenodo
