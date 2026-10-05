@@ -140,7 +140,7 @@ item is never merged; `format` is "unknown" for every issue because pulp or dige
 archive's records — the imaging step records the master's pixel size and the nominal dpi, and a later pass can set
 the format from the measured trim size (the dpi values are unreliable: one 1904 weekly claims 96 dpi).
 
-## The box-linking stage (s12_llm_link), decided 4 October
+## The box-linking stage (s12_llm_link), decided 4 October; reworked after the first trial (p50k, 5 October)
 
 Heejin: "After layout detection let the high performance LLM read the content and decide whether a box is
 connected to the next one or not. If the local LLM is not sure about it, let it use Fable or Opus API. If it is
@@ -148,30 +148,59 @@ still uncertain let it flag it and a human solve the case. Let's have this syste
 first."
 
 `pipeline/s12_llm_link.py` runs after the assembly. For every page a language model sees the page's text boxes
-in reading order (label, position, the head and tail of the text), the piece open at the end of the previous
-page (taken from the rules engine's view of that page, so that the pages of an issue are independent and can
-be asked in parallel — 48 at a time, settings.llm_link.local.page_concurrency; the first trial asked them one
-after another and left the lane nearly idle), and the rules engine's proposal as a hint, and answers for every
-box: continues the previous
-piece / begins a new piece (title, author, kind) / furniture / advertisement / caption / notice, with a
-confidence. Tier 1 is the local lane (a vLLM server on GPU 2, port 8023, settings.llm_link.local); a page with
-a box under `thresholds.accept_local` goes to tier 2, the Claude API with the page image attached
-(settings.llm_link.escalate: claude-opus-5-5 by default, $4/$20 per million tokens; claude-fable-5-1 as the
-alternative, $10/$50 — ids and prices read on platform.claude.com on 4 October 2026); a page with a box still
-under `thresholds.accept_api` is flagged for a person (flags.jsonl; the workbench). The API spend is counted in
-data/corpus/llm_link_spend.json against `escalate.budget_usd`. Output per issue under data/assembly_v2/llm/<id>/:
-pages.jsonl (every decision with its tier, model, tokens, seconds, cost), articles.json (the records built
-from the chains of "previous" links, in the rules assembly's shape), flags.jsonl, compare.json (agreement with
-the rules, box by box, with the disagreements). The trial (`--trial 100`) runs the first hundred assembled
-issues and writes data/corpus/llm_link_trial.json: pages, boxes, agreement with the rules, the escalation share,
-the flag share, the cost, seconds a page — the numbers that set the thresholds and the budget for the full run
-(`--tag <name>` names the report llm_link_trial_<name>.json; `--redo` runs issues already linked again, for a
-second trial with other settings — PULP_LLM_THINKING=1 for Qwen's thinking mode, PULP_LLM_MODEL and
-PULP_LLM_BASE_URL for another lane). The Claude API is asked without a temperature (claude-opus-5-5 rejects
-the parameter); at most six API calls are in flight at a time.
-Rough cost at the trial's scale: a page sent to the API with its image is about 4,000 tokens in and 200 out,
-about $0.02 on Opus 5.5 and $0.05 on Fable 5.1; at a 5% escalation share the whole corpus (980,000 pages) would
-cost about $1,000 on Opus, $2,500 on Fable.
+in reading order (label, position, the head and tail of the text; shorter on pages of more than 60 boxes), the
+editorial piece the rules engine had open before the page (from the rules' records, up to four pages back, so a
+story interrupted by a page of advertising is still shown as open), and the rules' decision for every box as a
+hint, and answers for every box with one of: previous (continues the open editorial piece, also across
+advertising), new (a new editorial piece: kind, title, author), advert (every box of an advertisement), caption,
+notice, furniture; with a confidence and a short reason. The pages of an issue are independent and are asked in
+parallel (48 at a time, settings.llm_link.local.page_concurrency; two issues at a time, .concurrency).
+
+Tier 1 is the local lane (a vLLM server on GPU 2, port 8023, the lab's Qwen3-14B). Its answer is held to a JSON
+schema (ANSWER_SCHEMA in the code): the server lets the model write only boxes with the allowed fields and
+values. The first trial had plain JSON mode and 24% of its answers could not be read (the model wrote a box as a
+quoted string, which is valid JSON). A lane that refuses the schema is asked for plain JSON, then for nothing,
+and the step down is logged. The answer limit grows with the page (about 60 tokens a box, at least 4,000, at most
+12,000); an answer cut off at the limit is asked again with twice the room, an unreadable one once more with a
+little randomness (temperature 0.3). Tier 2 is the Claude API with the page image (settings.llm_link.escalate:
+claude-opus-5-5, $4/$20 per million tokens; claude-fable-5-1 as the alternative, $10/$50 — ids and prices read
+on platform.claude.com on 4 October 2026), for a page with a box under thresholds.accept_local (0.85) or an
+unreadable local answer. Flagged for a person (flags.jsonl, with the reason): a page the API answered with a box
+under thresholds.accept_api (0.80); a page whose local answer was not trusted and that the API did not answer; a
+page no model answered, which keeps the rules' decisions. The API is asked without a temperature (Opus 5.5
+rejects the parameter), at most six calls at a time. It is not asked again in a run after a refusal that
+retrying cannot cure (no credit, a refused key, an unknown model) — on 5 October at 00:36 the account's credit
+ran out after $12.65 and 4,183 calls failed —, nor once the run has spent escalate.budget_usd ($50) or all runs
+together escalate.budget_total_usd ($100, data/corpus/llm_link_spend.json); those pages are flagged instead.
+
+Output per issue under data/assembly_v2/<variant>/<id>/: pages.jsonl (every decision with its tier, model,
+tokens, seconds, cost, how the answer ended, the format used), articles.json (the records, in the rules
+assembly's shape: "new" opens an editorial record, "previous", "caption" and "notice" join the open one,
+advertising and furniture in between leave it open, a run of "advert" boxes is one advertisement record),
+flags.jsonl, compare.json; and data/assembly_v2/<variant>/summary.jsonl, one line per issue. <variant> is llm for
+the corpus and the pilot issues, llm_trial_<tag> for a trial.
+
+The comparison with the rules (compare.json) asks two questions apart: the kind of every box (editorial,
+advertising, furniture) and, for a box both call editorial, whether a piece begins there. The rules' side is
+computed in reading order across the issue, a piece running on across furniture and advertising. (The first
+trial compared a box with the box just before it, so a continuation after a running head counted as a rules
+"new", and boxes inside an advertisement that the model chained to its first box counted as disagreements; the
+model's hints had the same fault. Both are corrected.)
+
+Runs: `--trial N --tag NAME` (the first N assembled issues; `--same-as OLD` takes the issues of trial OLD;
+resumable; report data/corpus/llm_link_trial_NAME.json with the shares of unreadable, escalated, answered and
+flagged pages, cost, the two agreements, and which decisions the local model was unsure of); `--pilot` (the ten
+pilot issues into data/assembly_v2/llm, report data/corpus/llm_link_pilot.json). Accuracy: s09 scores the llm
+variant with the others — on the pilot issues against the human-verified records and the contents pages
+(`s09_assembly_eval.py --all --out data/assembly_v2/eval_pilot_llm.json`), on a trial's corpus issues against
+the contents pages and the structural checks (`--issues-dir data/assembly_v2/llm_trial_NAME --variant
+llm_trial_NAME`). Environment overrides for a trial: PULP_LLM_THINKING=1 (Qwen's thinking mode),
+PULP_LLM_MODEL and PULP_LLM_BASE_URL (another lane).
+
+Measured in the first trial (5 October; docs/corpus-build-log.md): local answers 47 s each with 48 in flight,
+827 tokens out, 1.17 s a page overall; the API 10.2 s a page, 4,337 tokens in and 1,097 out, $0.039 a page with
+the image on Opus 5.5. At 15–20% of pages to the API the corpus (980,000 pages) would cost about $5,500–7,500 on
+Opus 5.5, half that on Sonnet 5.5: the second trial and the calibration decide the threshold and the model.
 
 ## Decisions taken on 4 October (Heejin)
 

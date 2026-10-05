@@ -446,6 +446,19 @@ its files before failing); write a paste's scratch files under
 /mnt/sda/pulp/tmp, never /tmp; and state in the expected output which
 figures come from which command (the audit's live mode and its
 --candidate mode print the same shape of line with different numbers).
+Since 5 October 2026 a server paste does not wait. Twice (4 October
+22:45, during a run in the foreground; 5 October 00:00, during a
+`sleep 300`) the Mac's ssh session ended mid-paste with "Read from
+remote host …: Can't assign requested address": the Mac's own network
+address had gone away (a Wi-Fi or VPN reconnection), and whatever the
+paste still had to do did not happen. So a paste that starts long work
+puts it in tmux and ends within about a minute, and the check is a
+separate paste that is safe to run any number of times: it starts the
+work only when no process is doing it, the pane shows no DONE line and
+no result file newer than the code exists; and it finds the process
+with an anchored `pgrep -f "^python3 pipeline/…"` (unanchored, the
+pattern also matches the tmux shell, whose command line contains the
+same text and which stays alive in its `sleep 86400`).
 
 ## The pipeline, stage by stage
 
@@ -623,12 +636,17 @@ the stages load it themselves (`timing_util.load_pulp_env`).
                     each rule.
     s09_assembly_eval    the assembly harness: every candidate (live —
                     whatever data/articles holds, the rules' records
-                    since the switch —, rules, rules-on-model) against
+                    since the switch —, rules, rules-on-model, and since
+                    5 October 2026 llm, the s12 box links) against
                     the human-verified records, the contents page, and
                     structural checks → data/assembly_v2/eval.json; the
                     /assembly page of the site shows it. --yardstick
                     <archive> replays the annotations over an archived
-                    assembly after a switch.
+                    assembly after a switch. --issues-dir <folder>
+                    --variant <name> --out <file> score corpus issues
+                    (a box-linking trial's) with the contents page and
+                    the structural checks; issues nobody corrected skip
+                    the site's replay.
     s10_assembly_audit   the audit (2026-09-03): every record a person
                     corrected against the live assembly, region by
                     region, each disagreement sorted by cause
@@ -757,12 +775,15 @@ duplicate rule and its known limits. In short:
                       magazine; masters deleted once assembled; working
                       images reaped under 400 GB free; progress.json every
                       minute; a STOP file or Ctrl-C stops it, --run resumes.
-    s12_llm_link      the box-linking stage (2026-10-04): a language model
-                      decides, box by box, what continues what — the
-                      local lane on GPU 2 first, the Claude API with the
-                      page image when unsure, a flag for a person when
-                      still unsure; records in the rules assembly's
-                      shape under data/assembly_v2/llm/<id>/; --trial N;
+    s12_llm_link      the box-linking stage (2026-10-04; reworked in
+                      p50k, 2026-10-05): a language model decides, box by
+                      box, what kind of box it is and whether a piece
+                      begins there — the local lane on GPU 2 first (its
+                      answer held to a JSON schema), the Claude API with
+                      the page image when unsure, a flag for a person when
+                      still unsure; records in the rules assembly's shape
+                      under data/assembly_v2/llm/<id>/ (llm_trial_<tag>
+                      for a trial); --trial N --tag, --same-as, --pilot;
                       docs/corpus-run.md, "The box-linking stage".
     scripts/corpus_reaper.py   the same space rules by hand.
     docs/corpus-build-log.md   the dated build log for the data paper

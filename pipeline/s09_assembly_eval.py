@@ -21,11 +21,24 @@ Three yardsticks, from the strongest to the widest:
 
 Candidates compared: the live assembly (data/articles: s07's model output
 until the switch of 2026-09-02, the rules' records since — the backend
-field says which), rules-only (s08) and rules-on-model (s08). Output: data/assembly_v2/eval.json and a plain-text
-table; docs/assembly-v2.md carries the discussion.
+field says which), rules-only (s08), rules-on-model (s08) and, since
+5 October 2026, the language model's box links (s12, data/assembly_v2/llm).
+Output: data/assembly_v2/eval.json and a plain-text table;
+docs/assembly-v2.md carries the discussion.
 
     python3 pipeline/s09_assembly_eval.py --all
     python3 pipeline/s09_assembly_eval.py --issue ast_1930_01
+
+Corpus issues have no human records yet, but the contents-page yardstick
+and the structural checks need none: score a box-linking trial's issues
+(s12 --trial, data/assembly_v2/llm_trial_<tag>) against the rules with
+
+    python3 pipeline/s09_assembly_eval.py --issues-dir data/assembly_v2/llm_trial_<tag> \
+        --variant llm_trial_<tag> --out data/assembly_v2/eval_trial_<tag>.json
+
+(the contents yardstick is the rules engine's own reading of the issue's
+contents page, analysis.json, so it favours the rules where the rules read
+the contents page right; it is the magazine's own list all the same).
 """
 import argparse
 import glob
@@ -44,7 +57,8 @@ PIECE_TYPES = ("story", "serial_part", "poem", "letters", "feature")
 STORY_TYPES = ("story", "serial_part")
 VARIANTS = [("live", "data/articles/{iid}/articles.json"),          # whatever is live: s07 until 2026-09-02, the rules since
             ("rules", "data/assembly_v2/rules/{iid}/articles.json"),
-            ("rules_on_model", "data/assembly_v2/rules_on_model/{iid}/articles.json")]
+            ("rules_on_model", "data/assembly_v2/rules_on_model/{iid}/articles.json"),
+            ("llm", "data/assembly_v2/llm/{iid}/articles.json")]           # s12, the language model's box links (5 October 2026)
 
 
 # ---------------------------------------------------------------- inputs
@@ -73,6 +87,8 @@ def human_records(iid):
     """The annotation log replayed over the assembly it was made on,
     through the site's own engine, so the yardstick is exactly what the
     workbench showed: the live one, or the archive named by --yardstick."""
+    if not YARDSTICK["dir"] and not os.path.exists(os.path.join(ROOT, "data", "annotations", f"{iid}.jsonl")):
+        return [], {}           # nobody has corrected this issue (the corpus issues): nothing to replay, no need to load the site
     sys.path.insert(0, os.path.join(ROOT, "webapp"))
     for k, v in (("PULP_SITE_PASSWORD_FILE", "/nonexistent"), ("PULP_SECRET_FILE", "/tmp/.pulp_eval_secret"),
                  ("PULP_USERS_FILE", "/nonexistent"), ("PULP_API_TOKEN_FILE", "/nonexistent")):
@@ -325,13 +341,22 @@ def main():
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--issue")
     ap.add_argument("--yardstick", help="an archive made by scripts/switch_assembly.py (its folder), when the live assembly is no longer the one the annotations were made on")
+    ap.add_argument("--issues-dir", help="score the issues that have a folder here (e.g. data/assembly_v2/llm_trial_<tag>), not the pilot list")
+    ap.add_argument("--variant", action="append", default=[], help="another assembly under data/assembly_v2 to score (e.g. llm_trial_<tag>); repeatable")
+    ap.add_argument("--out", help="where to write the evaluation (default data/assembly_v2/eval.json)")
     args = ap.parse_args()
     if args.yardstick:
         YARDSTICK["dir"] = os.path.join(ROOT, args.yardstick) if not os.path.isabs(args.yardstick) else args.yardstick
+    for name in args.variant:
+        VARIANTS.append((name, "data/assembly_v2/" + name + "/{iid}/articles.json"))
     cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"), encoding="utf-8"))
-    ids = [args.issue] if args.issue else ([i["id"] for i in cfg["issues"]] if args.all else [])
+    if args.issues_dir:
+        d = args.issues_dir if os.path.isabs(args.issues_dir) else os.path.join(ROOT, args.issues_dir)
+        ids = sorted(x for x in os.listdir(d) if os.path.exists(os.path.join(d, x, "articles.json")))
+    else:
+        ids = [args.issue] if args.issue else ([i["id"] for i in cfg["issues"]] if args.all else [])
     if not ids:
-        sys.exit("pass --all or --issue <id>")
+        sys.exit("pass --all, --issue <id> or --issues-dir <folder>")
     results = []
     for iid in ids:
         r = evaluate_issue(iid)
@@ -339,12 +364,13 @@ def main():
             results.append(r)
     txt = table(results)
     print(txt)
-    outdir = os.path.join(ROOT, "data", "assembly_v2")
-    os.makedirs(outdir, exist_ok=True)
+    out = args.out or os.path.join("data", "assembly_v2", "eval.json")
+    out_abs = out if os.path.isabs(out) else os.path.join(ROOT, out)
+    os.makedirs(os.path.dirname(out_abs), exist_ok=True)
     json.dump({"generated": time.strftime("%Y-%m-%dT%H:%M:%S"), "variants": [v for v, _ in VARIANTS], "yardstick": YARDSTICK["dir"] and os.path.relpath(YARDSTICK["dir"], ROOT),
                "issues": results, "table": txt},
-              open(os.path.join(outdir, "eval.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print(f"\nwritten data/assembly_v2/eval.json")
+              open(out_abs, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print(f"\nwritten {os.path.relpath(out_abs, ROOT)}")
 
 
 if __name__ == "__main__":

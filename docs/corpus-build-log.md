@@ -320,4 +320,104 @@ the same, and the chains are still built page by page afterwards. At most six AP
 time; the API spend file now also counts input and output tokens. The trial is restarted on p50j (same tag,
 --redo); the first run's outputs are overwritten, its log lines stay in data/corpus/llm_link_trial.log.
 
-(Next entries: the restarted trial's first issues; the report.)
+### 2026-10-05, 00:00–09:20 KST — p50j deployed (f5d6133); the first trial stopped after five issues; a second ssh drop; pastes no longer wait
+
+PASTE 8g committed p50j as f5d6133 and the server pulled it. PASTE 8h then stopped the first trial, which had
+finished five issues in about half an hour, six issues at a time: '47 (agreement 0.8143, above) and four others,
+of which the last three printed — 10 Story Book 1922-02 (68 pages, 1,280 boxes, agreement with the rules 0.698,
+22 pages flagged, 1,831 s), 1921-11 (1,304 boxes, 0.815, 27 flagged, 1,874 s) and 1922-03 (1,355 boxes, 0.721,
+31 flagged, 1,903 s). No page reached the API (every call failed on the temperature parameter), so every page
+the local tier was unsure of, or whose answer it could not parse, was flagged: 22 to 31 of 68 pages (32–46%).
+That is the most the API tier would have had to take on these issues with the p50i prompt. 8h then printed
+"s12 selftest ok" and LANE-OK, and the ssh session broke again ("Read from remote host 155.230.137.46: Can't
+assign requested address"), this time during the paste's five-minute wait. The two commands that start the
+trial in tmux come straight after LANE-OK and take a fraction of a second, so the trial almost certainly
+started at about 00:00. The error is raised on the Mac when its own network address goes away (a Wi-Fi or VPN
+reconnection), not by the server. Both drops (4 Oct 22:45, during a run in the foreground; 5 Oct 00:00, during
+a `sleep 300`) came while a paste was waiting for minutes. From now on a server paste returns within about a
+minute: long work starts in tmux and the paste ends; the check is a separate paste that can be run any number
+of times. PASTE 8i is that check for the trial: it starts the trial only if no trial process is running, the
+tmux pane does not show TRIAL-DONE and no trial report newer than the deployed s12 exists; it finds the process
+with an anchored `pgrep -f "^python3 pipeline/s12_llm_link.py --trial"`, because the tmux shell's own command
+line contains the same text and stays alive in its `sleep 86400`; and it prints the trial's numbers over every
+issue finished since the tmux session was created, with the corpus run's progress. The handbook's paste section
+records the rule.
+
+### 2026-10-05, 09:20 KST — the first box-linking trial's results (PASTE 8i); what they show
+
+The trial on p50j (tag qwen14b_nothink) ran from 00:10 to 04:07: 100 issues (the first hundred assembled: 10
+Story Book, 10 Story Detective, 10 Story Western, '47, Action Stories, A. Merritt's Fantasy and others), 12,099
+pages, 229,867 boxes, 14,213 s — 1.17 s a page with one issue at a time and 48 pages in flight. Local answers:
+11,629, 47.2 s each, 827 output tokens each. 2,827 of them (24%) could not be read: the model broke the list
+partway and wrote a box as a quoted string with escaped quotes (`{"boxes":[{"k":1,…},"k\":2,\"joins\":…`);
+under the lane's plain JSON mode a string inside the list is valid JSON, so the server let it through. Of the
+8,802 readable answers, 7,124 pages had every box at confidence 0.85 or more, 1,634 had a box between 0.5 and
+0.85, 44 a box under 0.5. So 4,505 pages (37%) wanted the API: 2,827 unreadable and 1,678 unsure. The API
+answered 322 of them (Opus 5.5 with the page image: 10.2 s, 4,337 tokens in and 1,097 out, $0.0393 a page; 5
+answers unreadable), $12.65 in all, and from 00:36 refused every call: "Your credit balance is too low to access
+the Anthropic API" (4,183 calls). Flagged pages: 3,261 (27%). The 2,719 pages no model answered were given
+"previous" for every box, i.e. chained into whatever piece was open — a fault: from p50k they keep the rules'
+decisions and are flagged.
+
+Agreement with the rules, box by box: 83.6% (by issue from 0.389, 310 All-Story Weekly covers, to 0.945; median
+0.839; by magazine from 0.784, 10 Story Book, to 0.880, 5 Western Novels). The figure mixes two questions and the
+comparison had a fault. (a) A box was compared with the box just before it, so after a running head or an
+advertisement the rules were counted as beginning a piece even where their records continue it. (b) The rules'
+"advert" names a kind of box, the model's "previous" a link: 17,500 boxes that the rules call advertising and the
+model chained to the box before them (mostly the later boxes of one advertisement) counted as disagreements; the
+largest pairs were rules=advert/model=previous 17,500, rules=new/model=previous 7,378, rules=furniture/model=
+previous 5,582, rules=previous/model=new 2,360, rules=advert/model=new 1,813. The model's hints had fault (a)
+too: the first box of every page, and the box after a running head, were described to it as beginning a piece;
+it mostly overrode them (the "F. D. R." case of 4 October, "begins mid-sentence on page 5", was this fault, not
+the rules). The samples of the two boundary classes (16, with their texts) favour the model: continuations in
+mid-sentence that the rules are said to split ("were foregathered from the best families of France and Spain…",
+"road grew to a river…", "people. Someone remarked that…" — some of these are fault (a)), and new titles the
+rules ran on ("The Dirty Guy A Story of the Track BY EDWIN HEIMBACH", "A BARNYARD TRAGEDY", a verse filler after
+a rule in 10 Story Book); a few are unclear (a by-line first on its page; genre labels such as "• Baseball"; an
+anecdote heading inside a department of '47). One more fault, in the record builder: a "previous" box after an
+advertisement went into the open story, while the model, following the prompt's words ("continues the piece of
+the box before it"), sometimes used "previous" for the second box of an advertisement, so advertising text could
+enter a story record.
+
+Projection: the trial's own escalation share (2.7%, the pages the API answered) gives about $1,000 for the
+corpus's 980,000 pages; with every unsure page answered — 14–18% once all answers are readable — about
+$5,400–6,900 on Opus 5.5, half on Sonnet 5.5. The local tier at 1.17 s a page would need about 13 days on GPU 2,
+longer than the reading. The API credit is Heejin's to add (the Claude Console's billing page); the stage runs
+without it, flagging instead.
+
+The corpus run at 09:19: 1,921 issues downloaded, 1,914 imaged, 352 read, cleaned and assembled (351
+lemmatized), 349 masters removed; no failures, no stall-watch events, no crash notes; 2,529 GB free on /mnt/sda.
+Rates since 22:05: 158.5 downloads an hour (about 35 hours left), 30 readings an hour — 58,306 pages, 1.45 pages
+a second, GPU 0 at 71% at the check. Before p50g it read 1.9 pages a second at 86–89%: the 32-request limit set
+in p50g costs about a quarter of the speed.
+
+### 2026-10-05, 10:00 KST — p50k: the faults of the first trial corrected; the accuracy run on the pilot issues
+
+s12: the local answer is held to a JSON schema (a list of box objects with fixed fields and allowed values; the
+server lets the model write nothing else), with plain JSON, then nothing, as fallbacks if the lane refuses it;
+the answer limit grows with the page (about 60 tokens a box, 4,000 to 12,000); a cut-off answer is asked again
+with twice the room, an unreadable one once more at temperature 0.3; how each answer ended is kept. The rules'
+decisions are computed once per issue in reading order across the issue (a piece runs on across furniture and
+advertising) and serve three uses: the hints, the comparison, and the answer for a page no model answered. The
+open piece shown for a page is looked for up to four pages back, past pages of advertising. The prompt now says
+that "previous" continues the editorial piece that is open, also across advertising, that every box of an
+advertisement is "advert", and that "new" is never used for advertising; the builder takes "new" with kind
+"ad" as the start of an advertisement. The comparison asks two questions apart: the kind of every box
+(editorial, advertising, furniture) and, where both call a box editorial, whether a piece begins there. The API
+is not asked again in a run after a refusal retrying cannot cure (no credit, a refused key, an unknown model);
+budgets are per run ($50) and in total ($100 across all runs, $12.65 spent); those pages are flagged, each flag
+with its reason. Trials write to their own folders (data/assembly_v2/llm_trial_<tag>), resumable, with a line
+per issue in summary.jsonl; --same-as runs a trial on an earlier trial's issues; --pilot runs the ten pilot
+issues into data/assembly_v2/llm. Two issues at a time keep the lane busy. s09: the llm variant is scored with
+the others; --issues-dir/--variant/--out score a trial's corpus issues on the contents pages and the structural
+checks (issues nobody corrected skip loading the site). The reading: 48 requests per worker (96 in all, under
+the server's 104 sequences), read again by the orchestrator for each issue.
+
+The paste (PASTE 8k) moves the first trial's outputs to data/assembly_v2/llm_trial_qwen14b_nothink; prints a
+calibration from its 317 pages answered by both tiers (how often Opus agrees with the local model at each level
+of the local model's confidence) and a diagnosis of its unreadable answers; and starts tmux `llmjob`: s12 over
+the pilot issues, s09 on the pilot issues (rules and llm against the human-verified records and the contents
+pages: the first accuracy figure for the box links against people's corrections), the second trial on the same
+100 issues (tag qwen14b_schema), and s09 over those issues for the rules and both trials.
+
+(Next entries: the calibration; the pilot accuracy; the second trial.)
