@@ -612,8 +612,9 @@ def build_db(sig, path, log=None):
               "house_excerpts": sum(1 for row in rec_rows if row[29]),
               "corpus_issues": n_corpus, "corpus_issues_shown_as_pilot": len(also_pilot),
               "needs_look": sum(1 for row in rec_rows if row[-1]),
-              "model_checked": sum(1 for row in rec_rows if (row[-2] or "").startswith("rules, checked")),
-              "model_disagrees": sum(1 for row in rec_rows if "disagrees" in (row[-2] or "") or "(changed)" in (row[-2] or "")),
+              "model_checked": sum(1 for row in rec_rows if (row[-2] or "").startswith(("rules, checked", "rules, with", "made by the model"))),
+              "model_disagrees": sum(1 for row in rec_rows if any(w in (row[-2] or "") for w in ("disagrees", "(changed)", "applied", "made by the model", "set aside"))),
+              "model_applied": sum(1 for row in rec_rows if any(w in (row[-2] or "") for w in ("applied", "made by the model"))),
               "verified": sum(1 for row in rec_rows if row[19] == "verified")}
     meta = {"signature": _signature(sig), "built": time.strftime("%Y-%m-%d %H:%M:%S"),
             "build_seconds": round(time.time() - t0, 2), "counts": json.dumps(counts),
@@ -622,7 +623,7 @@ def build_db(sig, path, log=None):
             "summary": json.dumps(_json(os.path.join(D, "reuse", "background", "summary_machine.json")) or {}),
             "overlap": json.dumps(_json(os.path.join(D, "reuse", "machine_region_overlap.json")) or {}),
             "survey": json.dumps(_json(os.path.join(D, "survey", "summary.json")) or {}),
-            "corpus_included": "true", "version": "0.19.0"}
+            "corpus_included": "true", "version": "0.20.0"}
     con.executemany("INSERT INTO meta VALUES (?,?)", list(meta.items()))
     con.commit()
     con.close()

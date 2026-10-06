@@ -856,7 +856,27 @@ def is_title_box(title, k, pages):
     return bool(ti) and (t.startswith(ti[: max(4, len(ti) // 2)]) or len(t) <= 1.5 * len(ti) + 4)
 
 
-def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc=None, rl=None):
+def decision_kind(j, R, r_ed, k, rl, last_ed):
+    """The kind of change a decision makes to the rules' records (the kinds of the model check review, s13; p50q):
+    None when it changes no record of the rules."""
+    if j == "furniture":
+        return "out_furniture" if R is not None else None
+    if j == "advert":
+        if R is not None and is_ad_type(R["type"]):
+            return None
+        return "out_ad" if R is not None else "new_ad"
+    if j == "new":
+        if r_ed:
+            return None if rl.get(k, {}).get("joins") == "new" else "split"
+        return "out_new"
+    if r_ed:                                                         # previous, caption, notice
+        return "join" if (rl.get(k, {}).get("joins") == "new" and last_ed is not None and last_ed is not R) else None
+    if last_ed is not None:
+        return "out_continues" if R is not None else "box_in"         # from an advertisement / from no record
+    return "orphan" if R is None else None
+
+
+def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc=None, rl=None, apply=None):
     """The model's decisions applied to the rules' records (p50m). Where the model agrees with the rules, the rules'
     record is kept as it is — with its resumptions after fillers, advertising and jumps, which links from box to box
     cannot express. Where it disagrees, the record is changed at that box:
@@ -867,7 +887,8 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
         editorial where the rules have advertising,    the box joins the open piece (previous …) or begins one (new)
         furniture or nothing
     Every change is listed in the record's llm.changes with the model's confidence. Without the rules' records (no
-    assembly), the records are built from the decisions alone."""
+    assembly), the records are built from the decisions alone. apply (p50q): a set of decision kinds (decision_kind);
+    a decision of another kind is not applied and the box stays as the rules have it (None: every decision)."""
     from s08_assemble_rules import clean_text, join_boxes
     order, n = {}, 0
     for pno in sorted(pages):
@@ -935,6 +956,19 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
         r_ed = R is not None and not is_ad_type(R["type"])
         if j == "new" and (b.get("kind") or "") == "ad":
             j = "advert"
+        if apply is not None:
+            kind = decision_kind(j, R, r_ed, k, rl, last_ed)
+            if kind is not None and kind not in apply:              # not applied: the box stays as the rules have it
+                if R is not None:
+                    if is_ad_type(R["type"]):
+                        llm_ad = R
+                    else:
+                        last_ed, llm_ad = R, None
+                    R["llm"]["confidence_min"] = min(R["llm"]["confidence_min"], conf)
+                    R["llm"]["tiers"][tier] += 1
+                else:
+                    llm_ad = None
+                continue
         if j == "furniture":
             if R is not None:
                 R["llm"]["changes"].append(f"{k} out as furniture ({conf:.2f})")
@@ -1344,6 +1378,17 @@ def rebuild_issue(iid, variant=OUT_VARIANT, meta=None, old=None):
     return sm
 
 
+def records_with(iid, apply, variant=OUT_VARIANT, meta=None):
+    """The rules' records with only the model's decisions of the kinds in apply made (s13, p50q: Heejin's choice, kind
+    by kind, after the model check review); from the stored decisions, no model is asked, nothing is written."""
+    pj = os.path.join(ROOT, "data", "assembly_v2", variant, iid, "pages.jsonl")
+    prs = [json.loads(line) for line in open(pj, encoding="utf-8")]
+    pages = load_pages(iid)
+    owner, furn, rules_doc = load_rules(iid)
+    rl = rules_labels(pages, owner, furn)
+    return build_records(iid, pages, prs, meta or {"id": iid}, variant, rules_doc=rules_doc, rl=rl, apply=set(apply))
+
+
 def rebuild(variant):
     """The records and the comparison of a run made again from its stored decisions with the current code; no model is
     asked. After a change to the record builder or the comparison, a run can be scored again at once (s09)."""
@@ -1417,6 +1462,19 @@ def selftest():
     doc = build_records("t", pages, pr_(adv), {"magazine": "Weird Tales"}, rules_doc=rules_doc, rl=rl)
     recs = {r["article_id"]: r for r in doc["articles"]}
     assert recs["t_a1"]["pages"] == [1, 3] and "moon rose red" not in recs["t_a1"]["text"] and recs["t_a9001"]["type"] == "ad", recs
+    # p50q: only the kinds asked for are applied
+    recs = {r["article_id"]: r for r in build_records("t", pages, pr_(adv), {"magazine": "Weird Tales"}, rules_doc=rules_doc, rl=rl,
+                                                      apply={"out_ad"})["articles"]}
+    assert recs["t_a9001"]["type"] == "ad" and "moon rose red" not in recs["t_a1"]["text"], recs           # advertising applied
+    recs = {r["article_id"]: r for r in build_records("t", pages, pr_(adv), {"magazine": "Weird Tales"}, rules_doc=rules_doc, rl=rl,
+                                                      apply={"split"})["articles"]}
+    assert "t_a9001" not in recs and recs["t_a1"]["llm"]["kept"] and recs["t_a1"]["fragments"][0]["region_ids"] == [1, 2, 3], recs   # not applied
+    recs = {r["article_id"]: r for r in build_records("t", pages, pr_(split), {"magazine": "Weird Tales"}, rules_doc=rules_doc, rl=rl,
+                                                      apply={"out_ad"})["articles"]}
+    assert "t_a9001" not in recs and recs["t_a1"]["llm"]["kept"], recs                                      # the split not applied
+    recs = {r["article_id"]: r for r in build_records("t", pages, pr_(split), {"magazine": "Weird Tales"}, rules_doc=rules_doc, rl=rl,
+                                                      apply={"split"})["articles"]}
+    assert recs["t_a9001"]["pages"] == [3] and recs["t_a1"]["pages"] == [1], recs                           # the split applied
     story_b = {"article_id": "t_a3", "type": "story", "title": None, "roles": {"3:2": "note"}, "fragments": [{"page": 3, "region_ids": [1, 2]}]}
     story_a = dict(story, fragments=[{"page": 1, "region_ids": [1, 2, 3]}])
     owner2 = {}

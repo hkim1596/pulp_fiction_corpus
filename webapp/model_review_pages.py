@@ -230,15 +230,22 @@ def counts_table(t=None):
     P = pool()
     in_pool = Counter(c["kind"] for c in P)
     target = _target()
+    try:
+        import s13_publish
+        pol = s13_publish.kinds_policy()
+    except Exception:
+        pol = {}
+    now = {"apply": "applied", "apply_flag": "applied, still flagged", "flag": "flagged", "ignore": "set aside (not flagged)"}
     rows = []
     for k, label in _kinds().items():
         v = t.get(k, Counter())
         n = sum(v[x] for x in ("rules", "model", "neither"))
         share = (f"{100 * v['model'] / n:.0f}%" if n else "")
         rows.append([_esc(label), E.N(in_pool.get(k, 0)), E.N(sum(v.values())) + f" <span class='fine'>of {target}</span>",
-                     E.N(v["rules"]), E.N(v["model"]), E.N(v["neither"]), E.N(v["cannot_tell"]), E.N(share)])
+                     E.N(v["rules"]), E.N(v["model"]), E.N(v["neither"]), E.N(v["cannot_tell"]), E.N(share),
+                     _esc(now.get(pol.get(k), ""))])
     return E._table(["kind of change", "#cases waiting", "#judged", "#rules right", "#model right", "#neither",
-                     "#can't tell", "model right (of the decided)"], rows)
+                     "#can't tell", "model right (of the decided)", "what the site does with it now"], rows)
 
 
 def review_page(qs, user, render=None):
@@ -247,14 +254,14 @@ def review_page(qs, user, render=None):
     want = (qs.get("case") or [""])[0]
     skip = [(qs.get("skip") or [""])[0]]
     head = [CSS, _G["howto"](
-        "The language model checks every box of every corpus issue against the rules' records. Where it disagrees, "
-        "the website keeps the rules' record and flags it (Heejin's choice after the pilot score, where the rules alone "
-        "were right more often). This page asks, one case at a time, who is right. Look at the red box on the scan and "
+        "The language model checks every box of every corpus issue against the rules' records. What it would change is "
+        "applied, flagged or set aside kind by kind, as Heejin decided on 6 October from the first 206 judgments here "
+        "(the last column of the table). This page goes on asking, one case at a time, who is right, so that the "
+        "decisions can be checked and changed as the counts grow. Look at the red box on the scan and "
         "the texts beside it, read what the model would change, and choose: THE RULES ARE RIGHT (the record should stay "
         "as it is), THE MODEL IS RIGHT (the change should be made), NEITHER (both are wrong; the record needs another "
         "fix — a note helps), or CAN'T TELL. Keys: 1, 2, 3, 4. The cases are spread over the kinds of change and the "
-        "magazines; the table counts the verdicts by kind. When each kind has about 25, the counts decide, kind by kind, "
-        "whether the model's change is applied, ignored, or kept as a flag."),
+        "magazines; the table counts the verdicts by kind."),
         "<h1>Model check review</h1>",
         f"<p class='muted'>{len(P):,} disagreements waiting in the issues the model has checked so far "
         f"(the list is renewed by the site refresh). Judged so far: "

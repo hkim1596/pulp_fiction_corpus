@@ -205,9 +205,20 @@
     }
   },
   "publish": {
-    "_comment": "s13: what the website shows for a corpus issue. prefer: rules_flagged = the rules' records, each checked against the model's reading (s12): where the model would change a record, the record stays as the rules made it, the change is listed in its flags and the record needs a look (Heejin's choice on 5 October 2026, after the pilot score: on the 74 records people verified the rules alone were exactly right on 65, the rules as the model changed them on 50); llm = the records as the model changed them (v0.18.0: 5 October, from 11:36 until p50o); rules = the rules' records only. look_below: a record with a box the model was less sure of than this needs a look too.",
+    "_comment": "s13: what the website shows for a corpus issue. prefer: rules_flagged = the rules' records, each checked against the model's reading (s12), with the model's changes applied, flagged or set aside kind by kind as publish.kinds says (since p50q; before: where the model would change a record, the record stayed as the rules made it, the change was listed in its flags and the record needed a look: Heejin's choice on 5 October 2026, after the pilot score, where on the 74 records people verified the rules alone were exactly right on 65 and the rules as the model changed them on 50); llm = the records as the model changed them (v0.18.0: 5 October, from 11:36 until p50o); rules = the rules' records only. look_below: a record with a box the model was less sure of than this needs a look too.",
     "prefer": "rules_flagged",
-    "look_below": 0.9
+    "look_below": 0.9,
+    "kinds": {
+      "_comment": "what the site does with each kind of change the model would make to the rules' records (s13; Heejin, 6 October 2026, after Sujin's 206 judgments on the model check review, about 25 a kind): apply = the change is made on the site and the record is not flagged for it; apply_flag = the change is made and the record stays on the needs-a-look list; flag = the record stays as the rules made it, the change is listed in its flags and it needs a look; ignore = the record stays as the rules made it and is not flagged for it (what the model said stays in the record's model_check). The verdicts (rules right / model right / neither): out_ad 1/15/9, join 5/15/2, split 5/15/3, box_in 6/11/4, out_furniture 11/10/4, out_new 17/6/3, out_continues 9/5/8, apart 8/4/3. A change here is applied to every issue at the next refresh.",
+      "out_ad": "apply",
+      "join": "apply_flag",
+      "split": "apply_flag",
+      "box_in": "flag",
+      "out_furniture": "flag",
+      "out_new": "ignore",
+      "out_continues": "ignore",
+      "apart": "ignore"
+    }
   },
   "site": {
     "_comment": "scripts/site_refresh.py: how often the site's own database (authors, magazines, issues, stories, the workbench list) is brought up to date with the corpus run; the /run board reads the run's progress file at every visit.",

@@ -740,3 +740,66 @@ downloaded, 457 read and assembled, 165.5 downloads and 31.3 readings an hour, 2
 
 Next: people with a named account judge about 25 cases of each kind on /review/model; PASTE 9a shows the counts; then
 Heejin decides, kind by kind, whether the model's change is applied, ignored, or kept as a flag.
+
+### 2026-10-06, 10:15 KST — Sujin's 206 judgments; Heejin's choices, kind by kind (p50q, site v0.20.0); the reading stopped
+
+PASTE 9a (10:01). The site: 1,102 issues assembled; 49,172 records, 10,685 stories; the model had checked 33,672
+records (774 issues, 112,484 pages: 782 asked again, 758 boxes left open, 77 pages flagged; 202 s an issue) and
+disagreed with 7,584 (22.5%); 7,658 needed a look; 74 verified. The review's pool: 19,170 cases from 763 issues of 90
+magazines — a box added 5,654, a box out as advertising 4,149, a box moved to the piece before 3,947, a split 2,006, a
+box out as page furniture 1,611, a join 990, a record taken apart 733, a new piece inside a record 80.
+
+Sujin's judgments on /review/model (one reader; about 25 of each kind):
+
+    kind of change                         rules right   model right   neither   can't tell   model right of the decided
+    box moved out as advertising                 1            15           9          1             60%
+    join                                         5            15           2          4             68%
+    split                                        5            15           3          2             65%
+    box added to a record                        6            11           4          5             52%
+    box moved out as page furniture             11            10           4          1             40%
+    record taken apart                           8             4           3         10             27%
+    new piece begun inside a record             17             6           3          0             23%
+    box moved to the piece before                9             5           8          4             23%
+
+Her notes: a box the model calls advertising is advertising, but so are boxes around it ("121M is advertising, yes, but
+not only that box, right column is lists of ads"; "the box before · 37U · Is also part of ad"); a contents list is not
+advertising; a box the model takes for the start of a new piece is often a continuation from another page ("149p is not
+a begin, but continuation from other piece").
+
+The questions put to Heejin at 10:05, with these numbers, and his answers (10:06), all as recommended:
+- A box moved out of a story as advertising — "Apply automatically (Recommended)": the box leaves the story and goes to
+  an advertisement record; the record no longer needs a look for it.
+- Joins and splits — "Apply, keep flagged (Recommended)": the site shows the model's version, and the record stays on
+  the needs-a-look list so a person can undo it.
+- A box added to a record, a box moved out as page furniture — "Keep as a flag (Recommended)".
+- A new piece begun inside a record, a box moved to the piece before, a record taken apart — "Stop flagging them
+  (Recommended)": these no longer make a record need a look; what the model said stays saved with the record.
+
+p50q and site v0.20.0:
+- config/corpus_settings.json, publish.kinds: out_ad apply; join, split apply_flag; box_in, out_furniture flag; out_new,
+  out_continues, apart ignore (with the verdicts in the comment). A change there reaches every issue at the next refresh.
+- s12 build_records takes the set of kinds to apply (decision_kind names the change a decision makes: out_furniture,
+  out_ad, new_ad — a box of no record made advertising —, split, out_new, join, out_continues, box_in, orphan); a
+  decision of another kind leaves the box as the rules have it. s12 records_with(iid, kinds) makes an issue's records so
+  from the stored decisions (no model is asked). The follower is not changed: data/assembly_v2/llm keeps the model's
+  full view.
+- s13 publishes the rules' records with the applied kinds made (records_with), and marks every record: "rules, checked by
+  the model: agrees"; "rules, with the model's changes applied" (each change in the flags, in the past tense: "applied:
+  the model moved box 37U out of this record as advertising (sure 0.98)"); "rules, checked by the model: disagrees (see
+  the flags)" for the flagged kinds; "… disagreement set aside" for the ignored kinds; "made by the model (from the rules'
+  records)" for the advertising records and the split-off parts it made. needs_look: a flagged kind, an applied-and-flagged
+  kind (a join, a split), an open decision, or a box under 0.9. model_check keeps what the model said: applied, pending,
+  set aside. A box the model would add to a record is told apart by where it comes from: from no record (box_in) or from
+  an advertisement (the same decision as the advertisement's own "box moved to the piece before", and set aside with it);
+  in the review's pool the two notes of that decision are one case. The note published.json is version 3 and carries the
+  policy; every issue is made again in the first refresh.
+- The review page shows, beside the counts, what the site now does with each kind; the Corpus run page counts the records
+  the model's changes were applied to; the workbench labels say "applied", "set aside" or "model".
+
+The reading stopped (10:01): no issue assembled in the last hour; GPU 0 held 1.6 GB at 0% (the reading server holds about
+85 GB). The model (GPU 2) and the site kept going. PASTE 9c (sent at once) shows why and starts the reading server again
+if GPU 0 is free, this time with Docker's own restart (--restart unless-stopped, without --rm), so that a stop no longer
+halts the run; nothing is removed. The download went on (6,650 of 7,440 issues, 181 an hour; the rest in about four
+and a half hours), and its files — the archive masters, kept until an issue is assembled, and the page images — took 786
+GB since yesterday noon: 1,635 GB free at 10:01, about 1,490 GB when the download ends. At 31 issues read an hour the
+reading needs about eight and a half more days.

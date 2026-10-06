@@ -213,10 +213,10 @@ def board_html(compact=False):
         out.append(f"<p class='fine'>The site's own database (authors, magazines, issues, stories, the workbench list) was last rebuilt "
                    f"{_esc(rf.get('ts', ''))} in {rf.get('build_seconds', '?')} s: {rf.get('records', 0):,} records of {rf.get('issues_assembled', 0):,} "
                    f"assembled issues and the ten pilot issues; {rf.get('model_checked', 0):,} checked by the language model, which "
-                   f"disagrees with {rf.get('model_disagrees', 0):,}; {rf.get('needs_look', 0):,} flagged for a look; "
-                   f"{rf.get('verified', 0):,} verified by people. It is rebuilt every few minutes (scripts/site_refresh.py). Where the "
-                   "model disagrees, the record stays as the rules made it and its flags say what the model would change "
-                   "(Heejin's choice after the pilot score, 5 October).</p>")
+                   f"disagrees with {rf.get('model_disagrees', 0):,} and whose changes are applied to {rf.get('model_applied', 0):,}; "
+                   f"{rf.get('needs_look', 0):,} flagged for a look; {rf.get('verified', 0):,} verified by people. It is rebuilt every "
+                   "few minutes (scripts/site_refresh.py). What the model would change is applied, flagged or set aside kind by "
+                   "kind (Heejin's choice of 6 October after the model check review; config/corpus_settings.json, publish.kinds).</p>")
     gu = p.get("given_up") or {}
     ev = stage_counts()
     out.append("<p class='fine'>Given up after retries: " + (", ".join(f"{_esc(k)} {v}" for k, v in gu.items()) if gu else "none")

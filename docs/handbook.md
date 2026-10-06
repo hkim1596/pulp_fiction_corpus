@@ -126,6 +126,18 @@ record's own annotation history shows live events only. A rebuild of
 the explorer that fails on a half-written source file (a pipeline stage
 still running) keeps the old database and retries.
 
+Since v0.20.0 (2026-10-06, p50q; Heejin's choices after Sujin's 206
+judgments on the model check review): what the model would change is
+applied, flagged or set aside kind by kind (config/corpus_settings.json,
+publish.kinds): advertising inside a story is moved out; joins and
+splits are made and stay flagged; a box added or moved out as page
+furniture is flagged; a new piece inside a record, a box moved to the
+piece before and a record taken apart are set aside. s12 build_records
+takes the kinds to apply (records_with makes an issue's records so from
+the stored decisions); s13 marks each record "agrees", "with the
+model's changes applied", "disagrees", "disagreement set aside" or
+"made by the model".
+
 Since v0.19.0 (2026-10-05, p50p; Heejin: "Quick review page"): the
 model check review, /review/model (webapp/model_review_pages.py; Workroom,
 "Model check"). One disagreement between the model and the rules at a

@@ -234,13 +234,15 @@ Three processes keep the site current, each in its own tmux session on the serve
   (data/pilot_stories.jsonl), and the explorer database is rebuilt from the exports and moved into place. Stop it with
   `touch data/corpus/STOP_SITE`. The site itself only reads (data/explorer.static).
 
-What a corpus record is on the site (Heejin's choice, 5 October, 11:40, after the pilot score: on the 74 records people
-verified, the rules alone were exactly right on 65, the rules as the model changed them on 50): the rules' record. The
-model's reading of its boxes is compared with it: "rules, checked by the model: agrees", or "… disagrees (see the
-flags)" with what the model would change in the flags, for a person to decide. Such a record, one with a decision the
-model left open, and one with a box the model was under 0.9 sure of need a look. settings.publish.prefer holds the
-choice (rules_flagged; llm would publish the model's records, rules the rules' alone); a change there is applied to
-every issue at the next refresh.
+What a corpus record is on the site: the rules' record, with the model's changes made or listed kind by kind
+(Heejin's choices: 5 October, 11:40, after the pilot score, the rules' records with the model's view as flags; 6 October,
+10:06, after Sujin's 206 judgments on the model check review, kind by kind). settings.publish.kinds: a box the model
+moves out of a story as advertising — applied; a join or a split — applied, and the record still needs a look; a box it
+would add to a record or move out as page furniture — listed in the flags, the record needs a look; a new piece begun
+inside a record, a box moved to the piece before, a record taken apart — set aside (not flagged; kept in the record's
+model_check). A record with a decision the model left open, or with a box it was under 0.9 sure of, needs a look too.
+settings.publish.prefer holds the overall choice (rules_flagged; llm would publish the model's records whole, rules the
+rules' alone); a change in either is applied to every issue at the next refresh.
 
 Who is right where they disagree (site v0.19.0, Heejin's choice of 5 October, 11:58): /review/model ("Model check" in
 the Workroom) shows one disagreement at a time — the scan with the box in question in red and the record in blue, the

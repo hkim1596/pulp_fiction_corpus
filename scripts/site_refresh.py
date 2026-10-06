@@ -64,6 +64,7 @@ def cycle(first=False):
             rec.update({"records": counts.get("records", 0), "stories": counts.get("stories", 0), "authors": counts.get("authors", 0),
                         "magazines": counts.get("magazines", 0), "needs_look": counts.get("needs_look", 0),
                         "model_checked": counts.get("model_checked", 0), "model_disagrees": counts.get("model_disagrees", 0),
+                        "model_applied": counts.get("model_applied", 0),
                         "verified": counts.get("verified", 0),
                         "corpus_issues_shown_as_pilot": counts.get("corpus_issues_shown_as_pilot", 0)})
         except Exception:
@@ -72,7 +73,7 @@ def cycle(first=False):
         try:
             rec.update({k: v for k, v in json.load(open(os.path.join(ROOT, "data", "corpus", "site_refresh.json"))).items()
                         if k in ("records", "stories", "authors", "magazines", "needs_look", "model_checked", "model_disagrees",
-                                 "verified", "build_seconds")})
+                                 "model_applied", "verified", "build_seconds")})
         except Exception:
             pass
     rec["seconds"] = round(time.time() - t0, 1)

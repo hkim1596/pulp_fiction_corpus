@@ -30,7 +30,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.19.0"
+APP_VERSION = "0.20.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CONFIG = os.environ.get("PULP_CONFIG",
@@ -173,7 +173,7 @@ def automation_html(a):
     conf = a.get("confidence")
     bits = []
     if asm:
-        bits.append(f"assembled by the {esc(asm)}")
+        bits.append(esc(asm) if asm.startswith("made by") else f"assembled by the {esc(asm)}")
     if conf is not None:
         bits.append(f"the model's lowest confidence on its boxes {float(conf):.2f}")
     head = ("<b style='color:var(--warn)'>needs a look</b> · " if a.get("needs_look") else "") + " · ".join(bits)
@@ -185,11 +185,16 @@ def automation_html(a):
 def automation_cells(a):
     """Three table cells for a record: how it was assembled, the model's confidence, its flags (v0.18.0)."""
     asm = a.get("assembly") or ""
-    short = "rules + model" if asm.startswith("rules, checked") else ("rules" if asm else "")
+    short = ("model" if asm.startswith("made by the model") else
+             "rules + model" if asm.startswith(("rules, checked", "rules, with")) else ("rules" if asm else ""))
     if "(changed)" in asm:
         short += " (changed)"
+    elif "applied" in asm:
+        short += " (applied)"
     elif "disagrees" in asm:
         short += " (disagrees)"
+    elif "set aside" in asm:
+        short += " (set aside)"
     elif asm.endswith("agrees"):
         short += " (agrees)"
     conf = a.get("confidence")
@@ -2575,9 +2580,10 @@ click first.</p>"""
         pub = doc.get("published") or {}
         how = (f"<p class='fine'>Assembled automatically: the rules engine (s08)"
                + (", then checked box by box by the language model (s12), which kept or changed each record" if pub.get("source") == "llm" else
-                  ", then checked box by box by the language model (s12); where the model disagrees, the record stays as the rules "
-                  "made it and what the model would change is listed in its flags, for a person to decide (on the pilot the rules "
-                  "alone were right more often)" if pub.get("source") == "rules+model" else
+                  ", then checked box by box by the language model (s12); what the model would change is applied, flagged or set "
+                  "aside kind by kind, as decided after the model check review (6 October): advertising it finds inside a "
+                  "record is moved out; its joins and splits are made but stay flagged; a box it would add or move out as "
+                  "page furniture is listed in the flags; the kinds it mostly gets wrong are set aside" if pub.get("source") == "rules+model" else
                   " (not yet checked by the language model)")
                + f"; on this site since {esc(pub.get('ts', '')[:16].replace('T', ' '))}. The confidence is the model's lowest on the "
                "record's boxes; ⚑ marks a record the model disagrees with, left a decision open on, or was unsure of — the ones to "
@@ -2786,8 +2792,8 @@ click first.</p>"""
         body = (howto(
             "Every separately printed unit — stories, serial instalments, poems, features, letters pages, advertisements — of every "
             "issue on the site: the ten pilot issues and the corpus run's issues as they are assembled. Each row says how the "
-            "automation made the record (the rules engine, and whether the language model has checked it and agrees or disagrees; "
-            "where it disagrees, the record stays as the rules made it and the flags say what the model would change), the "
+            "automation made the record (the rules engine, and whether the language model has checked it: it agrees; its "
+            "changes of a kind people found it right on are applied; or it disagrees and the flags say what it would change), the "
             "model's lowest confidence on its boxes, and its flags; ⚑ marks the records the automation is least sure of. Choose "
             "'needs a look' to see those first. Click a title to view it on the scans — and, with an annotator account, to fix and "
             "verify it; every correction is kept and replayed, and the corrections are what the rules and the model are improved from.")
