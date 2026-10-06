@@ -237,7 +237,8 @@ Three processes keep the site current, each in its own tmux session on the serve
 What a corpus record is on the site: the rules' record, with the model's changes made or listed kind by kind
 (Heejin's choices: 5 October, 11:40, after the pilot score, the rules' records with the model's view as flags; 6 October,
 10:06, after Sujin's 206 judgments on the model check review, kind by kind). settings.publish.kinds: a box the model
-moves out of a story as advertising — applied; a join or a split — applied, and the record still needs a look; a box it
+moves out of a story as advertising — applied; a join or a split — applied, and the record still needs a look (a split:
+the first part, which carries the change; the part the model made is not flagged for it, p50r); a box it
 would add to a record or move out as page furniture — listed in the flags, the record needs a look; a new piece begun
 inside a record, a box moved to the piece before, a record taken apart — set aside (not flagged; kept in the record's
 model_check). A record with a decision the model left open, or with a box it was under 0.9 sure of, needs a look too.

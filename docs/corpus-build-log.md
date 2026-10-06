@@ -819,3 +819,35 @@ item refused by the archive with HTTP 500, retried by the run).
 
 PASTE 9d committed p50q (7e816f2); 9e restarted the refresh and the site (v0.20.0) at about 11:21, and within a minute the
 refresh had made 354 checked issues again kind by kind. PASTE 9a shows the reading's return and the new counts.
+
+### 2026-10-06, 11:35 KST — p50q's first counts; a split was flagged twice (p50r: one flag per change)
+
+PASTE 9f committed the entry above (9667400). PASTE 9a (about 11:25):
+- The reading is back: GPU 0 holds 87 GB at 77% (the reading server); one issue assembled in the last hour. The run:
+  6,979 of 7,440 issues downloaded, 1,107 assembled, 29.3 read an hour since the start, 1,591 GB free.
+- The refresh's first cycle on p50q published 1,102 issues again, 820 of them checked by the model. The site: 54,624
+  records, 13,686 stories; 41,717 records checked by the model; on 13,581 of them the model differs from the rules (a
+  change applied, flagged or set aside); 10,713 need a look; 74 verified.
+- The review's pool: 17,684 cases — a box moved to the piece before 4,839, a box out as advertising 4,448, a box added
+  2,402, a split 2,170, a box out as page furniture 1,779, a join 1,174, a record taken apart 788, a new piece inside a
+  record 84. The pool is smaller than at 10:01 (19,170) with more issues in it, mostly because a box the model would add
+  to a record from an advertisement now counts as the advertisement's own "box moved to the piece before": one case for
+  one decision (box added 5,654 → 2,402; box moved to the piece before 3,947 → 4,839).
+
+What did not go as planned: the share of checked records that need a look went up, from 7,658 of 33,672 (22.7%) at
+10:01 to 10,713 of 41,717 (25.7%), when setting three kinds of change aside should have brought it down. One cause, in
+s13: when the model splits a record, the site makes the part from the split box on into a new record ("made by the
+model"), and s13 put both parts on the needs-a-look list for the same split — the first part, which carries the change
+("applied: the model split this record …"), and the new part. With some 2,170 splits applied (the pool's count), that is
+up to about 2,000 records too many on the list (fewer where the new part needs a look for a reason of its own).
+
+p50r (pipeline/s13_publish.py; the site's code is unchanged, v0.20.0): a change is flagged once, on the record it came
+from (a split: the first part; a join: the record the other was joined to); a part the model made needs a look only for
+a change of its own of a flagged kind, a decision the model left open on one of its boxes, or a box it was under 0.9
+sure of. published.json is version 4, so the first refresh after the update makes every issue again. The selftest: the
+split's new part no longer needs a look; three records of the made-up issue do (were four). The settings' note on
+apply_flag says the same. PASTE 9g commits it, 9h restarts the refresh (the site and the model's follower keep
+running), and 9i is the check from now on: 9a's counts and, for the records that need a look, why — an applied split or
+join, a box the model would add or move out as page furniture, a decision left open, a box under 0.9 — and, for the
+records on the list only because of a box under 0.9, how sure the model was, to show what a lower threshold would take
+off the list.

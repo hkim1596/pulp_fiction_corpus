@@ -136,7 +136,10 @@ piece before and a record taken apart are set aside. s12 build_records
 takes the kinds to apply (records_with makes an issue's records so from
 the stored decisions); s13 marks each record "agrees", "with the
 model's changes applied", "disagrees", "disagreement set aside" or
-"made by the model".
+"made by the model". Since p50r (same day): a change is flagged once,
+on the record it came from (a split: the first part); a part the model
+made needs a look only for a change of its own, an open decision or a
+box under 0.9.
 
 Since v0.19.0 (2026-10-05, p50p; Heejin: "Quick review page"): the
 model check review, /review/model (webapp/model_review_pages.py; Workroom,

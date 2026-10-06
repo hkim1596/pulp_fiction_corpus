@@ -52,8 +52,9 @@ from corpus_lib import ROOT, settings, all_states, event, log, write_json_atomic
 LIVE = os.path.join(ROOT, "data", "articles")
 ANN = os.path.join(ROOT, "data", "annotations")
 MODES = ("rules_flagged", "llm", "rules")
-S13_NOTE = 3                  # the version of data/articles/<id>/published.json: 2 = with the disagreements (p50p);
-                              # 3 = the model's changes applied, flagged or set aside kind by kind (p50q)
+S13_NOTE = 4                  # the version of data/articles/<id>/published.json: 2 = with the disagreements (p50p);
+                              # 3 = the model's changes applied, flagged or set aside kind by kind (p50q);
+                              # 4 = a part the model made is not flagged for the change that made it (p50r)
 POLICIES = ("apply", "apply_flag", "flag", "ignore")
 DEFAULT_POLICY = "flag"
 POOL = os.path.join(ROOT, "data", "review", "model_disagreements.jsonl")
@@ -366,7 +367,9 @@ def annotate_checked(iid, doc, rules_doc, view, policy, page_records, open_dec, 
             applied = [c for c in own[1:] if not c.startswith(skip)]
             flags += [plain_made(why, labels, titles)] + [plain_applied(c, labels, titles) for c in applied]
             r["assembly"] = "made by the model (from the rules' records)"
-            look = policy.get(kind) == "apply_flag" or any(policy.get(refined_kind(c, otype)) == "apply_flag" for c in applied)
+            # the record a change came from carries the flag (a split's first part, a join's record): the part the model
+            # made is not flagged for the same change again (p50r; one flag per change, not two)
+            look = any(policy.get(refined_kind(c, otype)) == "apply_flag" for c in applied)
             r["model_check"] = {"agrees": False, "made": why, "applied": applied, "pending": [], "ignored": [], "open": len(opens)}
         else:
             v = view.get(aid) or {"agrees": True, "changes": [], "notes": []}
@@ -612,11 +615,11 @@ def selftest():
     a = {r["article_id"]: r for r in pub["articles"]}
     assert a["t_a001"]["assembly"].startswith("rules, with the model's changes applied") and a["t_a001"]["needs_look"], a["t_a001"]
     assert a["t_a001"]["flags"][0].startswith("applied: the model split this record"), a["t_a001"]["flags"]
-    assert a["t_a9001"]["assembly"].startswith("made by the model") and a["t_a9001"]["needs_look"]           # a split: still flagged
+    assert a["t_a9001"]["assembly"].startswith("made by the model") and not a["t_a9001"]["needs_look"]       # the split's flag is on t_a001
     assert a["t_a9002"]["assembly"].startswith("made by the model") and not a["t_a9002"]["needs_look"]       # advertising: not flagged
     assert a["t_a004"]["model_check"]["applied"] == ["5:1 out as advertising (0.98)"] and a["t_a004"]["needs_look"]   # flagged only by the open decision
     assert a["t_a003"]["assembly"].endswith("agrees") and a["t_a003"]["needs_look"] and "llm" not in a["t_a003"]       # 0.8 sure
-    assert n == 4, n
+    assert n == 3, n
     assert refined_kind("3:4 in (previous, 0.99)", {"3:4": "ad"}) == "out_continues" and refined_kind("3:4 in (previous, 0.99)", {}) == "box_in"
     print("s13 selftest ok")
 
