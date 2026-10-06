@@ -803,3 +803,19 @@ halts the run; nothing is removed. The download went on (6,650 of 7,440 issues, 
 and a half hours), and its files — the archive masters, kept until an issue is assembled, and the page images — took 786
 GB since yesterday noon: 1,635 GB free at 10:01, about 1,490 GB when the download ends. At 31 issues read an hour the
 reading needs about eight and a half more days.
+
+### 2026-10-06, 11:25 KST — the reading server started again; p50q live
+
+PASTE 9c (about 11:17): the last issue read was at 06:53 (argosy_all_story_weekly_1924_11_ly19241101), so about four and
+a half hours of reading were lost (some 140 issues). The run itself was alive (its 25 processes); no reading worker was
+running, because the run waits for the server before it starts one; no reading container was there, and Docker kept no
+record of its end (the container was started with --rm and removed itself when it stopped), so the cause is not known.
+On the cards: a process of another project (/home/tailab/shared/khj/interpretable_deep_learning_stylometry, pid 554847)
+holds a small share of all four, GPU 0 included (1.6 GB there); if it took more of GPU 0 for a while, the reading server
+(which takes 85% of the card) would have run out of memory and stopped. The lab's lanes on GPUs 1 and 3 and ours on GPU 2
+were as before; 459 GB of memory free. The reading server was started again at about 11:17, now with Docker's own restart
+(--restart unless-stopped, without --rm), so a stop restarts it by itself and its log is kept. The download went on (one
+item refused by the archive with HTTP 500, retried by the run).
+
+PASTE 9d committed p50q (7e816f2); 9e restarted the refresh and the site (v0.20.0) at about 11:21, and within a minute the
+refresh had made 354 checked issues again kind by kind. PASTE 9a shows the reading's return and the new counts.
