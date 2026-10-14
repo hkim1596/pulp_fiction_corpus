@@ -31,9 +31,18 @@ sys.path.insert(0, os.path.join(ROOT, "pipeline"))
 
 def cycle(first=False):
     from corpus_lib import write_json_atomic, all_states, log
+    if os.path.exists(os.path.join(ROOT, "data", "corpus", "CONTINUITY_UPGRADE")):
+        log("site", "continuity upgrade in progress; keeping the last complete website build")
+        return {"held": "continuity upgrade"}
     import s13_publish
     import r00_export_stories as r00
     t0 = time.time()
+    pending_path = os.path.join(ROOT, "data", "corpus", "site_build_pending.json")
+    status_path = os.path.join(ROOT, "data", "corpus", "site_refresh.json")
+    try:
+        previous = json.load(open(status_path, encoding="utf-8"))
+    except (OSError, ValueError):
+        previous = {}
     open(os.path.join(ROOT, "data", "explorer.static"), "a").close()
     pub = s13_publish.publish_all()
     n_pool = None
@@ -51,12 +60,19 @@ def cycle(first=False):
     rec = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "published": pub, "exported": n_exp, "pilot_exported": n_pilot,
            "review_pool": n_pool,
            "issues_assembled": sum(1 for s in all_states().values() if "assembled" in s.get("stages", {}))}
-    if first or pub["published"] or n_exp or n_pilot:
+    needs_build = first or pub["published"] or n_exp or n_pilot or previous.get("build_ok") is False
+    if needs_build or os.path.exists(pending_path):
+        # Publication/export are already durable. Record the outstanding build
+        # before starting it, so a failure/timeout/restart retries even when the
+        # next cycle sees no newly changed issues.
+        write_json_atomic(pending_path, {"requested": time.strftime("%Y-%m-%dT%H:%M:%S")})
         b0 = time.time()
         r = subprocess.run([sys.executable, os.path.join(ROOT, "webapp", "explore_pages.py"), "--build"], cwd=ROOT,
                            capture_output=True, text=True, timeout=3 * 3600)
         rec["build_seconds"] = round(time.time() - b0, 1)
         rec["build_ok"] = r.returncode == 0
+        if rec["build_ok"]:
+            os.unlink(pending_path)
         out = r.stdout
         try:
             j = out.rfind("\n{\n")                     # the build's closing summary (json, indent 1) after its log lines
@@ -71,13 +87,13 @@ def cycle(first=False):
             rec["build_tail"] = (r.stderr or out)[-800:]
     else:
         try:
-            rec.update({k: v for k, v in json.load(open(os.path.join(ROOT, "data", "corpus", "site_refresh.json"))).items()
+            rec.update({k: v for k, v in previous.items()
                         if k in ("records", "stories", "authors", "magazines", "needs_look", "model_checked", "model_disagrees",
-                                 "model_applied", "verified", "build_seconds")})
+                                 "model_applied", "verified", "build_seconds", "build_ok")})
         except Exception:
             pass
     rec["seconds"] = round(time.time() - t0, 1)
-    write_json_atomic(os.path.join(ROOT, "data", "corpus", "site_refresh.json"), rec)
+    write_json_atomic(status_path, rec)
     log("site", f"refresh: published {pub['published']} ({pub.get('from_rules_and_model', 0) + pub.get('from_llm', 0)} checked by the model), "
                f"exported {n_exp}{' and the pilot' if n_pilot else ''}, records {rec.get('records', '?')}, needs a look "
                f"{rec.get('needs_look', '?')}, {rec['seconds']} s")

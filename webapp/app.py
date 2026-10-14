@@ -25,6 +25,7 @@ import json
 import os
 import re
 import secrets as pysecrets
+import sys
 import threading
 import time
 import urllib.parse
@@ -33,6 +34,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 APP_VERSION = "0.21.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
+sys.path.insert(0, os.path.join(ROOT, "pipeline"))
+from article_guard import article_write_lock, assembly_sha256, upgrade_active
 CONFIG = os.environ.get("PULP_CONFIG",
                         os.path.join(ROOT, "config", "pilot_issues.json"))
 PASS_FILE = os.environ.get("PULP_SITE_PASSWORD_FILE",
@@ -313,7 +316,14 @@ def timings():
 
 def articles_of(iid):
     p = os.path.join(DATA, "articles", iid, "articles.json")
-    return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else None
+    if not os.path.exists(p):
+        return None
+    with open(p, "rb") as f:
+        raw = f.read()
+    doc = json.loads(raw)
+    # Digest the exact bytes used to render this form, not a later reread.
+    doc["_assembly_sha256"] = hashlib.sha256(raw).hexdigest()
+    return doc
 
 
 def articles_index():
@@ -344,7 +354,7 @@ STATUS_CHIP = {
 
 # workbench javascript (plain string; __TOKENS__ substituted per page)
 WB_JS = r"""
-var ISSUE="__ISSUE__", AID="__AID__", CAN=__CAN__, FIRSTPG=__FIRSTPG__;
+var ISSUE="__ISSUE__", AID="__AID__", BASELINE="__BASELINE__", CAN=__CAN__, FIRSTPG=__FIRSTPG__;
 var SEL=[];
 function leftPage(){
   var wl=document.querySelector('.wbleft');
@@ -364,7 +374,7 @@ function saveScroll(){
       w:window.scrollY,l:wl?wl.scrollTop:0,r:wr?wr.scrollTop:0,pg:lp?lp.pg:null,d:lp?lp.d:0}));
   }catch(e){}
 }
-function post(params,to){params.issue=ISSUE;params.article_id=AID;
+function post(params,to){params.issue=ISSUE;params.article_id=AID;params.assembly_sha256=BASELINE;
   saveScroll();
   fetch('/annotate',{method:'POST',
     headers:{'Content-Type':'application/x-www-form-urlencoded'},
@@ -372,6 +382,7 @@ function post(params,to){params.issue=ISSUE;params.article_id=AID;
       if(r.status===403||(r.redirected&&/\/login/.test(r.url))){
         alert('Not saved: your login has ended or your account cannot annotate. Log in again and repeat the action.');
         location.href='/login';return;}
+      if(r.status===409||r.status===503){return r.text().then(function(t){alert(t);});}
       if(!r.ok){alert('Not saved: the server answered '+r.status+'. Try again; if it repeats, leave feedback.');return;}
       if(to)location.href=to;else location.reload();
     }).catch(function(){alert('Not saved: the site could not be reached. Check the connection and try again.');});}
@@ -2217,6 +2228,21 @@ administrator approves them.</p>
 
     def do_annotate(self, get):
         iid = get("issue")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", iid or ""):
+            return self._send(400, "Invalid issue.", "text/plain")
+        # Lock before reading the baseline and keep it through every append.
+        # The maintenance check is inside the lock, so in-flight writers finish
+        # before an upgrade can replace their baseline.
+        with article_write_lock(ROOT, iid):
+            if upgrade_active(ROOT):
+                return self._send(503, "Not saved: the corpus is being upgraded. Please reload this page after the upgrade and try again.", "text/plain")
+            baseline = assembly_sha256(ROOT, iid)
+            if not baseline or get("assembly_sha256") != baseline:
+                return self._send(409, "Not saved: this article assembly changed since the page was opened. Please reload the page, review the current article, and repeat your correction.", "text/plain")
+            return self._do_annotate_locked(get)
+
+    def _do_annotate_locked(self, get):
+        iid = get("issue")
         aid = get("article_id")
         act = get("act")
         back = get("back") or f"/article/{aid}"
@@ -2810,6 +2836,7 @@ click first.</p>"""
         if not art:
             return self._page("Unknown", "<h1>Unknown article</h1>")
         iid = doc["issue"]
+        baseline = doc.get("_assembly_sha256", "")
         info = issue_by_id(iid) or {}
         can = self.user != "guest"
         others = [a for a in doc["articles"] if a["article_id"] != aid]
@@ -2836,7 +2863,8 @@ click first.</p>"""
 
         def hidden(**kw):
             s = (f"<input type='hidden' name='issue' value='{iid}'>"
-                 f"<input type='hidden' name='article_id' value='{aid}'>")
+                 f"<input type='hidden' name='article_id' value='{aid}'>"
+                 f"<input type='hidden' name='assembly_sha256' value='{baseline}'>")
             for k, v in kw.items():
                 s += f"<input type='hidden' name='{k}' value='{esc(str(v))}'>"
             return s
@@ -3185,6 +3213,7 @@ click first.</p>"""
                 "one (its segments join the end of this body text):</span> "
                 "<form class='mini' method='POST' action='/annotate'>"
                 f"<input type='hidden' name='issue' value='{iid}'>"
+                f"<input type='hidden' name='assembly_sha256' value='{baseline}'>"
                 f"<input type='hidden' name='act' value='merge'>"
                 f"<input type='hidden' name='into_id' value='{aid}'>"
                 f"<select name='article_id'>{pullopts}</select>"
@@ -3303,6 +3332,7 @@ click first.</p>"""
                if can else ""))
         script = ("<script>"
                   + WB_JS.replace("__ISSUE__", iid).replace("__AID__", aid)
+                  .replace("__BASELINE__", doc.get("_assembly_sha256", ""))
                   .replace("__CAN__", "true" if can else "false")
                   .replace("__FIRSTPG__", str(firstpg))
                   + "</script>")

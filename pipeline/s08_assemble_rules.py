@@ -53,8 +53,16 @@ from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from layout_order import order_region_keys
+from corpus_lib import write_json_atomic
 
-VERSION = "2.3"
+VERSION = "2.6"
+# 2.5: require evidence for continuation ownership and contents identity;
+# resolve duplicate folios; preserve small headings, embedded bylines, verse,
+# and story endings before departments. Full corpus reassembly follows 2.4.
+# 2.4: retain mislabelled body paragraphs, resume single-box continuations,
+# follow explicit forward page references, and order fragments geometrically
+# without changing the persistent region indices used by human annotations.
 # 2.3 (2026-09-06, from the corrections audit s11 over the 558 annotation events of 3–6 September,
 # read against a fresh build of 2.2): (a) advertising set beside the story on its continuation
 # pages is cut by COLUMN — a filler or advertisement block keeps to the column it stands in, and a
@@ -141,7 +149,7 @@ TAIL_NOTE_RE = re.compile(r"^\s*(?:Watch for|Don't miss|Look for|Read|Another|Ne
 NEXT_BLURB_RE = re.compile(r"next (?:month|week|issue)|in (?:the )?(?:next|following|forthcoming|coming) (?:issue|number|instal)|"
                            r"don't miss|will be (?:told|revealed|concluded|continued|found)|to be concluded", re.I)
 # the instalment marker in a title: "[Part I]", "(Part One)", "(Conclusion)", "— Part Two of Three"
-PART_MARK_RE = re.compile(r"\s*[\[\(\-—–:,]*\s*(?:(?:a |the )?(?:(?:two|three|four|five|six|2|3|4|5|6)[\- ]part )?(?:serial|novel|story|novelette)?\s*[—–\-:,]?\s*)?"
+PART_MARK_RE = re.compile(r"(?<!\w)\s*[\[\(\-—–:,]*\s*(?:(?:a |the )?(?:(?:two|three|four|five|six|2|3|4|5|6)[\- ]part )?(?:serial|novel|story|novelette)?\s*[—–\-:,]?\s*)?"
                           r"(?P<label>(?:part|pt\.?|instalment|installment|chapters?)\s*(?P<n>[ivxl]+|\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b"
                           r"(?:\s*(?:of|in)\s*(?P<tot>[ivxl]+|\d+|two|three|four|five|six|seven|eight))?|conclusion|concluded|the end|ending|beginning|final(?:e| instal?lment)?)"
                           r"[^\]\)]{0,40}?[\]\)]?\s*$", re.I)
@@ -163,8 +171,10 @@ FILLER_RE = re.compile(r"NEXT ISSUE|NEXT MONTH|NEXT WEEK|WRITE IN|A LETTER TO|ON
                        r"NEXT (?:MONTH|WEEK)'S|NOW ON SALE|OUT NOW|^\W*COMING\W*$|FEATURED IN", re.I)
 AD_WORDS = re.compile(r"\$\d|\bFREE\b|coupon|Dept\.|Send (?:no|for|me)|money back|guarantee|\bWrite (?:for|to)\b|postpaid|Address\b|catalog|Agents wanted|Learn at home|\bmail\b", re.I)
 MENTION_RE = re.compile(r"Please mention|when answering advertisements", re.I)
-CONT_FROM_RE = re.compile(r"continued from (?:page\s*)?(\d{1,4})", re.I)
-CONT_ON_RE = re.compile(r"continued on (?:page\s*)?(\d{1,4})|continued on next page|\(continued\)|to be continued|to be concluded|concluded in|"
+_CONT = r"\b(?:continued|cont(?:['’]d|d)?\.?)\s+"
+CONT_FROM_RE = re.compile(_CONT + r"from\s+(?:p(?:age|p)?\.?\s*)?(\d{1,4})\b", re.I)
+CONT_TO_PAGE_RE = re.compile(_CONT + r"on\s+(?:p(?:age|p)?\.?\s*)?(\d{1,4})\b", re.I)
+CONT_ON_RE = re.compile(CONT_TO_PAGE_RE.pattern + r"|continued\s+on\s+(?:the\s+)?next\s+page|\(continued\)|to be continued|to be concluded|concluded in|"
                         r"\[?\s*turn (?:the )?page\s*\]?|turn to page \d+", re.I)
 VERSE_RE = re.compile(r"\bverse\b|\bpoem\b", re.I)
 SERIAL_RE = re.compile(r"serial|part (?:one|two|three|four|five|six|i{1,3}|iv|v)\b|(?:two|three|four|five|six)-part|conclusion|to be continued|continued from|concluded in", re.I)
@@ -299,6 +309,10 @@ def is_furniture(p, i, r):
     t = region_text(r)
     H = p["height"]
     if r["label"] in ("PageHeader", "PageFooter"):
+        # Layout labels are predictions. A whole narrative paragraph mistakenly
+        # labelled as a running head must not silently vanish from the story.
+        if words(t) >= 25 and len(t) >= 120 and re.search(r"[a-z]", t):
+            return False
         # "CHAPTER III" at the top of a column is a chapter head the layout took for a running head
         return not (t and re.match(r"^\s*(?:CHAPTER|Chapter|CHAP\.|PART|Part)\s+\S", t) and chapter_head(t))
     if not t:
@@ -320,10 +334,13 @@ def is_furniture(p, i, r):
 
 def byline_author(t):
     m = BYLINE_RE.match(t.replace("\n", " "))
-    if not m or NOT_BYLINE_RE.match(t):
+    if not m or NOT_BYLINE_RE.match(t) or re.match(r"^\s*by\s+way\s+of\b", t, re.I):
         return None
     a = re.sub(r"\s+", " ", m.group(1)).strip(" .,;:")
     a = re.sub(r"\s*\(.*?\)\s*$", "", a)            # "(age 15)"
+    if re.match(r"^(?:(?:famous|popular|leading|well-known|well known)\s+)?"
+                r"(?:authors|writers)\s+(?:read|buy|choose)\b", a, re.I):
+        return None                                  # "by Famous Authors Read a POPULAR PUBLICATION"
     if not a or words(a) > 7 or len(a) > 60:
         return None
     if re.search(r"\d", a) and not re.search(r"[A-Za-z]{3}", a):
@@ -375,6 +392,172 @@ def prose_like(r):
         return False
     ws = re.findall(r"[a-z']+", t.lower())
     return sum(1 for w in ws if w in NARRATIVE) >= 2
+
+
+def continued_source_credit(pages, pno, byline):
+    """A manuscript credit cannot divide a sentence across facing pages."""
+    title = byline.get("embedded_title") or ""
+    if (pno - 1 not in pages or not re.fullmatch(
+            r"from\s+(?:a|an|the)\s+(?:[a-z]+\s+){0,6}manuscript", title, re.I)):
+        return []
+    prev, p = pages[pno - 1], pages[pno]
+    previous = order_region_keys(pages, [(pno - 1, j) for j, r in enumerate(prev["regions"])
+                                        if region_text(r) and not is_furniture(prev, j, r)])
+    if not previous:
+        return []
+    last = prev["regions"][previous[-1][1]]
+    if not prose_like(last) or re.search(r"[.!?\"\u201d\u2019']\s*[)\]]?\s*$", region_text(last)):
+        return []
+    credits = [byline["idx"]]
+    for j in range(byline["idx"] + 1, len(p["regions"])):
+        r, t = p["regions"][j], region_text(p["regions"][j])
+        if not t or is_furniture(p, j, r):
+            continue
+        if words(t) <= 20 and re.match(r"^(?:translated|adapted|augmented)\b.{0,80}\bby\b", t, re.I | re.S):
+            credits.append(j)
+            continue
+        return credits if prose_like(r) and t[:1].islower() else []
+    return []
+
+
+def signed_product_endorsement(p, start):
+    """Require a signed endorsement tied to the same product's direct offer."""
+    bi = start.get("byline_idx")
+    if not start.get("embedded_title") or start.get("toc") or bi is None:
+        return False
+    regs = p["regions"]
+    after = [(j, region_text(r)) for j, r in enumerate(regs) if j > bi and r["label"] == "Text"]
+    if not after:
+        return False
+    product = re.match(r"^([A-Z]{5,})\b", after[0][1])
+    if not product:
+        return False
+    product = product.group(1).lower()
+    author_words = set(re.findall(r"[a-z]+", (start.get("author") or "").lower()))
+    for j, t in after:
+        signed = re.fullmatch(r"\(signed\)\s+(.+?)\.?", t, re.I)
+        if not signed:
+            continue
+        name_words = set(re.findall(r"[a-z]+", signed.group(1).lower()))
+        if len(name_words) < 2 or not name_words <= author_words:
+            continue
+        endorsement = " ".join(t_ for j_, t_ in after if j_ < j)
+        offer = " ".join(region_text(r) for r in regs[j + 1:])
+        if (len(re.findall(r"\b" + re.escape(product) + r"\b", endorsement, re.I)) >= 3
+                and re.search(r"\bI\b", endorsement)
+                and re.search(r"\b(?:enroll|recommend)\w*\b", endorsement, re.I)
+                and re.search(r"\b" + re.escape(product) + r"\b", offer, re.I)
+                and re.search(r"\bfree\b", offer, re.I) and re.search(r"\bcoupon\b", offer, re.I)
+                and COMPANY_RE.search(offer)):
+            return True
+    return False
+
+
+def self_declared_commercial_head(p, start):
+    """A full-page product advertisement can quote an author in its headline."""
+    if not start.get("embedded_title") or start.get("toc"):
+        return False
+    content = [(j, r) for j, r in enumerate(p["regions"]) if region_text(r) and not is_furniture(p, j, r)]
+    if (not content or content[0][0] not in start["title_idx"]
+            or any(prose_like(r) for _, r in content)):
+        return False
+    return any(r["bbox"][2] - r["bbox"][0] >= .6 * p["width"]
+               and re.search(r"\bthis\s+advertisement\b.{0,200}\b(?:product|goods)\b.{0,80}\bfor\s+sale\b",
+                             region_text(r), re.I | re.S) for _, r in content)
+
+
+def demote_embedded_documents(pages, analysis):
+    """Repeated witness statements inside a named story are narrative headings."""
+    groups = {}
+    all_starts = [(pn, s) for pn, info in analysis["pages"].items() for s in info["starts"]]
+    for pn, s in all_starts:
+        if (s.get("embedded_title") and not s.get("toc")
+                and re.match(r"^(?:statement|testimony|deposition)\b", s.get("title") or "", re.I)):
+            groups.setdefault(norm_words(s["title"]), []).append((pn, s))
+    for group in groups.values():
+        if len({norm_words(s.get("author")) for _, s in group}) < 2:
+            continue
+        grouped = {id(s) for _, s in group}
+        proven = []
+        for pn, s in group:
+            if pn - 1 not in pages or pn + 1 not in pages:
+                continue
+            heads = [{norm_words(t) for t in analysis["pages"][q]["running"] if t}
+                     for q in (pn - 1, pn + 1)]
+            shared = (heads[0] & heads[1]) - {norm_words(analysis.get("magazine_head"))}
+            previous = [(q, t) for q, t in all_starts if q < pn and id(t) not in grouped]
+            if not shared or not previous:
+                continue
+            _, enclosing = max(previous, key=lambda pair: (pair[0], start_first(pair[1])))
+            toc = enclosing.get("toc") or {}
+            if (toc.get("type") not in ("story", "serial_part")
+                    or norm_words(toc.get("title")) not in shared):
+                continue
+            before = [r for j, r in enumerate(pages[pn]["regions"]) if j < start_first(s)
+                      and not is_furniture(pages[pn], j, r)]
+            if (not any(prose_like(r) for r in before)
+                    or any(THE_END_RE.fullmatch(region_text(r)) for r in before)):
+                continue
+            proven.append((pn, s, norm_words(toc["title"])))
+        # Both independently confirmed statements must belong to the same work.
+        for title in {title for _, _, title in proven}:
+            matching = [(pn, s) for pn, s, owner in proven if owner == title]
+            if len({norm_words(s.get("author")) for _, s in matching}) < 2:
+                continue
+            for pn, s in matching:
+                info = analysis["pages"][pn]
+                info["starts"].remove(s)
+                info.setdefault("embedded_document_headings", []).extend(s["title_idx"])
+                s["rejected"] = "repeated witness statement inside the story named by both adjacent running heads"
+                info.setdefault("rejected_starts", []).append(s)
+
+
+def generic_resume_blocker(p, info, magazine=""):
+    """Reject positive evidence of a different opening in the narrative column.
+
+    A pronoun-count heuristic cannot establish that a paragraph is non-fiction:
+    short dialogue, first-person speech and descriptions commonly fail it.
+    Advertising in the other column cannot block the story column either.
+    """
+    regs = p["regions"]
+    first = min((start_first(s) for s in info.get("starts", [])), default=len(regs))
+    candidates = [i for i in range(first) if i not in info.get("furniture", []) and prose_like(regs[i])]
+    blockers = []
+    for i in range(first):
+        r, t = regs[i], region_text(regs[i])
+        if not t or r["label"] == "Caption" or i in info.get("chapters", []) or chapter_head(t):
+            continue
+        if department_of(magazine, t):
+            blockers.append((i, "new department"))
+            continue
+        service = re.search(r"(?is)^(?:a\s+)?(?:free\s+)?question\s+and\s+answer\s+service\b|"
+                            r"^questions\b.{0,120}\b(?:sent|expert|department)\b|"
+                            r"^instructions\b.{0,160}\bquestionnaire\b", t)
+        if service:
+            blockers.append((i, "service opening"))
+            continue
+        if i in info.get("furniture", []):
+            continue
+        announcement = words(t) <= 12 and r["label"] == "SectionHeader" and FILLER_RE.search(t)
+        commercial = re.search(r"(?is)\b(?:mail|send|clip)\b.{0,35}\bcoupon\b|"
+                               r"\bmoney\s+(?:back|refunded)\b|\bsend\s+no\s+money\b|"
+                               r"\bfree\s+(?:trial|catalog|catalogue|booklet)\b", t)
+        if announcement or commercial:
+            blockers.append((i, "advertising or announcement opening"))
+    reasons = []
+    for candidate in candidates:
+        box = regs[candidate]["bbox"]
+        blocked = []
+        for i, reason in blockers:
+            other = regs[i]["bbox"]
+            overlap = max(0, min(box[2], other[2]) - max(box[0], other[0]))
+            same_column = overlap >= .35 * max(1, min(box[2] - box[0], other[2] - other[0]))
+            if i <= candidate and other[1] < box[3] and same_column:
+                blocked.append(f"{reason} before narrative at region {i}")
+        if not blocked:
+            return None
+        reasons.extend(blocked)
+    return reasons[0] if reasons else "no narrative paragraph before a new printed start"
 
 
 def start_first(s):
@@ -668,7 +851,7 @@ def parse_toc(pages):
         if e["author"] and re.fullmatch(r"(?:a |the )?(?:department|editor|editors|readers|staff)s?", e["author"].strip(), re.I):
             s = (s + " " + e["author"]).strip()
             e["author"] = None
-        if VERSE_RE.search(s) or VERSE_RE.search(bl[:60]):
+        if VERSE_RE.search(s) or re.search(r"\bpoetry\b", s, re.I) or VERSE_RE.search(bl[:60]):
             e["type"] = "poem"
         elif LETTERS_RE.search(e["title"]) or LETTERS_RE.search(bl[:80]):
             e["type"] = "letters"
@@ -684,6 +867,35 @@ def parse_toc(pages):
     return entries, pno
 
 
+def nearby_serial_contents(pages, pno, byline, entries, offset):
+    """Recover a missing display title from independent serial-start evidence.
+
+    A bad folio must not put a contents-backed byline on the preceding page.
+    Require an exact author, a printed installment descriptor, nearby expected
+    page, and the contents title in a following running head.
+    """
+    if offset is None:
+        return None
+    regs = pages[pno]["regions"]
+    bi = byline["idx"]
+    if any(region_text(r) and not is_furniture(pages[pno], j, r)
+           for j, r in enumerate(regs[:bi])):
+        return None
+    descriptor = " ".join(region_text(r) for r in regs[bi + 1:bi + 3])
+    if not re.match(r"(?i)^(?:first|second|third|fourth|fifth|sixth|seventh|eighth|last|final|\d+(?:st|nd|rd|th)?)\s+of\s+(?:\w+|\d+)\s+parts?\b", descriptor):
+        return None
+    matches = []
+    for e in entries:
+        if (e.get("type") != "serial_part" or not e.get("author")
+                or norm(e["author"]) != norm(byline["author"])
+                or abs(e["page"] + offset - pno) > 2):
+            continue
+        if any(norm(t) == norm(e["title"]) for q in range(pno + 1, pno + 5)
+               if q in pages for _, t in running_heads(pages[q])):
+            matches.append(e)
+    return matches[0] if len(matches) == 1 else None
+
+
 def analyse(pages):
     """Everything the rules need to know about every page."""
     A = {"pages": {}, "toc": [], "toc_page": None, "offset": None, "folio_range": None}
@@ -694,6 +906,14 @@ def analyse(pages):
         known = {norm(e["title"]) for e in A["toc"]}
         A["toc"] += [e for e in more if norm(e["title"]) not in known]
         A["toc"].sort(key=lambda e: e["page"])
+    # Some contents layouts print "TITLE, by Author" in one OCR box. Keep
+    # the author out of title matching so a real printed start can claim it.
+    for entry in A["toc"]:
+        inline = re.match(r"^(.+?)\s*[,—–]\s*(by\s+.+)$", entry["title"], re.I)
+        author = byline_author(inline.group(2)) if inline else None
+        if author and not entry.get("author"):
+            entry["title_as_read"] = entry["title"]
+            entry["title"], entry["author"] = inline.group(1).strip(), author
     offsets = Counter()
     for pno, p in pages.items():
         f = folio_of(p)
@@ -706,10 +926,31 @@ def analyse(pages):
     # printed page -> scan page: the page that carries that number, else the nearest numbered page's offset
     # (a scan with an inserted leaf shifts the offset part-way through the issue)
     fol_index = {}
+    candidates = {}
     for pno, p in sorted(pages.items()):
         f = folio_of(p)
-        if f and abs((pno - f) - (A["offset"] or 0)) <= 6 and f not in fol_index:
-            fol_index[f] = pno
+        if f and abs((pno - f) - (A["offset"] or 0)) <= 6:
+            candidates.setdefault(f, []).append(pno)
+    folios = {pn: folio_of(p) for pn, p in pages.items()}
+    A["folio_conflicts"] = {}
+    for printed, scans in candidates.items():
+        if len(scans) == 1:
+            fol_index[printed] = scans[0]
+            continue
+        # A single OCR digit can duplicate a later folio. Prefer the candidate
+        # supported by the numbering on its neighbours, not the first scan.
+        def support(pn):
+            errors = [abs((folios[q] - printed) - (q - pn)) for q in range(pn - 3, pn + 4)
+                      if q != pn and folios.get(q) is not None and folios[q] != printed]
+            return (sum(e == 0 for e in errors), -sum(min(e, 10) for e in errors))
+        scores = {pn: support(pn) for pn in scans}
+        ranked = sorted(scans, key=lambda pn: scores[pn], reverse=True)
+        chosen = ranked[0] if scores[ranked[0]][0] >= 2 and scores[ranked[0]] != scores[ranked[1]] else None
+        if chosen is not None:
+            fol_index[printed] = chosen
+        # Unresolved duplicates are omitted; scan_of estimates from neighbouring
+        # reliable folios instead of treating a conflicting OCR number as fact.
+        A["folio_conflicts"][printed] = {"scans": scans, "chosen": chosen}
     A["folio_index"] = fol_index
 
     def scan_of(printed):
@@ -752,6 +993,12 @@ def analyse(pages):
                 nt = region_text(regs[i + 1]).replace("\n", " ")
                 if 0 < words(nt) <= 5 and nt[:1].isupper() and not chapter_head(nt):
                     info["bylines"].append({"idx": i, "author": nt.strip(" .,"), "name_idx": i + 1})
+            elif r["label"] == "SectionHeader" and words(t) <= 24:
+                combined = re.match(r"^(.+?)(?:\n+|,\s+)([Bb][Yy]\s+.+)$", t, re.S)
+                ca = byline_author(combined.group(2)) if combined else None
+                if ca and words(combined.group(1)) <= 14:
+                    info["bylines"].append({"idx": i, "author": ca,
+                                             "embedded_title": " ".join(combined.group(1).split())})
         info["body_chars"] = body_chars
         # text inside an illustration (Heejin's category of 2026-09-04): a page whose only content is a few
         # short lines, none of them prose, most of them not words ("LOVE MALES DATER ME & MY CLAN" over a
@@ -786,6 +1033,17 @@ def analyse(pages):
         info["cont_on"] = []            # idx — the piece pauses here
         for i, r in enumerate(regs):
             t = region_text(r)
+            # OCR can combine the printed continuation notice with its first
+            # paragraph. Route that box without making its prose furniture.
+            first_line, sep, remainder = t.partition("\n")
+            inline_from = CONT_FROM_RE.search(first_line)
+            if (sep and inline_from and not re.search(r"\w", first_line[:inline_from.start()])
+                    and not re.search(r"\w", first_line[inline_from.end():])
+                    and words(remainder) >= 3):
+                info["cont_from"].append((i, int(inline_from.group(1))))
+                if i in info["furniture"]:
+                    info["furniture"].remove(i)
+                continue
             if words(t) > 12:
                 continue
             m = CONT_FROM_RE.search(t)
@@ -800,9 +1058,13 @@ def analyse(pages):
         # starts: a by-line with its title — the section-header lines right above it
         for b in info["bylines"]:
             bi = b["idx"]
+            source_credits = continued_source_credit(pages, pno, b)
+            if source_credits:
+                info.setdefault("source_credits", []).extend(source_credits)
+                continue
             by0 = regs[bi]["bbox"][1]
-            lines, subs, teaser_between = [], [], []
-            j = bi - 1
+            lines, subs, teaser_between = ([bi] if b.get("embedded_title") else []), [], []
+            j = -1 if b.get("embedded_title") else bi - 1
             while j >= 0:
                 r = regs[j]
                 if j in info["furniture"]:
@@ -817,7 +1079,7 @@ def analyse(pages):
                     lines.insert(0, j)
                 elif r["label"] == "Caption" and not lines:
                     pass                                   # the illustration's caption sits between title and by-line
-                elif not lines and len(subs) < 3 and words(t) <= 8 and (not chapter_head(t) or re.fullmatch(r"(?i)\s*part\s+\w+\.?\s*", t)):
+                elif not lines and len(subs) < 3 and words(t) <= 8 and (not chapter_head(t) or PART_MARK_RE.fullmatch(t)):
                     subs.insert(0, j)                     # a subtitle line between the title and the by-line ("PART II." too)
                 elif not lines and not teaser_between and 8 < words(t) <= 80 and r["label"] == "Text":
                     teaser_between.append(j)              # the blurb printed between the title and the by-line
@@ -834,13 +1096,15 @@ def analyse(pages):
                         lines = [j]
                         break
             toc_hit = None
-            page_title_guess = " ".join(region_text(regs[j]).replace("\n", " ") for j in lines)
+            page_title_guess = b.get("embedded_title") or " ".join(region_text(regs[j]).replace("\n", " ") for j in lines)
             hits = [e for e in info["toc_entries"] if e["author"] and sim(e["author"], b["author"]) > 0.6]
             if hits:
                 # two entries by one author on one page (a story and a poem): the one whose title the page prints
                 toc_hit = max(hits, key=lambda e: (sim(page_title_guess, e["title"]) if page_title_guess else 0, sim(e["author"], b["author"])))
             if not toc_hit and info["toc_entries"] and not lines:
                 toc_hit = max(info["toc_entries"], key=lambda e: sim(e["author"] or "", b["author"]))
+            if not lines and not toc_hit:
+                toc_hit = nearby_serial_contents(pages, pno, b, A["toc"], A["offset"])
             if not lines and toc_hit:
                 # the title far above the by-line (a drawing between them: "Serenade WITH" a page-height above
                 # "a novelet by …"): the display line the contents page names, anywhere above on the page
@@ -852,7 +1116,33 @@ def analyse(pages):
                     if sim(tj, toc_hit["title"]) > 0.6 or title_prefix(tj, toc_hit["title"]):
                         lines = [j]
                         break
-            if not lines and not toc_hit:
+            facing_title = None
+            if not lines and not toc_hit and pno - 1 in pages:
+                prev = pages[pno - 1]
+                # A title-only facing page plus an explicit byline and body is
+                # independent start evidence. A previous story/ad page is not.
+                prev_text = [(j, rr) for j, rr in enumerate(prev["regions"])
+                             if region_text(rr) and not is_furniture(prev, j, rr)]
+                following = " ".join(region_text(rr) for rr in regs[bi + 1:])
+                facing_toc = toc_by_scan.get(pno - 1, [])
+                facing_match = [e for e in facing_toc if len(prev_text) == 1
+                                and sim(region_text(prev_text[0][1]), e["title"]) > .8
+                                and (not e.get("author") or sim(e["author"], b["author"]) > .8)]
+                if (len(prev_text) == 1 and prev_text[0][1]["label"] == "SectionHeader"
+                        and is_display(prev, prev_text[0][1])
+                        and 2 <= words(region_text(prev_text[0][1])) <= 14
+                        and not chapter_head(region_text(prev_text[0][1]))
+                        and not (AD_WORDS.search(region_text(prev_text[0][1]))
+                                 or FILLER_RE.search(region_text(prev_text[0][1])))
+                        and len(following) >= 500 and any(prose_like(rr) for rr in regs[bi + 1:])
+                        and (not facing_toc or len(facing_match) == 1)
+                        and not any(AD_WORDS.search(region_text(rr)) or FILLER_RE.search(region_text(rr))
+                                    for rr in regs[:bi])):
+                    facing_title = {"page": pno - 1, "idx": prev_text[0][0],
+                                    "text": " ".join(region_text(prev_text[0][1]).split())}
+                    if facing_match:
+                        toc_hit = facing_match[0]
+            if not lines and not toc_hit and not facing_title:
                 continue
             # the title is the tallest line; other lines join it when the contents page agrees, else they are subtitles
             title_idx, sub_idx = [], list(subs)
@@ -872,10 +1162,11 @@ def analyse(pages):
                     else:
                         sub_idx.append(j)
                 title_idx.sort()
-            title = re.sub(r"\s+", " ", " ".join(region_text(regs[j]).replace("\n", " ") for j in title_idx)).strip()
+            title = (facing_title or {}).get("text") or b.get("embedded_title") or re.sub(r"\s+", " ", " ".join(region_text(regs[j]).replace("\n", " ") for j in title_idx)).strip()
             info["starts"].append({"title_idx": title_idx, "subtitle_idx": sorted(sub_idx), "byline_idx": bi, "title": title,
                                    "author": b["author"], "toc": toc_hit, "teaser_idx": (teaser_between if lines else []),
-                                   "name_idx": b.get("name_idx")})
+                                   "name_idx": b.get("name_idx"), "facing_title": facing_title,
+                                   "embedded_title": bool(b.get("embedded_title"))})
         # chapter heads and fillers
         head_idx = {j for s_ in info["starts"] for j in s_["title_idx"] + s_["subtitle_idx"]}
         for i, r in enumerate(regs):
@@ -929,6 +1220,21 @@ def analyse(pages):
         keep = []
         starts = sorted(info["starts"], key=lambda s: s["byline_idx"])
         for k, s in enumerate(starts):
+            if self_declared_commercial_head(pages[pno], s):
+                s["rejected"] = "product offer explicitly identifies the page as an advertisement"
+                info.setdefault("rejected_starts", []).append(s)
+                continue
+            if (s.get("embedded_title") and not s.get("toc")
+                    and re.match(r"^(?:in\s+(?:the\s+)?)?next\s+(?:issue|month|week)(?:['\u2019]s)?\s+"
+                                 r"(?:novel|story|novelette|serial|feature|poem)\s*:",
+                                 s.get("title") or "", re.I)):
+                s["rejected"] = "future-issue title and byline inside a filler block (an announcement, not a start)"
+                info.setdefault("rejected_starts", []).append(s)
+                continue
+            if signed_product_endorsement(pages[pno], s):
+                s["rejected"] = "signed product endorsement with the same product's free offer and coupon"
+                info.setdefault("rejected_starts", []).append(s)
+                continue
             first = start_first(s)
             stop = start_first(starts[k + 1]) if k + 1 < len(starts) else len(regs)
             following = sum(len(region_text(regs[j])) for j in range(s["byline_idx"] + 1, stop) if j not in info["furniture"])
@@ -976,28 +1282,56 @@ def analyse(pages):
     # placed on the page the contents page gives, at the title if one is readable, else
     # at the first paragraph (the one that opens with a word in capitals)
     if A["offset"] is not None:
-        claimed = set()
+        # A contents parser can read only "by Author" when the title is drawn
+        # separately. Bind that entry to a unique actual title+byline instead
+        # of inventing another work deep inside a story at a misread folio.
+        for e in A["toc"]:
+            author_only = byline_author(e["title"]) if not e.get("author") else None
+            if not author_only:
+                continue
+            named = [(pno, s) for pno, info in A["pages"].items() for s in info["starts"]
+                     if s.get("byline_idx") is not None and s.get("title_idx") and s.get("title")
+                     and not s.get("toc") and norm(s.get("author") or "") == norm(author_only)]
+            if len(named) == 1:
+                pno, start = named[0]
+                e["scan_linked"] = pno
+                e["author_only_printed_match"] = {"title": start["title"], "author": start["author"]}
+                # The missing contents title also makes its section/serial
+                # attribution unreliable. Keep the independently printed
+                # start's identity and type; only suppress the phantom start.
+        claimed = {norm(e["title"]) for e in A["toc"] if e.get("author_only_printed_match")}
         for info in A["pages"].values():
             for s in info["starts"]:
                 if s.get("toc"):
                     claimed.add(norm(s["toc"]["title"]))
-        # entries whose printed page number the OCR garbled: link them to a by-line start by name
+        # Entries with a garbled page number can match a printed start by name.
+        # Rank all pairs first: a cover credit sharing an author must not claim
+        # that author's story before its exact title is considered.
+        name_pairs = []
         for e in A["toc"]:
             if norm(e["title"]) in claimed:
                 continue
-            best = None
             for pno, info in A["pages"].items():
                 for s in info["starts"]:
                     if s.get("toc"):
                         continue
-                    score = max(sim(s["title"], e["title"]), sim(s["author"] or "", e["author"] or "") if e["author"] else 0)
-                    if score > 0.6 and (best is None or score > best[0]):
-                        best = (score, s, pno)
-            if best:
-                best[1]["toc"] = e
-                best[1]["toc_linked_by_name"] = True
-                e["scan_linked"] = best[2]
-                claimed.add(norm(e["title"]))
+                    title_score = sim(s["title"], e["title"])
+                    # Shared articles/letter shapes alone are not title
+                    # evidence (THE CHRONICLER versus THE ATOMIC PILE).
+                    left = {w for w in norm_words(s["title"]).split() if len(w) > 3 and w not in STOP_WORDS}
+                    right = {w for w in norm_words(e["title"]).split() if len(w) > 3 and w not in STOP_WORDS}
+                    title_match = title_score > 0.6 and (norm(s["title"]) == norm(e["title"]) or
+                                                        any(sim(a, b) >= 0.85 for a in left for b in right))
+                    author_score = sim(s["author"] or "", e["author"] or "") if e["author"] else 0
+                    if title_match or author_score > 0.6:
+                        name_pairs.append(((bool(title_match), title_score, author_score), e, s, pno))
+        for _, e, s, pno in sorted(name_pairs, key=lambda pair: pair[0], reverse=True):
+            if norm(e["title"]) in claimed or s.get("toc"):
+                continue
+            s["toc"] = e
+            s["toc_linked_by_name"] = True
+            e["scan_linked"] = pno
+            claimed.add(norm(e["title"]))
         lo_hi = A["folio_range"] or [min(pages), max(pages)]
         for e in A["toc"]:
             if norm(e["title"]) in claimed:
@@ -1014,7 +1348,12 @@ def analyse(pages):
                 regs = pages[q]["regions"]
                 # a readable display title that matches
                 for j, r in enumerate(regs):
-                    if j in info["furniture"] or not is_display(pages[q], r):
+                    # Small factual pieces often have an ordinary-size heading
+                    # half way down the page, after the preceding story's end.
+                    # Falling back to the first paragraph would steal that end.
+                    small_title = (r["label"] == "SectionHeader" and words(region_text(r)) <= 14
+                                   and norm_words(region_text(r)) == norm_words(e["title"]))
+                    if j in info["furniture"] or not (is_display(pages[q], r) or small_title):
                         continue
                     if sim(region_text(r), e["title"]) > 0.6 or title_prefix(region_text(r), e["title"]):
                         placed = (q, [j], None)
@@ -1027,6 +1366,20 @@ def analyse(pages):
                 if len(frags) >= 2 and sim(" ".join(region_text(regs[j]) for j in frags), e["title"]) > 0.6:
                     placed = (q, frags, None)
                     break
+            if not placed and not e.get("author") and e.get("type") in ("feature", "letters"):
+                # A department's page number can also be garbled. Its exact
+                # printed heading plus matching running head is stronger than
+                # a guessed paragraph boundary at that number.
+                exact = [(q, j) for q, page in pages.items()
+                         if not A["toc_page"] or q > A["toc_page"]
+                         for j, r in enumerate(page["regions"])
+                         if r["label"] == "SectionHeader" and norm(region_text(r)) == norm(e["title"])
+                         and any(norm(t) == norm(e["title"]) for n in range(q, q + 3)
+                                 if n in pages for _, t in running_heads(pages[n]))]
+                if len(exact) == 1:
+                    q, j = exact[0]
+                    placed = (q, [j], None)
+                    e["scan_linked"] = q
             if not placed and P in pages:
                 info = A["pages"][P]
                 regs = pages[P]["regions"]
@@ -1053,6 +1406,7 @@ def analyse(pages):
                   "author": e["author"], "toc": e, "from_contents": True}
             info["starts"].append(st)
             claimed.add(norm(e["title"]))
+    demote_embedded_documents(pages, A)
     for info in A["pages"].values():
         info["starts"].sort(key=start_first)
     # the range of pages that carry the magazine's own matter: the printed page numbers, widened by the
@@ -1115,6 +1469,7 @@ class Assembler:
         self.open = None            # the open record (a dict)
         self.last_text = ""         # the last text added to the open piece (continuation test)
         self.suspended = None       # the piece a full advertisement page interrupted
+        self.continuations = {}     # target scan page -> record named by a forward notice
         self.n = 0
 
     def new(self, typ, title=None, author=None, page=None, toc=None):
@@ -1204,6 +1559,11 @@ class Assembler:
                 rec["keys"].sort(key=lambda x: (printed(x[0]), x[1]))
                 rec["flags"].append("the scan has a leaf out of order: scan page " + ", ".join(f"{pn} carries printed page {misplaced[pn]}" for pn in held)
                                     + " — the text of this record follows the printed page numbers, not the scan order")
+            if rec["type"] in ("story", "feature", "letters", "poem"):
+                ordered = order_region_keys(pages, rec["keys"])
+                if ordered != rec["keys"]:
+                    rec["flags"].append("reading order follows column geometry (region identities preserved)")
+                rec["keys"] = ordered
             frags = {}
             for pn, i in rec["keys"]:
                 frags.setdefault(pn, []).append(i)
@@ -1429,6 +1789,12 @@ class Assembler:
                 t = region_text(pages[pn]["regions"][i]).strip()
                 if words(t) > 25:
                     break
+                lines = [line.strip() for line in t.splitlines() if line.strip()]
+                if (typ == "poem" and rec.get("author") and len(lines) == 2
+                        and norm_words(lines[0]) == norm_words(rec["author"])
+                        and re.fullmatch(r"\d{1,3}\s*[A-Z]?", lines[1])):
+                    self.demote(rec, pn, i, "the author's name and printer's signature at the end")
+                    continue
                 m = END_SIG_RE.match(t)
                 if m:
                     name = m.group(1).strip()
@@ -2062,9 +2428,164 @@ class Assembler:
             for j in pending:
                 self.add(rec, pno, j)
 
+    def continued_prefix_columns(self, pno, p, info, loose, notice, target, catalogue_pages=None):
+        """Keep the preceding story's run-on columns above another continuation.
+
+        A later named continuation can share a three-column page with the
+        preceding story and a narrow advertising column. OCR often lists the
+        entire advertising column first; that does not make the two narrative
+        columns an advertisement. Require an adjacent open story, a lowercase
+        run-on, multiple narrative paragraphs, and separate commercial boxes.
+        """
+        if (self.open is None or self.open is target
+                or self.open.get("type") not in ("story", "feature", "letters", "poem")
+                or pno - 1 not in self.pages):
+            return []
+        def overlaps_box(a, b):
+            return max(0, min(a[2], b[2]) - max(a[0], b[0])) >= .75 * min(a[2] - a[0], b[2] - b[0])
+
+        def catalogue(text):
+            return len(re.findall(r"(?im)\bfrom\s*\$\s*\d", text)) >= 3
+
+        def direct_offer(region):
+            text = region_text(region)
+            return (region["label"] == "Form" or catalogue(text)
+                    or bool(re.search(r"(?i)\b(?:send no money|money[- ]back|mail (?:the )?coupon|free trial|refunded|"
+                                      r"buy from your local dealer|kits? only\s+\d)\b", text))
+                    or (bool(re.search(r"(?i)\b(?:send|mail|order|buy|postpaid)\b", text))
+                        and bool(POSTAL_RE.search(text) or re.search(r"\$\s*\d|\d+\s*(?:cents?|[¢c])\b", text)))
+                    or (region["label"] in ("Caption", "SectionHeader")
+                        and bool(re.search(r"(?i)\b(?:kit|bottle|booklet|copy)\b", text))
+                        and bool(re.search(r"\$\s*\d", text))))
+
+        def whole_catalogue_page(page):
+            # A full intervening product advertisement can have been wrongly
+            # owned by the open story already. Skip its identity evidence only
+            # when every substantive text box names the same printed product
+            # or is an explicit offer/catalogue. A narrative column vetoes it.
+            regs = page["regions"]
+            if any(THE_END_RE.fullmatch(region_text(r)) or CONT_ON_RE.search(region_text(r)) for r in regs):
+                return False
+            if not any(catalogue(region_text(r)) for r in regs):
+                return False
+            if any(r["label"] == "Text" and 0 < words(region_text(r)) < 8
+                   and (region_text(r).lstrip().startswith(('"', '\u201c', '\u2018'))
+                        or re.search(r"(?i)\b(?:I|we|he|she|they|his|her|their)\b", region_text(r)))
+                   for r in regs):
+                return False  # short dialogue can be genuine narrative too
+            bodies = [r for r in regs if r["label"] == "Text" and words(region_text(r)) >= 8]
+            brands = [region_text(r) for r in regs if r["label"] == "SectionHeader"
+                      and re.fullmatch(r"[A-Z]{5,}", region_text(r))]
+            return next((brand for brand in brands
+                       if sum(bool(re.search(r"(?i)\b" + re.escape(brand) + r"s?\b", region_text(r))) for r in bodies) >= 2
+                       and all(direct_offer(r) or re.search(r"(?i)\b" + re.escape(brand) + r"s?\b", region_text(r))
+                               for r in bodies)), None)
+
+        previous_page = pno - 1
+        catalogue_title = whole_catalogue_page(self.pages[previous_page])
+        if catalogue_title and pno - 2 in self.pages:
+            previous_page = pno - 2
+        previous_owned = [(pn, j) for pn, j in self.open["keys"] if pn == previous_page]
+        if any(THE_END_RE.fullmatch(region_text(self.pages[pn]["regions"][j]))
+               or CONT_ON_RE.search(region_text(self.pages[pn]["regions"][j])) for pn, j in previous_owned):
+            return []
+        prev_regs = self.pages[previous_page]["regions"]
+        prior_offers = [r["bbox"] for r in prev_regs if direct_offer(r)]
+        previous = [(pn, j) for pn, j in previous_owned
+                    if self.open["roles"].get(key(pn, j)) not in
+                    ("title", "author", "subtitle", "teaser", "caption", "note")
+                    and not any(overlaps_box(prev_regs[j]["bbox"], box) for box in prior_offers)]
+        if not previous:
+            return []
+        # Derive this from the actual owned reading boxes, not last_text: that
+        # mutable convenience field can still describe an earlier open record.
+        previous = order_region_keys(self.pages, previous)
+        previous_text = [region_text(self.pages[pn]["regions"][j]) for pn, j in previous]
+        last_region = self.pages[previous[-1][0]]["regions"][previous[-1][1]]
+        if (not previous_text[-1]
+                or last_region["label"] != "Text" or words(previous_text[-1]) < 8
+                or not (prose_like(last_region) or re.search(r"\b(?:I|he|she|his|her|they|their|we|our)\b", previous_text[-1], re.I))
+                or re.search(r"[.!?\"\u201d\u2019']\s*[)\]]?\s*$", previous_text[-1])):
+            return []
+        regs = p["regions"]
+        top = regs[notice]["bbox"][1]
+        text = [j for j in loose if regs[j]["label"] == "Text"
+                and regs[j]["bbox"][1] < top]
+
+        def overlaps(j, k):
+            return overlaps_box(regs[j]["bbox"], regs[k]["bbox"])
+
+        offers = {j for j in loose if direct_offer(regs[j]) or j in info.get("forms", {})}
+        # Narrow coupon lines and inset headlines may not overlap one another
+        # directly. Connect them through the other boxes of that same column;
+        # never use a spanning box to bridge into a neighbouring story column.
+        while offers:
+            expanded = offers | {j for j in loose
+                                 if regs[j]["bbox"][2] - regs[j]["bbox"][0] <= .4 * p["width"]
+                                 and any(overlaps(j, k) for k in offers)}
+            if expanded == offers:
+                break
+            offers = expanded
+        anchors = [j for j in text if prose_like(regs[j])
+                   and .15 * p["width"] <= regs[j]["bbox"][2] - regs[j]["bbox"][0] <= .4 * p["width"]
+                   and not any(overlaps(j, k) for k in offers)]
+        if len(anchors) < 2:
+            return []
+        narrative = [j for j in text if not any(overlaps(j, k) for k in offers)]
+        if not narrative:
+            return []
+        first = min(narrative, key=lambda j: (regs[j]["bbox"][1], regs[j]["bbox"][0]))
+        if not region_text(regs[first])[:1].islower() or words(region_text(regs[first])) < 4:
+            return []
+        # A genuine separate commercial column is required. No source box is
+        # discarded merely for containing an ordinary advertising vocabulary word.
+        commercial = [j for j in offers if not any(overlaps(j, k) for k in narrative)]
+        if not commercial or any(regs[j]["bbox"][1] >= top and not any(overlaps(j, k) for k in offers)
+                                 for j in loose if regs[j]["label"] == "Text"):
+            return []
+        if catalogue_pages is not None and catalogue_title and previous_page == pno - 2:
+            catalogue_pages.append((pno - 1, catalogue_title))
+        return narrative
+
+    def separate_continuation_catalogues(self, catalogue_pages):
+        """Remove a proven intervening advertisement from the reading stream.
+
+        Called only after the complete continuation predicate succeeds. Keep
+        every box and its identity in a separate advertiser record; never move
+        boxes owned by another piece or merely suspected commercial prose.
+        """
+        for pn, title in catalogue_pages:
+            owned = [(p, j) for p, j in self.open["keys"] if p == pn]
+            if not owned:
+                continue
+            advertisement = self.new("ad", title=title, page=pn)
+            for _, j in owned:
+                self.steal(advertisement, pn, j)
+            advertisement["flags"].append(f"whole product catalogue on p.{pn} separated from a continuous story")
+            self.open["flags"].append(f"reading resumes across the separate product catalogue on p.{pn}")
+
     def story_page(self, pno, p, info):
         regs = p["regions"]
         pages_ = self.pages
+        # Restore before processing a caption or an ornament at the top: making
+        # a new feature for that box used to strand the single paragraph below.
+        target = self.continuations.pop(pno, None)
+        first_start = min((start_first(s) for s in info["starts"]), default=len(regs))
+        body_before_start = [j for j in range(first_start) if j not in info["furniture"]
+                             and prose_like(regs[j])]
+        if target is not None:
+            body_before_start = [j for j in range(first_start) if j not in info["furniture"]
+                                 and words(region_text(regs[j])) >= 4
+                                 and not AD_WORDS.search(region_text(regs[j]))]
+        resume_allowed = (self.suspended is not None
+                          and generic_resume_blocker(p, info, self.magazine_name()) is None
+                          and not any(dest > pno and rec is self.suspended
+                                      for dest, rec in self.continuations.items()))
+        if body_before_start and (target is not None or (self.open is None and resume_allowed)):
+            self.open = target if target is not None else self.suspended
+            self.open["flags"].append(f"resumes on p.{pno} after interrupted story pages")
+            if self.open is self.suspended:
+                self.suspended = None
         starts = {s["byline_idx"]: s for s in info["starts"] if s["byline_idx"] is not None}
         at_of = {s["at"]: s for s in info["starts"] if s.get("at") is not None}
         title_of = {}
@@ -2099,7 +2620,31 @@ class Assembler:
             if loose and not any(start_first(s) < first_notice for s in info["starts"]):
                 target = self.continued_piece(cont_from[first_notice], pno)
                 ttl = (target or {}).get("title") or ""
-                if target is not None and len(loose) <= 2 and all(words(region_text(regs[j])) <= 12 for j in loose) and \
+                # The repeated title/author can follow advertisements in the
+                # other column. It is still furniture above this continuation.
+                repeated = [j for j in loose if target is not None
+                            and column_of(p, regs[j]) == column_of(p, regs[first_notice])
+                            and words(region_text(regs[j])) <= 12
+                            and norm_words(region_text(regs[j])) in
+                            {norm_words(name) for name in (ttl, target.get("author")) if name}]
+                for j in repeated:
+                    self.furn(pno, j)
+                    self.furniture[-1]["why"] = "repeated title or author above a 'continued from' notice"
+                loose = [j for j in loose if j not in repeated]
+                catalogue_pages = []
+                continued_prefix = self.continued_prefix_columns(pno, p, info, loose, first_notice, target, catalogue_pages)
+                if continued_prefix:
+                    self.separate_continuation_catalogues(catalogue_pages)
+                for j in continued_prefix:
+                    text = region_text(regs[j])
+                    role = "note" if words(text) <= 40 and FILLER_RE.search(text) else None
+                    self.add(self.open, pno, j, role)
+                if continued_prefix:
+                    self.open["flags"].append(f"preceding story columns retained above another continuation on p.{pno}")
+                    loose = [j for j in loose if j not in continued_prefix]
+                if not loose:
+                    pass
+                elif target is not None and len(loose) <= 2 and all(words(region_text(regs[j])) <= 12 for j in loose) and \
                         any(sim(region_text(regs[j]), ttl) > 0.5 for j in loose):
                     for j in loose:
                         self.furn(pno, j)                          # the piece's title repeated over the continuation
@@ -2107,11 +2652,16 @@ class Assembler:
                 else:
                     ltxt = " ".join(region_text(regs[j]) for j in loose)
                     kind = "ad" if (len(AD_WORDS.findall(ltxt)) >= 1 or info["ad_score"] >= 3) else "other"
-                    rec = self.new(kind, title=self.page_title(p, info, loose[0]) or region_text(regs[loose[0]])[:60], page=pno)
-                    rec["flags"].append("text above a 'continued from' notice" + (" (reads like an advertisement)" if kind == "ad" else " with no known owner"))
-                    self.open = rec
-                    for j in loose:
-                        self.add(rec, pno, j)
+                    if kind == "ad":
+                        # Preserve the printed boundaries of separate offers;
+                        # a later continuation does not make them one advertiser.
+                        self.ad_page(pno, p, dict(info, furniture=[j for j in range(n) if j not in loose]))
+                    else:
+                        rec = self.new(kind, title=self.page_title(p, info, loose[0]) or region_text(regs[loose[0]])[:60], page=pno)
+                        rec["flags"].append("text above a 'continued from' notice with no known owner")
+                        self.open = rec
+                        for j in loose:
+                            self.add(rec, pno, j)
         pre_new = []               # regions above the title that belong to the piece starting on this page
         if info["starts"]:
             # regions above the first title of the page: the end of the open piece's column when there is
@@ -2129,7 +2679,9 @@ class Assembler:
             # in lower case (a sentence carried over) or a long one; every Text region down to the last such
             # paragraph is the column, and so is the Text that follows it — except a short quoted line right
             # before the title, which is the illustration's caption
-            evidence = [j for j in above if regs[j]["label"] == "Text" and (region_text(regs[j])[:1].islower() or words(region_text(regs[j])) > 40)
+            evidence = [j for j in above if regs[j]["label"] == "Text" and
+                        (region_text(regs[j])[:1].islower() or words(region_text(regs[j])) > 40
+                         or (target is not None and self.open is target and not AD_WORDS.search(region_text(regs[j]))))
                         and (notice_above is None or j < notice_above)
                         and not (words(region_text(regs[j])) <= 8 and TYPE_LABEL_RE.match(region_text(regs[j])))    # "a novel" is a label
                         and words(region_text(regs[j])) >= 4]
@@ -2173,6 +2725,7 @@ class Assembler:
                     self.furn(pno, j)
                     self.furniture[-1]["why"] = "above the title on a start page"
         pre_set = set(pre_new)
+        ended_piece = None          # a following department can own its own continuation notice
         i = 0
         while i < n:
             if i in pre_set:
@@ -2188,15 +2741,74 @@ class Assembler:
                     rec = self.new("other", page=pno, title=f"continued from page {cont_from[i]}")
                     rec["flags"].append(f"'continued from page {cont_from[i]}' but no record is open there")
                     self.open = rec
+                if i not in info["furniture"]:
+                    self.add(self.open, pno, i)  # inline notice plus narrative: retain the complete body box
                 i += 1
                 continue
             if i in cont_on and self.open is not None and self.open.get("type") not in ("ad", "other"):
+                notice = region_text(regs[i])
+                dest = CONT_TO_PAGE_RE.search(notice)
+                next_page = re.search(r"(?i)continued\s+on\s+(?:the\s+)?next\s+page", notice)
+                marker = dest or next_page
+                prefix = norm_words(notice[:marker.start()]) if marker else ""
+                own_titles = [self.open.get("title"), (self.open.get("toc") or {}).get("title")]
+                own_notice = not prefix or any(prefix == norm_words(title) for title in own_titles if title)
+                scan = self.A["scan_of"](int(dest.group(1))) if dest and own_notice and self.A.get("scan_of") else None
+                if scan is None and own_notice and next_page:
+                    scan = pno + 1
+                if scan is not None and scan > pno:
+                    self.continuations[scan] = self.open
                 tail = True
             if i in info["furniture"]:
                 i += 1
                 continue
             r = regs[i]
             t = region_text(r)
+            if (i in info.get("source_credits", []) and self.open is not None
+                    and self.open.get("type") in ("story", "poem", "feature", "letters")):
+                self.add(self.open, pno, i, "note")
+                i += 1
+                continue
+            if (i in info.get("embedded_document_headings", []) and self.open is not None
+                    and self.open.get("type") in ("story", "poem", "feature", "letters")):
+                self.add(self.open, pno, i, "heading")
+                i += 1
+                continue
+            if (self.open is not None and filler is None and not tail
+                    and self.open.get("type") in ("story", "poem", "feature", "letters")
+                    and THE_END_RE.fullmatch(t)):
+                ended_piece = self.open
+            editorial_intro = (r["label"] == "Text" and
+                               re.search(r"(?is)^\s*in this department\b.{0,240}\bcorrespondence\b", t))
+            if (ended_piece is self.open and ended_piece is not None
+                    and filler is None and not tail and i not in title_of
+                    and i not in starts and i not in at_of and i not in chapters
+                    and ((r["label"] == "SectionHeader" and words(t) <= 8) or editorial_intro)):
+                department = department_of(self.magazine_name(), t)
+                # Some magazines have no department list yet. A Discussions
+                # heading plus its own editorial introduction/salutation is
+                # independent evidence of letters after the finished story.
+                following = "\n".join(region_text(regs[j]) for j in range(i + 1, min(i + 5, n)))
+                if (department is None and norm_words(t) == "discussions"
+                        and re.search(r"(?im)^\s*(?:in this department\b|editor\s*,)", following)):
+                    department = ("Discussions", "letters", None)
+                if (department is None and not t
+                        and re.search(r"(?is)^\s*in this department\b.{0,240}\bcorrespondence\b", following)):
+                    department = (None, "letters", None)  # the drawn heading has no readable OCR
+                if department is None and editorial_intro:
+                    department = (None, "letters", None)
+                if department is not None:
+                    if self.suspended is ended_piece:
+                        self.suspended = None
+                    name, kind, author = department
+                    self.open = self.new(kind, title=(t or None) if not editorial_intro else None, author=author, page=pno)
+                    if name:
+                        self.open["department"] = name
+                    self.open["flags"].append(f"department after the preceding piece's end on p.{pno}")
+                    self.add(self.open, pno, i, None if editorial_intro else "title")
+                    ended_piece = None
+                    i += 1
+                    continue
             if self.open is not None and self.open.get("type") in ("story", "poem", "feature", "letters") and filler is None and not tail \
                     and i not in title_of and i not in starts and i not in at_of and i not in chapters and i not in cont_from:
                 nxt_i = self.column_ad(pno, p, info, i)
@@ -2252,8 +2864,9 @@ class Assembler:
                 self.teaser(pno, p, info, s, i + 1)
                 i += 1
                 continue
-            if self.open is None and self.suspended is not None and \
-                    sum(1 for j in range(i, n) if j not in info["furniture"] and prose_like(regs[j])) >= 2:
+            if self.open is None and self.suspended is not None and resume_allowed and \
+                    any(j < min((start_first(s) for s in info["starts"]), default=n) and prose_like(regs[j])
+                        for j in range(i, n) if j not in info["furniture"]):
                 self.open = self.suspended                # the piece resumes after a full advertisement page
                 self.open["flags"].append(f"resumes on p.{pno} after advertisement pages")
                 self.suspended = None
@@ -2401,6 +3014,9 @@ class Assembler:
             if key(pno, j) not in self.owner:
                 self.furn(pno, j)
                 self.furniture[-1]["why"] = "above the title on a start page"
+        if self.open is not None and any(dest > pno and rec is self.open for dest, rec in self.continuations.items()):
+            self.suspended = self.open
+            self.open = None
         # the running head names the piece the page belongs to; a mismatch is worth a flag
         if self.open and self.open.get("type") in ("story",) and info["running"]:
             title = self.open.get("title") or ""
@@ -2717,6 +3333,10 @@ class Assembler:
             title = title_case(title)                      # the printed capitals are kept as title_as_printed
         rec = self.new(typ, title=title, author=author, page=pno,
                        toc=({k: toc.get(k) for k in ("title", "author", "page", "type", "blurb")} if toc else None))
+        if s.get("facing_title"):
+            facing = s["facing_title"]
+            self.steal(rec, facing["page"], facing["idx"], "title")
+            rec["flags"].append(f"title-only facing page {facing['page']} joined to its printed by-line")
         if serial:
             rec["serial"] = serial
             rec["work_title"] = title
@@ -2772,6 +3392,8 @@ class Assembler:
             seen += 1
             if seen >= 2:
                 break
+        if s["_rec"].get("type") == "poem":
+            return                                          # a short centred verse is reading text, not a guessed blurb
         if s["_rec"].get("teaser"):
             return                                          # the blurb above the title was already taken
         blurb = ((s.get("toc") or {}).get("blurb") or "")
@@ -2789,6 +3411,11 @@ class Assembler:
             t = region_text(r)
             x0, y0, x1, y1 = r["bbox"]
             w = words(t)
+            score = sim(t, blurb) if blurb else 0
+            narrative = sum(w_ in NARRATIVE for w_ in re.findall(r"[a-z']+", t.lower())) >= 2
+            if r["label"] != "Caption" and score < .6 and \
+                    ((w > 40 and narrative) or (w >= 25 and y1 - y0 > .24 * p["height"])):
+                break                                        # body prose need not start with a drop cap
             if w > 80 or w < 6 or r["label"] == "SectionHeader":
                 continue
             fw = t.split()[0]
@@ -2798,7 +3425,6 @@ class Assembler:
             wide = (x1 - x0) > 0.5 * W
             if not (centred or wide):
                 continue
-            score = sim(t, blurb) if blurb else 0
             if best is None or score > best[0]:
                 best = (score, j)
             if not blurb:
@@ -2877,7 +3503,7 @@ def run_issue(iid, cfg_issue=None, log=print):
         out = assemble(iid, pages, A, variant, model)
         d = os.path.join(ROOT, "data", "assembly_v2", variant, iid)
         os.makedirs(d, exist_ok=True)
-        json.dump(out, open(os.path.join(d, "articles.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        write_json_atomic(os.path.join(d, "articles.json"), out)
         outs[variant] = out
     for e in A["toc"]:
         e["scan"] = e.get("scan_linked") or (A["scan_of"](e["page"]) if A.get("scan_of") and A["offset"] is not None else None)
@@ -2885,11 +3511,12 @@ def run_issue(iid, cfg_issue=None, log=print):
             e["scan"] = None                      # a page number the OCR garbled and no start to link it to
     an = {"issue": iid, "offset": A["offset"], "folio_range": A["folio_range"], "content_range": A.get("content_range"),
           "folio_index": {str(k): v for k, v in A.get("folio_index", {}).items()},
+          "folio_conflicts": A.get("folio_conflicts", {}),
           "magazine_head": A.get("magazine_head"), "toc_page": A["toc_page"], "toc": A["toc"],
           "pages": {str(k): {kk: vv for kk, vv in v.items() if kk != "toc_entries"} for k, v in A["pages"].items()}}
     for v in an["pages"].values():
         v["starts"] = [{k: s[k] for k in ("title", "author", "title_idx", "byline_idx")} for s in v["starts"]]
-    json.dump(an, open(os.path.join(ROOT, "data", "assembly_v2", "rules", iid, "analysis.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    write_json_atomic(os.path.join(ROOT, "data", "assembly_v2", "rules", iid, "analysis.json"), an)
     o = outs["rules"]
     log(f"[s08] {iid}: offset {A['offset']}, printed range {A['folio_range']}, contents entries {len(A['toc'])}, "
         f"{o['checks']['story_records']} story records of {o['checks']['records']}, unassigned {o['checks']['unassigned_regions']}, "

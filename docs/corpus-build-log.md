@@ -1005,3 +1005,55 @@ The model's stored records must be made again with the rules: PASTE 9m stops the
 rebuilds the model's records of every checked issue from its stored decisions (no model is asked), starts the follower
 and the refresh again (the refresh makes every issue again) and restarts the site; it runs in tmux p50s (log
 data/corpus/p50s_deploy.log). PASTE 9l commits p50s; 9n is the check afterwards.
+
+### 2026-10-07, 21:25 KST — Astra project access verified (Codex)
+
+At Heejin's request, activated the prepared dedicated SSH key, a repository deploy key with write permission,
+and the named active website administrator astra. Existing keys and accounts were preserved. Verified file
+read/write access, a database write transaction rolled back without changes, repository SSH authentication and
+write permission, and website login and admin-page access. No corpus data or application code changed, no services
+restarted, and the pending p50s changes were not deployed. This entry remains a local addition pending the next
+reviewed code deployment; credentials and detailed access records remain outside the repository.
+
+### 2026-10-07, 21:48 KST — Read-only examination found source identity and publication defects (Codex)
+
+The approved list has 7,440 archive identifiers but only 7,417 internal IDs (21 colliding IDs across 44 entries).
+The December 1923 Argosy group contains three distinct issues under one ID; its model article and page-decision
+files are malformed. Publication repeatedly fails on that cache, leaving the website database at 6 October
+17:04:28 KST while OCR and assembly continue. At 21:42 KST there were 7,212 downloaded and 2,499 assembled unique
+state IDs. Raw progress counters reuse the same state for duplicate entries. There are 205 failed downloads
+with no queued retry; the survey confirms 80 collection records in the approved selection. The examination
+made no production changes. Preserve affected data and correct source identity before rebuilding those records
+or relying on a simple restart. Full findings and a bounded repair proposal are in the Dropbox project report
+project-examination-2026-10-07.md, with a machine-readable snapshot and read-only collector under pilot_export/.
+
+### 2026-10-07–08 — Automatic story continuity, rules 2.6 (Codex)
+
+Heejin requested critical continuity fixes and fully automatic layout/OCR assembly, prioritizing whole stories.
+Rules 2.6 now uses geometric reading order, stronger printed continuation and identity evidence, protection against
+false headings and model cuts, exact source-page completion, and atomic publication/retry recovery. All 7,440
+approved archive entries have unique IDs; the 44 affected collision entries' original artifacts were archived and
+rehashed. CPU subprocess isolation also prevents inherited OCR pipes from hanging completed jobs.
+
+The full 2.6 pass installed 2,536 of 2,572 selected assemblies. The next bounded pass completed at 04:41:53 KST
+on 8 October: 879 of 902 installed and 23 retained unchanged under metadata guards. Those holds include real
+continuity and title/ownership defects; their prior output is not certified correct. A strict live reading-order
+check exposed six preexisting Hupmobile catalogue boxes interrupting one recovered sentence. The final general
+catalogue-separation rule preserves those boxes in a separate ad after positive page and continuation evidence.
+A reconciled 33-case replay changed only that issue; every other ownership group remained unchanged.
+
+Final source fa7235a deployed at 05:08:27 KST; the one-issue correction completed at 05:09:57 with no failures.
+Fresh consumers restarted at 05:11:02. Linux and local checks pass 231 unit tests, 21 continuity regressions and
+five self-checks. The 42-story development benchmark retains 13,700 additional annotated body words, improving
+96.026% to 99.944% recall and reducing false splits from five to zero; this is not a held-out corpus-wide estimate.
+Live checks against the 05:11:15 database confirmed all 66 recovered narrative boxes in consecutive reading order,
+with the six catalogue boxes (145 words), adjacent ads and the next-month note excluded from reading text. Four
+earlier repairs also pass; 42 forms carry current assembly digests and invalid/stale submissions return 409.
+
+All eight annotation logs and eight live assemblies remain byte-identical; all 23 held receipts are unchanged;
+no meaningful cross-issue relationships were lost. Final provenance checks validate 160 OCR manifests / 22,596
+pages; database integrity and all 47 deployed source hashes pass. The website snapshot has 111,117 records and
+2,703 assembled issues; processing continued to 2,706 by the audit, with all stop/upgrade markers clear.
+Only the minimal annotation-safety overlay was applied to the app; preexisting p50s app/settings changes remain
+separate. See docs/continuity-improvements-2026-10-07.md and pilot_export/continuity-2026-10-07/ for evidence,
+benchmark caveats and known remaining defects. Fully automatic execution does not guarantee 100% accuracy.

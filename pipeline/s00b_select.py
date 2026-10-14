@@ -27,6 +27,7 @@ The clauses, in order (an item is set aside at the first clause it fails):
     python3 pipeline/s00b_select.py --selftest
 """
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -298,18 +299,29 @@ def to_issue_record(d):
             "alternates": d.get("alternates", []), "gold": None}
 
 
+def unique_issue_ids(issues):
+    """Keep existing noncolliding ids; distinguish collisions by the complete archive identity."""
+    issues = [dict(issue) for issue in issues]
+    counts = Counter(issue["id"] for issue in issues)
+    for issue in issues:
+        if counts[issue["id"]] > 1:
+            digest = hashlib.sha256(issue["ia_identifier"].encode("utf-8")).hexdigest()[:12]
+            issue["id"] += "_" + digest
+    duplicates = [iid for iid, n in Counter(issue["id"] for issue in issues).items() if n > 1]
+    if duplicates:
+        raise ValueError(f"issue ids are still not unique: {duplicates[:10]}")
+    return issues
+
+
 def write_outputs(decisions, final, dup_groups, counts):
+    # Validate before replacing selection artifacts. Data directories and the approval are not migrated here.
+    issues = unique_issue_ids([to_issue_record(d) for d in final])
     os.makedirs(SURVEY, exist_ok=True)
     with open(os.path.join(SURVEY, "selection.jsonl"), "w", encoding="utf-8") as f:
         for d in decisions:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
     write_json_atomic(os.path.join(SURVEY, "selection_counts.json"), dict(sorted(counts.items())))
     write_json_atomic(os.path.join(SURVEY, "duplicates.json"), dup_groups)
-    issues = [to_issue_record(d) for d in final]
-    ids = Counter(i["id"] for i in issues)
-    for i in issues:  # make ids unique if two items collapse to one key
-        if ids[i["id"]] > 1:
-            i["id"] = i["id"] + "_" + re.sub(r"[^A-Za-z0-9]+", "", i["ia_identifier"])[:6].lower()
     # the download order: dated issues first (by magazine, then date), the undated ones at the end, so that the
     # decision about them (604 items, many of them fan magazines of unknown date) can wait without holding anything up
     order = settings()["download"].get("order", "magazine_then_date")

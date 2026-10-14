@@ -43,6 +43,29 @@ def corpus_config():
     return json.load(open(CORPUS_CONFIG, encoding="utf-8"))
 
 
+def partition_issue_ids(issues):
+    """Return (safe unique entries, conflicting id -> archive identifiers), without changing the approved list.
+
+    An id naming different sources cannot safely name a directory, state file, or model job. Hold every entry
+    in such a group; choosing the first or last would silently assign another issue's scans to it. Identical
+    id/source repetitions are deduplicated in their original order so they never create concurrent writers.
+    """
+    sources = {}
+    for issue in issues:
+        iid, ident = issue.get("id"), issue.get("ia_identifier")
+        if not isinstance(iid, str) or not iid or not isinstance(ident, str) or not ident:
+            raise ValueError("every issue must have a nonempty id and ia_identifier")
+        sources.setdefault(iid, set()).add(ident)
+    conflicts = {iid: sorted(idents) for iid, idents in sources.items() if len(idents) > 1}
+    safe, seen = [], set()
+    for issue in issues:
+        iid = issue["id"]
+        if iid not in conflicts and iid not in seen:
+            safe.append(issue)
+            seen.add(iid)
+    return safe, conflicts
+
+
 APPROVAL_PATH = os.path.join(ROOT, "config", "corpus_approval.json")
 
 

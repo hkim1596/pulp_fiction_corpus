@@ -54,7 +54,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from urllib.parse import quote
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from corpus_lib import ROOT, settings, corpus_config, require_approved, mark, has, log, issue_dirs, write_json_atomic  # noqa: E402
+from corpus_lib import (ROOT, settings, corpus_config, require_approved, mark, has, log, issue_dirs,  # noqa: E402
+                        write_json_atomic, load_state, partition_issue_ids)
 from timing_util import stage_timer  # noqa: E402
 
 CORPUS_DIR = os.path.join(ROOT, "data", "corpus")
@@ -245,10 +246,23 @@ def fetch_issue(issue, root=None):
     os.makedirs(raw, exist_ok=True)
     t0 = time.time()
     meta_path = os.path.join(raw, "meta.json")
+    if root == ROOT:
+        prior = load_state(iid).get("stages", {}).get("downloaded", {}).get("ia_identifier")
+        if prior and prior != ident:
+            raise RuntimeError(f"{iid}: cached download belongs to {prior}, requested {ident}; source audit required")
     if os.path.exists(meta_path):
-        meta = json.load(open(meta_path, encoding="utf-8"))
+        with open(meta_path, encoding="utf-8") as metadata_file:
+            meta = json.load(metadata_file)
+        cached_ident = (meta.get("metadata") or {}).get("identifier")
+        if cached_ident != ident:
+            raise RuntimeError(f"{iid}: cached metadata belongs to {cached_ident!r}, requested {ident}; source audit required")
     else:
+        payloads = [os.path.join(raw, name) for name in ("ia_text.txt", "ia_djvu.xml", "scandata.xml")]
+        if any(os.path.exists(path) for path in payloads) or (os.path.isdir(master_dir) and os.listdir(master_dir)):
+            raise RuntimeError(f"{iid}: cached files have no source metadata; source audit required before reuse")
         meta = json.loads(get_bytes(f"https://archive.org/metadata/{ident}").decode("utf-8"))
+        if (meta.get("metadata") or {}).get("identifier") != ident:
+            raise RuntimeError(f"{iid}: archive metadata does not identify the requested source {ident}")
         if not meta.get("files"):
             raise RuntimeError(f"{ident}: empty item record (dark or removed?)")
         write_json_atomic(meta_path, meta)
@@ -462,6 +476,9 @@ def download_worker(q, results, wid):
 
 
 def run(issues, workers, image_processes, image_only=False):
+    issues, conflicts = partition_issue_ids(issues)
+    for iid, sources in conflicts.items():
+        log("s01c", f"holding ambiguous issue id {iid}: {sources}; the other issues continue")
     os.makedirs(CORPUS_DIR, exist_ok=True)
     todo_dl = [] if image_only else pending(issues, "downloaded")
     log("s01c", f"{len(issues):,} issues in the list; {len(todo_dl):,} to download; "
@@ -584,16 +601,24 @@ def main():
         smoke(args.smoke); return
     if args.repair:
         from corpus_lib import all_states
+        _safe, conflicts = partition_issue_ids(corpus_config()["issues"])
         n = 0
         for iid, st in all_states().items():
+            if iid in conflicts:
+                log("s01c", f"holding repair of ambiguous issue id {iid}: {conflicts[iid]}")
+                continue
             if (st["stages"].get("imaged") or {}).get("bad_leaves") and "repaired" not in st["stages"]:
                 log("s01c", f"repair {iid}: {len(st['stages']['imaged']['bad_leaves'])} bad leaves")
                 n += repair_bad_leaves(iid)
         log("s01c", f"repaired {n} pages"); return
     cfg = corpus_config()
     require_approved(cfg, "download")
-    issues = cfg["issues"]
+    issues, conflicts = partition_issue_ids(cfg["issues"])
+    for iid, sources in conflicts.items():
+        log("s01c", f"holding ambiguous issue id {iid}: {sources}; the other issues continue")
     if args.issue:
+        if args.issue in conflicts:
+            sys.exit(f"ambiguous issue id {args.issue}: {conflicts[args.issue]}; source audit required")
         issues = [i for i in issues if i["id"] == args.issue]
         if not issues:
             sys.exit(f"no issue with id {args.issue}")

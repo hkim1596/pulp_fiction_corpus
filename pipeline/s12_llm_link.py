@@ -65,6 +65,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 import threading
 import time
 import urllib.error
@@ -75,6 +76,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corpus_lib import ROOT, PILOT_CONFIG, settings, mark, all_states, event, log, write_json_atomic, issue_dirs  # noqa: E402
 from timing_util import stage_timer, load_pulp_env  # noqa: E402
+from layout_order import order_region_keys  # noqa: E402
 
 OUT_VARIANT = "llm"
 SPEND_PATH = os.path.join(ROOT, "data", "corpus", "llm_link_spend.json")
@@ -791,15 +793,11 @@ def link_issue(iid, meta, variant=OUT_VARIANT, dry_run_page=None, log_fn=None, m
     if len(down) >= max(3, len(page_records) // 10):
         raise LaneDown(f"{iid}: the lane did not answer on {len(down)} of {len(page_records)} pages; nothing written")
     secs = round(time.time() - t_start, 1)
-    with open(os.path.join(out_dir, "pages.jsonl"), "w", encoding="utf-8") as f:
-        for r in page_records:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
-    with open(os.path.join(out_dir, "flags.jsonl"), "w", encoding="utf-8") as f:
-        for fl in flags:
-            f.write(json.dumps(fl, ensure_ascii=False) + "\n")
     doc = build_records(iid, pages, page_records, meta, variant, rules_doc=_rules_doc, rl=rl)
-    json.dump(doc, open(os.path.join(out_dir, "articles.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     cmp = compare_with_rules(iid, pages, page_records, rl)
+    write_jsonl_atomic(os.path.join(out_dir, "pages.jsonl"), page_records)
+    write_jsonl_atomic(os.path.join(out_dir, "flags.jsonl"), flags)
+    write_json_atomic(os.path.join(out_dir, "articles.json"), doc)
     write_json_atomic(os.path.join(out_dir, "compare.json"), cmp)
     low_labels = Counter()
     for r in page_records:
@@ -847,15 +845,32 @@ def fmt3(x):
     return "-" if x is None else f"{x:.3f}"
 
 
+def write_jsonl_atomic(path, rows):
+    """Readers see a complete old or new decision log, never a truncated one."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=".tmp-", suffix=".jsonl")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            for row in rows:
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+
+
 def is_title_box(title, k, pages):
     """The box carries the title itself (not body text the model gave the piece's title with): its text begins with
     the title and is not much longer than a title with a by-line or subtitle (p50s: a paragraph that merely begins
     with the words the model took for the title is body text), or is not much longer than the title."""
     pn, i = map(int, k.split(":"))
-    t = " ".join(region_text(pages[pn]["regions"][i]).lower().split())
-    ti = " ".join(str(title).lower().split())
-    return bool(ti) and ((t.startswith(ti[: max(4, len(ti) // 2)]) and len(t) <= max(3 * len(ti), len(ti) + 60))
-                         or len(t) <= 1.5 * len(ti) + 4)
+    t = " ".join(re.findall(r"\w+", region_text(pages[pn]["regions"][i]).lower()))
+    ti = " ".join(re.findall(r"\w+", str(title).lower()))
+    # Short body text is not a title merely because the model supplied a longer title.
+    # Require printed words to match; allow a title split over adjacent layout boxes.
+    return bool(t and ti) and ((t == ti or t.startswith(ti + " "))
+                              and len(t) <= max(3 * len(ti), len(ti) + 60)
+                              or ti.startswith(t + " ") and len(t.split()) >= 2)
 
 
 def decision_kind(j, R, r_ed, k, rl, last_ed):
@@ -891,7 +906,63 @@ def cut_rules():
     """settings.llm_link.cut_rules (p50s): which of the model's cuts are set aside."""
     c = (settings().get("llm_link") or {}).get("cut_rules") or {}
     return {"same_title": bool(c.get("same_title", True)), "no_text": bool(c.get("no_text", True)),
-            "contents_max_words": int(c.get("contents_max_words", 300))}
+            "contents_max_words": int(c.get("contents_max_words", 300)),
+            "continuity": bool(c.get("continuity", True))}
+
+
+def continuity_cut_reason(parent, child, key, pages, original):
+    """Positive evidence that a proposed cut breaks an existing prose record.
+
+    A lowercase OCR box alone is not enough: the preceding body box must also end
+    mid-sentence. Printed titles, by-lines, captions and page furniture are excluded.
+    Only cuts inside a rules record are considered; this never joins unrelated records.
+    """
+    from s08_assemble_rules import CONT_FROM_RE
+    if not original or original.get("type") not in ("story", "serial_part", "feature"):
+        return None
+    original_keys = {f"{fr['page']}:{i}" for fr in original.get("fragments", []) for i in fr.get("region_ids", [])}
+    if key not in original_keys:
+        return None
+    pno, idx = map(int, key.split(":"))
+    reg = pages[pno]["regions"][idx]
+    text = region_text(reg).strip()
+    roles = original.get("roles") or {}
+    role = roles.get(key)
+    if role in ("chapter", "chapter_number", "chapter_title"):
+        return "the cut begins at a chapter of the same piece"
+    # A bare numeral/roman numeral can be a page number. Only an explicitly named
+    # chapter is sufficient without the rules' chapter role.
+    if len(text.split()) <= 8 and re.match(r"(?i)^\s*(?:chapter|chap\.|part)\s+(?:[ivxlcdm]+|\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b", text):
+        return "the cut begins at a chapter of the same piece"
+    if len(text.split()) <= 8 and CONT_FROM_RE.search(text):
+        return "the cut begins at an explicit continuation notice"
+    if role in TEXTLESS_ROLES or reg.get("label") != "Text" or len(text.split()) < 4:
+        return None
+    if _norm_title(text) == _norm_title(child.get("title")):
+        return None                         # a title that is actually printed, even if labelled Text
+    if re.match(r"(?i)^\W*(?:by|conducted by|edited by|as told to)\s+", text):
+        return None
+    first = re.search(r"[A-Za-z]", text)
+    if not first or not first[0].islower():
+        return None
+    prior = []
+    for fr in original.get("fragments", []):
+        for i in fr.get("region_ids", []):
+            k = f"{fr['page']}:{i}"
+            if k == key:
+                break
+            if k in parent["_keys"] and roles.get(k) not in TEXTLESS_ROLES + ("chapter", "chapter_number", "chapter_title"):
+                r = pages[fr["page"]]["regions"][i]
+                if r.get("label") == "Text" and region_text(r).strip():
+                    prior.append(region_text(r).strip())
+        else:
+            continue
+        break
+    if not prior or len(prior[-1].split()) < 4:
+        return None
+    if re.search(r"[A-Za-z,\-\u00ad]\s*$", prior[-1]):
+        return "the cut breaks a continuing sentence"
+    return None
 
 
 def tidy_cuts(recs, pages, rules=None):
@@ -899,6 +970,8 @@ def tidy_cuts(recs, pages, rules=None):
     aside all three"). A cut the model made in a record is set aside, and the piece it made goes back, where
         the new piece repeats the title of the piece it was cut from, or of an earlier piece of the same record
             (it goes back to that piece: a story resumed after an advertisement or a filler is one record again);
+        the cut breaks a continuing sentence, a chapter, or an explicit continued-from notice within the same
+            prose record (positive continuity evidence; a lowercase box alone is insufficient);
         the cut leaves a piece with no text of its own (only a title, by-line, teaser, subtitle, caption or note): the
             piece before the cut (a heading cut off from its text: the text goes back to it), or the new piece (it goes
             back to the piece before);
@@ -953,6 +1026,10 @@ def tidy_cuts(recs, pages, rules=None):
                 if A is not None and _norm_title(A.get("title")) == t:
                     target, why = A, "the new piece repeats the title"
                     break
+        if target is None and rules.get("continuity", True):
+            why = continuity_cut_reason(P, X, k, pages, (root or {}).get("_orig"))
+            if why:
+                target = P
         words = own_words(X)
         in_toc = root is not None and root.get("type") == "toc" and root.get("_orig") is not None
         if target is None and in_toc:
@@ -1021,8 +1098,8 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
     assembly), the records are built from the decisions alone. apply (p50q): a set of decision kinds (decision_kind);
     a decision of another kind is not applied and the box stays as the rules have it (None: every decision). A cut in a
     piece the model had already cut off is of the kind split_later (p50s). tidy (p50s): the cut rules (tidy_cuts) set
-    aside the cuts that make a piece repeating the title, a piece with no text of its own, or a short part of a
-    contents page."""
+    aside the cuts that make a piece repeating the title, a piece with no text of its own, a short part of a
+    contents page, or a piece cut through positive evidence of prose continuity."""
     from s08_assemble_rules import clean_text, join_boxes
     order, n = {}, 0
     for pno in sorted(pages):
@@ -1035,6 +1112,7 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
     for a in (rules_doc or {}).get("articles", []):
         rec = {k: v for k, v in a.items() if k not in ("fragments", "pages", "text", "n_regions", "keys")}
         rec.update({"roles": dict(a.get("roles") or {}), "flags": list(a.get("flags") or []), "_keys": set(), "_orig": a, "_changed": False,
+                    "_page_order": list(dict.fromkeys(f["page"] for f in a.get("fragments", []))),
                     "llm": {"changes": [], "confidence_min": 1.0, "tiers": Counter()}})
         for f in a.get("fragments", []):
             for i in f.get("region_ids", []):
@@ -1045,11 +1123,12 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
     furniture = {f"{f['page']}:{f['idx']}" for f in (rules_doc or {}).get("furniture", [])}
     n_new = 0
 
-    def new_rec(typ, title=None, author=None, why=""):
+    def new_rec(typ, title=None, author=None, why="", page_order=None):
         nonlocal n_new
         n_new += 1
         r = {"article_id": f"{iid}_a{9000 + n_new}", "type": typ, "title": title, "author": author, "roles": {}, "flags": [], "toc": None,
-             "_keys": set(), "_orig": None, "_changed": True, "llm": {"changes": [why] if why else [], "confidence_min": 1.0, "tiers": Counter()}}
+             "_keys": set(), "_orig": None, "_changed": True, "_page_order": list(page_order or []),
+             "llm": {"changes": [why] if why else [], "confidence_min": 1.0, "tiers": Counter()}}
         recs.append(r)
         return r
 
@@ -1128,7 +1207,7 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
                     pass                                                    # the rules begin this record here too
                 elif r_ed:                                                  # the rules continue R here: R splits
                     R2 = new_rec(KIND_TYPE.get((b.get("kind") or "story").lower(), "other"), b.get("title"), b.get("author"),
-                                 why=f"split from {R['article_id']} at {k} ({conf:.2f})")
+                                 why=f"split from {R['article_id']} at {k} ({conf:.2f})", page_order=R["_page_order"])
                     for kk in sorted([x for x in R["_keys"] if pos(x) >= pos(k)], key=pos):
                         move(kk, R2)
                     R["llm"]["changes"].append(f"split at {k}: the rest is {R2['article_id']} ({conf:.2f})")
@@ -1178,6 +1257,7 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
         o = r.pop("_orig")
         changed = r.pop("_changed")
         keys = r.pop("_keys")
+        page_order = r.pop("_page_order")
         r["llm"]["tiers"] = dict(r["llm"]["tiers"])
         if o is not None and not changed:
             for f in ("fragments", "pages", "text", "n_regions"):
@@ -1185,14 +1265,20 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
                     r[f] = o[f]
             r["llm"]["kept"] = True
         else:
-            ks = sorted(keys, key=lambda x: (int(x.split(":")[0]), int(x.split(":")[1])))
+            key_pairs = [tuple(map(int, x.split(":"))) for x in keys]
+            # Keep s08's corrected printed-page traversal when it differs from scan
+            # order. New pages keep scan order when no such correction exists.
+            page_rank = {pn: i for i, pn in enumerate(page_order)} if page_order != sorted(page_order) else {}
+            key_pairs.sort(key=lambda x: (page_rank.get(x[0], len(page_rank) + x[0]), x[1]))
+            key_pairs = order_region_keys(pages, key_pairs)
+            ks = [f"{pn}:{i}" for pn, i in key_pairs]
             frags = {}
             for x in ks:
                 pn, i = map(int, x.split(":"))
                 frags.setdefault(pn, []).append(i)
-            r["fragments"] = [{"page": pn, "region_ids": frags[pn]} for pn in sorted(frags)]
+            r["fragments"] = [{"page": pn, "region_ids": indices} for pn, indices in frags.items()]
             r["pages"] = sorted(frags)
-            body = [region_text(pages[pn]["regions"][i]) for pn in sorted(frags) for i in frags[pn]
+            body = [region_text(pages[pn]["regions"][i]) for pn, indices in frags.items() for i in indices
                     if r["roles"].get(f"{pn}:{i}") not in ("title", "subtitle", "author", "teaser", "caption", "note", "synopsis")]
             r["text"] = clean_text(join_boxes([t for t in body if t]))
             r["n_regions"] = len(ks)
@@ -1405,10 +1491,12 @@ def follow(workers, idle_s=120):
     the fact goes to events.jsonl. The file data/corpus/STOP_LLM stops it after the issues in hand; s13 publishes what
     it writes to the website."""
     load_pulp_env()
-    from corpus_lib import corpus_config
+    from corpus_lib import corpus_config, partition_issue_ids
     stop = os.path.join(ROOT, "data", "corpus", "STOP_LLM")
     log("s12", f"follow: the assembled corpus issues, {workers} at a time -> data/assembly_v2/{OUT_VARIANT} (stop: touch data/corpus/STOP_LLM)")
     waited = False
+    upgrade_waited = False
+    last_conflicts = None
     fails = Counter()
     fpath = os.path.join(ROOT, "data", "corpus", "llm_follow_failures.jsonl")
     if os.path.exists(fpath):
@@ -1418,11 +1506,26 @@ def follow(workers, idle_s=120):
             except Exception:
                 pass
     while not os.path.exists(stop):
+        if os.path.exists(os.path.join(ROOT, "data", "corpus", "CONTINUITY_UPGRADE")):
+            if not upgrade_waited:
+                log("s12", "follow: continuity upgrade in progress; waiting before linking more issues")
+                upgrade_waited = True
+            _sleep_unless(stop, 30)
+            continue
+        upgrade_waited = False
         cfg = corpus_config()
-        meta = {i["id"]: i for i in cfg["issues"]}
+        issues, conflicts = partition_issue_ids(cfg["issues"])
+        conflict_signature = tuple((iid, tuple(sources)) for iid, sources in sorted(conflicts.items()))
+        if conflict_signature != last_conflicts:
+            if conflicts:
+                log("s12", f"follow: held {len(conflicts)} issue IDs naming different archive sources: " + ", ".join(sorted(conflicts)))
+            if conflicts or last_conflicts:
+                event("source_conflicts_held", stage="linked_llm", count=len(conflicts), issues=conflicts)
+            last_conflicts = conflict_signature
+        meta = {i["id"]: i for i in issues}
         states = all_states()
         todo = []
-        for i in cfg["issues"]:
+        for i in issues:
             st = states.get(i["id"])
             if not st or "assembled" not in st["stages"]:
                 continue
@@ -1499,7 +1602,7 @@ def rebuild_issue(iid, variant=OUT_VARIANT, meta=None, old=None):
     rl = rules_labels(pages, owner, furn)
     prs = [json.loads(line) for line in open(pj, encoding="utf-8")]
     doc = build_records(iid, pages, prs, (meta or {}).get(iid, {"id": iid}), variant, rules_doc=rules_doc, rl=rl)
-    json.dump(doc, open(os.path.join(d, iid, "articles.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    write_json_atomic(os.path.join(d, iid, "articles.json"), doc)
     cmp = compare_with_rules(iid, pages, prs, rl)
     write_json_atomic(os.path.join(d, iid, "compare.json"), cmp)
     sm = dict((old or {}).get(iid) or {"issue": iid, "variant": variant})

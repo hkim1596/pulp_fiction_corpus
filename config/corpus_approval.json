@@ -6,7 +6,7 @@
  "approved_at": "2026-10-04T17:56:48",
  "issues": 7440,
  "undated": 589,
- "list_sha256": "a8a60adbbe26a9e624ca36943ec3ac6bb49b21f28e6b42191b4a099f2dc6c66e",
+ "list_sha256": "30004e2358a39c8f9a5a5a430a9710fa66b07dda443565f4d4384012a17e84ba",
  "list_path": "config/corpus_issues.json",
  "counts": {
   "0 items in the collection": 28410,
@@ -50,5 +50,20 @@
    "year",
    "title"
   ]
- }
+ },
+ "identity_migrations": [
+  {
+   "migration_id": "issue-id-repair-a8a60adbbe26",
+   "kind": "technical_issue_id_collision_repair",
+   "performed_by": "Codex",
+   "proposed_at_utc": "2026-10-07T13:57:24.868994+00:00",
+   "authorization": "User request to automatically fix critical corpus defects; selected source membership is unchanged.",
+   "original_list_sha256": "a8a60adbbe26a9e624ca36943ec3ac6bb49b21f28e6b42191b4a099f2dc6c66e",
+   "new_list_sha256": "30004e2358a39c8f9a5a5a430a9710fa66b07dda443565f4d4384012a17e84ba",
+   "selected_membership_sha256": "e5a4ef43af4e762d6246819b765c9ed58a039c0070334d80aa9342f2c6673a3a",
+   "original_approval_file_sha256": "60e86ddb087b6c74c499740c0e8eb62c2e294acd1ca9c88ad188aee51c47084e",
+   "archive_manifest": "data/identity_quarantine/issue-id-repair-a8a60adbbe26/plan.json",
+   "note": "The original human selection approval remains historical evidence; this entry authorizes only internal ID repair, not new source selection."
+  }
+ ]
 }

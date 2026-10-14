@@ -31,6 +31,7 @@ data/corpus/STOP, add the URL to the settings, start again with --run (nothing i
 """
 import argparse
 import json
+import multiprocessing
 import os
 import queue
 import shutil
@@ -44,7 +45,7 @@ from concurrent.futures import ProcessPoolExecutor
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corpus_lib import (ROOT, CORPUS_CONFIG, settings, corpus_config, require_approved, mark, load_state, all_states,  # noqa: E402
-                        free_gb, issue_dirs, write_json_atomic, log, event)
+                        free_gb, issue_dirs, write_json_atomic, log, event, partition_issue_ids)
 import s01c_fetch as fetch  # noqa: E402
 
 
@@ -109,6 +110,37 @@ def py_env():
     return env
 
 
+def process_pool(max_workers):
+    # Readers launch subprocesses from threads. Forking a pool at the same time can inherit an OCR
+    # pipe's write end, so communicate() never sees EOF even after the OCR subprocess has exited.
+    return ProcessPoolExecutor(max_workers=max_workers, mp_context=multiprocessing.get_context("spawn"))
+
+
+def collect_reading(proc, timeout, cleanup_timeout=5):
+    """Collect an OCR subprocess, with bounded cleanup even when another process holds its pipes."""
+    import signal
+    try:
+        return proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        except OSError:
+            proc.kill()
+        try:
+            proc.communicate(timeout=cleanup_timeout)
+        except subprocess.TimeoutExpired:
+            for stream in (proc.stdout, proc.stderr):
+                if stream is not None:
+                    stream.close()
+            try:
+                proc.wait(timeout=cleanup_timeout)
+            except subprocess.TimeoutExpired:
+                pass
+        raise RuntimeError(f"reading timed out after {timeout} s (Read timed out)")
+
+
 def read_issue(iid, server_url):
     """Surya over one issue in a subprocess (so a crash costs one issue, not the run). Returns pages read."""
     env = py_env()
@@ -116,28 +148,16 @@ def read_issue(iid, server_url):
         env["SURYA_INFERENCE_URL"] = server_url
     t0 = time.time()
     limit = settings()["reading"].get("issue_timeout_s", 3600)
-    import signal
     # start_new_session: the subprocess and its surya child form their own process group (id = the child's pid),
     # so a timeout can kill both and nothing else
     proc = subprocess.Popen([sys.executable, os.path.join(ROOT, "pipeline", "s02_layout_ocr.py"), "--issue", iid],
                             env=env, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
-    try:
-        out, err = proc.communicate(timeout=limit)
-    except subprocess.TimeoutExpired:
-        try:
-            os.killpg(proc.pid, signal.SIGKILL)
-        except Exception:
-            proc.kill()
-        proc.communicate()
-        raise RuntimeError(f"reading timed out after {limit} s (Read timed out)")        # "Read timed out" -> put back, not failed
+    out, err = collect_reading(proc, limit)  # "Read timed out" -> put back, not failed
     r = types.SimpleNamespace(returncode=proc.returncode, stdout=out, stderr=err)
-    out_dir = os.path.join(ROOT, "data", "text", iid, "routeA")
-    n_pages = len([f for f in os.listdir(issue_dirs(iid)["pages"]) if f.endswith((".jpg", ".png"))])
-    got = len([f for f in os.listdir(out_dir) if f.endswith(".txt")]) if os.path.isdir(out_dir) else 0
-    if r.returncode != 0 or got == 0:
-        raise RuntimeError(f"s02 exit {r.returncode}, {got} pages: {(r.stderr or r.stdout)[-600:]}")
-    if abs(got - n_pages) > 2:
-        raise RuntimeError(f"s02 read {got} pages of {n_pages}")
+    if r.returncode != 0:
+        raise RuntimeError(f"s02 exit {r.returncode}: {(r.stderr or r.stdout)[-600:]}")
+    from s02_layout_ocr import validate_outputs
+    got = validate_outputs(iid, issue_dirs(iid)["pages"])
     return {"pages": got, "seconds": round(time.time() - t0, 1), "server": server_url or "spawned"}
 
 
@@ -275,6 +295,11 @@ def reap(states, min_free):
 
 def link_magazines(issues, states, linked, s08=None, force=False):
     """The cross-issue pass for every magazine whose issues are all assembled or given up."""
+    if os.path.exists(os.path.join(ROOT, "data", "corpus", "CONTINUITY_UPGRADE")):
+        return 0                      # the upgrade runs its own cross-issue pass after replacing all affected records
+    issues, conflicts = partition_issue_ids(issues)
+    for iid, sources in conflicts.items():
+        log("run", f"holding cross-issue links for ambiguous id {iid}: {sources}")
     if s08 is None:
         import s08_assemble_rules as s08
     by_mag = defaultdict(list)
@@ -390,7 +415,13 @@ def run(args):
     cfg = corpus_config()
     approval = require_approved(cfg, "process")
     st = settings()
-    issues = cfg["issues"]
+    issues, conflicts = partition_issue_ids(cfg["issues"])
+    for iid, sources in conflicts.items():
+        log("run", f"holding ambiguous issue id {iid}: {sources}; the other issues continue")
+    identity_info = {"approved_issues": len(cfg["issues"]), "held_ambiguous_ids": len(conflicts),
+                     "held_ambiguous_entries": sum(i["id"] in conflicts for i in cfg["issues"])}
+    if conflicts:
+        event("issue_id_conflicts", conflicts=conflicts, **identity_info)
     if args.limit:
         issues = issues[: args.limit]
     info = run_info(approval, len(issues))
@@ -433,8 +464,8 @@ def run(args):
     queued_read = set()
 
     threading.Thread(target=disk_thread, daemon=True).start()
-    image_pool = ProcessPoolExecutor(max_workers=st["images"].get("processes", 4))
-    post_pool = ProcessPoolExecutor(max_workers=st["lemma"].get("processes", 4))
+    image_pool = process_pool(st["images"].get("processes", 4))
+    post_pool = process_pool(st["lemma"].get("processes", 4))
     image_futs, post_futs = {}, {}
     queued_image, queued_post = set(), set()
     linked = set(s["stages"]["linked"]["magazine"] for s in states.values() if "linked" in s["stages"])
@@ -488,6 +519,10 @@ def run(args):
                             queued_post.add(iid)
                     else:
                         log("run", f"reading failed {iid}: {str(err)[:300]}")
+                        # Let the resume scan retry a failed reading, using the freshly written failure count.
+                        # Leaving the id queued forever prevents both a retry and normal completion of the run.
+                        states[iid] = load_state(iid)
+                        queued_read.discard(iid)
             except queue.Empty:
                 pass
             # 4 post-processing done -> masters go
@@ -502,7 +537,8 @@ def run(args):
             # 5 every minute: progress, reaper, cross-issue links; the stall watch for the reading
             if time.time() - last_progress > 60:
                 states = all_states()
-                reap(states, min_free)
+                # Keep the images of ambiguous ids for the source audit; those issues are not processed here.
+                reap({i["id"]: states[i["id"]] for i in issues if i["id"] in states}, min_free)
                 pending_read = [i["id"] for i in issues if "imaged" in states.get(i["id"], {"stages": {}})["stages"]
                                 and "read" not in states.get(i["id"], {"stages": {}})["stages"]]
                 if readers and pending_read and time.time() - last_read_done > 1200:
@@ -524,7 +560,8 @@ def run(args):
                     if n:
                         log("run", f"cross-issue pass: {n} magazines linked")
                     last_link = time.time()
-                rec = progress(issues, states, started, {"base": base, "queues": {"download": dl_q.qsize(), "image": len(image_futs), "read": read_q.qsize(), "post": len(post_futs)}})
+                rec = progress(issues, states, started, {"base": base, **identity_info,
+                               "queues": {"download": dl_q.qsize(), "image": len(image_futs), "read": read_q.qsize(), "post": len(post_futs)}})
                 log("run", "done " + ", ".join(f"{s} {rec['done'].get(s, 0):,}" for s in CHAIN) +
                     f" | pages read {rec['pages'].get('read', 0):,} | free {rec['free_gb']:.0f} GB | "
                     + ", ".join(f"{s} {v}h" for s, v in rec["hours_left_at_this_rate"].items() if v is not None))
@@ -549,7 +586,7 @@ def run(args):
                 if not busy:
                     states = all_states()
                     link_magazines(issues, states, linked)
-                    progress(issues, states, started, {"base": base})
+                    progress(issues, states, started, {"base": base, **identity_info})
                     log("run", "nothing left to do")
                     break
             time.sleep(2)

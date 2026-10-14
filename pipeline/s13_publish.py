@@ -47,6 +47,7 @@ published as set aside (kind cut_set_aside, not flagged). A split in a part the 
     python3 pipeline/s13_publish.py --issue <id>
 """
 import argparse
+import copy
 import json
 import os
 import re
@@ -55,14 +56,16 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corpus_lib import ROOT, settings, all_states, event, log, write_json_atomic  # noqa: E402
+from article_guard import article_write_lock
 
 LIVE = os.path.join(ROOT, "data", "articles")
 ANN = os.path.join(ROOT, "data", "annotations")
 MODES = ("rules_flagged", "llm", "rules")
-S13_NOTE = 5                  # the version of data/articles/<id>/published.json: 2 = with the disagreements (p50p);
+S13_NOTE = 6                  # the version of data/articles/<id>/published.json: 2 = with the disagreements (p50p);
                               # 3 = the model's changes applied, flagged or set aside kind by kind (p50q);
                               # 4 = a part the model made is not flagged for the change that made it (p50r);
                               # 5 = the cut rules: cuts set aside, further cuts as their own kind (p50s)
+                              # 6 = preserve prose unless a model change has independent boundary/removal evidence
 POLICIES = ("apply", "apply_flag", "flag", "ignore")
 DEFAULT_POLICY = "flag"
 POOL = os.path.join(ROOT, "data", "review", "model_disagreements.jsonl")
@@ -228,6 +231,149 @@ def apply_kinds(policy):
     if "out_new" in out:
         out.add("orphan")
     return out
+
+
+def publication_records(iid, pages, rules_doc, page_records, apply, meta=None):
+    """Apply selected model changes only when they preserve known prose continuity.
+
+    Confidence alone cannot justify removing story text. Held proposals and their
+    reasons remain on the source record for review; neither OCR nor human logs change.
+    """
+    import s12_llm_link as s12
+    from s08_assemble_rules import byline_author, chapter_head, is_display, CONT_FROM_RE, CONT_ON_RE, THE_END_RE
+    owner = {}
+    for rec in rules_doc.get("articles", []):
+        for fr in rec.get("fragments", []):
+            for i in fr.get("region_ids", []):
+                k = f"{fr['page']}:{i}"
+                owner[k] = (rec, (rec.get("roles") or {}).get(k))
+    furn = {f"{f['page']}:{f['idx']}" for f in rules_doc.get("furniture", [])}
+    hints = s12.rules_labels(pages, owner, furn)
+    guarded = copy.deepcopy(page_records)
+    holds = {}
+    prose = {"story", "serial_part", "feature", "poem"}
+
+    def printed_start(page, reg, b):
+        text = s12.region_text(reg).strip()
+        if byline_author(text):
+            return True
+        title = b.get("title")
+        if not title or chapter_head(text) or len(text.split()) > 18:
+            return False
+        if s12._norm_title(text) != s12._norm_title(title):
+            return False
+        words = [w for w in re.findall(r"[A-Za-z]+", text) if w.lower() not in ("a", "an", "the", "of", "and", "to", "in", "on", "for")]
+        title_case = bool(words) and sum(w[0].isupper() for w in words) / len(words) >= .7
+        try:
+            return reg.get("label") == "SectionHeader" or title_case and is_display(page, reg)
+        except (KeyError, TypeError, IndexError):
+            return reg.get("label") == "SectionHeader"
+
+    def resumes_later(rec, k):
+        keys = [f"{f['page']}:{i}" for f in rec.get("fragments", []) for i in f.get("region_ids", [])]
+        title = s12._norm_title(rec.get("title"))
+        for later in keys[keys.index(k) + 1:]:
+            pn, i = map(int, later.split(":"))
+            reg = pages[pn]["regions"][i]
+            text = s12.region_text(reg).strip()
+            if (len(text.split()) <= 10 and CONT_FROM_RE.search(text)
+                    or title and reg.get("label") == "SectionHeader" and s12._norm_title(text) == title):
+                return True
+        return False
+
+    def established_start(rec, page, reg):
+        # A teaser/author-credit box can precede the title, and a damaged title may
+        # have been independently recovered from the contents page. Neither is a
+        # reason to merge the entire named story into the preceding one.
+        toc = rec.get("toc") or {}
+        if (s12._norm_title(rec.get("title")) and s12._norm_title(rec.get("title")) == s12._norm_title(toc.get("title"))
+                and toc.get("page") is not None):
+            return True
+        if printed_start(page, reg, {"title": rec.get("title")}):
+            return True
+        for k, role in (rec.get("roles") or {}).items():
+            if role not in ("title", "author"):
+                continue
+            pn, idx = map(int, k.split(":"))
+            r = pages[pn]["regions"][idx]
+            if printed_start(pages[pn], r, {"title": rec.get("title")}):
+                return True
+        return False
+
+    def clear_ad(reg):
+        text = s12.region_text(reg)
+        call = re.search(r"(?im)(?:^|\n)\s*(?:send|mail|order|write|enclose|remit)\b|\bmoney.back\b|\bpostpaid\b|\border now\b", text)
+        price = re.search(r"\$\s*\d|\b\d+\s*(?:cents|dollars)\b", text, re.I)
+        form = re.search(r"\bcoupon\b|\bdept\.|\bcatalog(?:ue)?\b|\b(?:name|address)\s*[._]{2,}", text, re.I)
+        form_heading = re.match(r"(?i)^\W*(?:coupon|order form)\b", text)
+        return bool(call and (price or form) or price and form and form_heading)
+
+    def clear_furniture(page, reg, rec, k):
+        text = s12.region_text(reg).strip()
+        if not text or re.fullmatch(r"[\W_]+", text):
+            return True
+        if len(text.split()) > 12 or chapter_head(text) and not text.isdigit():
+            return False
+        try:
+            y0, y1 = reg["bbox"][1], reg["bbox"][3]
+            marginal = y1 <= .14 * page["height"] or y0 >= .86 * page["height"]
+        except (KeyError, TypeError, IndexError):
+            return False
+        if not marginal:
+            return False
+        if re.fullmatch(r"\W*\d{1,4}\W*", text):
+            return True
+        return (hints[k]["joins"] != "new" and reg.get("label") in ("PageHeader", "PageFooter")
+                and (text.upper() == text or s12._norm_title(text) == s12._norm_title(rec.get("title"))))
+
+    for pr in guarded:
+        pn = pr["page"]
+        for box, idx in (pr.get("keymap") or {}).items():
+            k = f"{pn}:{idx}"
+            rec, role = owner.get(k, (None, None))
+            b = pr.get("boxes", {}).get(str(box))
+            if not rec or rec.get("type") not in prose or not isinstance(b, dict):
+                continue
+            reg, page = pages[pn]["regions"][int(idx)], pages[pn]
+            j, hint = b.get("joins"), hints[k]
+            reason = None
+            if j == "new" and b.get("kind") != "ad" and hint["joins"] != "new" and ({"split", "split_later"} & set(apply)):
+                if not printed_start(page, reg, b):
+                    reason = "no independent printed title or by-line at the proposed story boundary"
+                elif resumes_later(rec, k):
+                    reason = "the original story visibly resumes later; a tail split would take its continuation"
+            elif (j == "advert" or j == "new" and b.get("kind") == "ad") and "out_ad" in apply:
+                if not clear_ad(reg):
+                    reason = "story text has no clear advertising transaction or order form"
+            elif j == "furniture" and "out_furniture" in apply:
+                if not clear_furniture(page, reg, rec, k):
+                    reason = "story text is not identifiable marginal page furniture"
+            elif j in ("previous", "caption", "notice") and hint["joins"] == "new" and "join" in apply:
+                if established_start(rec, page, reg):
+                    reason = "the rules' story has its own printed title, by-line or contents-page start"
+            if reason is None and j in ("caption", "notice") and role not in s12.TEXTLESS_ROLES:
+                text = s12.region_text(reg).strip()
+                clear_caption = reg.get("label") == "Caption" and len(text.split()) <= 80
+                notice = CONT_FROM_RE.search(text) or CONT_ON_RE.search(text)
+                notice_at_start = notice and not re.search(r"\w", text[:notice.start()])
+                clear_notice = len(text.split()) <= 14 and (THE_END_RE.match(text) or notice_at_start)
+                if not (clear_caption if j == "caption" else clear_notice):
+                    reason = "reading text has no independent caption or continuation-notice evidence"
+            if reason:
+                holds.setdefault(rec["article_id"], []).append({"key": k, "proposed": j, "reason": reason,
+                                                               "confidence": b.get("confidence")})
+                b["joins"] = hint["joins"]
+                b["kind"] = hint.get("kind")
+                b["title"] = hint.get("title") if hint["joins"] == "new" else None
+    built = s12.build_records(iid, pages, guarded, meta or {"id": iid}, rules_doc=rules_doc, rl=hints, apply=set(apply))
+    held_by_key = {h["key"]: h for held in holds.values() for h in held}
+    for rec in built["articles"]:
+        held = [held_by_key[k] for f in rec.get("fragments", []) for i in f.get("region_ids", [])
+                if (k := f"{f['page']}:{i}") in held_by_key]
+        if held:
+            rec["continuity_holds"] = held
+    built["checks"]["model_changes_held_for_continuity"] = sum(map(len, holds.values()))
+    return built
 
 
 def refined_kind(raw, rules_owner_type):
@@ -460,6 +606,14 @@ def annotate_checked(iid, doc, rules_doc, view, policy, page_records, open_dec, 
             look = bool(pending) or any(policy.get(refined_kind(c, otype)) == "apply_flag" for c in applied)
             r["model_check"] = {"agrees": bool(v.get("agrees")), "applied": applied, "pending": [c for c, _ in pending],
                                 "ignored": ignored, "open": len(opens)}
+        continuity_holds = r.get("continuity_holds") or []
+        if continuity_holds:
+            flags += [f"kept story continuity at {labels(h['key'])}: {h['reason']}" for h in continuity_holds]
+            r["model_check"]["continuity_holds"] = continuity_holds
+            r["model_check"]["agrees"] = False
+            r["assembly"] = (r["assembly"] + "; story continuity protected" if r["model_check"].get("applied")
+                             else "rules, checked by the model: changes held to preserve story continuity")
+            look = True
         flags += [f"the model left a decision open — {o}" for o in opens]
         r["flags"] = flags
         r["confidence"] = conf
@@ -503,6 +657,13 @@ def annotate(doc, source, look_below, view=None, open_dec=None):
 
 
 def publish_issue(iid, mode="rules_flagged", look_below=0.9, force=False):
+    # The annotation existence check and both live writes are one transaction
+    # with the website's baseline read and annotation append.
+    with article_write_lock(ROOT, iid):
+        return _publish_issue_locked(iid, mode, look_below, force)
+
+
+def _publish_issue_locked(iid, mode="rules_flagged", look_below=0.9, force=False):
     """Write data/articles/<iid>/articles.json. Returns (what, source, records, needs_look)."""
     mode = mode if mode in MODES else "rules_flagged"
     rules_p = os.path.join(ROOT, "data", "assembly_v2", "rules", iid, "articles.json")
@@ -555,7 +716,7 @@ def publish_issue(iid, mode="rules_flagged", look_below=0.9, force=False):
             import s12_llm_link as s12
             from corpus_lib import corpus_config
             meta = next((i for i in corpus_config()["issues"] if i["id"] == iid), {"id": iid})
-            built = s12.records_with(iid, applied_kinds, meta=meta)
+            built = publication_records(iid, s12.load_pages(iid), rules_doc, prs, applied_kinds, meta=meta)
             doc = dict(rules_doc, articles=built["articles"], furniture=built["furniture"], model_applied=applied_kinds,
                        backend=f"{rules_doc.get('backend', 'rules')} + the model's changes ({', '.join(applied_kinds)})")
         n_look = annotate_checked(iid, doc, rules_doc, view, policy, prs, open_dec, look_below)
@@ -580,12 +741,20 @@ def publish_all(force=False):
     counts."""
     cfg = settings().get("publish", {})
     mode, look_below = cfg.get("prefer", "rules_flagged"), float(cfg.get("look_below", 0.9))
-    from corpus_lib import corpus_config
+    if os.path.exists(os.path.join(ROOT, "data", "corpus", "CONTINUITY_UPGRADE")):
+        log("s13", "publication held: continuity upgrade is installing complete issue snapshots")
+        return {"mode": mode, "published": 0, "current": 0, "held": 0, "from_rules_and_model": 0,
+                "from_llm": 0, "from_rules": 0, "needs_look": 0, "held_source_conflict": 0, "held_upgrade": 1}
+    from corpus_lib import corpus_config, partition_issue_ids
     states = all_states()
+    issues, conflicts = partition_issue_ids(corpus_config()["issues"])
     counts = {"mode": mode, "published": 0, "current": 0, "held": 0, "from_rules_and_model": 0, "from_llm": 0, "from_rules": 0,
-              "needs_look": 0}
+              "needs_look": 0, "held_source_conflict": len(conflicts)}
+    if conflicts:
+        counts["held"] += len(conflicts)
+        log("s13", f"held {len(conflicts)} issue IDs naming different archive sources; existing live records kept: " + ", ".join(sorted(conflicts)))
     seen = set()
-    for i in corpus_config()["issues"]:
+    for i in issues:
         iid = i["id"]
         if iid in seen:
             continue
