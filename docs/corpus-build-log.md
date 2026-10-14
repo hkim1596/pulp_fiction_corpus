@@ -1057,3 +1057,39 @@ pages; database integrity and all 47 deployed source hashes pass. The website sn
 Only the minimal annotation-safety overlay was applied to the app; preexisting p50s app/settings changes remain
 separate. See docs/continuity-improvements-2026-10-07.md and pilot_export/continuity-2026-10-07/ for evidence,
 benchmark caveats and known remaining defects. Fully automatic execution does not guarantee 100% accuracy.
+
+### 2026-10-14, 23:25 KST — the corpus run finished on 12 October; the code that built it committed; the server in line with git
+
+The run (started 4 October, 22:05 KST; code p50g at the start, rules 2.6 from 8 October) ended by itself at 13:58 on
+12 October ("nothing left to do"): 7,306 of the 7,440 approved issues downloaded, imaged, read, cleaned, lemmatized
+and assembled; 974,720 pages read; the archive masters deleted for 7,304 after assembly. 134 issues failed to
+download and were not retried (all marked failed between 05:11 and 09:46 on 8 October): 120 archive items have
+neither a JP2 zip nor a PDF, 13 answered HTTP 500, one HTTP 401. The model's check (s12, GPU 2) finished at 17:44 on
+12 October with every assembled issue linked. The website at 22:54 on 14 October: 7,273 issues current and 33 held
+(corrected by a person, or under source conflict); 322,644 records, 67,087 stories, 18,180 authors, 1,584 magazines;
+321,865 records checked by the model, 54,920 disagreements, 19,078 changes applied, 57,926 records needing a look;
+125 verified; the newest annotation 9 October 20:14; the model-check review still at Sujin's 206 judgments of 5
+October. Disk: 1,996 GB free on the data disk, 378 GB on the root disk.
+
+The record between 8 and 14 October is the journal's (development-journal.md in the Dropbox folder; this log had no
+entry). The Stage 1 protocol was submitted by Prof. Tenen (manuscript ID CHR-2026-0073, from his email, shown to
+Claude on 7 October; the date of submission is not in the email).
+
+Git (14 October, Heejin, PASTE 9q–9s): until today nothing after e513cba (p50r, 6 October) was committed; the
+corpus was built with code that existed only as working copies on the Mac and the server. Two commits were made from
+the Mac clone: 9f5fb62, p50s exactly as delivered on 6 October (its pipeline part had gone live inside Codex's
+release, its site part had not); 040e598, Codex's rules 2.6 and source-ID repair of 7–8 October with its 25 tests,
+the migration and continuity scripts and its notes — the code that built the corpus (45 of the 47 files in the
+server's release manifest, data/corpus/releases/continuity-2026-10-07/manifest.json, are byte-identical to it; the
+two others are webapp/app.py, the server having run the annotation guard on the v0.20.0 app, and Codex's notes).
+The server was then brought in line with git by a checked reset (pilot_export/commit-2026-10-14/server_git_sync.sh:
+every pipeline file and the approval file were already identical; the files overwritten — p50s's site part, the
+settings file, the docs, .gitignore — are kept in data/corpus/releases/git-sync-2026-10-14/before/); the website
+restarted on v0.21.0 (the review page's two new kinds, "split again" and "split set aside", are live). Three stray
+logs at the repository's root on the server (s06_final.log, s06_final2.log, thumbs.log) are untracked and left alone.
+
+Open, in order of weight: the 134 missing issues (retry the 13 HTTP 500 cases; inspect the 120 and the one 401 item;
+state the result in this log and in the data paper's coverage note); the accuracy of the assembly on corpus issues
+(the ~400-record human sample not started; no model-check judgments since 5 October; Codex's 99.9% recall is on its
+42-story development set, not a held-out sample); the 57,926 records needing a look; the 33 held issues; Prof.
+Jae-Yon Lee's offer of computing power (ADHO; a decision for Heejin, now less pressing since the run is finished).
