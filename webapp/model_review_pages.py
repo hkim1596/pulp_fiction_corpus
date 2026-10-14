@@ -28,7 +28,7 @@ _G = {}
 VERDICTS = {"rules": "the rules are right", "model": "the model is right", "neither": "neither", "cannot_tell": "can't tell"}
 SHORT = {"split": "split", "join": "join", "box_in": "box added", "out_ad": "box out as advertising",
          "out_furniture": "box out as furniture", "out_continues": "box to the piece before", "out_new": "new piece inside",
-         "apart": "taken apart"}
+         "apart": "taken apart", "split_later": "split again", "cut_set_aside": "split set aside"}
 _CACHE = {"pool": (None, []), "log": (None, [])}
 
 
@@ -197,10 +197,15 @@ def _scan(c, doc):
             lab = (f"<rect class='lab' x='{bx}' y='{max(y0 - 2, 0)}' width='{w}' height='{fs + 6}' rx='4'/>"
                    f"<text class='labt' x='{bx + 6}' y='{max(y0 - 2, 0) + fs}' font-size='{fs}'>{name}</text>")
         g.append(f"<g class='fbox g{grp}'><rect class='bx' x='{x0}' y='{y0}' width='{x1 - x0}' height='{y1 - y0}'/>{lab}</g>")
+    if c.get("kind") == "split_later":                     # p50s
+        what = " · blue: the part the model had already split off · purple: the part it splits off again at the red box"
+    elif c.get("kind") == "cut_set_aside":
+        what = " · blue: the record as the site shows it, with the split set aside"
+    else:
+        what = " · blue: this record as the site shows it" + (" · purple: the other record" if other else "")
     return (f"<div class='scanwrap'><img src='/img/{iid}/page_{pno:04d}.png' alt='page {pno}'>"
             f"<svg viewBox='0 0 {W} {H}' preserveAspectRatio='none'>{''.join(g)}</svg>"
-            f"<div class='pgcap'>page {pno} · red: the box of the question · blue: this record as the rules made it"
-            + (" · purple: the other record" if other else "") + " · grey dashes: other records and page furniture · "
+            f"<div class='pgcap'>page {pno} · red: the box of the question{what} · grey dashes: other records and page furniture · "
             f"<a href='/issue/{iid}/p/{pno}' target='_blank'>this page full size</a></div></div>")
 
 
@@ -261,7 +266,11 @@ def review_page(qs, user, render=None):
         "the texts beside it, read what the model would change, and choose: THE RULES ARE RIGHT (the record should stay "
         "as it is), THE MODEL IS RIGHT (the change should be made), NEITHER (both are wrong; the record needs another "
         "fix — a note helps), or CAN'T TELL. Keys: 1, 2, 3, 4. The cases are spread over the kinds of change and the "
-        "magazines; the table counts the verdicts by kind."),
+        "magazines; the table counts the verdicts by kind. Since 6 October (p50s) two more kinds: a split the model makes "
+        "again in a part it had already split off (\u201csplit again\u201d; until then only the first split of each record "
+        "was asked here), and a split set aside by a rule because the new part would repeat the title, would leave a part "
+        "with no text of its own, or would cut a contents page (\u201csplit set aside\u201d; THE RULES ARE RIGHT means the "
+        "rule was right to set it aside)."),
         "<h1>Model check review</h1>",
         f"<p class='muted'>{len(P):,} disagreements waiting in the issues the model has checked so far "
         f"(the list is renewed by the site refresh). Judged so far: "

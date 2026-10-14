@@ -36,6 +36,13 @@ corrected (data/annotations/<id>.jsonl) is not written again: the corrections ar
 made on. Rerun freely: an issue is written only when one of its sources is newer than the live file, or when the live
 file was written in another mode.
 
+Since p50q the model's changes are applied, flagged or set aside kind by kind (settings.publish.kinds; s12 records_with
+builds the records with the applied kinds). Since p50s (Heejin, 6 October 2026, after PASTE 9k) s12's cut rules
+(tidy_cuts) set aside the splits that make a part repeating the title, a part with no text of its own on either side of
+the cut, or a short part of a contents page; the record keeps a note, "cut at <box> set aside: <why> (<confidence>)",
+published as set aside (kind cut_set_aside, not flagged). A split in a part the model had split off is a further cut
+(kind split_later), with its own policy; both kinds have their own cases on the review page (later_cases).
+
     python3 pipeline/s13_publish.py              # every assembled corpus issue whose source changed
     python3 pipeline/s13_publish.py --issue <id>
 """
@@ -52,9 +59,10 @@ from corpus_lib import ROOT, settings, all_states, event, log, write_json_atomic
 LIVE = os.path.join(ROOT, "data", "articles")
 ANN = os.path.join(ROOT, "data", "annotations")
 MODES = ("rules_flagged", "llm", "rules")
-S13_NOTE = 4                  # the version of data/articles/<id>/published.json: 2 = with the disagreements (p50p);
+S13_NOTE = 5                  # the version of data/articles/<id>/published.json: 2 = with the disagreements (p50p);
                               # 3 = the model's changes applied, flagged or set aside kind by kind (p50q);
-                              # 4 = a part the model made is not flagged for the change that made it (p50r)
+                              # 4 = a part the model made is not flagged for the change that made it (p50r);
+                              # 5 = the cut rules: cuts set aside, further cuts as their own kind (p50s)
 POLICIES = ("apply", "apply_flag", "flag", "ignore")
 DEFAULT_POLICY = "flag"
 POOL = os.path.join(ROOT, "data", "review", "model_disagreements.jsonl")
@@ -142,6 +150,10 @@ def plain(change, labels, titles):
     m = re.match(r"^split at (\d+:\d+): the rest is \S+ \(([\d.]+)\)$", change)
     if m:
         return f"the model would split this record: a new piece begins at {labels(m.group(1))} (sure {m.group(2)})"
+    m = re.match(r"^cut at (\d+:\d+) set aside: (.+) \(([\d.]+)\)$", change)
+    if m:
+        return (f"the model would split this record: a new piece begins at {labels(m.group(1))} (sure {m.group(3)}); "
+                f"a rule sets the split aside: {m.group(2)}")
     m = re.match(r"^(\d+:\d+) out as advertising \(([\d.]+)\)$", change)
     if m:
         return f"the model would move box {labels(m.group(1))} out of this record as advertising (sure {m.group(2)})"
@@ -173,6 +185,8 @@ KINDS = {                     # the kinds of disagreement, in the words of the r
     "out_continues": "the model would move a box to the piece before",
     "out_new": "the model would begin a new piece at a box inside the record",
     "apart": "the model would take the record apart",
+    "split_later": "the model would split again a piece it had split off",
+    "cut_set_aside": "a split the model would make, set aside by a rule",
 }
 _PATTERNS = [(re.compile(p), k, ik, io, ic) for p, k, ik, io, ic in (
     (r"^split at (\d+:\d+): the rest is (\S+) \(([\d.]+)\)$", "split", 1, None, 3),
@@ -183,7 +197,8 @@ _PATTERNS = [(re.compile(p), k, ik, io, ic) for p, k, ik, io, ic in (
     (r"^(\d+:\d+) in \((\w+), ([\d.]+)\)$", "box_in", 1, None, 3),
     (r"^(\S+) joined at (\d+:\d+) \(([\d.]+)\)$", "join", 2, 1, 3),
     (r"^(\S+) joined to (\S+) at (\d+:\d+) \(([\d.]+)\)$", "join", 3, 2, 4),
-    (r"^(\S+) taken apart$", "apart", None, None, None))]
+    (r"^(\S+) taken apart$", "apart", None, None, None),
+    (r"^cut at (\d+:\d+) set aside: (.+) \(([\d.]+)\)$", "cut_set_aside", 1, None, 3))]
 
 
 def parse_change(c):
@@ -198,14 +213,16 @@ def parse_change(c):
 def kinds_policy():
     """kind of change -> apply | apply_flag | flag | ignore (settings.publish.kinds; Heejin's choice, 6 October 2026,
     after the model check review). A kind not named there is flagged."""
-    k = (settings().get("publish") or {}).get("kinds") or {}
+    k = dict((settings().get("publish") or {}).get("kinds") or {})
+    k.setdefault("cut_set_aside", "ignore")           # p50s: a cut set aside by a rule is not flagged unless settings say so
+    k.setdefault("split_later", k.get("split"))       # p50s: a further cut follows the splits unless settings say otherwise
     return {kind: (k.get(kind) if k.get(kind) in POLICIES else DEFAULT_POLICY) for kind in KINDS}
 
 
 def apply_kinds(policy):
     """The decision kinds s12 applies for a policy (s12 decision_kind): a free box made advertising goes with the
     advertising, a record begun from text before any title goes with the new pieces."""
-    out = {k for k, p in policy.items() if p in ("apply", "apply_flag")}
+    out = {k for k, p in policy.items() if p in ("apply", "apply_flag") and k != "cut_set_aside"}
     if "out_ad" in out:
         out.add("new_ad")
     if "out_new" in out:
@@ -265,6 +282,38 @@ def plain_made(why, labels, titles):
     return "made by the model: " + why
 
 
+def made_change_kind(c, otype):
+    """The kind of a change noted on a part the model made: a split there is a further cut (split_later, p50s)."""
+    k = refined_kind(c, otype)
+    return "split_later" if k == "split" else k
+
+
+def later_cases(iid, doc):
+    """The review's cases that only the published records show (p50s): a further cut in a part the model had split off
+    (split_later; the part before in blue, the new part in purple) and a cut set aside by a rule in such a part
+    (cut_set_aside). The parts the model made are named by their ids in the published records, which the review page
+    draws. Call after annotate_checked."""
+    labels = Labels(iid)
+    titles = {a["article_id"]: a.get("title") for a in doc.get("articles", [])}
+    out = []
+    for r in doc.get("articles", []):
+        if not _is_made(r["article_id"]):
+            continue
+        mc = r.get("model_check") or {}
+        for raw in (mc.get("applied") or []) + (mc.get("pending") or []) + (mc.get("ignored") or []):
+            kind, key, other, conf = parse_change(raw)
+            if kind == "split":
+                kind = "split_later"
+                m = re.match(r"^split at \S+: the rest is (\S+)", raw)
+                other = m.group(1) if m else None
+            elif kind != "cut_set_aside":
+                continue
+            out.append({"case": f"{iid}|{kind}|{r['article_id']}|{key}", "record": r["article_id"], "title": r.get("title"),
+                        "type": r.get("type"), "kind": kind, "key": key, "other": other, "conf": conf, "change": raw,
+                        "plain": plain(raw, labels, titles)})
+    return out
+
+
 def _made_kind(why):
     return ("split" if why.startswith("split from") else "out_ad" if why.startswith("advertising from") else
             "out_new" if why.startswith(("a piece begins at", "text before any title")) else "other")
@@ -319,7 +368,8 @@ def model_view(iid, rules_doc, llm_doc, page_records, open_dec):
         L = by_id.get(aid)
         raw = []
         if L is not None and (L.get("llm") or {}).get("kept"):
-            agrees, notes = True, []
+            raw = [c for c in (L.get("llm") or {}).get("changes", []) if parse_change(c)[0] == "cut_set_aside"]   # p50s
+            agrees, notes = not raw, [plain(c, labels, titles) for c in raw]
         elif L is not None:
             agrees = False
             raw = [c for c in (L.get("llm") or {}).get("changes", [])
@@ -350,6 +400,9 @@ def annotate_checked(iid, doc, rules_doc, view, policy, page_records, open_dec, 
     dec = _decisions(page_records)
     labels = Labels(iid)
     titles = {a["article_id"]: a.get("title") for a in rules_doc.get("articles", [])}
+    for a in doc.get("articles", []):                 # the parts the model made, by their own titles (p50s)
+        if a.get("title") and not titles.get(a["article_id"]):
+            titles[a["article_id"]] = a.get("title")
     otype = owner_types(rules_doc)
     skip = ("split from", "advertising from", "a piece begins at", "text before any title")
     n_look = 0
@@ -363,17 +416,25 @@ def annotate_checked(iid, doc, rules_doc, view, policy, page_records, open_dec, 
         flags = list(r.get("flags") or [])
         if _is_made(aid):
             why = own[0] if own else ""
-            kind = _made_kind(why)
-            applied = [c for c in own[1:] if not c.startswith(skip)]
-            flags += [plain_made(why, labels, titles)] + [plain_applied(c, labels, titles) for c in applied]
+            rest = [c for c in own[1:] if not c.startswith(skip)]
+            set_aside = [c for c in rest if parse_change(c)[0] == "cut_set_aside"]           # p50s: the cut rules
+            applied = [c for c in rest if c not in set_aside]
+            flag_set_aside = policy.get("cut_set_aside") == "flag"
+            flags += ([plain_made(why, labels, titles)]
+                      + [plain_applied(c, labels, titles).replace("the model split this record", "the model split this part again")
+                         for c in applied]
+                      + ([plain(c, labels, titles) for c in set_aside] if flag_set_aside else []))
             r["assembly"] = "made by the model (from the rules' records)"
             # the record a change came from carries the flag (a split's first part, a join's record): the part the model
-            # made is not flagged for the same change again (p50r; one flag per change, not two)
-            look = any(policy.get(refined_kind(c, otype)) == "apply_flag" for c in applied)
-            r["model_check"] = {"agrees": False, "made": why, "applied": applied, "pending": [], "ignored": [], "open": len(opens)}
+            # made is not flagged for the same change again (p50r; one flag per change, not two). A split in a part the
+            # model made is a further cut, of the kind split_later (p50s).
+            look = (any(policy.get(made_change_kind(c, otype)) == "apply_flag" for c in applied)
+                    or (flag_set_aside and bool(set_aside)))
+            r["model_check"] = {"agrees": False, "made": why, "applied": applied, "pending": set_aside if flag_set_aside else [],
+                                "ignored": [] if flag_set_aside else set_aside, "open": len(opens)}
         else:
             v = view.get(aid) or {"agrees": True, "changes": [], "notes": []}
-            applied = [c for c in own if not c.startswith(skip)]
+            applied = [c for c in own if not c.startswith(skip) and parse_change(c)[0] != "cut_set_aside"]
             pending, ignored = [], []
             for raw, note in zip(v.get("changes") or [], v.get("notes") or []):
                 pol = policy.get(refined_kind(raw, otype), DEFAULT_POLICY)
@@ -381,6 +442,12 @@ def annotate_checked(iid, doc, rules_doc, view, policy, page_records, open_dec, 
                     pending.append((raw, note))
                 elif pol == "ignore":
                     ignored.append(raw)
+            for c in own:                                   # p50s: the cuts set aside here, also when the model's view is older
+                if parse_change(c)[0] == "cut_set_aside" and c not in ignored and c not in [x for x, _ in pending]:
+                    if policy.get("cut_set_aside") == "flag":
+                        pending.append((c, plain(c, labels, titles)))
+                    else:
+                        ignored.append(c)
             flags += [plain_applied(c, labels, titles) for c in applied] + [n for _, n in pending]
             if applied:
                 r["assembly"] = "rules, with the model's changes applied" + ("; it would change more (see the flags)" if pending else "")
@@ -492,6 +559,8 @@ def publish_issue(iid, mode="rules_flagged", look_below=0.9, force=False):
             doc = dict(rules_doc, articles=built["articles"], furniture=built["furniture"], model_applied=applied_kinds,
                        backend=f"{rules_doc.get('backend', 'rules')} + the model's changes ({', '.join(applied_kinds)})")
         n_look = annotate_checked(iid, doc, rules_doc, view, policy, prs, open_dec, look_below)
+        seen = {c["case"] for c in cases}
+        cases += [c for c in later_cases(iid, doc) if c["case"] not in seen]
     elif source == "llm":
         n_look = annotate(doc, source, look_below, open_dec=_open_decisions(llm_dir))
     else:
@@ -524,7 +593,12 @@ def publish_all(force=False):
         st = states.get(iid)
         if not st or "assembled" not in st["stages"]:
             continue
-        what, source, n, n_look = publish_issue(iid, mode, look_below, force)
+        try:
+            what, source, n, n_look = publish_issue(iid, mode, look_below, force)
+        except Exception as e:                       # one issue's fault does not stop the others (p50s)
+            log("s13", f"{iid}: not published ({e!r}); the live records stay as they were")
+            counts["failed"] = counts.get("failed", 0) + 1
+            continue
         if what == "published":
             counts["published"] += 1
             counts[{"rules+model": "from_rules_and_model", "llm": "from_llm"}.get(source, "from_rules")] += 1
@@ -621,6 +695,39 @@ def selftest():
     assert a["t_a003"]["assembly"].endswith("agrees") and a["t_a003"]["needs_look"] and "llm" not in a["t_a003"]       # 0.8 sure
     assert n == 3, n
     assert refined_kind("3:4 in (previous, 0.99)", {"3:4": "ad"}) == "out_continues" and refined_kind("3:4 in (previous, 0.99)", {}) == "box_in"
+    # p50s: the cuts set aside by a rule, and the further cuts
+    sa = "cut at 3:1 set aside: the new piece repeats the title (0.97)"
+    assert parse_change(sa) == ("cut_set_aside", "3:1", None, 0.97) and "a rule sets the split aside: the new piece repeats" in plain(sa, Labels("t"), {})
+    assert made_change_kind("split at 4:2: the rest is t_a9003 (0.95)", {}) == "split_later"
+    assert "cut_set_aside" not in apply_kinds(dict(pol, cut_set_aside="apply", split_later="apply_flag")) and "split_later" in apply_kinds(dict(pol, split_later="apply_flag"))
+    pol5 = dict(pol, split_later="apply_flag", cut_set_aside="ignore")
+    rules5 = {"articles": [
+        {"article_id": "t_a001", "title": "The Red Moon", "fragments": [{"page": 1, "region_ids": [1, 2]}, {"page": 3, "region_ids": [0, 1]}], "flags": []},
+        {"article_id": "t_a002", "title": "Wolves", "fragments": [{"page": 4, "region_ids": [0, 1, 2]}], "flags": []}]}
+    llm5 = {"articles": [
+        {"article_id": "t_a001", "llm": {"kept": True, "changes": [sa]}},
+        {"article_id": "t_a002", "llm": {"kept": False, "changes": ["split at 4:1: the rest is t_a9001 (0.96)"]}},
+        {"article_id": "t_a9001", "llm": {"kept": False, "changes": ["split from t_a002 at 4:1 (0.96)", "split at 4:2: the rest is t_a9002 (0.95)"]}},
+        {"article_id": "t_a9002", "llm": {"kept": False, "changes": ["split from t_a9001 at 4:2 (0.95)", "cut at 4:3 set aside: the new piece has no text of its own (0.94)"]}}]}
+    v5 = model_view("t", rules5, llm5, [], {})
+    assert not v5["t_a001"]["agrees"] and "a rule sets the split aside" in v5["t_a001"]["notes"][0], v5["t_a001"]
+    pub5 = {"articles": [
+        {"article_id": "t_a001", "title": "The Red Moon", "fragments": rules5["articles"][0]["fragments"], "flags": [], "llm": {"kept": True, "changes": [sa]}},
+        {"article_id": "t_a002", "title": "Wolves", "fragments": [{"page": 4, "region_ids": [0]}], "flags": [],
+         "llm": {"kept": False, "changes": ["split at 4:1: the rest is t_a9001 (0.96)"]}},
+        {"article_id": "t_a9001", "title": "Snow", "fragments": [{"page": 4, "region_ids": [1]}], "flags": [],
+         "llm": {"kept": False, "changes": ["split from t_a002 at 4:1 (0.96)", "split at 4:2: the rest is t_a9002 (0.95)"]}},
+        {"article_id": "t_a9002", "title": "Ice", "fragments": [{"page": 4, "region_ids": [2, 3]}], "flags": [],
+         "llm": {"kept": False, "changes": ["split from t_a9001 at 4:2 (0.95)", "cut at 4:3 set aside: the new piece has no text of its own (0.94)"]}}]}
+    n = annotate_checked("t", pub5, rules5, v5, pol5, [], {}, 0.9)
+    a = {r["article_id"]: r for r in pub5["articles"]}
+    assert a["t_a001"]["assembly"].endswith("disagreement set aside") and not a["t_a001"]["needs_look"] and a["t_a001"]["model_check"]["ignored"] == [sa], a["t_a001"]
+    assert a["t_a002"]["needs_look"] and a["t_a9001"]["needs_look"] and not a["t_a9002"]["needs_look"], [(k, x["needs_look"]) for k, x in a.items()]
+    assert a["t_a9002"]["model_check"]["ignored"] == ["cut at 4:3 set aside: the new piece has no text of its own (0.94)"] and not a["t_a9002"]["model_check"]["applied"]
+    assert any(f.startswith("applied: the model split this part again") for f in a["t_a9001"]["flags"]), a["t_a9001"]["flags"]
+    assert n == 2, n
+    lc = {(c["kind"], c["record"], c["key"], c["other"]) for c in later_cases("t", pub5)}
+    assert lc == {("split_later", "t_a9001", "4:2", "t_a9002"), ("cut_set_aside", "t_a9002", "4:3", None)}, lc
     print("s13 selftest ok")
 
 

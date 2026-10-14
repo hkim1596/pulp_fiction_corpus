@@ -849,11 +849,13 @@ def fmt3(x):
 
 def is_title_box(title, k, pages):
     """The box carries the title itself (not body text the model gave the piece's title with): its text begins with
-    the title, or is not much longer than it."""
+    the title and is not much longer than a title with a by-line or subtitle (p50s: a paragraph that merely begins
+    with the words the model took for the title is body text), or is not much longer than the title."""
     pn, i = map(int, k.split(":"))
     t = " ".join(region_text(pages[pn]["regions"][i]).lower().split())
     ti = " ".join(str(title).lower().split())
-    return bool(ti) and (t.startswith(ti[: max(4, len(ti) // 2)]) or len(t) <= 1.5 * len(ti) + 4)
+    return bool(ti) and ((t.startswith(ti[: max(4, len(ti) // 2)]) and len(t) <= max(3 * len(ti), len(ti) + 60))
+                         or len(t) <= 1.5 * len(ti) + 4)
 
 
 def decision_kind(j, R, r_ed, k, rl, last_ed):
@@ -867,7 +869,9 @@ def decision_kind(j, R, r_ed, k, rl, last_ed):
         return "out_ad" if R is not None else "new_ad"
     if j == "new":
         if r_ed:
-            return None if rl.get(k, {}).get("joins") == "new" else "split"
+            if rl.get(k, {}).get("joins") == "new":
+                return None
+            return "split" if R.get("_orig") is not None else "split_later"     # p50s: a cut in a piece the model cut off
         return "out_new"
     if r_ed:                                                         # previous, caption, notice
         return "join" if (rl.get(k, {}).get("joins") == "new" and last_ed is not None and last_ed is not R) else None
@@ -876,7 +880,134 @@ def decision_kind(j, R, r_ed, k, rl, last_ed):
     return "orphan" if R is None else None
 
 
-def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc=None, rl=None, apply=None):
+TEXTLESS_ROLES = ("title", "subtitle", "author", "teaser", "caption", "note", "synopsis")   # boxes kept out of a record's text
+
+
+def _norm_title(t):
+    return re.sub(r"[^a-z0-9]", "", (t or "").lower())
+
+
+def cut_rules():
+    """settings.llm_link.cut_rules (p50s): which of the model's cuts are set aside."""
+    c = (settings().get("llm_link") or {}).get("cut_rules") or {}
+    return {"same_title": bool(c.get("same_title", True)), "no_text": bool(c.get("no_text", True)),
+            "contents_max_words": int(c.get("contents_max_words", 300))}
+
+
+def tidy_cuts(recs, pages, rules=None):
+    """The cut rules (p50s; Heejin, 6 October 2026, after PASTE 9k showed that such cuts are almost always wrong: "Set
+    aside all three"). A cut the model made in a record is set aside, and the piece it made goes back, where
+        the new piece repeats the title of the piece it was cut from, or of an earlier piece of the same record
+            (it goes back to that piece: a story resumed after an advertisement or a filler is one record again);
+        the cut leaves a piece with no text of its own (only a title, by-line, teaser, subtitle, caption or note): the
+            piece before the cut (a heading cut off from its text: the text goes back to it), or the new piece (it goes
+            back to the piece before);
+        the record cut is a contents page and the part cut off has no more than contents_max_words words (a story the
+            rules ran into the contents page is still cut off).
+    The pieces are taken last made first, so that a piece's own later pieces are settled before the piece itself. The
+    record the cut was in keeps a note, "cut at <box> set aside: <why> (<confidence>)"; the notes of the piece go with
+    its boxes; a rules' record left with its own boxes and only such notes is the rules' record again. Returns the
+    number of cuts set aside."""
+    rules = rules or cut_rules()
+    by_id = {r["article_id"]: r for r in recs}
+    made = []
+    for r in recs:
+        ch = r["llm"]["changes"]
+        if r.get("_orig") is None and ch:
+            m = re.match(r"^split from (\S+) at (\d+:\d+) \(([\d.]+)\)$", ch[0])
+            if m:
+                made.append((r["article_id"], m.group(1), m.group(2), m.group(3)))
+    parent_of = {x: p for x, p, _k, _c in made}
+
+    def chain(aid):                                       # the pieces before: the record it was cut from first
+        out = []
+        while aid in parent_of and len(out) < 1000:
+            aid = parent_of[aid]
+            out.append(aid)
+        return out
+
+    def own_words(r):
+        n = 0
+        for key in r["_keys"]:
+            if r["roles"].get(key) in TEXTLESS_ROLES:
+                continue
+            pno, i = map(int, key.split(":"))
+            try:
+                n += len(region_text(pages[pno]["regions"][i]).split())
+            except (KeyError, IndexError):
+                pass
+        return n
+
+    n_set = 0
+    for xid, pid, k, conf in reversed(made):
+        X, P = by_id.get(xid), by_id.get(parent_of.get(xid, pid))
+        if X is None or P is None:
+            continue
+        before = chain(xid)
+        root = by_id.get(before[-1]) if before else None
+        target, why = None, None
+        t = _norm_title(X.get("title"))
+        if rules["same_title"] and t:
+            for aid in before:
+                A = by_id.get(aid)
+                if A is not None and _norm_title(A.get("title")) == t:
+                    target, why = A, "the new piece repeats the title"
+                    break
+        words = own_words(X)
+        in_toc = root is not None and root.get("type") == "toc" and root.get("_orig") is not None
+        if target is None and in_toc:
+            if words <= rules["contents_max_words"]:
+                target, why = P, "in a contents page"
+            # a longer text cut off from a contents page (a story the rules ran into it) stays cut off
+        elif target is None and rules["no_text"]:
+            if own_words(P) == 0:
+                target, why = P, "the piece before the cut has no text of its own"     # a heading cut off from its text
+            elif words == 0:
+                target, why = P, "the new piece has no text of its own"
+        if target is None:
+            continue
+        tid = target["article_id"]
+        o = target.get("_orig")
+        o_keys = {f"{f['page']}:{i}" for f in (o or {}).get("fragments", []) for i in f.get("region_ids", [])}
+        o_roles = (o or {}).get("roles") or {}
+        for key in list(X["_keys"]):
+            role = X["roles"].pop(key, None)
+            if key in o_keys:
+                role = o_roles.get(key)                   # the rules' own role for a box of the rules' record
+            target["_keys"].add(key)
+            if role and not is_ad_type(target["type"]):
+                target["roles"][key] = role
+        X["_keys"] = set()
+        target["_changed"] = True
+        cut = f"split at {k}: the rest is {xid} ("
+        P["llm"]["changes"] = [f"cut at {k} set aside: {why} ({conf})" if c.startswith(cut) else c for c in P["llm"]["changes"]]
+        target["llm"]["changes"].extend(X["llm"]["changes"][1:])
+        target["llm"]["confidence_min"] = min(target["llm"]["confidence_min"], X["llm"]["confidence_min"])
+        target["llm"]["tiers"].update(X["llm"]["tiers"])
+        target["flags"] += [f for f in X.get("flags") or [] if f not in target["flags"]]
+        rx = re.compile(rf"\b{re.escape(xid)}\b")
+        for r in recs:
+            if r is not X and any(xid in c for c in r["llm"]["changes"]):
+                r["llm"]["changes"] = [rx.sub(tid, c) for c in r["llm"]["changes"]]
+        for x, p in list(parent_of.items()):
+            if p == xid:
+                parent_of[x] = tid
+        parent_of.pop(xid, None)
+        del by_id[xid]
+        recs.remove(X)
+        n_set += 1
+    for r in recs:                                        # a rules' record whose cuts were all set aside is the rules' record again
+        o = r.get("_orig")
+        if o is None or not r.get("_changed"):
+            continue
+        o_keys = {f"{f['page']}:{i}" for f in o.get("fragments", []) for i in f.get("region_ids", [])}
+        if r["_keys"] == o_keys and all(re.match(r"^cut at \S+ set aside: ", c) for c in r["llm"]["changes"]):
+            r["_changed"] = False
+            r["roles"] = dict(o.get("roles") or {})
+    return n_set
+
+
+def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc=None, rl=None, apply=None, tidy=True):
     """The model's decisions applied to the rules' records (p50m). Where the model agrees with the rules, the rules'
     record is kept as it is — with its resumptions after fillers, advertising and jumps, which links from box to box
     cannot express. Where it disagrees, the record is changed at that box:
@@ -888,7 +1019,10 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
         furniture or nothing
     Every change is listed in the record's llm.changes with the model's confidence. Without the rules' records (no
     assembly), the records are built from the decisions alone. apply (p50q): a set of decision kinds (decision_kind);
-    a decision of another kind is not applied and the box stays as the rules have it (None: every decision)."""
+    a decision of another kind is not applied and the box stays as the rules have it (None: every decision). A cut in a
+    piece the model had already cut off is of the kind split_later (p50s). tidy (p50s): the cut rules (tidy_cuts) set
+    aside the cuts that make a piece repeating the title, a piece with no text of its own, or a short part of a
+    contents page."""
     from s08_assemble_rules import clean_text, join_boxes
     order, n = {}, 0
     for pno in sorted(pages):
@@ -1036,6 +1170,7 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
         if R is not None:
             R["llm"]["confidence_min"] = min(R["llm"]["confidence_min"], conf)
             R["llm"]["tiers"][tier] += 1
+    n_set_aside = tidy_cuts(recs, pages) if tidy else 0      # p50s: the cuts set aside by the cut rules
     out = []
     for r in recs:
         if not r["_keys"]:
@@ -1071,7 +1206,8 @@ def build_records(iid, pages, page_records, meta, variant=OUT_VARIANT, rules_doc
             "checks": {"records": len(out), "story_records": sum(1 for r in out if r["type"] == "story"),
                        "records_kept_from_rules": sum(1 for r in out if r["llm"].get("kept")),
                        "records_changed": sum(1 for r in out if not r["llm"].get("kept")),
-                       "unassigned_regions": 0, "double_owned_regions": 0, "flags": sum(len(r.get("flags") or []) for r in out)}}
+                       "unassigned_regions": 0, "double_owned_regions": 0, "flags": sum(len(r.get("flags") or []) for r in out),
+                       "cuts_set_aside": n_set_aside}}
 
 
 def model_type(b):
@@ -1514,7 +1650,94 @@ def selftest():
     assert set(fl) == {1, 2} and ans["boxes"][1]["confidence"] == 0.0, fl                    # nothing could be read: the rules, flagged
     ans, fl, c = settle(first, None, {3, 4}, 0.85, {"previous", "new", "advert"}, fb)
     assert set(fl) == {3} and ans["boxes"][3]["joins"] == "previous", fl                       # the second reading failed: the first stands, flagged where it matters
+    _selftest_cut_rules()
     print("s12 selftest ok")
+
+
+def _selftest_cut_rules():
+    """p50s: the cut rules (tidy_cuts) and the kind of a further cut."""
+    def pg(pno, texts):
+        return {"page": pno, "width": 1000, "height": 1500,
+                "regions": [{"label": "Text", "bbox": [0, 60 + 100 * i, 1000, 150 + 100 * i], "text": t, "order": i} for i, t in enumerate(texts)]}
+    long_text = " ".join(["word"] * 320)
+    pages = {1: pg(1, ["THE RED MOON", "By A. Merritt", "The night was cold and the", "moon rose red over the hills"]),
+             2: pg(2, ["BUY WAR BONDS TODAY", "the wolves came down to the river", "THE END"]),
+             3: pg(3, ["CONTENTS", "The Bulldog Breed ..... 12", "Wolf Trail ..... 40", "Our Cover this month", long_text]),
+             4: pg(4, ["THE DIRTY GUY", "Jerry Duggan rolled into Butte from Salt Lake", "on a horse train and stayed",
+                       "WOLVES OF THE NORTH", "The snow had fallen for a week and the"])}
+    story = {"article_id": "u_a1", "type": "story", "title": "The Red Moon", "roles": {"1:0": "title", "1:1": "author"},
+             "fragments": [{"page": 1, "region_ids": [0, 1, 2, 3]}, {"page": 2, "region_ids": [1, 2]}], "flags": [],
+             "pages": [1, 2], "text": "(the rules' text)", "n_regions": 6}
+    ad = {"article_id": "u_a2", "type": "ad", "title": None, "roles": {}, "fragments": [{"page": 2, "region_ids": [0]}], "flags": [],
+          "pages": [2], "text": "BUY WAR BONDS TODAY", "n_regions": 1}
+    toc = {"article_id": "u_a3", "type": "toc", "title": "Contents", "roles": {"3:0": "title"},
+           "fragments": [{"page": 3, "region_ids": [0, 1, 2, 3, 4]}], "flags": [], "pages": [3], "text": "(contents)", "n_regions": 5}
+    two = {"article_id": "u_a4", "type": "story", "title": "The Dirty Guy", "roles": {"4:0": "title"},
+           "fragments": [{"page": 4, "region_ids": [0, 1, 2, 3, 4]}], "flags": [], "pages": [4], "text": "(two stories)", "n_regions": 5}
+    rules_doc = {"articles": [story, ad, toc, two], "furniture": []}
+    owner = {}
+    for rec in rules_doc["articles"]:
+        for fr in rec["fragments"]:
+            for i in fr["region_ids"]:
+                owner[f"{fr['page']}:{i}"] = (rec, rec["roles"].get(f"{fr['page']}:{i}"))
+    rl = rules_labels(pages, owner, set())
+
+    def prs(answers):
+        return [{"page": p, "n_boxes": len(a), "keymap": {str(k + 1): k for k in range(len(a))}, "tier": "local",
+                 "boxes": {str(k + 1): dict({"confidence": 0.97}, **b) for k, b in enumerate(a)}} for p, a in sorted(answers.items())]
+    base = {1: [{"joins": "new", "kind": "story", "title": "The Red Moon"}, {"joins": "caption"}, {"joins": "previous"}, {"joins": "previous"}],
+            2: [{"joins": "advert"}, {"joins": "previous"}, {"joins": "notice"}],
+            3: [{"joins": "new", "kind": "contents", "title": "Contents"}, {"joins": "previous"}, {"joins": "previous"}, {"joins": "previous"},
+                {"joins": "previous"}],
+            4: [{"joins": "new", "kind": "story", "title": "The Dirty Guy"}, {"joins": "previous"}, {"joins": "previous"},
+                {"joins": "previous"}, {"joins": "previous"}]}
+
+    def build(changes, tidy=True):
+        a = {p: [dict(b) for b in bs] for p, bs in base.items()}
+        for (p, i), b in changes.items():
+            a[p][i] = b
+        d = build_records("u", pages, prs(a), {"id": "u"}, rules_doc=rules_doc, rl=rl, tidy=tidy)
+        return {r["article_id"]: r for r in d["articles"]}, d["checks"]
+    # 1. the same title cut again and again (in a rules' record, then in the piece cut off): both set aside, the rules' record kept
+    same = {(1, 2): {"joins": "new", "kind": "story", "title": "The Red Moon"}, (2, 1): {"joins": "new", "kind": "story", "title": "THE RED MOON"}}
+    raw, _ = build(same, tidy=False)
+    assert "u_a9001" in raw and "u_a9002" in raw and raw["u_a9001"]["llm"]["changes"][1].startswith("split at 2:1"), raw
+    recs, chk = build(same)
+    assert set(recs) == {"u_a1", "u_a2", "u_a3", "u_a4"} and chk["cuts_set_aside"] == 2, (sorted(recs), chk)
+    assert recs["u_a1"]["llm"]["kept"] and recs["u_a1"]["text"] == "(the rules' text)", recs["u_a1"]
+    ch = recs["u_a1"]["llm"]["changes"]
+    assert ch == ["cut at 1:2 set aside: the new piece repeats the title (0.97)", "cut at 2:1 set aside: the new piece repeats the title (0.97)"], ch
+    # 2. a by-line made a piece of its own, then the story's own title again: the story goes back to the rules' record, the by-line too
+    byline = {(1, 1): {"joins": "new", "kind": "story", "title": "By A. Merritt"}, (1, 2): {"joins": "new", "kind": "story", "title": "The Red Moon"}}
+    recs, chk = build(byline)
+    assert set(recs) == {"u_a1", "u_a2", "u_a3", "u_a4"} and recs["u_a1"]["llm"]["kept"] and recs["u_a1"]["roles"].get("1:1") == "author", recs["u_a1"]
+    assert any("no text of its own" in c for c in recs["u_a1"]["llm"]["changes"]), recs["u_a1"]["llm"]["changes"]
+    # 3. a contents page cut at its entries: set aside; a long text cut off from it stays a piece, now cut from the contents page
+    toc_cuts = {(3, 1): {"joins": "new", "kind": "story", "title": "The Bulldog Breed"}, (3, 2): {"joins": "new", "kind": "story", "title": "Wolf Trail"},
+                (3, 4): {"joins": "new", "kind": "story", "title": "The Long Story"}}
+    recs, chk = build(toc_cuts)
+    made = [r for a, r in recs.items() if a.startswith("u_a9")]
+    assert len(made) == 1 and made[0]["title"] == "The Long Story" and made[0]["llm"]["changes"][0].startswith("split from u_a3 at 3:4"), made
+    assert recs["u_a3"]["pages"] == [3] and sum(1 for c in recs["u_a3"]["llm"]["changes"] if "in a contents page" in c) == 2, recs["u_a3"]["llm"]["changes"]
+    assert any(c.startswith("split at 3:4: the rest is " + made[0]["article_id"]) for c in recs["u_a3"]["llm"]["changes"]), recs["u_a3"]["llm"]["changes"]
+    # 4. a real second story inside a rules' record stays cut off; a further cut in it is of the kind split_later
+    real = {(4, 3): {"joins": "new", "kind": "story", "title": "Wolves of the North"}}
+    recs, chk = build(real)
+    made = [r for a, r in recs.items() if a.startswith("u_a9")]
+    assert len(made) == 1 and made[0]["title"] == "Wolves of the North" and chk["cuts_set_aside"] == 0, (made, chk)
+    R = {"_orig": None, "type": "story"}
+    assert decision_kind("new", R, True, "9:9", {}, R) == "split_later" and decision_kind("new", dict(R, _orig={}), True, "9:9", {}, R) == "split"
+    # 5. a heading cut off from its text (the model gives the text another title): the text goes back to the heading
+    heading = {(4, 3): {"joins": "new", "kind": "story", "title": "Wolves of the North"}, (4, 4): {"joins": "new", "kind": "story", "title": "Snow"}}
+    recs, chk = build(heading)
+    made = [r for a, r in recs.items() if a.startswith("u_a9")]
+    assert len(made) == 1 and made[0]["title"] == "Wolves of the North" and made[0]["fragments"] == [{"page": 4, "region_ids": [3, 4]}], made
+    assert made[0]["llm"]["changes"][1:] == ["cut at 4:4 set aside: the piece before the cut has no text of its own (0.97)"], made[0]["llm"]
+    # 6. the rules' title and by-line cut off from the story's text: the story's text goes back to them
+    body = {(1, 2): {"joins": "new", "kind": "story", "title": "Night"}}
+    recs, chk = build(body)
+    assert set(recs) == {"u_a1", "u_a2", "u_a3", "u_a4"} and recs["u_a1"]["llm"]["kept"], sorted(recs)
+    assert recs["u_a1"]["llm"]["changes"] == ["cut at 1:2 set aside: the piece before the cut has no text of its own (0.97)"], recs["u_a1"]["llm"]
 
 
 def main():

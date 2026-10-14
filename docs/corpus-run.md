@@ -242,6 +242,14 @@ the first part, which carries the change; the part the model made is not flagged
 would add to a record or move out as page furniture — listed in the flags, the record needs a look; a new piece begun
 inside a record, a box moved to the piece before, a record taken apart — set aside (not flagged; kept in the record's
 model_check). A record with a decision the model left open, or with a box it was under 0.9 sure of, needs a look too.
+Since 6 October, 15:15 (p50s; Heejin's choice after PASTE 9k: "Set aside all three", "Review them, keep flagged"): the
+cut rules (settings llm_link.cut_rules; s12 tidy_cuts) set aside a split where the new part repeats the title of the
+part before it (it goes back to the part with that title), where the split leaves a part with no text of its own on
+either side, and in a contents page where the part cut off has no more than 300 words; the record keeps the note "cut at
+<box> set aside: <why>" (kind cut_set_aside, not flagged). A split in a part the model had already split off (kind
+split_later) is applied and flagged; both kinds are on the review page. After a change to the cut rules the model's
+stored records are rebuilt from its decisions (python3 pipeline/s12_llm_link.py --rebuild llm, with the follower
+stopped: touch data/corpus/STOP_LLM; PASTE 9m does it in tmux p50s).
 settings.publish.prefer holds the overall choice (rules_flagged; llm would publish the model's records whole, rules the
 rules' alone); a change in either is applied to every issue at the next refresh.
 

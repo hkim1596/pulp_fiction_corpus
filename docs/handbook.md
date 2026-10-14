@@ -141,6 +141,17 @@ on the record it came from (a split: the first part); a part the model
 made needs a look only for a change of its own, an open decision or a
 box under 0.9.
 
+Since v0.21.0 (2026-10-06, p50s; Heejin's choices after PASTE 9k): the
+cut rules of s12 (tidy_cuts; settings llm_link.cut_rules) set aside a
+split whose new part repeats the title of the part before it, a split
+that leaves a part with no text of its own on either side, and a split
+in a contents page (unless the part cut off has more than 300 words);
+the record keeps "cut at <box> set aside: <why>" (kind cut_set_aside,
+not flagged). A split in a part the model had split off is of the kind
+split_later (applied, flagged as "the model split this part again").
+The model check review has both kinds ("split again", "split set
+aside"), with the scan's colours explained under it.
+
 Since v0.19.0 (2026-10-05, p50p; Heejin: "Quick review page"): the
 model check review, /review/model (webapp/model_review_pages.py; Workroom,
 "Model check"). One disagreement between the model and the rules at a

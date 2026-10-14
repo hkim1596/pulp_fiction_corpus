@@ -851,3 +851,157 @@ running), and 9i is the check from now on: 9a's counts and, for the records that
 join, a box the model would add or move out as page furniture, a decision left open, a box under 0.9 — and, for the
 records on the list only because of a box under 0.9, how sure the model was, to show what a lower threshold would take
 off the list.
+
+### 2026-10-06, 12:00 KST — p50r deployed; the first count of why records need a look; most of the list is the model's cuts
+
+PASTE 9g committed p50r (e513cba) and the server took it. PASTE 9h (about 11:51): the selftest passed, the refresh was
+started again, and within 45 seconds 448 of the 1,113 published issues had been made again with one flag per change.
+PASTE 9i ran a minute later, before that first cycle had ended (536 of 1,113), so its counts are still those of p50q
+(the cycle of 11:46):
+- The site: 55,171 records, 13,868 stories; 42,569 records checked by the model; on 13,893 the model differs from the
+  rules; on 10,374 its changes were applied (or the record was made by it); 10,958 need a look; 74 verified. The
+  review's pool: 18,117 cases from 825 issues of 90 magazines. The model had checked 837 issues (123,604 pages; 202 s an
+  issue); in the last hour 14 issues were assembled and 36 checked by the model.
+- The run: 7,107 issues downloaded, 1,120 read and assembled, 29.2 an hour since the start; 1,577.5 GB free. GPU 0 held
+  87 GB at 71% (the reading), GPU 2 was at 100% (the model); GPUs 1 and 3 (the lab's) idle.
+
+Why the 10,958 records needed a look (a record can have more than one reason; in brackets, the records with that
+reason alone):
+
+    an applied split (kept on the list)                    5,496   (4,629)
+    an applied join (kept on the list)                     1,150     (366)
+    a box the model would add                              2,028   (1,442)
+    a box the model would move out as page furniture       1,075     (762)
+    a decision the model left open                           147       (2)
+    a box the model was under 0.9 sure of                    419     (153: 124 at 0.8-0.9, 18 at 0.7-0.8, 10 at 0.5-0.7, 1 under 0.5)
+    more than one reason                                             (1,357)
+    no reason in the flags                                           (2,247)
+
+By how the record was made: made by the model 5,523; rules with the model's changes applied 3,230; rules, the model
+disagrees 2,113; rules, the model agrees 82; disagreement set aside 10.
+
+What it shows:
+1. The 2,247 records with no reason in their flags are parts the model made, on the list only because they were made:
+   the double flag that p50r removes. After the first cycle on p50r the list should be about 8,700.
+2. The 0.9 threshold hardly matters: 153 records are on the list for that alone, and 0.8 would take off 124 of them.
+3. Most of the list is the model's cuts: 5,496 records carry an applied split, 4,629 for no other reason, while the
+   review's pool has 2,210 split cases. The difference is in how a record cut more than once is kept. When the model
+   cuts a rules record, the part after the cut is a new record (s12 build_records), and a further cut lands in that new
+   part and is noted there; the review's cases are taken from the rules' records only (s13 cases_of). So the review
+   shows only the first cut in each record. Sujin's split verdicts (model right on 15 of the 23 she could decide) are
+   about first cuts; the later cuts, about 3,300 of the 5,500, have not been looked at by anyone. The count of last
+   pieces (the 2,247 of point 1) is close to the count of records cut (about 2,200), which fits.
+4. PASTE 9j counts the cuts on the server: pieces per record cut, the rules' type of the records cut, first and later
+   cuts compared (a title from the model, a chapter or number heading at the cut, the length of the new piece, the
+   model's confidence), and twelve later cuts at random with the words on either side, so that the next choice — how
+   the later cuts are reviewed and flagged — rests on what they are.
+
+### 2026-10-06, 12:30 KST — p50r live: 8,998 records need a look; what the model's cuts are
+
+PASTE 9i (12:24), after the first cycle on p50r: all 1,132 published issues made again with one flag per change. The
+site: 56,096 records, 14,249 stories; 43,824 records checked by the model; on 14,311 the model differs from the rules;
+on 10,669 its changes were applied (or the record was made by it); 8,998 need a look (20.5% of the checked records;
+25.7% under p50q at 11:25); 74 verified. Why (in brackets, the records with that reason alone): an applied split 5,647
+(4,757); an applied join 1,225 (409); a box the model would add 2,084 (1,474); a box it would move out as page
+furniture 1,126 (788); a decision left open 154 (2); a box under 0.9 sure 432 (158: 127 at 0.8-0.9, 19 at 0.7-0.8, 11 at
+0.5-0.7, 1 under 0.5); more than one reason 1,410; no record left without a reason. By how the record was made: made by
+the model 3,375; rules with the model's changes applied 3,349; rules, the model disagrees 2,177; rules, the model
+agrees 86; disagreement set aside 11. The review's pool: 18,600 cases from 843 issues of 90 magazines. The model had
+checked 853 issues; in the last hour 30 issues were assembled (the reading at its usual pace again) and 32 checked by
+the model. The run: 7,197 issues downloaded, 1,136 assembled, 1,569 GB free.
+
+PASTE 9j (12:25), the model's cuts in the 853 checked issues: 5,660 cuts in 2,425 of the rules' records. Pieces per
+record cut: 2 pieces 1,488; 3 pieces 373; 4 pieces 167; 5 to 9 pieces 302; 10 or more 95. The records cut, by the
+rules' type: cut once — story 1,070, feature 315, contents page (toc) 65, poem 21; cut more than once — story 715,
+feature 178, contents page 35.
+
+    the model's cuts                       first cuts (in a rules record)   later cuts (in a piece the model cut off)
+    cuts                                              2,425                            3,235
+    the new piece has a title from the model         2,392                            3,138
+    it begins with a chapter, part or number            68                               48
+    words in the new piece, median                      471                               33
+    new pieces under 150 words                          847                            2,087
+    the model sure 0.95 or more / 0.9-0.95 / <0.9   2,337 / 26 / 62                  3,088 / 32 / 115
+
+Twelve later cuts at random: in seven the new piece carries the same title as the record it was cut from — "By W.
+Alexander" (a by-line taken as a title; 12 pieces), "Lord Johnnie" (a record the rules typed as a story; the text at
+this cut is a Dollar Book Club advertisement; 19 pieces), "The Pursuit of Antar" (12 pieces, the cut between an empty title piece and the story's first
+paragraph), "A Long Evening", "By David M. Speaker", "Adventures Buffalo Bill", "Antarctica—AND Our Future" — and five
+new pieces have no text of their own (only a title or a by-line). Four look like real new pieces inside a record the
+rules had made too long: "The Dirty Guy" (10 Story Book, 1921), "The Drought" (Adventure, 1922, in a record titled with
+the masthead), "Mastermind" (Amazing Stories, 1949), "The Closing Months of 1959" (Amazing Stories, 1939); one is a
+next-issue notice ("Beyond Courage").
+
+What it shows: the first cuts are mostly cuts between pieces of normal length; the later cuts are mostly the model
+cutting one piece into fragments — the same title given again and again, a title or by-line made a piece of its own —
+and the model is as sure of them as of the first cuts, so its confidence does not tell them apart. The review page has
+not shown them (it takes its cases from the rules' records). PASTE 9k counts how many cuts give the new piece the same
+title as the piece it is cut from (or no text of its own, or fall in a contents page) and how many records would leave
+the list if such cuts were not made, with samples of what would remain; the choice of a rule for the cuts is put to
+Heejin after it.
+
+### 2026-10-06, 15:15 KST — PASTE 9k; Heejin: three kinds of split set aside, the further splits reviewed (p50s, site v0.21.0)
+
+PASTE 9k, on the 963 issues the model had checked by then:
+
+    the model's splits                                  first (in a rules record)   later (in a part it split off)
+    splits                                                       2,638                        3,487
+    the new part repeats the title of the part before            848                         1,394
+    the new part has no text of its own                          570                         1,197
+    either of the two                                           1,190                        1,959
+    in a contents page                                            100                           232
+    the rest: splits / words in the new part, median     1,448 / 997                   1,528 / 300
+
+Of the 6,108 records that carried a split, 5,110 needed a look for splits alone; 2,067 of them would leave the list if
+the splits repeating a title were not made, 2,761 if those leaving a part without text were not made either, and 298
+if contents pages were not split. The samples: the five first splits repeating the title were all wrong — a teaser
+("Sheathe Your Claws, Hellcat!", "Old Marshals Never Die"), a subtitle ("Undersea Prey"), the title and by-line cut
+off from the story ("The Educated Harpoon", 2,448 words; "For the Flag", 21,319 words). The parts without text were a
+title in two boxes ("The HOODED" | "Liner"), a heading ("A Forgotten Hero of the Air War", "Odes"), a teaser line ("Kay
+Mercedes was beautiful but deadly"). The splits in contents pages cut the entries apart ("The Non-Gravitational
+Vortex", "The Bulldog Breed", "The 500th Shot", "Our Cover", a "Contents" continued). Of ten later splits that would
+remain, three looked right ("All Trains Stop", a filler; "Calvert of Allobar", 24,109 words, cut from "Vigilante
+Justice"; "Future Sky Fighter"), five wrong (an advertisement inside a Buffalo Bill story taken for a new story, which
+then carried the rest of the story; an article on Steinmetz cut from its by-line; a contents entry; a page of book
+advertisements cut book by book; the letters of a "Discussions" column cut letter by letter) and two unclear.
+
+The two questions put to Heejin and his answers, both as recommended:
+- Should the site stop making the splits the samples show to be almost always wrong? — "Set aside all three
+  (Recommended)": no split where the new part repeats the title of the part before it, where it has no text of its own,
+  or inside a contents page unless the part cut off is a long text (over 300 words); the boxes stay in the record, what
+  the model said is kept, not flagged.
+- The splits that remain inside parts the model had split off (about 1,400 expected): — "Review them, keep flagged
+  (Recommended)": they stay made and flagged; the review page shows them as their own kind, with a sample of the splits
+  set aside, so that both can be judged; then Heejin decides as for the other kinds.
+
+p50s does this:
+- s12 tidy_cuts, after the decisions are applied (settings llm_link.cut_rules): a split is set aside and its part goes
+  back where the new part repeats the title of the part it was cut from or of an earlier part of the same record (it goes
+  back to that part, so a story resumed after an advertisement is one record again); where the split leaves a part with
+  no text of its own on either side — the new part (it goes back to the part before), or the part before (a heading cut
+  off from its text, which goes back to the heading: the samples show this side as often, e.g. "The Educated Harpoon",
+  and it is the same rule seen from the other side of the split); and in a contents page where the part cut off has no
+  more than 300 words. The parts are taken last made first, so that a part's own later parts are settled first. The
+  record keeps a note, "cut at <box> set aside: <why> (<confidence>)"; a rules' record whose splits were all set aside is
+  the rules' record again, with the rules' own text.
+- s12 is_title_box: a box that merely begins with the words the model gave as the new part's title, but is much longer
+  than a title, is body text, not a title box (before, such a paragraph was kept out of the record's text, and its part
+  would have counted as having no text).
+- s12 decision_kind: a split in a part the model had split off is of the kind split_later.
+- s13: two more kinds in settings publish.kinds — split_later (apply_flag, as Heejin chose) and cut_set_aside (ignore:
+  not flagged, kept in the record's model_check). A record with set-aside splits only is "rules, checked by the model:
+  disagreement set aside"; a further split is flagged as "applied: the model split this part again …". The review's
+  cases for both kinds come from the published records (later_cases), so that the parts the model made are named as the
+  site names them; publish_all goes on past an issue that fails (it is logged and counted); published.json version 5,
+  so every issue is made again at the next refresh.
+- The review page: the two kinds ("split again", "split set aside"), with their own words under the scan (blue: the
+  part split off before, purple: the part split off again; or the record with the split set aside); site v0.21.0.
+- Tested in the sandbox: the s12 and s13 selftests (a title repeated twice, a by-line made a part, a contents page cut
+  at its entries with a long story kept, a real second story kept and its further split of kind split_later, a heading
+  cut from its text, the rules' title and by-line cut from the story); and the fixture end to end (the follower with a
+  fake lane, s13, the review pool, the review page for both new kinds, the site refresh).
+
+The model's stored records must be made again with the rules: PASTE 9m stops the follower after the issues in hand,
+rebuilds the model's records of every checked issue from its stored decisions (no model is asked), starts the follower
+and the refresh again (the refresh makes every issue again) and restarts the site; it runs in tmux p50s (log
+data/corpus/p50s_deploy.log). PASTE 9l commits p50s; 9n is the check afterwards.
