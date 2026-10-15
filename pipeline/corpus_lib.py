@@ -103,6 +103,30 @@ def issues_config():
     return json.load(open(issues_config_path(), encoding="utf-8"))
 
 
+SET_ASIDE_PATH = os.path.join(ROOT, "config", "corpus_set_aside.json")
+
+
+def set_aside():
+    """Issues set aside after the approval (config/corpus_set_aside.json, p50t; Heejin's decision of 14 October 2026
+    on the 134 issues the download could not get): id -> its entry (ia_identifier, reason, class). They stay in the
+    approved list, so the approval's fingerprint is untouched; no stage touches them, the run does not retry them,
+    and the counts report them apart. The datasheet counts them under their reasons."""
+    try:
+        d = json.load(open(SET_ASIDE_PATH, encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {e["id"]: e for e in d.get("issues", []) if e.get("id")}
+
+
+def active_issues(issues):
+    """The issues a stage works on: the list without the set-aside ones. Returns (issues, set-aside count)."""
+    aside = set_aside()
+    if not aside:
+        return list(issues), 0
+    kept = [i for i in issues if i.get("id") not in aside]
+    return kept, len(issues) - len(kept)
+
+
 LOG_PATH = os.path.join(ROOT, "data", "corpus", "orchestrator.log")
 
 

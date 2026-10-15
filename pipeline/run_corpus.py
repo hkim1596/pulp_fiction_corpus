@@ -45,7 +45,7 @@ from concurrent.futures import ProcessPoolExecutor
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corpus_lib import (ROOT, CORPUS_CONFIG, settings, corpus_config, require_approved, mark, load_state, all_states,  # noqa: E402
-                        free_gb, issue_dirs, write_json_atomic, log, event, partition_issue_ids)
+                        free_gb, issue_dirs, write_json_atomic, log, event, partition_issue_ids, active_issues, set_aside)
 import s01c_fetch as fetch  # noqa: E402
 
 
@@ -355,7 +355,7 @@ def progress(issues, states, started, extra=None):
         left = len(issues) - c[s] - failed[s]
         eta[s] = round(left / rate[s], 1) if rate[s] > 0 else None     # hours
     rec = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "issues": len(issues), "done": dict(c), "pages": dict(pages),
-           "given_up": dict(failed), "per_hour_since_start": {k: round(v, 1) for k, v in rate.items()},
+           "given_up": dict(failed), "set_aside": len(set_aside()), "per_hour_since_start": {k: round(v, 1) for k, v in rate.items()},
            "hours_left_at_this_rate": eta, "free_gb": round(free_gb(), 1),
            "disk_gb": disk_use(), "process_started": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(started)),
            "stop_file": os.path.exists(STOP_FILE)}
@@ -418,8 +418,11 @@ def run(args):
     issues, conflicts = partition_issue_ids(cfg["issues"])
     for iid, sources in conflicts.items():
         log("run", f"holding ambiguous issue id {iid}: {sources}; the other issues continue")
+    issues, n_aside = active_issues(issues)                 # p50t: the set-aside issues are not fetched, retried or counted
+    if n_aside:
+        log("run", f"{n_aside} issues set aside (config/corpus_set_aside.json): not fetched, not counted as missing")
     identity_info = {"approved_issues": len(cfg["issues"]), "held_ambiguous_ids": len(conflicts),
-                     "held_ambiguous_entries": sum(i["id"] in conflicts for i in cfg["issues"])}
+                     "held_ambiguous_entries": sum(i["id"] in conflicts for i in cfg["issues"]), "set_aside": n_aside}
     if conflicts:
         event("issue_id_conflicts", conflicts=conflicts, **identity_info)
     if args.limit:
@@ -607,14 +610,20 @@ def status():
     print(json.dumps(rec, indent=1))
 
 
-def retry_failed():
-    n = 0
+def retry_failed(only=None):
+    """Forget the failure marks, so that the next --run tries those issues again: every failed issue, or only the ids
+    given (p50t: --retry-failed --issues a,b,c). The set-aside issues are never retried."""
+    aside = set_aside()
+    n, skipped = 0, 0
     for iid, s in all_states().items():
-        if s.get("errors"):
-            s["errors"] = []
-            write_json_atomic(os.path.join(ROOT, settings()["paths"]["corpus_state"], f"{iid}.json"), s)
-            n += 1
-    print(f"cleared the failure marks of {n} issues")
+        if not s.get("errors"):
+            continue
+        if iid in aside or (only is not None and iid not in only):
+            skipped += 1; continue
+        s["errors"] = []
+        write_json_atomic(os.path.join(ROOT, settings()["paths"]["corpus_state"], f"{iid}.json"), s)
+        n += 1
+    print(f"cleared the failure marks of {n} issues" + (f"; left alone {skipped} (set aside, or not in the list given)" if skipped else ""))
 
 
 def main():
@@ -626,14 +635,15 @@ def main():
     ap.add_argument("--no-read", action="store_true", help="no Surya (no GPU): download, image only")
     ap.add_argument("--no-download", action="store_true", help="process what is on disk, fetch nothing")
     ap.add_argument("--limit", type=int, default=0, help="only the first N issues of the list (a trial)")
+    ap.add_argument("--issues", default="", help="with --retry-failed: only these issue ids (comma-separated)")
     args = ap.parse_args()
     if args.status:
         status(); return
     if args.retry_failed:
-        retry_failed(); return
+        retry_failed({x.strip() for x in args.issues.split(",") if x.strip()} if args.issues else None); return
     if args.link:
         cfg = corpus_config(); require_approved(cfg, "process")
-        n = link_magazines(cfg["issues"], all_states(), set(), force=True)
+        n = link_magazines(active_issues(cfg["issues"])[0], all_states(), set(), force=True)
         print(f"linked {n} magazines"); return
     if not args.run:
         sys.exit("pass --run, --status, --link or --retry-failed")

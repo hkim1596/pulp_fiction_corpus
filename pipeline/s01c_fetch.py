@@ -8,7 +8,9 @@ For every issue in config/corpus_issues.json (approved=true required; see corpus
   data/raw/<id>/ia_djvu.xml          the archive's positional OCR with page divisions (_djvu.xml)
   data/raw/<id>/scandata.xml         per-leaf scan record (page type, which leaves the access files include, ppi)
   data/masters/<id>/<ident>_jp2.zip  the scan master, kept zipped (one file per issue, no inode flood);
-                                     fallback <ident>.pdf when the item has no JP2 archive
+                                     fallback <ident>.pdf when the item has no JP2 archive; since p50t (14 October
+                                     2026) also a Comic Book ZIP/RAR, a raw zip of page images, or <ident>_pages.zip
+                                     made here from the item's loose page images (20 or more)
   data/pages/<id>/page_NNNN.jpg      working page images, 2,200 px high, JPEG quality 90  (imaging step)
   data/thumbs/<id>/page_NNNN.jpg     300 px thumbnails for the site                        (imaging step)
 
@@ -219,8 +221,36 @@ def pick(files, test):
     return None
 
 
+IMAGE_EXT = (".jpg", ".jpeg", ".png", ".tif", ".tiff", ".webp", ".jp2")
+IMAGE_FORMATS = ("JPEG", "PNG", "TIFF", "JPEG 2000")
+MIN_LOOSE_PAGES = 20            # fewer loose images than this is a cover or an illustration, not a scanned issue (p50t)
+
+
+def page_images(files):
+    """The item's loose page images (one file per page), in page order: the JPEG/PNG/TIFF files that are not the
+    archive's own derivatives (thumbnails, tiles). Returns [] unless there are at least MIN_LOOSE_PAGES."""
+    out = []
+    for f in files:
+        name, fmt = f.get("name", ""), f.get("format", "")
+        low = name.lower()
+        if fmt not in IMAGE_FORMATS and not low.endswith(IMAGE_EXT):
+            continue
+        if fmt in ("JPEG Thumb", "Item Tile") or "_thumb" in low or "__ia_thumb" in low or f.get("source") == "derivative":
+            continue
+        out.append(f)
+    out.sort(key=lambda f: _natkey(f.get("name", "")))
+    return out if len(out) >= MIN_LOOSE_PAGES else []
+
+
+def _natkey(name):
+    """A sort key that puts page_2 before page_10 (numbers compared as numbers)."""
+    return [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", name)]
+
+
 def choose_files(meta):
-    """Which of the item's files we take, by role."""
+    """Which of the item's files we take, by role. The scan master, in order of preference: the archive's JP2 zip;
+    else its PDF; else (p50t, 14 October 2026, for the 134 issues the run could not get) a Comic Book ZIP/RAR of page
+    images, a raw zip of page images, or the loose page images themselves (zipped into one master here)."""
     files = meta.get("files", [])
     low = lambda n: n.lower()
     out = {
@@ -228,11 +258,28 @@ def choose_files(meta):
         "djvu_xml": pick(files, lambda n: low(n).endswith("_djvu.xml")),
         "scandata": pick(files, lambda n: low(n).endswith("_scandata.xml") or low(n) == "scandata.xml"),
         "jp2_zip": pick(files, lambda n: low(n).endswith("_jp2.zip") and not re.search(r"_(raw|orig)_jp2\.zip$", low(n))),
-        "pdf": None,
+        "pdf": None, "cbz": None, "cbr": None, "raw_zip": None, "images": [],
     }
     if not out["jp2_zip"]:
         out["pdf"] = pick(files, lambda n: low(n).endswith(".pdf") and "_text" not in low(n)) or pick(files, lambda n: low(n).endswith(".pdf"))
+    if not out["jp2_zip"] and not out["pdf"]:
+        out["cbz"] = pick(files, lambda n: low(n).endswith(".cbz")) or next((f for f in files if f.get("format") == "Comic Book ZIP"), None)
+        out["cbr"] = pick(files, lambda n: low(n).endswith(".cbr")) or next((f for f in files if f.get("format") == "Comic Book RAR"), None)
+        out["raw_zip"] = next((f for f in files if f.get("format") in ("Generic Raw Book Zip",) or
+                               (low(f.get("name", "")).endswith(".zip") and f.get("format") == "ZIP")), None)
+        out["images"] = page_images(files)
     return out
+
+
+def master_choice(chosen):
+    """(source kind, the file record or the list of image files) for the scan master, or (None, None)."""
+    for kind in ("jp2", "pdf", "cbz", "cbr", "raw_zip"):
+        key = "jp2_zip" if kind == "jp2" else kind
+        if chosen.get(key):
+            return kind, chosen[key]
+    if chosen.get("images"):
+        return "images", chosen["images"]
+    return None, None
 
 
 def fetch_issue(issue, root=None):
@@ -293,22 +340,52 @@ def fetch_issue(issue, root=None):
         got[role] = {"name": f["name"], "bytes": n, "md5": f.get("md5")}
         manifest({"issue": iid, "ident": ident, "file": role, "name": f["name"], "bytes": n, "md5": f.get("md5")})
         time.sleep(dl["delay_between_files_s"])
-    src = None
-    f = chosen["jp2_zip"] or chosen["pdf"]
-    if not f:
-        raise RuntimeError(f"{ident}: no _jp2.zip and no pdf in the item")
-    src = "jp2" if chosen["jp2_zip"] else "pdf"
-    dest = os.path.join(master_dir, os.path.basename(f["name"]))
-    if os.path.exists(dest):
-        got["master"] = {"name": f["name"], "bytes": os.path.getsize(dest), "md5": f.get("md5")}
-    else:
-        n = download_file(f"{server}/{quote(f['name'])}", dest, int(f.get("size") or 0) or None, f.get("md5"))
-        got["master"] = {"name": f["name"], "bytes": n, "md5": f.get("md5")}
-        manifest({"issue": iid, "ident": ident, "file": "master", "name": f["name"], "bytes": n, "md5": f.get("md5"), "src": src})
+    src, f = master_choice(chosen)
+    if not src:
+        raise RuntimeError(f"{ident}: no _jp2.zip, no pdf, no comic-book archive, no zip and fewer than {MIN_LOOSE_PAGES} loose page images in the item")
     leaves = None
-    if src == "jp2":
-        with zipfile.ZipFile(dest) as z:
-            leaves = sum(1 for nm in z.namelist() if nm.lower().endswith(".jp2"))
+    if src == "images":
+        # loose page images: fetched one by one into a folder, then zipped into one master (one file per issue, as
+        # the other sources; the page order is the natural order of the file names)
+        dest = os.path.join(master_dir, f"{ident}_pages.zip")
+        if os.path.exists(dest):
+            got["master"] = {"name": os.path.basename(dest), "bytes": os.path.getsize(dest), "md5": None}
+        else:
+            tmp = os.path.join(master_dir, "_pages")
+            os.makedirs(tmp, exist_ok=True)
+            total = 0
+            for k, pf in enumerate(f, 1):
+                pdest = os.path.join(tmp, f"{k:04d}_{os.path.basename(pf['name'])}")
+                if not os.path.exists(pdest):
+                    total += download_file(f"{server}/{quote(pf['name'])}", pdest, int(pf.get("size") or 0) or None, pf.get("md5"))
+                    time.sleep(dl["delay_between_files_s"])
+                else:
+                    total += os.path.getsize(pdest)
+            part = dest + ".part"
+            with zipfile.ZipFile(part, "w", zipfile.ZIP_STORED) as z:
+                for name in sorted(os.listdir(tmp)):
+                    z.write(os.path.join(tmp, name), name)
+            os.replace(part, dest)
+            shutil.rmtree(tmp, ignore_errors=True)
+            got["master"] = {"name": os.path.basename(dest), "bytes": os.path.getsize(dest), "md5": None, "images": len(f)}
+            manifest({"issue": iid, "ident": ident, "file": "master", "name": os.path.basename(dest), "bytes": total, "src": src, "images": len(f)})
+        leaves = len(f)
+    else:
+        dest = os.path.join(master_dir, os.path.basename(f["name"]))
+        if os.path.exists(dest):
+            got["master"] = {"name": f["name"], "bytes": os.path.getsize(dest), "md5": f.get("md5")}
+        else:
+            n = download_file(f"{server}/{quote(f['name'])}", dest, int(f.get("size") or 0) or None, f.get("md5"))
+            got["master"] = {"name": f["name"], "bytes": n, "md5": f.get("md5")}
+            manifest({"issue": iid, "ident": ident, "file": "master", "name": f["name"], "bytes": n, "md5": f.get("md5"), "src": src})
+        if src == "jp2":
+            with zipfile.ZipFile(dest) as z:
+                leaves = sum(1 for nm in z.namelist() if nm.lower().endswith(".jp2"))
+        elif src in ("cbz", "raw_zip"):
+            with zipfile.ZipFile(dest) as z:
+                leaves = sum(1 for nm in z.namelist() if nm.lower().endswith(IMAGE_EXT) and not nm.endswith("/"))
+            if not leaves:
+                raise RuntimeError(f"{ident}: the zip {f['name']} holds no page images")
     # provenance for the record: the archive's own dates for the item (upload and last change), from the item record
     md = meta.get("metadata") or {}
     rec = {"src": src, "master": os.path.relpath(dest, root), "bytes": sum(v["bytes"] for v in got.values()), "files": got,
@@ -381,7 +458,12 @@ def image_issue(iid, root=None):
     sizes = []
     bad_leaves = []
     n = 0
-    if master.lower().endswith(".zip"):
+    low = master.lower()
+    if low.endswith(".zip") and not _zip_has_jp2(master):            # p50t: a cbz-like zip, a raw zip, or our zip of loose images
+        n, sizes = _image_from_archive(master, "zip", pages_dir, thumbs_dir, img)
+    elif low.endswith((".cbz", ".cbr", ".rar")):
+        n, sizes = _image_from_archive(master, "zip" if low.endswith(".cbz") and zipfile.is_zipfile(master) else "rar", pages_dir, thumbs_dir, img)
+    elif low.endswith(".zip"):
         with zipfile.ZipFile(master) as z:
             names = sorted(nm for nm in z.namelist() if nm.lower().endswith(".jp2"))
             for i, nm in enumerate(names, 1):
@@ -431,6 +513,75 @@ def image_issue(iid, root=None):
     if ppi and med:
         rec["trim_in"] = [round(med[0] / ppi, 2), round(med[1] / ppi, 2)]     # the scanned leaf in inches (from a nominal dpi: a hint, not a measurement)
     return rec
+
+
+def _zip_has_jp2(path):
+    try:
+        with zipfile.ZipFile(path) as z:
+            return any(nm.lower().endswith(".jp2") for nm in z.namelist())
+    except zipfile.BadZipFile:
+        return False
+
+
+def _extract_rar(path, into):
+    """A RAR (Comic Book RAR) unpacked with whichever tool the machine has: bsdtar (libarchive), 7z, unrar."""
+    tools = (["bsdtar", "-xf", path, "-C", into], ["7z", "x", "-y", f"-o{into}", path], ["7za", "x", "-y", f"-o{into}", path],
+             ["unrar", "x", "-o+", "-y", path, into + os.sep])
+    tried = []
+    for cmd in tools:
+        if shutil.which(cmd[0]) is None:
+            continue
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        tried.append(f"{cmd[0]} exit {r.returncode}")
+        if r.returncode == 0:
+            return cmd[0]
+    raise RuntimeError("no tool could unpack the RAR (install bsdtar, p7zip or unrar): " + (", ".join(tried) or "none installed"))
+
+
+def _image_from_archive(master, kind, pages_dir, thumbs_dir, img):
+    """Page images inside a zip (cbz, a raw zip, our zip of loose images) or a RAR (cbr) -> working JPEGs and thumbs,
+    in the natural order of the file names (page_2 before page_10). Returns (pages, sizes)."""
+    from PIL import Image
+    n, sizes = 0, []
+    tmp = os.path.join(pages_dir, "_unpack")
+    shutil.rmtree(tmp, ignore_errors=True)
+    os.makedirs(tmp, exist_ok=True)
+    try:
+        if kind == "zip":
+            with zipfile.ZipFile(master) as z:
+                names = [nm for nm in z.namelist() if nm.lower().endswith(IMAGE_EXT) and not nm.endswith("/") and "__macosx" not in nm.lower()]
+                names.sort(key=_natkey)
+                for i, nm in enumerate(names, 1):
+                    out = os.path.join(pages_dir, f"page_{i:04d}.jpg")
+                    if os.path.exists(out) and os.path.exists(os.path.join(thumbs_dir, f"page_{i:04d}.jpg")):
+                        n += 1; continue
+                    data = z.read(nm)
+                    im = decode_jp2(data, img["working_height_px"]) if nm.lower().endswith(".jp2") else Image.open(io.BytesIO(data))
+                    if im is None:
+                        raise RuntimeError(f"page image {nm} could not be decoded")
+                    im.load(); sizes.append(im.size)
+                    _save_working(im, out, os.path.join(thumbs_dir, f"page_{i:04d}.jpg"), img)
+                    n += 1
+        else:
+            _extract_rar(master, tmp)
+            files = []
+            for root_dir, _d, fs in os.walk(tmp):
+                files += [os.path.join(root_dir, x) for x in fs if x.lower().endswith(IMAGE_EXT) and not x.startswith(".")]
+            files.sort(key=lambda p: _natkey(os.path.relpath(p, tmp)))
+            if not files:
+                raise RuntimeError("the RAR holds no page images")
+            for i, p in enumerate(files, 1):
+                out = os.path.join(pages_dir, f"page_{i:04d}.jpg")
+                if os.path.exists(out) and os.path.exists(os.path.join(thumbs_dir, f"page_{i:04d}.jpg")):
+                    n += 1; continue
+                im = Image.open(p); im.load(); sizes.append(im.size)
+                _save_working(im, out, os.path.join(thumbs_dir, f"page_{i:04d}.jpg"), img)
+                n += 1
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    if n == 0:
+        raise RuntimeError(f"no page images in {os.path.basename(master)}")
+    return n, sizes
 
 
 def _image_job(iid):
@@ -586,6 +737,45 @@ def smoke(ident):
     return rec, img
 
 
+def selftest():
+    """The file choice and the imaging of the new masters, on made-up items (no network; p50t)."""
+    import tempfile
+    from PIL import Image
+    def rec(name, fmt, size=1000, source="original"):
+        return {"name": name, "format": fmt, "size": size, "source": source}
+    cases = (
+        ("cbr and pdf", {"files": [rec("x_meta.xml", "Metadata"), rec("A.cbr", "Comic Book RAR"), rec("A.pdf", "Text PDF")]}, "pdf"),
+        ("cbz", {"files": [rec("a.cbz", "Comic Book ZIP"), rec("x_thumb.jpg", "JPEG Thumb"), rec("__ia_thumb.jpg", "Item Tile")]}, "cbz"),
+        ("loose pages", {"files": [rec(f"scan {i}.jpg", "JPEG") for i in range(1, 36)] + [rec("scan 1_thumb.jpg", "JPEG Thumb", source="derivative")]}, "images"),
+        ("a cover only", {"files": [rec("cover.jpg", "JPEG"), rec("cover_thumb.jpg", "JPEG Thumb")]}, None),
+        ("raw zip", {"files": [rec("aasw_images.zip", "Generic Raw Book Zip")]}, "raw_zip"),
+        ("jp2 first", {"files": [rec("x_jp2.zip", "Single Page Processed JP2 ZIP"), rec("x.pdf", "Text PDF"), rec("x.cbr", "Comic Book RAR")]}, "jp2"))
+    for name, item, want in cases:
+        kind, _f = master_choice(choose_files(item))
+        assert kind == want, (name, kind, want)
+    assert [f["name"] for f in page_images(cases[2][1]["files"])][:3] == ["scan 1.jpg", "scan 2.jpg", "scan 3.jpg"]
+    assert _natkey("page_10.jpg") > _natkey("page_2.jpg")
+    tmp = tempfile.mkdtemp()
+    try:
+        os.makedirs(os.path.join(tmp, "config"))
+        shutil.copy(os.path.join(ROOT, "config", "corpus_settings.json"), os.path.join(tmp, "config", "corpus_settings.json"))
+        iid = "selftest_issue"
+        paths = {k: os.path.join(tmp, os.path.relpath(v, ROOT)) for k, v in issue_dirs(iid).items()}
+        os.makedirs(paths["master"]); os.makedirs(paths["raw"])
+        def jpg(shade):
+            b = io.BytesIO(); Image.new("RGB", (1200, 1800), (shade, shade, shade)).save(b, "JPEG"); return b.getvalue()
+        with zipfile.ZipFile(os.path.join(paths["master"], "issue.cbz"), "w") as z:
+            z.writestr("Issue/page 10.jpg", jpg(200)); z.writestr("Issue/page 2.jpg", jpg(100)); z.writestr("Issue/page 1.jpg", jpg(50))
+            z.writestr("Issue/readme.txt", "x"); z.writestr("__MACOSX/Issue/._page 1.jpg", b"junk")
+        r = image_issue(iid, root=tmp)
+        assert r["pages"] == 3 and sorted(os.listdir(paths["pages"])) == ["page_0001.jpg", "page_0002.jpg", "page_0003.jpg"], r
+        assert Image.open(os.path.join(paths["pages"], "page_0003.jpg")).getpixel((5, 5))[0] > 150   # page 10 came last
+        tools = [t for t in ("bsdtar", "7z", "7za", "unrar") if shutil.which(t)]
+        print("s01c selftest ok" + (f" (RAR tools here: {', '.join(tools)})" if tools else " (NO RAR TOOL on this machine: a Comic Book RAR cannot be unpacked; install bsdtar, p7zip or unrar)"))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", action="store_true", help="download and image every pending issue of the approved list")
@@ -594,9 +784,12 @@ def main():
     ap.add_argument("--image-only", action="store_true")
     ap.add_argument("--workers", type=int, default=0, help="download workers (default: settings.download.workers)")
     ap.add_argument("--image-processes", type=int, default=0, help="imaging processes (default: settings.images.processes)")
+    ap.add_argument("--selftest", action="store_true", help="the file choice and the imaging of the new masters, no network (p50t)")
     ap.add_argument("--smoke", metavar="IA_IDENTIFIER", help="fetch one arbitrary item into data/corpus/smoke/ (a test)")
     ap.add_argument("--repair", action="store_true", help="re-render the blank pages (bad JP2 leaves) of imaged issues from the archive's PDF")
     args = ap.parse_args()
+    if args.selftest:
+        selftest(); return
     if args.smoke:
         smoke(args.smoke); return
     if args.repair:
