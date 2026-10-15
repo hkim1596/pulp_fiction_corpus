@@ -226,10 +226,11 @@ IMAGE_FORMATS = ("JPEG", "PNG", "TIFF", "JPEG 2000")
 MIN_LOOSE_PAGES = 20            # fewer loose images than this is a cover or an illustration, not a scanned issue (p50t)
 
 
-def page_images(files):
-    """The item's loose page images (one file per page), in page order: the JPEG/PNG/TIFF files that are not the
-    archive's own derivatives (thumbnails, tiles). Returns [] unless there are at least MIN_LOOSE_PAGES."""
-    out = []
+def page_sequence(files):
+    """The largest group of numbered image files in one folder of the item, as (files sorted by number, the number of
+    distinct numbers, the span of the numbers), or (None, 0, 0). The archive's derivatives (JPEG Thumb, Item Tile,
+    _thumb) are dropped first; ties between folders go to the larger total size (pages over thumbnails)."""
+    groups = {}
     for f in files:
         name, fmt = f.get("name", ""), f.get("format", "")
         low = name.lower()
@@ -237,9 +238,42 @@ def page_images(files):
             continue
         if fmt in ("JPEG Thumb", "Item Tile") or "_thumb" in low or "__ia_thumb" in low or f.get("source") == "derivative":
             continue
-        out.append(f)
-    out.sort(key=lambda f: _natkey(f.get("name", "")))
-    return out if len(out) >= MIN_LOOSE_PAGES else []
+        folder, _, base = name.rpartition("/")
+        m = re.search(r"(\d+)\D*$", base)
+        if not m:
+            continue
+        groups.setdefault(folder, []).append((int(m.group(1)), f))
+    if not groups:
+        return None, 0, 0
+    best = max(groups.values(), key=lambda g: (len(g), sum(int(x[1].get("size") or 0) for x in g)))
+    nums = sorted({n for n, _ in best})
+    best.sort(key=lambda t: (t[0], _natkey(t[1].get("name", ""))))
+    return [f for _, f in best], len(nums), nums[-1] - nums[0] + 1 if nums else 0
+
+
+def page_images(files):
+    """The item's loose page images (one file per page), in page order, or [] when the item has no page sequence.
+    The pages of a scan are numbered files in one folder (001.jpg … 118.jpg; Final/files/mobile/1.jpg … 100.jpg in a
+    flip-book export); thumbnails, icons and the archive's own derivatives sit beside them, and an illustration set is
+    named by title. So the largest numbered group of one folder (page_sequence) is the scan when it holds at least
+    MIN_LOOSE_PAGES distinct numbers that fill their range to four fifths (an incomplete scan, or dates and catalogue
+    numbers, do not) and are not all years (covers named by date)."""
+    seq, n_distinct, span = page_sequence(files)
+    if not seq or n_distinct < MIN_LOOSE_PAGES or n_distinct < 0.8 * span:
+        return []
+    nums = sorted({int(re.search(r"(\d+)\D*$", f.get("name", "").rpartition("/")[2]).group(1)) for f in seq})
+    if all(1800 <= n <= 2030 for n in nums):
+        return []
+    return seq
+
+
+def comic_archives(files):
+    """The item's comic-book archives (.cbz/.cbr), grouped by stem: several stems mean several issues in one item."""
+    arch = [f for f in files if f.get("format") in ("Comic Book ZIP", "Comic Book RAR") or f.get("name", "").lower().endswith((".cbz", ".cbr"))]
+    stems = {}
+    for f in arch:
+        stems.setdefault(os.path.splitext(os.path.basename(f.get("name", "")))[0].lower(), []).append(f)
+    return stems
 
 
 def _natkey(name):
@@ -747,6 +781,10 @@ def selftest():
         ("cbr and pdf", {"files": [rec("x_meta.xml", "Metadata"), rec("A.cbr", "Comic Book RAR"), rec("A.pdf", "Text PDF")]}, "pdf"),
         ("cbz", {"files": [rec("a.cbz", "Comic Book ZIP"), rec("x_thumb.jpg", "JPEG Thumb"), rec("__ia_thumb.jpg", "Item Tile")]}, "cbz"),
         ("loose pages", {"files": [rec(f"scan {i}.jpg", "JPEG") for i in range(1, 36)] + [rec("scan 1_thumb.jpg", "JPEG Thumb", source="derivative")]}, "images"),
+        ("a flip-book export", {"files": [rec(f"Final/files/mobile/{i}.jpg", "JPEG", 4000000) for i in range(1, 101)]
+                                + [rec(f"Final/files/thumb/{i}.jpg", "JPEG", 20000) for i in range(1, 101)]
+                                + [rec(f"Final/mobile/style/icon/{i}-2x.png", "PNG") for i in range(1, 60)] + [rec("Final/files/shot.png", "PNG")]}, "images"),
+        ("an illustration set", {"files": [rec(f"cover art {t} {y}.jpg", "JPEG") for y in range(1920, 1950) for t in ("Dime Western", "Puppy Love")]}, None),
         ("a cover only", {"files": [rec("cover.jpg", "JPEG"), rec("cover_thumb.jpg", "JPEG Thumb")]}, None),
         ("raw zip", {"files": [rec("aasw_images.zip", "Generic Raw Book Zip")]}, "raw_zip"),
         ("jp2 first", {"files": [rec("x_jp2.zip", "Single Page Processed JP2 ZIP"), rec("x.pdf", "Text PDF"), rec("x.cbr", "Comic Book RAR")]}, "jp2"))
@@ -754,6 +792,10 @@ def selftest():
         kind, _f = master_choice(choose_files(item))
         assert kind == want, (name, kind, want)
     assert [f["name"] for f in page_images(cases[2][1]["files"])][:3] == ["scan 1.jpg", "scan 2.jpg", "scan 3.jpg"]
+    fb = page_images(cases[3][1]["files"])
+    assert len(fb) == 100 and fb[0]["name"] == "Final/files/mobile/1.jpg" and fb[99]["name"] == "Final/files/mobile/100.jpg", fb[:2]
+    assert len(comic_archives([rec("asf1933-01.cbr", "Comic Book RAR"), rec("asf1933-03.cbr", "Comic Book RAR")])) == 2
+    assert len(comic_archives([rec("x.cbz", "Comic Book ZIP"), rec("x.cbr", "Comic Book RAR")])) == 1
     assert _natkey("page_10.jpg") > _natkey("page_2.jpg")
     tmp = tempfile.mkdtemp()
     try:

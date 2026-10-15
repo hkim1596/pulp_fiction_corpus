@@ -17,10 +17,16 @@ The classes (the rule, from the item's file list):
     retry                   the download failed for a passing reason (HTTP 500, a timeout): try again, nothing else
     fetch: cbz/cbr          a Comic Book ZIP or RAR of page images
     fetch: raw zip          a zip of page images (the archive's "Generic Raw Book Zip", or a plain zip)
-    fetch: loose pages      20 or more page images as separate files, numbered in sequence (fewer, or images without
-                            page numbers in their names, are a cover or illustrations)
+    fetch: loose pages      20 or more page images as separate files, numbered in sequence in one folder (the
+                            downloader's own rule, s01c_fetch.page_images; fewer, or images named by title, are a
+                            cover or illustrations)
     set aside: not a scan   a cover image, illustrations, a checklist, an ebook: no scanned issue in the item
-    set aside: bound volume 600 or more page images under one item (several issues; its dates and contents would be wrong)
+    set aside: bound volume several issues in one item: 600 or more page images, or two or more comic-book archives
+                            with different names, or a title with a year range (1940-1942) or two months (its dates
+                            and contents would be wrong as one issue)
+    set aside: incomplete scan
+                            a numbered page sequence with a fifth to a half of its pages missing (a flip-book export
+                            that stopped half way; with more missing the numbers are not page numbers)
     set aside: no images    text-only or DjVu-only items (no page images the pipeline reads)
     set aside: restricted   HTTP 401/403: the archive restricts the item (a lending book, not a magazine)
 """
@@ -74,23 +80,10 @@ def fetch_metadata(ident, cache, sleep=0.4):
     return cache[ident]
 
 
-def numbered_sequence(names):
-    """True when the image names carry page numbers that run in sequence (xxx_0001.jpg, xxx_0002.jpg …): a scan of
-    an issue; a set of illustrations or covers is named by title. At least four of five names must end in a number and
-    the numbers must fill their range to four fifths."""
-    nums = []
-    for n in names:
-        m = re.search(r"(\d+)\D*$", n)
-        if m:
-            nums.append(int(m.group(1)))
-    if len(nums) < 0.8 * len(names) or not nums:
-        return False
-    span = max(nums) - min(nums) + 1
-    return len(set(nums)) >= 0.8 * span
-
-
 def classify(msg, meta):
-    """(class, reason) for one issue from its failure message and the archive's item record."""
+    """(class, reason) for one issue from its failure message and the archive's item record. The file rules are the
+    downloader's own (pipeline/s01c_fetch.py: page_images, comic_archives), so what is fetched is what was classified."""
+    from s01c_fetch import page_images, page_sequence, comic_archives
     m = msg or ""
     if "401" in m or "403" in m:
         return "set aside: restricted", "the archive restricts the item (HTTP 401/403); a lending book, not a magazine scan"
@@ -103,18 +96,27 @@ def classify(msg, meta):
     files = meta["files"]
     fmts = Counter(f.get("format") for f in files)
     names = [str(f.get("name") or "").lower() for f in files]
-    img_names = [str(f.get("name") or "") for f in files if f.get("format") in IMAGE_FORMATS and f.get("source") != "derivative"]
-    n_img = len(img_names)
-    if any(k in fmts for k in ("Comic Book ZIP", "Comic Book RAR")) or any(n.endswith((".cbz", ".cbr")) for n in names):
+    n_img = sum(1 for f in files if f.get("format") in IMAGE_FORMATS and f.get("source") != "derivative")
+    archives = comic_archives(files)
+    if n_img >= BOUND_VOLUME_PAGES:
+        return "set aside: bound volume", f"a bound volume of several issues ({n_img} page images under one item)"
+    if len(archives) >= 2:
+        return "set aside: bound volume", f"several issues in one item ({len(archives)} comic-book archives: {', '.join(sorted(archives))[:80]})"
+    title = (meta.get("title") or "")
+    if re.search(r"\b(18|19)\d\d\s*[-–]\s*(18|19)\d\d\b", title) or re.search(r"\b(january|february|march|april|may|june|july|august|september|october|november|december)\b.{0,12}\band\b.{0,12}\b(january|february|march|april|may|june|july|august|september|october|november|december)\b", title, re.I):
+        return "set aside: bound volume", f"several issues in one item by its title ({title[:60]})"
+    if archives:
         return "fetch: cbz/cbr", "a Comic Book ZIP/RAR of page images"
     if "Generic Raw Book Zip" in fmts:
         return "fetch: raw zip", "a zip of page images"
-    if n_img >= BOUND_VOLUME_PAGES:
-        return "set aside: bound volume", f"a bound volume of several issues ({n_img} page images under one item)"
-    if n_img >= 20 and numbered_sequence(img_names):
-        return "fetch: loose pages", f"{n_img} loose page images, numbered in sequence"
+    pages = page_images(files)
+    if pages:
+        return "fetch: loose pages", f"{len(pages)} loose page images in sequence ({pages[0].get('name', '')[:40]} …)"
+    seq, n_distinct, span = page_sequence(files)
+    if seq and n_distinct >= 20 and 0.5 * span <= n_distinct < 0.8 * span and not all(1800 <= int(re.search(r"(\d+)\D*$", f["name"].rpartition("/")[2]).group(1)) <= 2030 for f in seq):
+        return "set aside: incomplete scan", f"{n_distinct} of {span} numbered pages present ({seq[0].get('name', '')[:40]} …): an incomplete scan"
     if n_img >= 20:
-        return "set aside: not a scan", f"{n_img} images without page numbers in their names: illustrations or covers, not a scanned issue"
+        return "set aside: not a scan", f"{n_img} images but no numbered page sequence: illustrations or covers, not a scanned issue"
     if "ZIP" in fmts or "RAR" in fmts:
         if any(("rtf" in n or "txt" in n or "epub" in n) and n.endswith((".zip", ".rar")) for n in names):
             return "set aside: no images", "a zip/RAR of text, not of page images"
