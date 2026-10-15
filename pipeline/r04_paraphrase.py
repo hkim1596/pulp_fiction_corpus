@@ -423,7 +423,10 @@ def join_alignments(units, raw, alts):
         by_pair[(a["a"], a["b"])].append(a)
     out = []
     for key, lst in by_pair.items():
-        lst.sort(key=lambda a: (a["a0"], a["b0"]))
+        # a total order (15 October 2026, p50u): the greedy grouping below depends on the order of the list, and
+        # ties on (a0, b0) used to be broken by the order in which candidates had been found, so the result could
+        # differ between two runs over the same alignments; on the pilot's stories one same-issue alignment changed
+        lst.sort(key=lambda a: (a["a0"], a["b0"], a["a1"], a["b1"], -a["cols"], -a["score"], -a["matches"]))
         groups = []
         for a in lst:
             placed = False

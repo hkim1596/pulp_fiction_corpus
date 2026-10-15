@@ -18,6 +18,7 @@ Two steps on the server:
     python3 pipeline/r02_verbatim_corpus.py tokenize --workers 32        # data/export/corpus/*.jsonl -> tokens/ (a snapshot:
                                                                          # token ids, story bounds, the canonical texts, vocabulary)
     python3 pipeline/r02_verbatim_corpus.py match --k 6 7 8              # -> data/reuse/corpus_dryrun/machine_k<k>_*
+    python3 pipeline/r02_verbatim_corpus.py reindex                      # the clusters' .jsonl and index for the website, from _clusters.json
 
 Everything is written under data/reuse/corpus_dryrun/ (the plan's section 1: an engineering dry run of 14 October 2026
 onward, not the study's numbers; the study's run repeats the same code on the frozen corpus, version 1.0). The output
@@ -203,7 +204,16 @@ class LazyUnit(dict):
             toks = [t[0] for t in tokenize(self["canon"])]
             dict.__setitem__(self, "tokens", toks)
             return toks
+        if key == "ids":                      # the story's token ids (r04's alignment reads u['ids']); not kept, a copy each time
+            i = self["index"]
+            b = self._corpus.bounds
+            return self._corpus.tok[b[i]:b[i + 1]].astype(np.int32)
         raise KeyError(key)
+
+    def drop_text(self):
+        """Forget the text read by fill() (the report step keeps memory bounded by calling this after use)."""
+        for k in ("canon", "offsets", "tokens"):
+            dict.pop(self, k, None)
 
 
 class Corpus:
@@ -227,10 +237,15 @@ class Corpus:
         self.issue_of = np.array([idx[u["issue"]] for u in units], dtype=np.int64) if units else np.zeros(0, np.int64)
 
     @classmethod
-    def load(cls, outdir=OUTDIR, export_dir=EXPORT_DIR):
+    def load(cls, outdir=OUTDIR, export_dir=EXPORT_DIR, mmap=False):
+        """The snapshot written by tokenize_corpus. mmap=True maps the token array instead of reading it into memory
+        (for worker processes that share the page cache)."""
         tdir = os.path.join(outdir, "tokens")
         meta = json.load(open(os.path.join(tdir, "meta.json"), encoding="utf-8"))
-        tok = np.fromfile(os.path.join(tdir, "tokens.u32"), dtype=np.uint32)[:meta["tokens"]]
+        if mmap:
+            tok = np.memmap(os.path.join(tdir, "tokens.u32"), dtype=np.uint32, mode="r")[:meta["tokens"]]
+        else:
+            tok = np.fromfile(os.path.join(tdir, "tokens.u32"), dtype=np.uint32)[:meta["tokens"]]
         bounds = np.load(os.path.join(tdir, "bounds.npy"))
         vocab = [l.rstrip("\n") for l in open(os.path.join(tdir, "vocab.txt"), encoding="utf-8")]
         c = cls(tok, bounds, [], export_dir, vocab)
@@ -643,6 +658,25 @@ def cluster(matches, units):
     return out
 
 
+def write_clusters(clusters, pre, unit="len"):
+    """The clusters in the pilot's shape (<pre>_clusters.json) and, for the website's paged lists at corpus scale,
+    one cluster per line (<pre>_clusters.jsonl) with an index (<pre>_clusters_index.json: for every cluster its byte
+    offset in the .jsonl and the few numbers and the text the list shows)."""
+    json.dump(clusters, open(pre + "_clusters.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    index = []
+    with open(pre + "_clusters.jsonl", "wb") as f:
+        for i, c in enumerate(clusters):
+            off = f.tell()
+            line = json.dumps(c, ensure_ascii=False).encode("utf-8")
+            f.write(line + b"\n")
+            index.append({"i": i, "off": off, "n": len(line), "witnesses": c["witnesses"], "witnesses_collapsed": c.get("witnesses_collapsed", c["witnesses"]),
+                          "issues": c.get("issues"), "occurrences": c.get("occurrences"), "max_len": c["max_len"],
+                          "story_id": c["representative"]["story_id"], "text": (c["representative"].get("text") or "")[:160],
+                          "stories": sorted({m["story_id"] for m in c["members"]})[:12]})
+    json.dump({"n": len(index), "unit": unit, "generated": time.strftime("%Y-%m-%d %H:%M"), "clusters": index},
+              open(pre + "_clusters_index.json", "w", encoding="utf-8"), ensure_ascii=False)
+
+
 def run(corpus, k, set_name="machine", outdir=OUTDIR, max_df=MAX_DF, write_floor=WRITE_FLOOR, log=print):
     """One pass for one k: the array engine, then the pilot's report in the pilot's file shapes under outdir.
 
@@ -705,7 +739,7 @@ def run(corpus, k, set_name="machine", outdir=OUTDIR, max_df=MAX_DF, write_floor
     with open(pre + "_sameissue.jsonl", "w", encoding="utf-8") as f:
         for m in sorted(same_issue, key=lambda m: -m["len"]):
             f.write(json.dumps(R.serialize_match(m, units), ensure_ascii=False) + "\n")
-    json.dump(clusters, open(pre + "_clusters.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    write_clusters(clusters, pre, "len")
     np.savez(pre + "_pairs.npz", **pairs)
     top = [{"a": units[int(pairs["a"][i])]["story_id"], "b": units[int(pairs["b"][i])]["story_id"], "n_matches": int(pairs["n_matches"][i]),
             "max_len": int(pairs["max_len"][i]), "cover_a": float(pairs["cover_a"][i]), "cover_b": float(pairs["cover_b"][i])}
@@ -886,7 +920,7 @@ def pilot_check(stories_path, ks=(6, 7, 8), which="machine"):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("step", nargs="?", choices=["tokenize", "match"])
+    ap.add_argument("step", nargs="?", choices=["tokenize", "match", "reindex"])
     ap.add_argument("--export", default=EXPORT_DIR)
     ap.add_argument("--out", default=OUTDIR)
     ap.add_argument("--set", default="machine", choices=["machine", "verified", "corrected"])
@@ -903,6 +937,11 @@ def main():
         sys.exit(0 if pilot_check(args.stories, tuple(args.k)) else 1)
     if args.step == "tokenize":
         tokenize_corpus(args.export, args.out, args.set, args.workers)
+    elif args.step == "reindex":
+        import glob
+        for f in sorted(glob.glob(os.path.join(args.out, "*_clusters.json"))):
+            write_clusters(json.load(open(f, encoding="utf-8")), f[:-len("_clusters.json")], "len")
+            print(f"[r02c] index written for {os.path.basename(f)}")
     elif args.step == "match":
         corpus = Corpus.load(args.out, args.export)
         print(f"[r02c] {corpus.n_stories} stories, {int(corpus.bounds[-1]):,} tokens, {len(set(corpus.issue_of.tolist()))} issues ({LABEL})")

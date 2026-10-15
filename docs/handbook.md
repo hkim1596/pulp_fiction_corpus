@@ -949,6 +949,24 @@ hand-reviewed validation set and then frozen.
                           story_share,skipped_shingles}.json,
                           _matches.jsonl, _sameissue.jsonl,
                           <set>_region_overlap.json
+    r02_verbatim_corpus the same stage over the whole corpus (15 October
+                        2026, p50u; docs/reuse-at-scale-plan-2026-10-14.md):
+                        `tokenize` writes a snapshot of the story set
+                        (token ids, story bounds, canonical texts,
+                        vocabulary) under data/reuse/corpus_dryrun/tokens/;
+                        `match --k 6 7 8` finds the same maximal spans as
+                        r02 with arrays (hashed shingles sorted in numpy,
+                        grouped by their tokens, seeds reduced to runs per
+                        diagonal, vectorized extension, seeds bucketed on
+                        disk by story pair). Every match is counted and kept
+                        as arrays (_matches.npy, _sameissue.npy, _pairs.npz);
+                        the text files and the clusters hold the matches of
+                        10+ tokens (the stats say how many lie under). The
+                        --selftest proves the pilot engine's results on
+                        fabricated corpora, --pilot-check on the pilot's
+                        stories. Label on everything: "engineering dry run
+                        of 14 October 2026 onward; not the study's numbers".
+                        → data/reuse/corpus_dryrun/machine_k<k>_*
     r03_synthetic       a SEPARATE copy of the story corpus with planted
                         reuse (20 verbatim, 20 near-verbatim with 8% of
                         words damaged, 20 heavily edited), ids suffixed
@@ -971,6 +989,63 @@ hand-reviewed validation set and then frozen.
                         --synthetic runs the planted copy and scores it;
                         --window 100 --stride 50 is the sensitivity run.
                         → data/reuse/para/<set>_w50s25_k<K>_*
+    r04_paraphrase_corpus
+                        the same stage over the whole corpus (p50u), in six
+                        resumable steps under data/reuse/corpus_dryrun/para/:
+                        alts (the fuzzy alternates of the snapshot's
+                        vocabulary), passages, embed (the pilot's model and
+                        runtime, fastembed, in parallel processes; or
+                        sentence-transformers on a card), knn (exact, by
+                        blocks of matrix products on a card with torch, or
+                        numpy; faiss approximate when chosen and recorded),
+                        candidates (neighbours and r02's exact seeds, bucketed
+                        by story pair), align (the pilot's batch scorer,
+                        traceback, join and keep rule in parallel processes),
+                        report (the pilot's files per K; the text files and
+                        clusters hold alignments of 40+ columns, every kept
+                        alignment is in _alignments.npy). The --selftest
+                        proves the pilot pipeline's alignments on fabricated
+                        corpora; --pilot-check on the pilot's stories with
+                        the real model.
+                        → data/reuse/corpus_dryrun/para/machine_w50s25_k<K>_*
+    r05_background_corpus
+                        the background over the whole corpus (p50w): every
+                        pair with an exact (seed 6) or near-verbatim (K 20)
+                        match gets its row; the pairs without one are a
+                        stratified sample per later decade x years band
+                        (20,000 a cell, two independent draws), weighted by
+                        the cell's exact pair count, so the share of pairs
+                        with any match is exact and only the finer splits
+                        carry sampling error. Topic similarity by TF-IDF
+                        cosine from the token ids (the pilot's vectorizer
+                        settings), the embedding cosine from r04's vectors;
+                        the pilot's columns, curves, time table and unusual
+                        pairs; the two-part model only with --model, on a
+                        capped subsample. The selftest reproduces the pilot's
+                        pair table column by column in all-pairs mode and
+                        checks the sampler's cell sizes and weights.
+                        → data/reuse/corpus_dryrun/background/
+                          pairs_machine.npy, pairs_machine_top.csv.gz,
+                          summary_machine.json
+    r06_validation_corpus
+                        the hand-review set drawn from the corpus candidates
+                        (p50w): the pilot's strata (source x score band x
+                        cosine band), 25 a stratum, fixed seed, inclusion
+                        weights, from the scored candidate arrays of r04's
+                        align step; the items in the pilot's shape under
+                        data/reuse/corpus_dryrun/validation/; the site's
+                        /reuse/validate?set=corpus shows them to the readers
+                        (judgments in that folder's judgments.jsonl); the
+                        pilot's calibrate scores the grid against them. The
+                        selftest reproduces the pilot's strata table on the
+                        same neighbours.
+    scripts/duplicate_items.py
+                        issues the archive holds twice, from the exact-reuse
+                        pair table: same-text story pairs (cover 80% of both,
+                        longest 200+) aggregated by issue pair; the same
+                        magazine and date = a duplicate item, another date =
+                        a date to check, another magazine = an edition or a
+                        reprint. → data/reuse/corpus_dryrun/duplicates/
     r05_background      protocol 4.1: one row per story pair (all pairs
                         at pilot scale) with exact and paraphrase extent,
                         later date, years apart, topic similarity
@@ -1140,6 +1215,23 @@ highlights that region), `/reuse/progress` with annotation progress,
 the pipeline status board and the process board (every issue at every
 step, from explore_pages.process_board_html). Member login required,
 like the rest of the site.
+
+The corpus dry run's pages (webapp/corpus_reuse_pages.py, v0.23.0,
+p50w): `/reuse/corpus` (what the corpus-scale stages found: exact reuse
+per seed with the length chart, near-verbatim per K, the background,
+the duplicate items; every section says "not run yet" until its files
+exist under data/reuse/corpus_dryrun/), `/reuse/corpus/clusters?kind=
+&k=&page=` (paged, 100 a page, from `<set>_k<k>_clusters_index.json`),
+`/reuse/corpus/cluster/<kind>/<k>/<i>` (one cluster, read from the
+`_clusters.jsonl` by its byte offset; witnesses located live as on the
+pilot's page), `/reuse/corpus/pairs?k=` (the 20,000 story pairs with
+the longest exact matches), `/reuse/corpus/duplicates` (issues the
+archive holds twice). Every page carries the dry-run line. The pilot's
+pages are untouched; `/reuse` links to `/reuse/corpus` when the folder
+exists. The clusters' .jsonl and index are written by the corpus stages
+(r02_verbatim_corpus.write_clusters); `python3 pipeline/
+r02_verbatim_corpus.py reindex` makes them from the _clusters.json of a
+pass that ran before the index existed.
 
 Two facts the first run established (details in docs/pilot-results.md
 and the journal): the machine assembly lists some scan regions under
