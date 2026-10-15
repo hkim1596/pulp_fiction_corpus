@@ -1093,3 +1093,77 @@ state the result in this log and in the data paper's coverage note); the accurac
 (the ~400-record human sample not started; no model-check judgments since 5 October; Codex's 99.9% recall is on its
 42-story development set, not a held-out sample); the 57,926 records needing a look; the 33 held issues; Prof.
 Jae-Yon Lee's offer of computing power (ADHO; a decision for Heejin, now less pressing since the run is finished).
+
+### 2026-10-15, 08:40 KST — three decisions of 14 October turned into code (p50t, p50u); the work on the server prepared
+
+Heejin's three choices on the evening of 14 October, each put to him with a recommended option: on the 134 issues the
+run could not download, "Fetch the real scans, set the rest aside"; on the accuracy of the assembly, "150 issues,
+stratified, two readers"; on the text-reuse analysis, which had run only on the pilot's stories, "Build and dry-run now,
+label it as such". The code (commits of 15 October, p50t and p50u) is as follows; the results come in the next entry,
+after the server has run PASTE 9w (pilot_export/p50_pastes.txt).
+
+The missing issues. The 134 were classified from the archive's item records on 14 October (the queries ran from the
+Mac): 13 answered HTTP 500 and hold real scans (a Comic Book RAR and a text PDF each: retried); one is a lending book
+(HTTP 401, "I Cheated Russia's White Death": set aside); 120 have neither a JP2 zip nor a PDF — 21 are Comic Book ZIP
+or RAR scans (about 11.5 GB: fetched); 7 are loose page images (two of them bound volumes of 906 and 1,621 images,
+ArgosyAll-StoryWeekly and Astounding_Stories_of_Super_Science_1931, set aside; two Love Story items of 350 images each,
+phantom_detective_4104_orig with 116, and two items of 92 and 138 images that looked like illustration sets on 14
+October — the script's rule decides these by the file names: 20 or more images whose names carry page numbers in
+sequence are a scan and are fetched, images named by title are illustrations and are set aside); 83 hold
+a cover or illustrations only (set aside: not a scan); 3 are zips of unknown content (one "Generic Raw Book Zip" and
+captain_hazzard_3805, fetched; New_Detective…rtf.r, text, set aside); 2 are DjVu only (Punch 1920: set aside); 2 have
+no images (Amazing_Stories_Annual, Amazing_Stories_Checklist.mht: set aside); 2 had no metadata when asked (queried
+again by the script). The downloader (pipeline/s01c_fetch.py) now takes a Comic Book ZIP or RAR, a raw zip of page
+images, or loose page images (20 or more, numbered in sequence) when an item has no JP2 zip and no PDF, in that order
+of preference, and
+images them with the same thumbnails and page files as before; a selftest covers the file choice and the imaging of
+the new kinds. scripts/missing_issues.py does the classification from the run's events and the archive's records and
+writes config/corpus_set_aside.json (the issue, its archive identifier, the class, the reason; "decided_by": Heejin,
+14 October); corpus_lib.set_aside() keeps every stage off those issues, the run page and --status count them, and
+--retry-failed --issues clears the failure marks of the named issues only. The approved list and its fingerprint are
+untouched: the set-aside issues stay in the list and are reported as such in the datasheet.
+
+The verification sample (plan section 6.1). scripts/draw_verification_sample.py draws 150 assembled, non-set-aside
+issues stratified by decade of the cover date and genre in the plan's eight classes (science fiction, detective,
+western, adventure, weird, general, romance, other; the archive's rarer filings fall in "other", the filing as given is
+kept on every issue; the format, pulp or digest, is "unknown" for every item in the archive's metadata and so cannot
+be a stratum): at least two issues from every non-empty cell, the rest in proportion to the cells' sizes, chosen with
+seed 20261014; the reading order mixes the genres; every fifth issue of that order is read by a second reader too,
+for a figure of reader agreement. On the approved list this gives 58 cells and 30 second-reader issues; the sample is
+written to config/verification_sample.json and committed (it is part of the study's record). The website's
+Verification page (/verify/sample, v0.22.0) lists the issues in reading order with what is done on each (records
+verified of the records the machine made, by whom), a checklist for the readers (every piece on the contents page has
+a record starting on the right page with the right title and author; every record holds its own boxes and nothing
+else; the roles are right; serial parts carry their part; mark VERIFIED when right or fixed; OCR misreadings inside a
+box are not this sample's concern), progress by decade and genre, and the assembly's accuracy by stratum once
+pipeline/s11_corrections_audit.py --sample has run (a record is "exact" when the person left it as the machine made
+it, "same boxes" when only a role or a field was corrected; the strata are weighted by their share of the corpus).
+
+Text reuse at corpus scale (docs/reuse-at-scale-plan-2026-10-14.md). The three stages have run only on the pilot's
+stories; the corpus has about 67,000 stories and half a billion words. The plan: an engineering dry run of the stages
+rebuilt for the corpus, on the corpus as it stands, with everything written under data/reuse/corpus_dryrun/ and every
+page that shows it carrying the line "engineering dry run of 14 October 2026 onward; not the study's numbers" — the
+Registered Report rule and plan section 3.3 keep the study's numbers for the frozen corpus, version 1.0, after the
+protocol's acceptance (manuscript CHR-2026-0073), when the same code runs again. The exact-reuse stage is rebuilt first
+(pipeline/r02_verbatim_corpus.py): the method is the pilot's step for step (k = 6, 7, 8; the commonplace cap at 50
+stories; extension; de-duplication; same-issue matches set apart; the pilot's own cluster, pair and share functions),
+the engine is arrays — token ids in one array, 64-bit shingle hashes sorted in numpy, shingles grouped by their actual
+tokens, seeds reduced to runs on their diagonals and extended in vectorized batches, the candidate seeds bucketed on
+disk by story pair when there are more than 50 million. Its selftest runs both engines on fabricated corpora (planted
+passages shared by two to six stories, repeats inside a story, same-issue pairs with shared regions, commonplace
+shingles, a weak hash with many collisions, the on-disk bucket path) and requires identical matches, clusters, pair
+statistics and story shares; --pilot-check does the same on the pilot's stories on the server. Two limits of size,
+recorded in the stats: every match is counted and kept as arrays (the journal's estimate of 22 September is 200
+million story pairs with a six-word match at the pilot's rates), but the files with text and the clusters hold the
+matches of ten tokens or more (the pilot's own length bins start a new bin at ten); cluster members carry 300
+characters of text instead of 1,500. The next stages (r04 near-verbatim with GPU embeddings and an approximate index;
+r05 the background on a stratified pair sample; the site's pages for the corpus set) follow in that order.
+
+Prepared for the server (PASTE 9w, in tmux p50t): the classification run with the archive's records, the set-aside
+file written, the failure marks of the fetchable issues cleared and the corpus run started again (the reading server
+on GPU 0 is up; the follower on GPU 2 links the issues as they are assembled); the verification sample drawn; the site
+restarted on v0.22.0; the pilot check of the new engine, then the snapshot of the story set and the passes at k = 6,
+7, 8. Open after that: whether a RAR tool exists on the server (bsdtar, 7z or unrar; without one the Comic Book RAR
+items fail at the imaging step and stay set aside — a sudo install is Heejin's call); the reader guide for Sujin and
+the start of the reading; the floor for the cluster files (ten tokens) and the pages for the corpus set, to be put to
+Heejin with the first numbers.

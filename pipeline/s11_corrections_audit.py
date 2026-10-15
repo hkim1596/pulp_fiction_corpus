@@ -50,6 +50,7 @@ import json
 import os
 import re
 import sys
+import time
 from collections import Counter, defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -303,16 +304,62 @@ def report(results, show=False):
     return "\n".join(out)
 
 
+def accuracy_by_stratum(results, sample, population=None):
+    """The assembly's accuracy on the verification sample (p50t; plan section 6.1): over the VERIFIED records of the
+    sampled issues, the share left exactly as the machine made them and the share with the same boxes, by decade, by
+    genre class, by decade × genre, and in all — unweighted, and weighted by the strata's share of the corpus
+    (population: {(decade, genre): issues} from the sample file's cells) so that the figure stands for the corpus."""
+    by_issue = {i["id"]: i for i in sample["issues"]}
+    rows_in = []
+    for r in results:
+        meta = by_issue.get(r["issue"])
+        if not meta:
+            continue
+        for row in r["records"]:
+            if row["status"] != "verified":
+                continue
+            rows_in.append((meta["decade"], meta["genre"], row["exact"], row["same_boxes"]))
+    def tally(keyf):
+        t = defaultdict(lambda: [0, 0, 0])
+        for d, g, ex, sb in rows_in:
+            k = keyf(d, g)
+            t[k][0] += 1; t[k][1] += ex; t[k][2] += sb
+        return t
+    out = []
+    for name, keyf in (("all", lambda d, g: "all"), ("decade", lambda d, g: d), ("genre", lambda d, g: g), ("decade x genre", lambda d, g: f"{d} / {g}")):
+        for k, (n, ex, sb) in sorted(tally(keyf).items()):
+            out.append({"level": name, "stratum": k, "n": n, "exact": ex, "same_boxes": sb})
+    weighted = None
+    if population:
+        cell = tally(lambda d, g: (d, g))
+        tot = sum(population.values())
+        wex = wsb = wn = 0.0
+        for k, pop in population.items():
+            n, ex, sb = cell.get(k, (0, 0, 0))
+            if n:
+                wex += pop / tot * ex / n; wsb += pop / tot * sb / n; wn += pop / tot
+        if wn:
+            weighted = {"exact_pct": round(100 * wex / wn, 1), "same_boxes_pct": round(100 * wsb / wn, 1), "covered_share_of_corpus": round(wn, 3)}
+    return {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "records": len(rows_in), "issues": len({r["issue"] for r in results if r["issue"] in by_issue}),
+            "rows": out, "weighted": weighted}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--issue")
     ap.add_argument("--since", help="only records whose last human action is at or after this time stamp")
     ap.add_argument("--show", action="store_true", help="print every difference")
     ap.add_argument("--candidate", help="a directory of <issue>/articles.json to measure instead of the live records (e.g. data/assembly_v2/rules)")
+    ap.add_argument("--corpus", action="store_true", help="the corpus list (config/corpus_issues.json) instead of the pilot's")
+    ap.add_argument("--sample", help="config/verification_sample.json: only its issues, and the accuracy by stratum -> data/assembly_v2/verification_accuracy.json")
     args = ap.parse_args()
     A = site()
-    cfg = json.load(open(os.path.join(ROOT, "config", "pilot_issues.json"), encoding="utf-8"))
-    ids = [args.issue] if args.issue else [i["id"] for i in cfg["issues"]]
+    sample = json.load(open(args.sample, encoding="utf-8")) if args.sample else None
+    if sample:
+        ids = [i["id"] for i in sample["issues"]]
+    else:
+        cfg = json.load(open(os.path.join(ROOT, "config", "corpus_issues.json" if args.corpus else "pilot_issues.json"), encoding="utf-8"))
+        ids = [args.issue] if args.issue else [i["id"] for i in cfg["issues"]]
     results = []
     for iid in ids:
         r = audit_issue(iid, A, since=args.since, show=True, candidate=args.candidate)
@@ -320,10 +367,23 @@ def main():
             results.append(r)
     txt = report(results, show=args.show)
     print(txt)
-    out = os.path.join(ROOT, "data", "assembly_v2", "corrections.json")
+    out = os.path.join(ROOT, "data", "assembly_v2", "corrections.json" if not sample else "corrections_sample.json")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     json.dump({"candidate": args.candidate or "data/articles", "issues": results, "report": txt}, open(out, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(f"\nwritten {os.path.relpath(out, ROOT)}")
+    if sample:
+        pop = {(c["decade"], c["genre"]): c["population"] for c in sample.get("cells", [])}
+        acc = accuracy_by_stratum(results, sample, pop)
+        ap_out = os.path.join(ROOT, "data", "assembly_v2", "verification_accuracy.json")
+        json.dump(acc, open(ap_out, "w", encoding="utf-8"), indent=1)
+        print(f"accuracy on {acc['records']} verified records of {acc['issues']} sampled issues:")
+        for r in acc["rows"]:
+            if r["level"] in ("all", "decade", "genre"):
+                print(f"   {r['level']:8s} {r['stratum']:18s} n {r['n']:5d}  exact {100 * r['exact'] / r['n']:5.1f}%  same boxes {100 * r['same_boxes'] / r['n']:5.1f}%")
+        if acc["weighted"]:
+            print(f"   weighted by the strata's share of the corpus: exact {acc['weighted']['exact_pct']}%, same boxes {acc['weighted']['same_boxes_pct']}% "
+                  f"(strata with verified records cover {100 * acc['weighted']['covered_share_of_corpus']:.0f}% of the corpus)")
+        print(f"written {os.path.relpath(ap_out, ROOT)}")
 
 
 if __name__ == "__main__":

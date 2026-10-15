@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.21.0"
+APP_VERSION = "0.22.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -1444,7 +1444,7 @@ def esc(s):
 NAV_EXPLORE = [("/overview", "Overview"), ("/authors", "Authors"), ("/magazines", "Magazines"), ("/issues", "Issues"),
                ("/stories", "Stories"), ("/pairs", "Pairs"), ("/reuse", "Reuse"), ("/collection", "Collection"),
                ("/corpus", "Corpus"), ("/datasheet", "Datasheet"), ("/method", "Method")]
-NAV_WORKROOM = [("/guide", "Guide"), ("/articles", "Workbench"), ("/review/model", "Model check"), ("/reuse/validate", "Paraphrase review"),
+NAV_WORKROOM = [("/guide", "Guide"), ("/articles", "Workbench"), ("/verify/sample", "Verification"), ("/review/model", "Model check"), ("/reuse/validate", "Paraphrase review"),
                 ("/reuse/cases", "Cases"), ("/reuse/progress", "Progress"), ("/run", "Corpus run"), ("/log", "Build log"), ("/assembly", "Assembly"),
                 ("/timing", "Timing"), ("/activity", "Activity"), ("/feedback", "Feedback")]
 
@@ -1618,12 +1618,14 @@ import review_pages as RV  # noqa: E402
 import collection_pages as CP  # noqa: E402
 import corpus_run_pages as CR  # noqa: E402      the corpus run, live (v0.17.0)
 import model_review_pages as MR  # noqa: E402     the model check review (v0.19.0)
+import verify_pages as VP  # noqa: E402           the verification sample (v0.22.0)
 RP.bind(globals())
 EX.bind(globals())
 RV.bind(globals())
 CP.bind(globals())
 CR.bind(globals())
 MR.bind(globals())
+VP.bind(globals())
 
 
 # ---------------- request handler ----------------
@@ -1989,6 +1991,8 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, RV.validate_page(qs, self.user, render=self._page))
         if path == "/review/model":
             return self._send(200, MR.review_page(qs, self.user, render=self._page))
+        if path == "/verify/sample":
+            return self._send(200, VP.sample_page(qs, self.user, render=self._page))
         if path == "/reuse/cases":
             return self._send(200, RV.cases_page(qs, self.user, render=self._page))
         m = re.fullmatch(r"/reuse/cluster/(\w+)/(exact|para)/(\d+)/(\d+)", path)

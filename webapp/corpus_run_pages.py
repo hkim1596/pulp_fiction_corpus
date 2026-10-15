@@ -219,9 +219,12 @@ def board_html(compact=False):
                    "kind (Heejin's choice of 6 October after the model check review; config/corpus_settings.json, publish.kinds).</p>")
     gu = p.get("given_up") or {}
     ev = stage_counts()
+    aside = p.get("set_aside") or 0
     out.append("<p class='fine'>Given up after retries: " + (", ".join(f"{_esc(k)} {v}" for k, v in gu.items()) if gu else "none")
-               + f". Failed attempts so far (retried): {sum(ev['failed'].values()):,}. The run keeps the archive masters until an issue is "
-               "assembled and deletes them then (the archive keeps them); the page images stay.</p>")
+               + f". Failed attempts so far (retried): {sum(ev['failed'].values()):,}."
+               + (f" Set aside after the download, with a reason each (config/corpus_set_aside.json; Heejin, 14 October): {aside:,} — "
+                  "archive items that are not scanned issues (a cover, illustrations, a checklist), bound volumes, restricted items." if aside else "")
+               + " The run keeps the archive masters until an issue is assembled and deletes them then (the archive keeps them); the page images stay.</p>")
     if not compact:
         yrs = by_year()
         layers = [("Selected", "#1baf7a", yrs["selected"], None), ("Downloaded", "#2a78d6", yrs["downloaded"], yrs["selected"]),
@@ -284,7 +287,7 @@ def run_page(qs=None, render=None):
     body = (_G["howto"]("The corpus run on the lab server, as it stands: what has been downloaded from the Internet Archive, read, "
                         "assembled into records, checked by the language model and put on this site, how fast, and how long the "
                         "rest will take at that pace; then the accuracy measured so far. The page reloads itself every minute.")
-            + "<h1>Corpus run</h1>" + board_html(compact=False) + (_G["MR"].run_lines() if "MR" in _G else "") + evals_html()
+            + "<h1>Corpus run</h1>" + board_html(compact=False) + (_G["VP"].run_lines() if "VP" in _G else "") + (_G["MR"].run_lines() if "MR" in _G else "") + evals_html()
             + "<p class='fine'>Everything done, decided and measured, day by day: <a href='/log'>the build log</a>.</p>"
             + "<script>setTimeout(function(){location.reload()},60000)</script>")
     return (render or _G["page"])("Corpus run", body, path="/run")
