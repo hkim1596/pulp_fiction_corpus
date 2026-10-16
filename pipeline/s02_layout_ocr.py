@@ -88,9 +88,16 @@ def issues_download_complete():
 
 
 def html_to_text(h):
+    """Surya's HTML as text. Table cells and rows, list items and headings keep a line break each (2026-10-15):
+    a contents page that Surya returns as a <table> was flattened before, gluing titles, authors and page
+    numbers into one string ('Return of Jesse James .....Alexander Scott50'); toc_folio.deglue repairs what
+    was read that way."""
     h = re.sub(r"<br\s*/?>", "\n", h or "")
-    h = re.sub(r"</p>", "\n", h)
+    h = re.sub(r"</(?:p|li|h[1-6]|div)>", "\n", h)
+    h = re.sub(r"</t[dh]>", "\n", h)
+    h = re.sub(r"</tr>", "\n\n", h)
     h = re.sub(r"<[^>]+>", "", h)
+    h = re.sub(r"\n{3,}", "\n\n", h)
     return html_mod.unescape(h).strip()
 
 

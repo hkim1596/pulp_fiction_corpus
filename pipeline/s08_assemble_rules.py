@@ -56,7 +56,19 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from layout_order import order_region_keys
 from corpus_lib import write_json_atomic
 
-VERSION = "2.6"
+VERSION = "2.7"
+# 2.7 (2026-10-15, Claude): the contents page and the printed page numbers are read together by
+# pipeline/toc_folio.py — the folio map is a path of offsets fitted through the whole issue (inserted
+# and missing leaves, volume pagination, numbers in running heads, leaves bound out of order) instead of
+# the most common difference; the contents page is read in every layout of the 2026-10-14/15 test bed
+# (page numbers in their own boxes, 'by Author 94' under the title, two columns, rows of two entries,
+# numbers the OCR lost, Surya's flattened tables); every entry is placed on the scan page that shows its
+# title or by-line, within two leaves of the page its number gives, or found by title and by-line when the
+# number is unreadable; a book's chapter list is not read as pieces. Measured on 36 corpus issues checked
+# by hand (424 contents pieces; docs/toc-folio.md): entries on the right scan page 57% (2.6) -> 98% (2.7;
+# 87% on the 20 issues drawn fresh before the last round of fixes); records starting on the right page
+# 87% -> 98%. Switch: settings assembly.toc_folio (default on) or PULP_TOC_FOLIO=0; the 2.6 reading is
+# kept in analysis.json (toc_v26, offset_v26, folio_range_v26) for comparison.
 # 2.5: require evidence for continuation ownership and contents identity;
 # resolve duplicate folios; preserve small headings, embedded bylines, verse,
 # and story endings before departments. Full corpus reassembly follows 2.4.
@@ -844,8 +856,15 @@ def parse_toc(pages):
         e.pop("start", None)
         e.pop("end", None)
     entries.sort(key=lambda e: e["page"])
+    type_toc_entries(entries)
+    # a second contents page (Weird Tales prints two): the same parse on the next page
+    return entries, pno
+
+
+def type_toc_entries(entries):
+    """The kind of every contents entry from its section label, title and blurb (2.1 onwards)."""
     for e in entries:
-        s = e["section"] or ""
+        s = e.get("section") or ""
         bl = e.get("blurb") or ""
         prose_blurb = bl and sum(1 for c in bl if c.isupper()) < 0.5 * max(1, sum(1 for c in bl if c.isalpha()))
         if e["author"] and re.fullmatch(r"(?:a |the )?(?:department|editor|editors|readers|staff)s?", e["author"].strip(), re.I):
@@ -863,8 +882,7 @@ def parse_toc(pages):
             e["type"] = "feature"                     # an unsigned short piece: a filler, a department
         else:
             e["type"] = "story"
-    # a second contents page (Weird Tales prints two): the same parse on the next page
-    return entries, pno
+    return entries
 
 
 def nearby_serial_contents(pages, pno, byline, entries, offset):
@@ -896,9 +914,46 @@ def nearby_serial_contents(pages, pno, byline, entries, offset):
     return matches[0] if len(matches) == 1 else None
 
 
+def toc_folio_enabled():
+    if os.environ.get("PULP_TOC_FOLIO") is not None:
+        return os.environ.get("PULP_TOC_FOLIO") not in ("0", "", "false", "no")
+    try:
+        cfg = json.load(open(os.path.join(ROOT, "config", "corpus_settings.json"), encoding="utf-8"))
+        return bool(cfg.get("assembly", {}).get("toc_folio", True))
+    except Exception:
+        return True
+
+
+def toc_from_reader(TF):
+    """toc_folio's entries in the shape the rules use (title, author, page, blurb, section, type, scan)."""
+    out = []
+    for e in TF["entries"]:
+        page = e.get("page")
+        if page is None and e.get("scan_page") is not None:
+            page = TF["folio"]["printed"].get(e["scan_page"])
+        if page is None:
+            continue
+        x = {"title": e["title"], "author": e.get("author") or None, "page": int(page), "blurb": e.get("blurb", ""),
+             "section": e.get("section", ""), "scan_page": e.get("scan_page"), "placed_by": e.get("placed_by"),
+             "confidence": e.get("confidence"), "toc_scan": e.get("toc_scan")}
+        for k in ("part", "type_label", "page_read"):
+            if e.get(k):
+                x[k] = e[k]
+        out.append(x)
+    out.sort(key=lambda e: e["page"])
+    return type_toc_entries(out)
+
+
 def analyse(pages):
     """Everything the rules need to know about every page."""
     A = {"pages": {}, "toc": [], "toc_page": None, "offset": None, "folio_range": None}
+    TF = None
+    if toc_folio_enabled():
+        try:
+            import toc_folio
+            TF = toc_folio.analyse_issue(pages)
+        except Exception as ex:                       # the 2.6 reading stands; the failure is recorded
+            A["toc_folio_error"] = repr(ex)[:300]
     A["toc"], A["toc_page"] = parse_toc(pages)
     # a second contents page right after the first (Weird Tales)
     if A["toc_page"] and (A["toc_page"] + 1) in pages:
@@ -914,6 +969,15 @@ def analyse(pages):
         if author and not entry.get("author"):
             entry["title_as_read"] = entry["title"]
             entry["title"], entry["author"] = inline.group(1).strip(), author
+    if TF is not None:
+        A["toc_v26"] = [{k: e.get(k) for k in ("title", "author", "page", "type")} for e in A["toc"]]
+        A["toc_page_v26"] = A["toc_page"]
+        A["toc_kind"] = TF["toc_kind"]
+        if TF["entries"] or TF["toc_kind"] == "chapters":
+            A["toc"] = toc_from_reader(TF)
+            A["toc_page"] = TF["toc_pages"][0] if TF["toc_pages"] else None
+            A["toc_pages"] = TF["toc_pages"]
+            A["toc_chapters"] = [{k: e.get(k) for k in ("title", "page")} for e in TF.get("chapters", [])]
     offsets = Counter()
     for pno, p in pages.items():
         f = folio_of(p)
@@ -951,6 +1015,18 @@ def analyse(pages):
         # Unresolved duplicates are omitted; scan_of estimates from neighbouring
         # reliable folios instead of treating a conflicting OCR number as fact.
         A["folio_conflicts"][printed] = {"scans": scans, "chosen": chosen}
+    if TF is not None and TF["folio"]["support"] >= max(5, len(fol_pages) if fol_pages else 0):
+        # the fitted folio map: printed page -> scan page, the dominant offset and the numbered range
+        F = TF["folio"]
+        segs = sorted(F["segments"], key=lambda g: -g["support"])
+        A["offset_v26"], A["folio_range_v26"] = A["offset"], A["folio_range"]
+        A["offset"] = segs[0]["offset"] if segs else A["offset"]
+        agree = [s for s, v in F["printed"].items() if v is not None and F["read"].get(s) == v]
+        if agree:
+            A["folio_range"] = [min(agree), max(agree)]
+        fol_index = {int(k): v for k, v in TF["scan_index"].items()}
+        A["folio_segments"] = F["segments"]
+        A["folio_misplaced"] = F["misplaced"]
     A["folio_index"] = fol_index
 
     def scan_of(printed):
@@ -965,7 +1041,7 @@ def analyse(pages):
     toc_by_scan = {}
     if A["offset"] is not None:
         for e in A["toc"]:
-            sp = scan_of(e["page"])
+            sp = e.get("scan_page") or scan_of(e["page"])     # the page that shows the entry (2.7), else the number
             if sp is not None:
                 toc_by_scan.setdefault(sp, []).append(e)
     for pno, p in pages.items():
@@ -3506,13 +3582,17 @@ def run_issue(iid, cfg_issue=None, log=print):
         write_json_atomic(os.path.join(d, "articles.json"), out)
         outs[variant] = out
     for e in A["toc"]:
-        e["scan"] = e.get("scan_linked") or (A["scan_of"](e["page"]) if A.get("scan_of") and A["offset"] is not None else None)
+        e["scan"] = e.get("scan_linked") or e.get("scan_page") or (A["scan_of"](e["page"]) if A.get("scan_of") and A["offset"] is not None else None)
         if e["scan"] not in pages:
             e["scan"] = None                      # a page number the OCR garbled and no start to link it to
     an = {"issue": iid, "offset": A["offset"], "folio_range": A["folio_range"], "content_range": A.get("content_range"),
           "folio_index": {str(k): v for k, v in A.get("folio_index", {}).items()},
           "folio_conflicts": A.get("folio_conflicts", {}),
           "magazine_head": A.get("magazine_head"), "toc_page": A["toc_page"], "toc": A["toc"],
+          "toc_pages": A.get("toc_pages"), "toc_kind": A.get("toc_kind"), "toc_v26": A.get("toc_v26"),
+          "toc_page_v26": A.get("toc_page_v26"), "offset_v26": A.get("offset_v26"), "folio_range_v26": A.get("folio_range_v26"),
+          "folio_segments": A.get("folio_segments"), "folio_misplaced": {str(k): v for k, v in (A.get("folio_misplaced") or {}).items()},
+          "toc_chapters": A.get("toc_chapters"), "toc_folio_error": A.get("toc_folio_error"),
           "pages": {str(k): {kk: vv for kk, vv in v.items() if kk != "toc_entries"} for k, v in A["pages"].items()}}
     for v in an["pages"].values():
         v["starts"] = [{k: s[k] for k in ("title", "author", "title_idx", "byline_idx")} for s in v["starts"]]

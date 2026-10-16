@@ -349,7 +349,7 @@ class UpgradeTest(unittest.TestCase):
 
     def test_target_follows_current_rules_and_rechecks_completed_prior_release(self):
         self.assertEqual(upgrade.TARGET_BACKEND, f"rules_v{rules.VERSION}")
-        self.assertEqual(upgrade.TARGET, (2, 6))
+        self.assertEqual(upgrade.TARGET, tuple(map(int, rules.VERSION.split("."))))
         self.put(self.rules_rel, doc("rules_v2.5"))
         self.put(f"data/corpus/{upgrade.BACKUP_NAME}/x/receipt.json", {"issue": "x", "status": "complete", "target": "rules_v2.5"})
         selected, _ = upgrade.plan(self.root, [{"id": "x", "ia_identifier": "source"}], {"x": {"stages": {"assembled": {}}}})
@@ -357,7 +357,7 @@ class UpgradeTest(unittest.TestCase):
         with patch.object(rules, "run_issue", side_effect=self.fake_run):
             result = upgrade.upgrade_one(str(self.root), {"id": "x"}, "rules")
         self.assertEqual(result["status"], "complete", result)
-        self.assertEqual(result["target"], "rules_v2.6")
+        self.assertEqual(result["target"], f"rules_v{rules.VERSION}")
 
     def test_cleaned_printed_ad_preserves_excerpt_without_giving_story_its_link(self):
         old, new = doc(), doc(upgrade.TARGET_BACKEND)
