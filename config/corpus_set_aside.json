@@ -1,0 +1,602 @@
+{
+ "_comment": "Issues of the approved list set aside after the download (p50t; Heejin, 14 October 2026: 'Fetch the real scans, set the rest aside'). They stay in the approved list (its fingerprint is untouched); corpus_lib.set_aside() keeps every stage off them; the datasheet counts them by reason. Made by scripts/missing_issues.py from the run's events and the archive's item records.",
+ "decided_by": "Heejin Kim",
+ "decided": "2026-10-14",
+ "written": "2026-10-16T19:58:41",
+ "issues": [
+  {
+   "id": "about_the_pulps_newsletters__undated_aboutpulps",
+   "ia_identifier": "aboutpulps",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "adventure_magazine_undated_remagazine",
+   "ia_identifier": "adventuremagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "amazing_stories_annual_undated_riesannual",
+   "ia_identifier": "Amazing_Stories_Annual",
+   "class": "set aside: not a scan",
+   "reason": "no page images at all: Archive BitTorrent, Metadata"
+  },
+  {
+   "id": "amazing_stories_checklist_mh_undated_ecklistmht",
+   "ia_identifier": "Amazing_Stories_Checklist.mht",
+   "class": "set aside: not a scan",
+   "reason": "no page images at all: Archive BitTorrent, Metadata, Unknown"
+  },
+  {
+   "id": "amazing_stories_magazine_undated_esmagazine",
+   "ia_identifier": "amazingstoriesmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "argosy_1946_09_charlesdye",
+   "ia_identifier": "argosy-september-1946-charlesdye",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "argosy_1949_02_argosy003",
+   "ia_identifier": "argosy-003",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "argosy_all_story_weekly_from_1922_toryweekly",
+   "ia_identifier": "ArgosyAll-StoryWeekly",
+   "class": "set aside: bound volume",
+   "reason": "a bound volume of several issues (906 page images under one item)"
+  },
+  {
+   "id": "argosy_magazine_undated_symagazine",
+   "ia_identifier": "argosymagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "asimov_s_science_fiction_mag_undated_ovmagazine",
+   "ia_identifier": "asimovmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "astounding_science_fiction_1940_n1942no301",
+   "ia_identifier": "astounding-science-fiction-1942-no-30-1",
+   "class": "set aside: bound volume",
+   "reason": "several issues in one item (18 comic-book archives: astounding science fiction 1940 no 24#5, astounding science fiction 1940 no 24#6)"
+  },
+  {
+   "id": "astounding_stories_1932_cience1932",
+   "ia_identifier": "Astounding_Stories_of_Super_Science_1932",
+   "class": "set aside: bound volume",
+   "reason": "a bound volume of several issues (1169 page images under one item)"
+  },
+  {
+   "id": "astounding_stories_january_a_1933_03_cience1933",
+   "ia_identifier": "Astounding_Stories_of_Super_Science_1933",
+   "class": "set aside: bound volume",
+   "reason": "several issues in one item (2 comic-book archives: asf1933-01, asf1933-03)"
+  },
+  {
+   "id": "astounding_stories_magazine_undated_ingstories",
+   "ia_identifier": "astoundingstories",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "astounding_stories_of_super__1931_cience1931",
+   "ia_identifier": "Astounding_Stories_of_Super_Science_1931",
+   "class": "set aside: bound volume",
+   "reason": "a bound volume of several issues (1621 page images under one item)"
+  },
+  {
+   "id": "authentic_science_fiction_undated_ncefiction",
+   "ia_identifier": "authenticsciencefiction",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "blue_book_magazine_undated_okmagazine",
+   "ia_identifier": "bluebookmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "brigitte_en_accion_undated_teenaccion",
+   "ia_identifier": "brigitte_en_accion",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "calvacade_magazine_undated_demagazine",
+   "ia_identifier": "calvacademagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "cave_that_swims_on_the_water_1920_05_llanderson",
+   "ia_identifier": "CaveThatSwimsOnTheWaterThePaulL.Anderson",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "cine_argentino_undated_eargentino",
+   "ia_identifier": "cineargentino",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "collier_s_magazine_undated_rsmagazine",
+   "ia_identifier": "colliersmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "comix_international_undated_ernational",
+   "ia_identifier": "comixinternational",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "creepy_undated_eepywarren",
+   "ia_identifier": "creepy_warren",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "eerie_magazine_undated_emagazines",
+   "ia_identifier": "eerie_magazines",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "el_pirata_negro_undated_iratanegro",
+   "ia_identifier": "el_pirata_negro",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "ellery_queen_s_mystery_magaz_undated_enmagazine",
+   "ia_identifier": "eleryqueenmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "espacio_el_mundo_futuro_undated_undofuturo",
+   "ia_identifier": "espacio_el_mundo_futuro",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "famous_fantastic_mysteries_undated_cmysteries",
+   "ia_identifier": "famousfantasticmysteries",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "famous_monsters_of_filmland_undated_rsmagazine",
+   "ia_identifier": "famousmonstersmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "fantastic_adventures_2_undated_07195007at",
+   "ia_identifier": "fantastic-adventures-v-12n-07-1950-07-at",
+   "class": "set aside: bound volume",
+   "reason": "several issues in one item (30 comic-book archives: fantastic adventures v10n01 (1948-01), fantastic adventures v10n02 (1948-02) (ca)"
+  },
+  {
+   "id": "fantastic_adventures_magazin_undated_adventures",
+   "ia_identifier": "fantasticadventures",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "fantastic_science_fiction_st_undated_csfstories",
+   "ia_identifier": "fantasticsfstories",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "fantasy_and_science_fiction__undated_ncefiction",
+   "ia_identifier": "fantasyandsciencefiction",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "fate_magazine_undated_temagazine",
+   "ia_identifier": "fatemagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "film_fun_magazine_undated_nmmagazine",
+   "ia_identifier": "filmfunmmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "galaxy_magazine_undated_xymagazine",
+   "ia_identifier": "galaxymagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "help_magazine_undated_lpmagazine",
+   "ia_identifier": "helpmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "heroes_de_la_pradera_undated_elapradera",
+   "ia_identifier": "heroes_de_la_pradera",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "heroes_del_espacio_undated_delespacio",
+   "ia_identifier": "heroes_del_espacio",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "i_cheated_russia_s_white_dea_1955_whitedeath",
+   "ia_identifier": "I_Cheated_Russias_White_Death",
+   "class": "set aside: restricted",
+   "reason": "the archive restricts the item (HTTP 401/403); a lending book, not a magazine scan"
+  },
+  {
+   "id": "if_magazine_undated_ifmagazine",
+   "ia_identifier": "ifmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "illustrations_de_peter_dribe_1940_puppylove",
+   "ia_identifier": "puppy-love",
+   "class": "set aside: not a scan",
+   "reason": "92 images but no numbered page sequence: illustrations or covers, not a scanned issue"
+  },
+  {
+   "id": "interzone_magazine_undated_nemagazine",
+   "ia_identifier": "interzonemagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "la_conquista_del_espacio_undated_delespacio",
+   "ia_identifier": "bolsilibros_la_conquista_del_espacio",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "la_huella_undated_huellapulp",
+   "ia_identifier": "la_huella_pulp",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "liberty_magazine_undated_tymagazine",
+   "ia_identifier": "libertymagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "love_story_1926_0319202003",
+   "ia_identifier": "138_20200319_202003",
+   "class": "set aside: incomplete scan",
+   "reason": "100 of 148 numbered pages present (Final/files/mobile/1.jpg …): an incomplete scan"
+  },
+  {
+   "id": "love_story_1926_05_3820200319",
+   "ia_identifier": "138_20200319",
+   "class": "set aside: incomplete scan",
+   "reason": "100 of 148 numbered pages present (Final/files/mobile/1.jpg …): an incomplete scan"
+  },
+  {
+   "id": "luchadores_del_espacio_undated_delespacio",
+   "ia_identifier": "luchadores_del_espacio",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "mccall_s_magazine_undated_lsmagazine",
+   "ia_identifier": "mccallsmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "mcclure_s_magazine_undated_esmagazine",
+   "ia_identifier": "mccluresmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "mechanix_illustrated_undated_llustrated",
+   "ia_identifier": "mechanixillustrated",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "miscellaneous_humor_and_joke_undated_pmischumor",
+   "ia_identifier": "pulp_misc_humor",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "miscellaneous_pulp_adventure_undated_cadventure",
+   "ia_identifier": "pulp_misc_adventure",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "miscellaneous_pulp_fantasy_undated_iscfantasy",
+   "ia_identifier": "pulp_misc_fantasy",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "miscellaneous_pulp_for_youth_undated_pmiscyouth",
+   "ia_identifier": "pulp_misc_youth",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "miscellaneous_pulp_horror_undated_mischorror",
+   "ia_identifier": "pulp_misc_horror",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "miscellaneous_pulp_mystery_undated_iscmystery",
+   "ia_identifier": "pulp_misc_mystery",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "miscellaneous_pulp_romance_undated_iscromance",
+   "ia_identifier": "pulp_misc_romance",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "miscellaneous_pulp_science_f_undated_pulpmiscsf",
+   "ia_identifier": "pulp_misc_sf",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "miscellaneous_pulp_sports_undated_miscsports",
+   "ia_identifier": "pulp_misc_sports",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "miscellaneous_pulp_westerns_undated_iscwestern",
+   "ia_identifier": "pulp_misc_western",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "miscellaneous_warren_publish_undated_ishingmisc",
+   "ia_identifier": "warrenpublishingmisc",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "modern_mechanix_undated_rnmechanix",
+   "ia_identifier": "modernmechanix",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "modern_screen_magazine_undated_dernscreen",
+   "ia_identifier": "modernscreen",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "new_detective_magazine_4411__undated_ackettrtfr",
+   "ia_identifier": "New_Detective_Magazine_-_4411_-_I_Feel_Bad_Killing_You_by_Leigh_Brackett_rtf.r",
+   "class": "set aside: no images",
+   "reason": "a zip/RAR of text, not of page images"
+  },
+  {
+   "id": "new_worlds_science_fiction_m_undated_ewworldssf",
+   "ia_identifier": "newworldssf",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "nickles_and_dimes_dime_novel_undated_esanddimes",
+   "ia_identifier": "nickles-and-dimes",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "photoplay_magazine_undated_aymagazine",
+   "ia_identifier": "photoplaymagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "planet_stories_undated_netstories",
+   "ia_identifier": "planetstories",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "psychotronic_video_undated_ychotronic",
+   "ia_identifier": "psychotronic",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "pulp_fiction_miscellaneous_undated_ictionmisc",
+   "ia_identifier": "pulp_fiction_misc",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "pulp_magazine_inbox_undated_azineinbox",
+   "ia_identifier": "pulpmagazine_inbox",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "pulp_magazines_of_golden_age_undated_chollywood",
+   "ia_identifier": "classichollywood",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "punch_or_the_london_charivar_1920_07_chv1591920",
+   "ia_identifier": "Punch_v159_1920",
+   "class": "set aside: no images",
+   "reason": "DjVu only: no page images the pipeline reads"
+  },
+  {
+   "id": "punch_or_the_london_charivar_1920_chv1581920",
+   "ia_identifier": "Punch_v158_1920",
+   "class": "set aside: no images",
+   "reason": "DjVu only: no page images the pipeline reads"
+  },
+  {
+   "id": "radio_stars_magazine_undated_rsmagazine",
+   "ia_identifier": "radiostarsmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "science_fantasy_undated_ncefantasy",
+   "ia_identifier": "sciencefantasy",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "science_fiction_quarterly_undated_nquarterly",
+   "ia_identifier": "sciencefictionquarterly",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "science_fiction_stories_undated_ionstories",
+   "ia_identifier": "sciencefictionstories",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "science_wonder_stories_undated_derstories",
+   "ia_identifier": "sciencewonderstories",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "secret_service_magazine_undated_servicemag",
+   "ia_identifier": "secretservicemag",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "seleccion_terror_undated_cionterror",
+   "ia_identifier": "bolsilibros_seleccion_terror",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "starburst_magazine_undated_stmagazine",
+   "ia_identifier": "starburstmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "startling_stories_undated_ingstories",
+   "ia_identifier": "startling_stories",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "teenage_love_stories_undated_rieswarren",
+   "ia_identifier": "teenagelovestorieswarren",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "the_goblin_undated_blinwarren",
+   "ia_identifier": "goblin-warren",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "the_new_movie_undated_henewmovie",
+   "ia_identifier": "thenewmovie",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "the_popular_magazine_undated_armagazine",
+   "ia_identifier": "popularmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "the_rook_undated_rookwarren",
+   "ia_identifier": "rook_warren",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "thrilling_detective_stories_undated_gdetective",
+   "ia_identifier": "thrillingdetective",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "thrilling_wonder_stories_undated_derstories",
+   "ia_identifier": "thrillingwonderstories",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "thrust_science_fiction_magaz_undated_sfmagazine",
+   "ia_identifier": "thrustsfmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "twilight_zone_magazine_undated_nemagazine",
+   "ia_identifier": "twilightzonemagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "unknown_worlds_undated_nownworlds",
+   "ia_identifier": "unknownworlds",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "vampirella_magazine_undated_vampirella",
+   "ia_identifier": "warren-vampirella",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "walter_m_baumhofer_1925_hing202102",
+   "ia_identifier": "dime-western-magazine-pulp-cover-the-lynching_202102",
+   "class": "set aside: not a scan",
+   "reason": "138 images but no numbered page sequence: illustrations or covers, not a scanned issue"
+  },
+  {
+   "id": "weird_tales_magazine_undated_esmagazine",
+   "ia_identifier": "weirdtalesmagazine",
+   "class": "set aside: not a scan",
+   "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  }
+ ]
+}
