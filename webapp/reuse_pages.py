@@ -591,7 +591,8 @@ def overview(render=None):
         "<h1>Text reuse in the pilot</h1>",
         "<p class='muted'>Browse: <a href='/reuse/clusters'>reuse clusters</a> · "
         "<a href='/reuse/validate'>paraphrase review</a> · <a href='/reuse/cases'>cases</a> · "
-        "<a href='/reuse/progress'>progress</a>. Method: <a href='/method#reuse'>the protocol step by step</a>.</p>"]
+        "<a href='/reuse/progress'>progress</a>. Method: <a href='/method#reuse'>the protocol step by step</a>.</p>",
+        _G["CRP"].overview_note() if "CRP" in _G else ""]
 
     # ---- exact
     out.append("<h2>1. Exact reuse (r02)</h2>")

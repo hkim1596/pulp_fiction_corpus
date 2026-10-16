@@ -623,7 +623,7 @@ def build_db(sig, path, log=None):
             "summary": json.dumps(_json(os.path.join(D, "reuse", "background", "summary_machine.json")) or {}),
             "overlap": json.dumps(_json(os.path.join(D, "reuse", "machine_region_overlap.json")) or {}),
             "survey": json.dumps(_json(os.path.join(D, "survey", "summary.json")) or {}),
-            "corpus_included": "true", "version": "0.22.0"}
+            "corpus_included": "true", "version": "0.23.0"}
     con.executemany("INSERT INTO meta VALUES (?,?)", list(meta.items()))
     con.commit()
     con.close()

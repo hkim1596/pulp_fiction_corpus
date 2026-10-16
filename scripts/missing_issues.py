@@ -9,7 +9,8 @@ set the rest aside"): what each archive item holds, which can be fetched with th
 
 Reads: the run's events (the last download failure of every issue that never downloaded), the issue list (the
 archive identifier of each), and the archive's item record of each (https://archive.org/metadata/<identifier>,
-fetched once and cached; one request every 0.4 s with a contact address). Writes the set-aside file that
+fetched once and cached; one request every 0.4 s with a contact address). An issue whose record is in the cache
+stays in the review on later runs even when the run has fetched it since, so that refined rules can still set it aside. Writes the set-aside file that
 corpus_lib.set_aside() reads (the run skips those issues; the datasheet counts them) and a plain-English report.
 Nothing on the server is changed by this script itself. Safe to run again: the cache is reused, the files rewritten.
 
@@ -141,6 +142,11 @@ def main():
     ids = {i["id"]: i for i in lst["issues"]}
     missing = never_downloaded(args.events)
     cache = json.load(open(args.cache, encoding="utf-8")) if os.path.exists(args.cache) else {}
+    # an issue classified on an earlier run (its item record is in the cache) stays in the review even when the run has
+    # fetched it since: the refined rules may set it aside (several issues in one item, say) after a download succeeded
+    for iid, i in ids.items():
+        if iid not in missing and i.get("ia_identifier") in cache:
+            missing[iid] = "no _jp2.zip and no pdf in the item (classified on an earlier run; fetched since)"
     rows = []
     for iid, msg in sorted(missing.items()):
         ident = (ids.get(iid) or {}).get("ia_identifier")
@@ -166,7 +172,7 @@ def main():
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     json.dump(out, open(args.out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     c = Counter(r["class"] for r in rows)
-    lines = [f"# The {len(rows)} issues the run could not download — {time.strftime('%Y-%m-%d %H:%M')}", "",
+    lines = [f"# The {len(rows)} issues the run could not download at first — {time.strftime('%Y-%m-%d %H:%M')}", "",
              "From the run's events and the archive's item records (scripts/missing_issues.py). Heejin's decision of 14 October:",
              "the real scans are fetched with the downloader's new file formats, the rest is set aside with a reason.", "",
              "| class | issues |", "|---|---|"] + [f"| {k} | {n} |" for k, n in c.most_common()] + ["", "| issue | class | reason | title | files | MB |", "|---|---|---|---|---|---|"]
@@ -174,7 +180,7 @@ def main():
         lines.append(f"| {r['id']} | {r['class']} | {r['reason']} | {(r['title'] or '')[:50]} | {r['n_files']} | {r['mb']} |")
     os.makedirs(os.path.dirname(args.report) or ".", exist_ok=True)
     open(args.report, "w", encoding="utf-8").write("\n".join(lines) + "\n")
-    print(f"{len(rows)} issues never downloaded: " + ", ".join(f"{k} {n}" for k, n in c.most_common()))
+    print(f"{len(rows)} issues reviewed ({sum(1 for r in rows if 'fetched since' not in r['failure'])} never downloaded): " + ", ".join(f"{k} {n}" for k, n in c.most_common()))
     print(f"set aside: {len(aside)} -> {args.out}; to fetch or retry: {len(rows) - len(aside)}; report: {args.report}")
     fetch_ids = [r["id"] for r in rows if not r["class"].startswith("set aside")]
     print("ids to retry/fetch:", ",".join(fetch_ids))

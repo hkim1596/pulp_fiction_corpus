@@ -1,0 +1,2012 @@
+{
+ "_comment": "The verification sample (plan section 6.1; Heejin, 14 October 2026): 150 assembled issues, stratified by decade and genre, drawn once with a fixed seed by scripts/draw_verification_sample.py; read on the workbench and marked verified record by record; every fifth issue in the reading order is read by a second reader too. The assembly's accuracy is s11_corrections_audit.py --sample over these issues.",
+ "drawn": "2026-10-15T09:52:36",
+ "seed": 20261014,
+ "n": 150,
+ "population": 7306,
+ "strata": "decade x genre class (the plan's eight; format unknown in the archive's metadata)",
+ "min_per_cell": 2,
+ "second_reader_every": 5,
+ "cells": [
+  {
+   "decade": "1890s",
+   "genre": "adventure",
+   "population": 10,
+   "drawn": 2
+  },
+  {
+   "decade": "1890s",
+   "genre": "detective",
+   "population": 27,
+   "drawn": 2
+  },
+  {
+   "decade": "1890s",
+   "genre": "general",
+   "population": 18,
+   "drawn": 2
+  },
+  {
+   "decade": "1890s",
+   "genre": "other",
+   "population": 44,
+   "drawn": 2
+  },
+  {
+   "decade": "1890s",
+   "genre": "science fiction",
+   "population": 2,
+   "drawn": 2
+  },
+  {
+   "decade": "1890s",
+   "genre": "weird",
+   "population": 2,
+   "drawn": 2
+  },
+  {
+   "decade": "1890s",
+   "genre": "western",
+   "population": 2,
+   "drawn": 2
+  },
+  {
+   "decade": "1900s",
+   "genre": "adventure",
+   "population": 17,
+   "drawn": 2
+  },
+  {
+   "decade": "1900s",
+   "genre": "detective",
+   "population": 5,
+   "drawn": 2
+  },
+  {
+   "decade": "1900s",
+   "genre": "general",
+   "population": 49,
+   "drawn": 2
+  },
+  {
+   "decade": "1900s",
+   "genre": "other",
+   "population": 95,
+   "drawn": 3
+  },
+  {
+   "decade": "1900s",
+   "genre": "romance",
+   "population": 1,
+   "drawn": 1
+  },
+  {
+   "decade": "1900s",
+   "genre": "western",
+   "population": 8,
+   "drawn": 2
+  },
+  {
+   "decade": "1910s",
+   "genre": "adventure",
+   "population": 64,
+   "drawn": 2
+  },
+  {
+   "decade": "1910s",
+   "genre": "detective",
+   "population": 17,
+   "drawn": 2
+  },
+  {
+   "decade": "1910s",
+   "genre": "general",
+   "population": 149,
+   "drawn": 3
+  },
+  {
+   "decade": "1910s",
+   "genre": "other",
+   "population": 130,
+   "drawn": 3
+  },
+  {
+   "decade": "1910s",
+   "genre": "science fiction",
+   "population": 2,
+   "drawn": 2
+  },
+  {
+   "decade": "1910s",
+   "genre": "western",
+   "population": 23,
+   "drawn": 2
+  },
+  {
+   "decade": "1920s",
+   "genre": "adventure",
+   "population": 184,
+   "drawn": 3
+  },
+  {
+   "decade": "1920s",
+   "genre": "detective",
+   "population": 71,
+   "drawn": 2
+  },
+  {
+   "decade": "1920s",
+   "genre": "general",
+   "population": 314,
+   "drawn": 4
+  },
+  {
+   "decade": "1920s",
+   "genre": "other",
+   "population": 221,
+   "drawn": 3
+  },
+  {
+   "decade": "1920s",
+   "genre": "romance",
+   "population": 23,
+   "drawn": 2
+  },
+  {
+   "decade": "1920s",
+   "genre": "science fiction",
+   "population": 95,
+   "drawn": 3
+  },
+  {
+   "decade": "1920s",
+   "genre": "weird",
+   "population": 97,
+   "drawn": 3
+  },
+  {
+   "decade": "1920s",
+   "genre": "western",
+   "population": 80,
+   "drawn": 2
+  },
+  {
+   "decade": "1930s",
+   "genre": "adventure",
+   "population": 210,
+   "drawn": 3
+  },
+  {
+   "decade": "1930s",
+   "genre": "detective",
+   "population": 119,
+   "drawn": 3
+  },
+  {
+   "decade": "1930s",
+   "genre": "general",
+   "population": 145,
+   "drawn": 3
+  },
+  {
+   "decade": "1930s",
+   "genre": "other",
+   "population": 158,
+   "drawn": 3
+  },
+  {
+   "decade": "1930s",
+   "genre": "romance",
+   "population": 50,
+   "drawn": 2
+  },
+  {
+   "decade": "1930s",
+   "genre": "science fiction",
+   "population": 445,
+   "drawn": 4
+  },
+  {
+   "decade": "1930s",
+   "genre": "weird",
+   "population": 156,
+   "drawn": 3
+  },
+  {
+   "decade": "1930s",
+   "genre": "western",
+   "population": 180,
+   "drawn": 3
+  },
+  {
+   "decade": "1940s",
+   "genre": "adventure",
+   "population": 171,
+   "drawn": 3
+  },
+  {
+   "decade": "1940s",
+   "genre": "detective",
+   "population": 282,
+   "drawn": 3
+  },
+  {
+   "decade": "1940s",
+   "genre": "general",
+   "population": 78,
+   "drawn": 2
+  },
+  {
+   "decade": "1940s",
+   "genre": "other",
+   "population": 187,
+   "drawn": 3
+  },
+  {
+   "decade": "1940s",
+   "genre": "romance",
+   "population": 46,
+   "drawn": 2
+  },
+  {
+   "decade": "1940s",
+   "genre": "science fiction",
+   "population": 677,
+   "drawn": 5
+  },
+  {
+   "decade": "1940s",
+   "genre": "weird",
+   "population": 82,
+   "drawn": 2
+  },
+  {
+   "decade": "1940s",
+   "genre": "western",
+   "population": 274,
+   "drawn": 3
+  },
+  {
+   "decade": "1950s",
+   "genre": "adventure",
+   "population": 68,
+   "drawn": 2
+  },
+  {
+   "decade": "1950s",
+   "genre": "detective",
+   "population": 166,
+   "drawn": 3
+  },
+  {
+   "decade": "1950s",
+   "genre": "general",
+   "population": 30,
+   "drawn": 2
+  },
+  {
+   "decade": "1950s",
+   "genre": "other",
+   "population": 103,
+   "drawn": 3
+  },
+  {
+   "decade": "1950s",
+   "genre": "romance",
+   "population": 43,
+   "drawn": 2
+  },
+  {
+   "decade": "1950s",
+   "genre": "science fiction",
+   "population": 1168,
+   "drawn": 8
+  },
+  {
+   "decade": "1950s",
+   "genre": "weird",
+   "population": 44,
+   "drawn": 2
+  },
+  {
+   "decade": "1950s",
+   "genre": "western",
+   "population": 174,
+   "drawn": 3
+  },
+  {
+   "decade": "undated",
+   "genre": "adventure",
+   "population": 14,
+   "drawn": 2
+  },
+  {
+   "decade": "undated",
+   "genre": "detective",
+   "population": 39,
+   "drawn": 2
+  },
+  {
+   "decade": "undated",
+   "genre": "other",
+   "population": 51,
+   "drawn": 2
+  },
+  {
+   "decade": "undated",
+   "genre": "romance",
+   "population": 17,
+   "drawn": 2
+  },
+  {
+   "decade": "undated",
+   "genre": "science fiction",
+   "population": 132,
+   "drawn": 3
+  },
+  {
+   "decade": "undated",
+   "genre": "weird",
+   "population": 156,
+   "drawn": 3
+  },
+  {
+   "decade": "undated",
+   "genre": "western",
+   "population": 91,
+   "drawn": 2
+  }
+ ],
+ "issues": [
+  {
+   "order": 1,
+   "id": "the_plattner_story_and_other_1897_ethuen1897",
+   "ia_identifier": "wells-h.-g.-the-plattner-story-and-others-methuen-1897",
+   "magazine": "The Plattner Story And Others - H. G. Wells (Methuen",
+   "cover_date": "1897",
+   "decade": "1890s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 2,
+   "id": "the_railroad_man_s_magazine_1910_11_rmm191011",
+   "ia_identifier": "rmm_1910_11",
+   "magazine": "The Railroad Man’s Magazine",
+   "cover_date": "1910-11",
+   "decade": "1910s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": false
+  },
+  {
+   "order": 3,
+   "id": "top_notch_magazine_1911_11_11101ibcbc",
+   "ia_identifier": "top-notch-magazine-v-006-n-03-1911-11-01-ibc-bc",
+   "magazine": "Top-Notch Magazine",
+   "cover_date": "1911-11",
+   "decade": "1910s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 4,
+   "id": "silken_threads_a_detective_s_1890_ardner1890",
+   "ia_identifier": "williams-harold-silken-threads-a-detective-story-alexander-gardner-1890",
+   "magazine": "Silken Threads: A Detective Story - Harold Williams (Alexander Gardner",
+   "cover_date": "1890",
+   "decade": "1890s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 5,
+   "id": "ace_high_magazine_1927_10_0419271018",
+   "ia_identifier": "ace-high-magazine-v-38-n-04-1927-10-18",
+   "magazine": "Ace-High Magazine",
+   "cover_date": "1927-10",
+   "decade": "1920s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": true
+  },
+  {
+   "order": 6,
+   "id": "bluebook_1952_08_5n04195208",
+   "ia_identifier": "bluebook-v-095-n-04-1952-08",
+   "magazine": "Bluebook",
+   "cover_date": "1952-08",
+   "decade": "1950s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 7,
+   "id": "weird_tales_1949_11_rgon776sas",
+   "ia_identifier": "Weird_Tales_v42n01_1949-11_Gorgon776-sas",
+   "magazine": "Weird Tales",
+   "cover_date": "1949-11",
+   "decade": "1940s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 8,
+   "id": "10_story_book_1921_12_ookdec1921",
+   "ia_identifier": "10StoryBookDec1921",
+   "magazine": "10 Story Book",
+   "cover_date": "1921-12",
+   "decade": "1920s",
+   "genre": "romance",
+   "genre_as_filed": "romance",
+   "second_reader": false
+  },
+  {
+   "order": 9,
+   "id": "the_thrill_book_1919_05_0519190501",
+   "ia_identifier": "TheThrillBookV01n0519190501",
+   "magazine": "The Thrill Book",
+   "cover_date": "1919-05",
+   "decade": "1910s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 10,
+   "id": "the_tatler_1920_01_lerjan1920",
+   "ia_identifier": "TatlerJan1920",
+   "magazine": "The Tatler",
+   "cover_date": "1920-01",
+   "decade": "1920s",
+   "genre": "other",
+   "genre_as_filed": "humor",
+   "second_reader": true
+  },
+  {
+   "order": 11,
+   "id": "adventure_1923_05_0419230510",
+   "ia_identifier": "adventure-v-040m-04-1923-05-10",
+   "magazine": "Adventure",
+   "cover_date": "1923-05",
+   "decade": "1920s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 12,
+   "id": "detective_story_magazine_vol_1917_01_ry5jan1917",
+   "ia_identifier": "detectivestory_5jan1917",
+   "magazine": "Detective Story Magazine Vol. VI",
+   "cover_date": "1917-01",
+   "decade": "1910s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 13,
+   "id": "wild_west_weekly_n0846_1919_01_4619190103",
+   "ia_identifier": "wild-west-weekly-n-0846-1919-01-03",
+   "magazine": "Wild West Weekly n0846",
+   "cover_date": "1919-01",
+   "decade": "1910s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 14,
+   "id": "argosy_1919_09_90913ibcbc",
+   "ia_identifier": "argosy-v-112-n-02-1919-09-13-ibc-bc",
+   "magazine": "Argosy",
+   "cover_date": "1919-09",
+   "decade": "1910s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 15,
+   "id": "weird_tales_1951_11_1gorgon776",
+   "ia_identifier": "Weird_Tales_v44n01_1951-11_Gorgon776",
+   "magazine": "Weird Tales",
+   "cover_date": "1951-11",
+   "decade": "1950s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": true
+  },
+  {
+   "order": 16,
+   "id": "love_story_magazine_1930_07_0219300726",
+   "ia_identifier": "LoveStoryMagazineV074N0219300726",
+   "magazine": "Love Story Magazine",
+   "cover_date": "1930-07",
+   "decade": "1930s",
+   "genre": "romance",
+   "genre_as_filed": "romance",
+   "second_reader": false
+  },
+  {
+   "order": 17,
+   "id": "astounding_science_fiction_1942_10_ctober1942",
+   "ia_identifier": "astoundingsciencefictionoctober1942",
+   "magazine": "Astounding Science Fiction",
+   "cover_date": "1942-10",
+   "decade": "1940s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 18,
+   "id": "frank_frazetta_fantasy_illus_undated_lustrated2",
+   "ia_identifier": "Frank_Frazetta_Fantasy_Illustrated_2",
+   "magazine": "Frank Frazetta Fantasy Illustrated 2",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "other",
+   "genre_as_filed": "fantasy",
+   "second_reader": false
+  },
+  {
+   "order": 19,
+   "id": "adventure_1949_04_0n06194904",
+   "ia_identifier": "adventure-v-120-n-06-1949-04",
+   "magazine": "Adventure",
+   "cover_date": "1949-04",
+   "decade": "1940s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 20,
+   "id": "detective_story_1918_12_0519181210",
+   "ia_identifier": "DetectiveStoryV019N0519181210",
+   "magazine": "Detective Story",
+   "cover_date": "1918-12",
+   "decade": "1910s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": true
+  },
+  {
+   "order": 21,
+   "id": "western_story_1930_07_0519300705",
+   "ia_identifier": "western-story-v-096-n-05-1930-07-05",
+   "magazine": "Western Story",
+   "cover_date": "1930-07",
+   "decade": "1930s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 22,
+   "id": "blue_book_magazine_1937_03_3703mccall",
+   "ia_identifier": "Blue_Book_Magazine_V64n05_1937-03.Mccall",
+   "magazine": "Blue Book Magazine",
+   "cover_date": "1937-03",
+   "decade": "1930s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 23,
+   "id": "weird_tales_1932_08_2193208sas",
+   "ia_identifier": "Weird_Tales_v20n02_1932-08_sas",
+   "magazine": "Weird Tales",
+   "cover_date": "1932-08",
+   "decade": "1930s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 24,
+   "id": "ranch_romances_1955_03_0419550325",
+   "ia_identifier": "ranch-romances-v-190-n-04-1955-03-25",
+   "magazine": "Ranch Romances",
+   "cover_date": "1955-03",
+   "decade": "1950s",
+   "genre": "romance",
+   "genre_as_filed": "romance",
+   "second_reader": false
+  },
+  {
+   "order": 25,
+   "id": "science_fiction_quarterly_ne_1951_08_1n02195108",
+   "ia_identifier": "Science_Fiction_Quarterly_New_Series_v01n02_1951-08",
+   "magazine": "Science Fiction Quarterly New Series",
+   "cover_date": "1951-08",
+   "decade": "1950s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": true
+  },
+  {
+   "order": 26,
+   "id": "10_short_novels_magazine_1938_10_1n01193810",
+   "ia_identifier": "10-short-novels-magazine-v-01-n-01-1938-10",
+   "magazine": "10 Short Novels Magazine",
+   "cover_date": "1938-10",
+   "decade": "1930s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": false
+  },
+  {
+   "order": 27,
+   "id": "leather_clad_tales_of_advent_1890_08_3818900823",
+   "ia_identifier": "leather-clad-tales-of-adventure-and-romance-no.-38-1890-08-23",
+   "magazine": "Leather-Clad Tales Of Adventure And Romance",
+   "cover_date": "1890-08",
+   "decade": "1890s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 28,
+   "id": "detective_tales_1948_02_8n03194802",
+   "ia_identifier": "detective-tales-v-38-n-03-1948-02",
+   "magazine": "Detective Tales",
+   "cover_date": "1948-02",
+   "decade": "1940s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 29,
+   "id": "texas_rangers_1950_10_0n02195010",
+   "ia_identifier": "texas-rangers-v-40-n-02-1950-10",
+   "magazine": "Texas Rangers",
+   "cover_date": "1950-10",
+   "decade": "1950s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 30,
+   "id": "argosy_1897_08_oundvolume",
+   "ia_identifier": "Argosy_v25n01_1897-08.Munsey_from_bound_volume",
+   "magazine": "Argosy",
+   "cover_date": "1897-08",
+   "decade": "1890s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": true
+  },
+  {
+   "order": 31,
+   "id": "deep_red_undated_d02fantaco",
+   "ia_identifier": "Deep_Red_02_FantaCo",
+   "magazine": "Deep Red",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 32,
+   "id": "love_story_magazine_1940_03_0519400302",
+   "ia_identifier": "love-story-magazine-v-157-n-05-1940-03-02",
+   "magazine": "Love Story Magazine",
+   "cover_date": "1940-03",
+   "decade": "1940s",
+   "genre": "romance",
+   "genre_as_filed": "romance",
+   "second_reader": false
+  },
+  {
+   "order": 33,
+   "id": "science_fiction_quarterly_1942_04s_ggorgon776",
+   "ia_identifier": "Science_Fiction_Quarterly_v01n06_1942-Spring_Gorgon776",
+   "magazine": "Science Fiction Quarterly",
+   "cover_date": "1942-04s",
+   "decade": "1940s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 34,
+   "id": "everybody_s_magazine_1919_02_9n04191810",
+   "ia_identifier": "everybodys-magazine-v-39-n-04-1918-10",
+   "magazine": "Everybody's Magazine",
+   "cover_date": "1919-02",
+   "decade": "1910s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": false
+  },
+  {
+   "order": 35,
+   "id": "the_aldine_boys_first_rate_p_1901_1ufikusdpp_e7b49cb24aac",
+   "ia_identifier": "the-aldine-boys-first-rate-pocket-library-n-405-1901-ufikus-dpp",
+   "magazine": "The Aldine Boys' First-Rate Pocket Library n405",
+   "cover_date": "1901",
+   "decade": "1900s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": true
+  },
+  {
+   "order": 36,
+   "id": "super_detective_library_undated_118bogof39",
+   "ia_identifier": "superdetectivelibrary118bogof39",
+   "magazine": "Super Detective Library",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 37,
+   "id": "texas_rangers_1951_02_1n03195102",
+   "ia_identifier": "texas-rangers-v-41-n-03-1951-02",
+   "magazine": "Texas Rangers",
+   "cover_date": "1951-02",
+   "decade": "1950s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 38,
+   "id": "blue_book_1921_11_4n01192111",
+   "ia_identifier": "blue-book-v-034-n-01-1921-11",
+   "magazine": "Blue Book",
+   "cover_date": "1921-11",
+   "decade": "1920s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 39,
+   "id": "weird_tales_1931_09_8n02193109",
+   "ia_identifier": "WeirdTalesV18N02193109",
+   "magazine": "Weird Tales",
+   "cover_date": "1931-09",
+   "decade": "1930s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 40,
+   "id": "10_story_book_1922_03_kmarch1922",
+   "ia_identifier": "10StoryBookMarch1922",
+   "magazine": "10 Story Book",
+   "cover_date": "1922-03",
+   "decade": "1920s",
+   "genre": "romance",
+   "genre_as_filed": "romance",
+   "second_reader": true
+  },
+  {
+   "order": 41,
+   "id": "astounding_1948_09_09cape1736",
+   "ia_identifier": "Astounding_v42n01_1948-09_cape1736",
+   "magazine": "Astounding",
+   "cover_date": "1948-09",
+   "decade": "1940s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 42,
+   "id": "jim_jam_jems_1921_04_sapril1921",
+   "ia_identifier": "JimJamJemsApril1921",
+   "magazine": "Jim Jam Jems",
+   "cover_date": "1921-04",
+   "decade": "1920s",
+   "genre": "other",
+   "genre_as_filed": "humor",
+   "second_reader": false
+  },
+  {
+   "order": 43,
+   "id": "jungle_stories_1948_10s_js1948fal",
+   "ia_identifier": "js_1948_fal",
+   "magazine": "Jungle Stories",
+   "cover_date": "1948-10s",
+   "decade": "1940s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 44,
+   "id": "the_saint_detective_magazine_1954_05_2n01195405",
+   "ia_identifier": "the-saint-detective-magazine-v-02-n-01-1954-05",
+   "magazine": "The Saint Detective Magazine",
+   "cover_date": "1954-05",
+   "decade": "1950s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 45,
+   "id": "western_story_annual_undated_toryannual",
+   "ia_identifier": "western-story-annual",
+   "magazine": "Western Story Annual",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": true
+  },
+  {
+   "order": 46,
+   "id": "the_popular_magazine_1920_01_0219200107",
+   "ia_identifier": "the-popular-magazine-v-055-n-02-1920-01-07",
+   "magazine": "The Popular Magazine",
+   "cover_date": "1920-01",
+   "decade": "1920s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 47,
+   "id": "ghost_stories_1930_05_8n05193005",
+   "ia_identifier": "ghost-stories-v-08-n-05-1930-05",
+   "magazine": "Ghost Stories",
+   "cover_date": "1930-05",
+   "decade": "1930s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 48,
+   "id": "why_get_married_token_west_1949_arwination",
+   "ia_identifier": "why-get-married-token-west-1949.-red-circle-12-darwination",
+   "magazine": "Why Get Married? - Token West",
+   "cover_date": "1949",
+   "decade": "1940s",
+   "genre": "romance",
+   "genre_as_filed": "romance",
+   "second_reader": false
+  },
+  {
+   "order": 49,
+   "id": "galaxy_1955_06_0n03195506",
+   "ia_identifier": "Galaxy_v10n03_1955-06",
+   "magazine": "Galaxy",
+   "cover_date": "1955-06",
+   "decade": "1950s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 50,
+   "id": "sunday_magazine_1905_08_olycus0152",
+   "ia_identifier": "SundayMagazine19050820LOCAutolycus0152",
+   "magazine": "Sunday Magazine",
+   "cover_date": "1905-08",
+   "decade": "1900s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": true
+  },
+  {
+   "order": 51,
+   "id": "doc_savage_club_reader_undated_wilddogdcp",
+   "ia_identifier": "Doc_Savage_Club_Reader_010_Wilddog-DCP",
+   "magazine": "Doc Savage Club Reader",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 52,
+   "id": "thrilling_detective_1951_12_9n01195112",
+   "ia_identifier": "thrilling-detective-v-69-n-01-1951-12",
+   "magazine": "Thrilling Detective",
+   "cover_date": "1951-12",
+   "decade": "1950s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 53,
+   "id": "dime_western_magazine_1952_11_vember1952",
+   "ia_identifier": "dime-western-magazine-november-1952",
+   "magazine": "Dime Western Magazine",
+   "cover_date": "1952-11",
+   "decade": "1950s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 54,
+   "id": "argosy_serials_roscoe_theodo_1934_mustbedeep",
+   "ia_identifier": "GraveMustBeDeep",
+   "magazine": "Argosy Serials: Roscoe, Theodore - A Grave Must Be Deep!",
+   "cover_date": "1934",
+   "decade": "1930s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 55,
+   "id": "weird_tales_1953_5n04195309",
+   "ia_identifier": "weird-tales-v-45-n-04-1953-09",
+   "magazine": "Weird Tales",
+   "cover_date": "1953",
+   "decade": "1950s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": true
+  },
+  {
+   "order": 56,
+   "id": "all_that_love_allows_paul_da_1955_91darwinia",
+   "ia_identifier": "all-that-love-allows-paul-darcy-boles-1955.-popular-691-darwin-ia",
+   "magazine": "All That Love Allows - Paul Darcy Boles",
+   "cover_date": "1955",
+   "decade": "1950s",
+   "genre": "romance",
+   "genre_as_filed": "romance",
+   "second_reader": false
+  },
+  {
+   "order": 57,
+   "id": "amazing_serials_02_wertenbak_1926_04_atom192645",
+   "ia_identifier": "AmazingSerials02WertenbakerTheManFromTheAtom192645",
+   "magazine": "Amazing Serials 02 Wertenbaker, G. Peyton - The Man From The Atom",
+   "cover_date": "1926-04",
+   "decade": "1920s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 58,
+   "id": "tip_top_weekly_1897_10_wbgsu12437",
+   "ia_identifier": "tip-top-weekly-080-1897-10-23.-street-smith-frank-merriwell-as-anchor-b-w-bgsu-12437",
+   "magazine": "Tip Top Weekly",
+   "cover_date": "1897-10",
+   "decade": "1890s",
+   "genre": "other",
+   "genre_as_filed": "youth",
+   "second_reader": false
+  },
+  {
+   "order": 59,
+   "id": "the_wide_world_1950_02_n622195002",
+   "ia_identifier": "the-wide-world-v-104-n-622-1950-02",
+   "magazine": "The Wide World",
+   "cover_date": "1950-02",
+   "decade": "1950s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 60,
+   "id": "10_story_detective_1941_09_94109ibcbc",
+   "ia_identifier": "10-story-detective-v-06-n-01-1941-09-ibc-bc",
+   "magazine": "10-Story Detective",
+   "cover_date": "1941-09",
+   "decade": "1940s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": true
+  },
+  {
+   "order": 61,
+   "id": "ace_high_western_stories_1948_06_9n01194806",
+   "ia_identifier": "ace-high-western-stories-v-19-n-01-1948-06",
+   "magazine": "Ace High Western Stories",
+   "cover_date": "1948-06",
+   "decade": "1940s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 62,
+   "id": "argosy_1891_04_1n04189104",
+   "ia_identifier": "argosy_v51n04_1891.04",
+   "magazine": "Argosy",
+   "cover_date": "1891-04",
+   "decade": "1890s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 63,
+   "id": "hammer_s_house_of_horror_undated_sproutscan",
+   "ia_identifier": "Hammers_House_of_Horror_001_SproutScan",
+   "magazine": "Hammer's House of Horror",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 64,
+   "id": "romance_western_undated_ncewestern",
+   "ia_identifier": "romance-western",
+   "magazine": "Romance Western",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "romance",
+   "genre_as_filed": "romance",
+   "second_reader": false
+  },
+  {
+   "order": 65,
+   "id": "the_heads_of_cerberus_by_fra_1919_cisstevens",
+   "ia_identifier": "the-heads-of-cerberus-francis-stevens",
+   "magazine": "The Heads Of Cerberus by Francis Stevens",
+   "cover_date": "1919",
+   "decade": "1910s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": true
+  },
+  {
+   "order": 66,
+   "id": "the_railroad_man_s_magazine_1909_12_rmm190912",
+   "ia_identifier": "rmm_1909_12",
+   "magazine": "The Railroad Man’s Magazine",
+   "cover_date": "1909-12",
+   "decade": "1900s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": false
+  },
+  {
+   "order": 67,
+   "id": "swift_nick_of_the_york_road__1913_3backcover",
+   "ia_identifier": "edgar-george-swift-nick-of-the-york-road-mills-boon-1913-back-cover",
+   "magazine": "Swift Nick Of The York Road - George Edgar (Mills & Boon",
+   "cover_date": "1913",
+   "decade": "1910s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 68,
+   "id": "old_sleuth_weekly_1908_05_0219080501",
+   "ia_identifier": "old-sleuth-weekly-v-01-n-02-1908-05-01",
+   "magazine": "Old Sleuth Weekly",
+   "cover_date": "1908-05",
+   "decade": "1900s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 69,
+   "id": "west_british_edition_1938_01_0219380115",
+   "ia_identifier": "west-uk-v-29-n-02-1938-01-15",
+   "magazine": "West British edition",
+   "cover_date": "1938-01",
+   "decade": "1930s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 70,
+   "id": "argosy_1905_08_august1905",
+   "ia_identifier": "argosy_august_1905",
+   "magazine": "Argosy",
+   "cover_date": "1905-08",
+   "decade": "1900s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": true
+  },
+  {
+   "order": 71,
+   "id": "strange_stories_of_coinciden_1891_redway1891",
+   "ia_identifier": "doyle-arthur-conan-et-al.-strange-stories-of-coincidence-and-ghostly-adventure-george-redway-1891",
+   "magazine": "Strange Stories Of Coincidence And Ghostly Adventure - Arthur Conan Doyle, et al. (George Redway",
+   "cover_date": "1891",
+   "decade": "1890s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 72,
+   "id": "the_shawnee_witch_1908_ewitch1908",
+   "ia_identifier": "the-shawnee-witch-1908",
+   "magazine": "The Shawnee Witch",
+   "cover_date": "1908",
+   "decade": "1900s",
+   "genre": "romance",
+   "genre_as_filed": "romance",
+   "second_reader": false
+  },
+  {
+   "order": 73,
+   "id": "startling_stories_1952_08_5208colour",
+   "ia_identifier": "Startling_Stories_v27n01_1952-08_colour",
+   "magazine": "Startling Stories",
+   "cover_date": "1952-08",
+   "decade": "1950s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 74,
+   "id": "star_weekly_novel_1953_05_lsendetour",
+   "ia_identifier": "star-weekly-novel-1953-05-30-helen-nielsen-detour",
+   "magazine": "Star Weekly Novel",
+   "cover_date": "1953-05",
+   "decade": "1950s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": false
+  },
+  {
+   "order": 75,
+   "id": "adventure_1929_01_0319290115",
+   "ia_identifier": "adventure-v-069-n-03-1929-01-15",
+   "magazine": "Adventure",
+   "cover_date": "1929-01",
+   "decade": "1920s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": true
+  },
+  {
+   "order": 76,
+   "id": "suspense_1951_10s_031951fall",
+   "ia_identifier": "Suspense_v01n03_1951-Fall",
+   "magazine": "Suspense",
+   "cover_date": "1951-10s",
+   "decade": "1950s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 77,
+   "id": "notches_on_the_rough_edge_of_1890_anhall1890",
+   "ia_identifier": "d-oyle-lynn-cyril-notches-on-the-rough-edge-of-life-chapman-hall-1890",
+   "magazine": "Notches On The Rough Edge Of Life - Lynn Cyril D'Oyle (Chapman & Hall",
+   "cover_date": "1890",
+   "decade": "1890s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 78,
+   "id": "argosy_all_story_weekly_1923_01_ngifcibcbc",
+   "ia_identifier": "argosy-v-148-n-04-1923-01-13-missing-ifc-ibc-bc",
+   "magazine": "Argosy All-Story Weekly",
+   "cover_date": "1923-01",
+   "decade": "1920s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 79,
+   "id": "weird_tales_1941_01_5n07194101",
+   "ia_identifier": "Weird_Tales_v35n07_1941-01",
+   "magazine": "Weird Tales",
+   "cover_date": "1941-01",
+   "decade": "1940s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 80,
+   "id": "romantic_range_undated_anticrange",
+   "ia_identifier": "romantic-range",
+   "magazine": "Romantic Range",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "romance",
+   "genre_as_filed": "romance",
+   "second_reader": true
+  },
+  {
+   "order": 81,
+   "id": "fantastic_adventures_1941_08_08cape1736",
+   "ia_identifier": "Fantastic_Adventures_v03n06_1941-08_cape1736",
+   "magazine": "Fantastic Adventures",
+   "cover_date": "1941-08",
+   "decade": "1940s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 82,
+   "id": "this_week_magazine_1953_06_ne19530621",
+   "ia_identifier": "this-week-magazine-1953-06-21",
+   "magazine": "This Week Magazine",
+   "cover_date": "1953-06",
+   "decade": "1950s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": false
+  },
+  {
+   "order": 83,
+   "id": "the_red_raven_library_1905_02_0419050204",
+   "ia_identifier": "TheRedRavenLibrary0419050204",
+   "magazine": "The Red Raven Library",
+   "cover_date": "1905-02",
+   "decade": "1900s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 84,
+   "id": "detective_fiction_weekly_1929_08_edstarmwdn",
+   "ia_identifier": "detective-fiction-weekly-v-043-n-03-1929-08-03.-red-star-mw-dn",
+   "magazine": "Detective Fiction Weekly",
+   "cover_date": "1929-08",
+   "decade": "1920s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 85,
+   "id": "wild_west_weekly_n0365_1909_10_6519091015",
+   "ia_identifier": "wild-west-weekly-n-0365-1909-10-15",
+   "magazine": "Wild West Weekly n0365",
+   "cover_date": "1909-10",
+   "decade": "1900s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": true
+  },
+  {
+   "order": 86,
+   "id": "death_at_sea_by_richard_sale_1940_athsea1940",
+   "ia_identifier": "sale-death-sea-1940",
+   "magazine": "Death at Sea, by Richard Sale",
+   "cover_date": "1940",
+   "decade": "1940s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 87,
+   "id": "naked_screaming_terror_undated_sue3gorbag",
+   "ia_identifier": "Naked_Screaming_Terror_issue_3_gorbag",
+   "magazine": "Naked Screaming Terror",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 88,
+   "id": "true_romances_1938_08_addenbones",
+   "ia_identifier": "TrueRomancesV27n06193808.MacfaddenBONES",
+   "magazine": "True Romances",
+   "cover_date": "1938-08",
+   "decade": "1930s",
+   "genre": "romance",
+   "genre_as_filed": "romance",
+   "second_reader": false
+  },
+  {
+   "order": 89,
+   "id": "the_fate_of_the_poseidonia_undated_poseidonia",
+   "ia_identifier": "TheFateOfThePoseidonia",
+   "magazine": "The Fate of the Poseidonia",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 90,
+   "id": "four_sided_triangle_1949_liamtemple",
+   "ia_identifier": "four-sided-triangle-by-william-temple",
+   "magazine": "Four Sided Triangle",
+   "cover_date": "1949",
+   "decade": "1940s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": true
+  },
+  {
+   "order": 91,
+   "id": "lost_continent_library_undated_tlibrary02",
+   "ia_identifier": "Lost_Continent_Library_02",
+   "magazine": "Lost Continent Library",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 92,
+   "id": "the_complete_sherlock_holmes_1891_holmesvol2",
+   "ia_identifier": "doylecompletesherlockholmesvol2",
+   "magazine": "The Complete Sherlock Holmes",
+   "cover_date": "1891",
+   "decade": "1890s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 93,
+   "id": "wild_west_weekly_n0155_1905_10_5519051006",
+   "ia_identifier": "wild-west-weekly-n-0155-1905-10-06",
+   "magazine": "Wild West Weekly n0155",
+   "cover_date": "1905-10",
+   "decade": "1900s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 94,
+   "id": "the_popular_magazine_1913_12_lbdarwinia",
+   "ia_identifier": "popular-magazine-v-030-n-04-1913-12-01.-street-smith-lb-darwin-ia",
+   "magazine": "The Popular Magazine",
+   "cover_date": "1913-12",
+   "decade": "1910s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 95,
+   "id": "weird_tales_1928_01_1sasifcibc",
+   "ia_identifier": "WeirdTalesV11N01192801sasIfcIbc",
+   "magazine": "Weird Tales",
+   "cover_date": "1928-01",
+   "decade": "1920s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": true
+  },
+  {
+   "order": 96,
+   "id": "thrilling_wonder_stories_1938_10_2n02193810",
+   "ia_identifier": "Thrilling_Wonder_Stories_v12n02_1938-10",
+   "magazine": "Thrilling Wonder Stories",
+   "cover_date": "1938-10",
+   "decade": "1930s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 97,
+   "id": "tip_top_library_1896_10_etandsmith",
+   "ia_identifier": "Tip_Top_Library_v01n28_1896-10-24.Street_and_Smith",
+   "magazine": "Tip Top Library",
+   "cover_date": "1896-10",
+   "decade": "1890s",
+   "genre": "other",
+   "genre_as_filed": "youth",
+   "second_reader": false
+  },
+  {
+   "order": 98,
+   "id": "adventure_1928_02_0519280215",
+   "ia_identifier": "adventure-v-065-n-05-1928-02-15",
+   "magazine": "Adventure",
+   "cover_date": "1928-02",
+   "decade": "1920s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 99,
+   "id": "old_sleuth_weekly_1908_05_0319080515",
+   "ia_identifier": "old-sleuth-weekly-v-01-n-03-1908-05-15",
+   "magazine": "Old Sleuth Weekly",
+   "cover_date": "1908-05",
+   "decade": "1900s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 100,
+   "id": "indian_child_life_1899_inationdcp",
+   "ia_identifier": "Indian_Child_Life_1899.ThereseEdwin_Deming_Darwination-DCP",
+   "magazine": "Indian Child Life",
+   "cover_date": "1899",
+   "decade": "1890s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": true
+  },
+  {
+   "order": 101,
+   "id": "eric_of_the_strong_heart_by__1918_gheart1918",
+   "ia_identifier": "rousseau-strong-heart-1918",
+   "magazine": "Eric of the Strong Heart, by Victor Rousseau",
+   "cover_date": "1918",
+   "decade": "1910s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 102,
+   "id": "weird_tales_1927_09_0n03192709",
+   "ia_identifier": "WeirdTalesV10N03192709",
+   "magazine": "Weird Tales",
+   "cover_date": "1927-09",
+   "decade": "1920s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 103,
+   "id": "amazing_stories_1926_10_ctober1926",
+   "ia_identifier": "amazing_stories_october_1926",
+   "magazine": "Amazing Stories",
+   "cover_date": "1926-10",
+   "decade": "1920s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 104,
+   "id": "railroad_stories_1935_02_cufikusdpp",
+   "ia_identifier": "Railroad_Stories_v16n03_1935-02.Munsey_c2c_ufikus-DPP_",
+   "magazine": "Railroad Stories",
+   "cover_date": "1935-02",
+   "decade": "1930s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": false
+  },
+  {
+   "order": 105,
+   "id": "the_aldine_o_er_land_and_sea_1890_ary0111890",
+   "ia_identifier": "the-aldine-oer-land-and-sea-library-011-1890",
+   "magazine": "The Aldine \"O'er Land And Sea\" Library",
+   "cover_date": "1890",
+   "decade": "1890s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": true
+  },
+  {
+   "order": 106,
+   "id": "ten_detective_aces_1935_02_2n04193502",
+   "ia_identifier": "ten-detective-aces-v-22-n-04-1935-02",
+   "magazine": "Ten Detective Aces",
+   "cover_date": "1935-02",
+   "decade": "1930s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 107,
+   "id": "masked_rider_western_1947_02_1n02194702",
+   "ia_identifier": "masked-rider-western-v-21-n-02-1947-02",
+   "magazine": "Masked Rider Western",
+   "cover_date": "1947-02",
+   "decade": "1940s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 108,
+   "id": "argosy_1924_05_0619240503",
+   "ia_identifier": "argosy-v-159-n-06-1924-05-03",
+   "magazine": "Argosy",
+   "cover_date": "1924-05",
+   "decade": "1920s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 109,
+   "id": "ghost_stories_1926_10_1n04192610",
+   "ia_identifier": "ghost-stories-v-01-n-04-1926-10",
+   "magazine": "Ghost Stories",
+   "cover_date": "1926-10",
+   "decade": "1920s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 110,
+   "id": "science_fiction_1939_10_1n04193910",
+   "ia_identifier": "sciencefictionv01n04193910",
+   "magazine": "Science Fiction",
+   "cover_date": "1939-10",
+   "decade": "1930s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": true
+  },
+  {
+   "order": 111,
+   "id": "the_scrap_book_1909_12_8n06190912",
+   "ia_identifier": "thescrapbookv08n06190912",
+   "magazine": "The Scrap Book",
+   "cover_date": "1909-12",
+   "decade": "1900s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": false
+  },
+  {
+   "order": 112,
+   "id": "army_talks_vol_ii_1944_11_erlippmann",
+   "ia_identifier": "ArmyTalksVolIIINo113Jan1945TheArmyInEuropeByWalterLippmann",
+   "magazine": "Army Talks Vol II",
+   "cover_date": "1944-11",
+   "decade": "1940s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 113,
+   "id": "the_illustrated_detective_ma_1931_09_03193109dm",
+   "ia_identifier": "the-illustrated-detective-magazine-v-04n-03-1931-09-d-m",
+   "magazine": "The Illustrated Detective Magazine",
+   "cover_date": "1931-09",
+   "decade": "1930s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 114,
+   "id": "western_story_magazine_1925_10_0419251010",
+   "ia_identifier": "western-story-magazine-v-055-n-04-1925-10-10",
+   "magazine": "Western Story Magazine",
+   "cover_date": "1925-10",
+   "decade": "1920s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 115,
+   "id": "blue_book_1907_05_5n01190705",
+   "ia_identifier": "blue-book-v-005-n-01-1907-05",
+   "magazine": "Blue Book",
+   "cover_date": "1907-05",
+   "decade": "1900s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": true
+  },
+  {
+   "order": 116,
+   "id": "arm_chair_library_1897_01_ry79189701",
+   "ia_identifier": "the-arm-chair-library-79-1897-01",
+   "magazine": "Arm Chair Library",
+   "cover_date": "1897-01",
+   "decade": "1890s",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false
+  },
+  {
+   "order": 117,
+   "id": "planet_stories_1949_04s_tsg0318sas",
+   "ia_identifier": "Planet_Stories_v04n02_1949-Spring_EXciter-dtsg0318-sas",
+   "magazine": "Planet Stories",
+   "cover_date": "1949-04s",
+   "decade": "1940s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 118,
+   "id": "unknown_1940_08_4008unzorg",
+   "ia_identifier": "Unknown_v03n06_1940-08_unz.org",
+   "magazine": "Unknown",
+   "cover_date": "1940-08",
+   "decade": "1940s",
+   "genre": "other",
+   "genre_as_filed": "fantasy",
+   "second_reader": false
+  },
+  {
+   "order": 119,
+   "id": "battle_stories_1930_12_winationia",
+   "ia_identifier": "battle-stories-v-07-n-40-1930-12.-fawcett-darwination-ia",
+   "magazine": "Battle Stories",
+   "cover_date": "1930-12",
+   "decade": "1930s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 120,
+   "id": "chicago_ledger_1923_09_3919230929",
+   "ia_identifier": "chicago-ledger-v-51n-39-1923-09-29",
+   "magazine": "Chicago Ledger",
+   "cover_date": "1923-09",
+   "decade": "1920s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": true
+  },
+  {
+   "order": 121,
+   "id": "wild_west_weekly_n0812_1918_05_1219180510",
+   "ia_identifier": "wild-west-weekly-n-0812-1918-05-10",
+   "magazine": "Wild West Weekly n0812",
+   "cover_date": "1918-05",
+   "decade": "1910s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 122,
+   "id": "blue_book_1936_11_4n01193611",
+   "ia_identifier": "blue-book-v-064-n-01-1936-11",
+   "magazine": "Blue Book",
+   "cover_date": "1936-11",
+   "decade": "1930s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 123,
+   "id": "new_worlds_1955_09_9v13195509",
+   "ia_identifier": "New_Worlds_039v13_1955-09",
+   "magazine": "New Worlds",
+   "cover_date": "1955-09",
+   "decade": "1950s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 124,
+   "id": "10_story_book_1931_07_07darwinia",
+   "ia_identifier": "10-story-book-v-30n-01-1931-07-darwin-ia",
+   "magazine": "10 Story Book",
+   "cover_date": "1931-07",
+   "decade": "1930s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": false
+  },
+  {
+   "order": 125,
+   "id": "adventure_1950_10_3n06195010",
+   "ia_identifier": "adventure-v-123-n-06-1950-10",
+   "magazine": "Adventure",
+   "cover_date": "1950-10",
+   "decade": "1950s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": true
+  },
+  {
+   "order": 126,
+   "id": "startling_mystery_stories_undated_6768winter",
+   "ia_identifier": "startling-mystery-stories-07-v-02n-01-1967-68-winter",
+   "magazine": "Startling Mystery Stories",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 127,
+   "id": "western_story_magazine_1939_06_0519390624",
+   "ia_identifier": "WesternStoryV174N0519390624",
+   "magazine": "Western Story Magazine",
+   "cover_date": "1939-06",
+   "decade": "1930s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 128,
+   "id": "blue_book_1940_04_0n06194004",
+   "ia_identifier": "BlueBookV070N06194004",
+   "magazine": "Blue Book",
+   "cover_date": "1940-04",
+   "decade": "1940s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 129,
+   "id": "amazing_stories_1930_08_05number05",
+   "ia_identifier": "AmazingStoriesVolume05Number05",
+   "magazine": "Amazing Stories",
+   "cover_date": "1930-08",
+   "decade": "1930s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 130,
+   "id": "punch_library_of_humour_mr_p_undated_unchafloat",
+   "ia_identifier": "punch-library-of-humour-mr-punch-afloat",
+   "magazine": "Punch Library Of Humour - Mr Punch Afloat",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "other",
+   "genre_as_filed": "humor",
+   "second_reader": true
+  },
+  {
+   "order": 131,
+   "id": "adventure_1931_01_0219310101",
+   "ia_identifier": "AdventureV077N0219310101",
+   "magazine": "Adventure",
+   "cover_date": "1931-01",
+   "decade": "1930s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 132,
+   "id": "ellery_queen_s_mystery_magaz_1944_03_n015194403",
+   "ia_identifier": "ellery-queens-mystery-magazine-v-005-n-015-1944-03",
+   "magazine": "Ellery Queen's Mystery Magazine",
+   "cover_date": "1944-03",
+   "decade": "1940s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 133,
+   "id": "frontier_stories_1949_10s_llatlpmurf",
+   "ia_identifier": "FrontierStoriesV17n081949FallATLPMUrf",
+   "magazine": "Frontier Stories",
+   "cover_date": "1949-10s",
+   "decade": "1940s",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 134,
+   "id": "blue_book_1952_01_4n03195201",
+   "ia_identifier": "blue-book-v-094-n-03-1952-01",
+   "magazine": "Blue Book",
+   "cover_date": "1952-01",
+   "decade": "1950s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": false
+  },
+  {
+   "order": 135,
+   "id": "galaxy_1952_07_y195207jpg",
+   "ia_identifier": "Galaxy_1952.07_-_jpg",
+   "magazine": "Galaxy",
+   "cover_date": "1952-07",
+   "decade": "1950s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": true
+  },
+  {
+   "order": 136,
+   "id": "whiz21may_p5_1921_whiz21may",
+   "ia_identifier": "whiz21may",
+   "magazine": "whiz21may p5",
+   "cover_date": "1921",
+   "decade": "1920s",
+   "genre": "other",
+   "genre_as_filed": "humor",
+   "second_reader": false
+  },
+  {
+   "order": 137,
+   "id": "adventure_1936_11_6n01193611",
+   "ia_identifier": "AdventureV096N01193611",
+   "magazine": "Adventure",
+   "cover_date": "1936-11",
+   "decade": "1930s",
+   "genre": "adventure",
+   "genre_as_filed": "adventure",
+   "second_reader": false
+  },
+  {
+   "order": 138,
+   "id": "the_shadow_1931_vingshadow",
+   "ia_identifier": "the-shadow-1-the-living-shadow",
+   "magazine": "The Shadow",
+   "cover_date": "1931",
+   "decade": "1930s",
+   "genre": "detective",
+   "genre_as_filed": "detective",
+   "second_reader": false
+  },
+  {
+   "order": 139,
+   "id": "two_western_action_books_undated_ctionbooks",
+   "ia_identifier": "two-western-action-books",
+   "magazine": "Two Western-Action Books",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false
+  },
+  {
+   "order": 140,
+   "id": "astounding_stories_1936_08_3608images",
+   "ia_identifier": "astounding_1936-08_images",
+   "magazine": "Astounding Stories",
+   "cover_date": "1936-08",
+   "decade": "1930s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": true
+  },
+  {
+   "order": 141,
+   "id": "this_week_magazine_1953_04_ne19530412",
+   "ia_identifier": "this-week-magazine-1953-04-12",
+   "magazine": "This Week Magazine",
+   "cover_date": "1953-04",
+   "decade": "1950s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": false
+  },
+  {
+   "order": 142,
+   "id": "the_most_thrilling_science_f_undated_evertold04",
+   "ia_identifier": "Most_Thrilling_Science_Fiction_Ever_Told_04",
+   "magazine": "The Most Thrilling Science Fiction Ever Told",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 143,
+   "id": "fantasy_book_1949_v01n051949",
+   "ia_identifier": "Fantasy_Book_v01n05_1949",
+   "magazine": "Fantasy Book",
+   "cover_date": "1949",
+   "decade": "1940s",
+   "genre": "other",
+   "genre_as_filed": "fantasy",
+   "second_reader": false
+  },
+  {
+   "order": 144,
+   "id": "super_science_stories_britis_undated_nknowndate",
+   "ia_identifier": "Super_Science_Stories_British_Ed_unknown_date",
+   "magazine": "Super Science Stories British Ed.",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 145,
+   "id": "all_story_weekly_1914_05_0119140502",
+   "ia_identifier": "AllStoryWeeklyV031N0119140502",
+   "magazine": "All-Story Weekly",
+   "cover_date": "1914-05",
+   "decade": "1910s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": true
+  },
+  {
+   "order": 146,
+   "id": "the_stolen_bacillus_and_othe_1895_ethuen1895",
+   "ia_identifier": "wells-h.-g.-the-stolen-bacillus-and-other-incidents-methuen-1895",
+   "magazine": "The Stolen Bacillus And Other Incidents - H. G. Wells (Methuen",
+   "cover_date": "1895",
+   "decade": "1890s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 147,
+   "id": "fantasy_science_fiction_1953_02_4n02195302",
+   "ia_identifier": "Fantasy_Science_Fiction_v004n02_1953-02",
+   "magazine": "Fantasy & Science Fiction",
+   "cover_date": "1953-02",
+   "decade": "1950s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 148,
+   "id": "astounding_british_ed_1953_07_9n07195307",
+   "ia_identifier": "Astounding_British_Ed._v09n07_1953-07",
+   "magazine": "Astounding British Ed.",
+   "cover_date": "1953-07",
+   "decade": "1950s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 149,
+   "id": "galaxy_magazine_february_1955_02_zine195502",
+   "ia_identifier": "galaxymagazine-1955-02",
+   "magazine": "Galaxy Magazine (February",
+   "cover_date": "1955-02",
+   "decade": "1950s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": false
+  },
+  {
+   "order": 150,
+   "id": "amazing_stories_1927_06_02number03",
+   "ia_identifier": "AmazingStoriesVolume02Number03",
+   "magazine": "Amazing Stories",
+   "cover_date": "1927-06",
+   "decade": "1920s",
+   "genre": "science fiction",
+   "genre_as_filed": "science fiction",
+   "second_reader": true
+  }
+ ]
+}

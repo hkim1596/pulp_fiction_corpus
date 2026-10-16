@@ -51,8 +51,18 @@ def _r6():
     return r6
 
 
-def _vdir():
-    return os.path.join(_G["DATA"], "reuse", "validation")
+SETS = {"pilot": ("reuse", "validation"), "corpus": ("reuse", "corpus_dryrun", "validation")}   # v0.23.0: the corpus dry run's set
+
+
+def _vdir(set_="pilot"):
+    return os.path.join(_G["DATA"], *SETS.get(set_, SETS["pilot"]))
+
+
+def _u(set_, **params):
+    """A /reuse/validate URL carrying the set."""
+    q = {"set": set_} if set_ != "pilot" else {}
+    q.update({k: v for k, v in params.items() if v not in (None, "")})
+    return "/reuse/validate" + ("?" + "&".join(f"{k}={_esc(str(v))}" for k, v in q.items()) if q else "")
 
 
 def _render(render, title, body, path):
@@ -65,37 +75,38 @@ def _render(render, title, body, path):
 _CACHE = {}
 
 
-def _items():
+def _items(set_="pilot"):
     r6 = _r6()
-    p = os.path.join(_vdir(), "review_set.jsonl")
+    p = os.path.join(_vdir(set_), "review_set.jsonl")
     if not os.path.exists(p):
         return []
     mt = os.path.getmtime(p)
-    if _CACHE.get("items_mt") != mt:
-        _CACHE["items"] = r6.load_review_set(p)
-        _CACHE["items_mt"] = mt
-    return _CACHE["items"]
+    if _CACHE.get(("items_mt", p)) != mt:
+        _CACHE[("items", p)] = r6.load_review_set(p)
+        _CACHE[("items_mt", p)] = mt
+    return _CACHE[("items", p)]
 
 
-def _stats():
-    p = os.path.join(_vdir(), "review_set_stats.json")
+def _stats(set_="pilot"):
+    p = os.path.join(_vdir(set_), "review_set_stats.json")
     try:
         return json.load(open(p, encoding="utf-8"))
     except Exception:
         return {}
 
 
-def _judgments(set_id):
+def _judgments(set_id, set_="pilot"):
     r6 = _r6()
-    return r6.load_judgments(os.path.join(_vdir(), "judgments.jsonl"), set_id=set_id)
+    return r6.load_judgments(os.path.join(_vdir(set_), "judgments.jsonl"), set_id=set_id)
 
 
-def append_judgment(user, set_id, item, judgment, note):
+def append_judgment(user, set_id, item, judgment, note, set_="pilot"):
     r6 = _r6()
     if judgment not in r6.JUDGMENTS_ALLOWED:
         return False
-    os.makedirs(_vdir(), exist_ok=True)
-    with open(os.path.join(_vdir(), "judgments.jsonl"), "a", encoding="utf-8") as f:
+    set_ = set_ if set_ in SETS else "pilot"
+    os.makedirs(_vdir(set_), exist_ok=True)
+    with open(os.path.join(_vdir(set_), "judgments.jsonl"), "a", encoding="utf-8") as f:
         f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "user": user, "set_id": set_id,
                             "item": item, "judgment": judgment, "note": (note or "")[:2000]}, ensure_ascii=False) + "\n")
     return True
@@ -158,16 +169,21 @@ CSS = """
 
 
 def validate_page(qs, user, render=None):
-    items = _items()
-    stats = _stats()
+    set_ = (qs.get("set") or ["pilot"])[0]
+    set_ = set_ if set_ in SETS else "pilot"
+    items = _items(set_)
+    stats = _stats(set_)
     view = (qs.get("view") or [""])[0]
+    switch = ("<p class='fine'>Review set: " + " · ".join(f"<b>{lab}</b>" if s == set_ else f"<a href='{_u(s)}'>{lab}</a>"
+              for s, lab in (("pilot", "the pilot's stories"), ("corpus", "the corpus dry run"))) + "</p>")
     if not items:
         body = [_howto("The review set does not exist on this server yet: run "
-                       "<code>python3 pipeline/r06_validation.py --build</code> after the paraphrase stage."),
-                "<h1>Paraphrase review</h1><div class='empty'>No review set.</div>"]
+                       "<code>python3 pipeline/r06_validation.py --build</code> after the paraphrase stage"
+                       + (" (for the corpus: <code>python3 pipeline/r06_validation_corpus.py</code> after r04's alignment)" if set_ == "corpus" else "") + "."),
+                "<h1>Paraphrase review</h1>", switch, "<div class='empty'>No review set.</div>"]
         return _render(render, "Paraphrase review", body, "/reuse/validate")
     set_id = items[0].get("set_id")
-    js = _judgments(set_id)
+    js = _judgments(set_id, set_)
     r6 = _r6()
     by_item = r6.latest_by_user(js)
     mine = {i: d[user] for i, d in by_item.items() if user in d} if user else {}
@@ -180,9 +196,10 @@ def validate_page(qs, user, render=None):
         "Two stories that merely treat the same subject, or share stock phrasing, are NOT A PARAPHRASE. UNSURE is "
         "allowed; a note helps the other reader. You do not see the machine's numbers until you have judged — the "
         "calibration below shows how every setting fares against the readers. Keys: 1 paraphrase, 2 not, 3 unsure."),
-        "<h1>Paraphrase review</h1>",
+        "<h1>Paraphrase review</h1>", switch,
+        (_G["CRP"]._label() if set_ == "corpus" and "CRP" in _G else ""),
         f"<p class='muted'>Review set {_esc(set_id)} · {len(items)} items · "
-        + " · ".join(f"<a href='/reuse/validate?view={v}'>{lab}</a>" for v, lab in
+        + " · ".join(f"<a href='{_u(set_, view=v)}'>{lab}</a>" for v, lab in
                      (("", "review"), ("mine", "my judgments"), ("calibration", "calibration"), ("design", "the set's design")))
         + "</p>",
         f"<div class='vprog'>Judged: " + (", ".join(f"{_esc(_G['display_name'](u))} {n}" for u, n in readers.most_common()) or "nobody yet")
@@ -193,7 +210,7 @@ def validate_page(qs, user, render=None):
     if view == "design":
         return _render(render, "Paraphrase review — design", head + design_html(stats), "/reuse/validate")
     if view == "mine":
-        return _render(render, "Paraphrase review — my judgments", head + mine_html(items, mine, by_item), "/reuse/validate")
+        return _render(render, "Paraphrase review — my judgments", head + mine_html(items, mine, by_item, set_), "/reuse/validate")
     # the item to show: ?item=, else the first unjudged (after ?after=)
     want = (qs.get("item") or [""])[0]
     after = (qs.get("after") or [""])[0]
@@ -209,13 +226,13 @@ def validate_page(qs, user, render=None):
                 break
     if item is None:
         body = head + ["<div class='empty'>You have judged every item. Thank you — the calibration shows the result."
-                       " <a href='/reuse/validate?view=calibration'>Calibration</a></div>"]
+                       f" <a href='{_u(set_, view='calibration')}'>Calibration</a></div>"]
         return _render(render, "Paraphrase review", body, "/reuse/validate")
-    body = head + item_html(item, user, mine.get(item["id"]), by_item.get(item["id"], {}))
+    body = head + item_html(item, user, mine.get(item["id"]), by_item.get(item["id"], {}), set_)
     return _render(render, f"Paraphrase review — {item['id']}", body, "/reuse/validate")
 
 
-def item_html(it, user, my_judgment, others):
+def item_html(it, user, my_judgment, others, set_="pilot"):
     ta, tb = it["window_a"], it["window_b"]
     ha, hb = _shared_runs(ta, tb)
     can = bool(user) and user != "guest"
@@ -229,11 +246,12 @@ def item_html(it, user, my_judgment, others):
         out.append(
             f"<form method='POST' action='/reuse/validate' id='vform'>"
             f"<input type='hidden' name='item' value='{_esc(it['id'])}'><input type='hidden' name='set_id' value='{_esc(it['set_id'])}'>"
+            f"<input type='hidden' name='set' value='{_esc(set_)}'>"
             "<div class='vbtns'>"
             "<button class='p' name='judgment' value='paraphrase' accesskey='1'>1 · Paraphrase or copy</button>"
             "<button class='n' name='judgment' value='not' accesskey='2'>2 · Not a paraphrase</button>"
             "<button class='u' name='judgment' value='unsure' accesskey='3'>3 · Unsure</button>"
-            f"<a class='muted' href='/reuse/validate?after={_esc(it['id'])}'>skip for now</a></div>"
+            f"<a class='muted' href='{_u(set_, after=it['id'])}'>skip for now</a></div>"
             "<textarea class='vnote' name='note' placeholder='A note for the other reader (optional): what decided it?'></textarea>"
             "</form>"
             "<script>document.addEventListener('keydown',function(e){if(e.target.tagName==='TEXTAREA')return;"
@@ -257,14 +275,14 @@ def item_html(it, user, my_judgment, others):
     return out
 
 
-def mine_html(items, mine, by_item):
+def mine_html(items, mine, by_item, set_="pilot"):
     rows = []
     for it in items:
         j = mine.get(it["id"])
         al = it.get("aligned")
         others = ", ".join(f"{_esc(_G['display_name'](u))}: {_esc(x['judgment'])}" for u, x in by_item.get(it["id"], {}).items() if x is not j)
         rows.append("<tr>" + "".join(f"<td>{c}</td>" for c in (
-            f"<a href='/reuse/validate?item={_esc(it['id'])}'>{_esc(it['id'])}</a>",
+            f"<a href='{_u(set_, item=it['id'])}'>{_esc(it['id'])}</a>",
             _esc(j["judgment"]) if j else "<span class='muted'>—</span>",
             _esc(j.get("note") or "") if j else "",
             others,

@@ -13,7 +13,8 @@ write their result under data/reuse/corpus_dryrun/para/ and can be run again fro
     alts        the fuzzy alternates of the snapshot's vocabulary (one edit apart, words of five letters or more)
     passages    the passage table (story, start, end) over the r02 snapshot (data/reuse/corpus_dryrun/tokens/)
     embed       the passage vectors, float16, in parallel processes (fastembed on the processor, the pilot's model
-                and runtime) or on a card (sentence-transformers, when present and chosen)
+                and runtime) or on a card (sentence-transformers, or transformers alone — the "hf" backend — inside a
+                container that has torch, when chosen)
     knn         the K nearest passages in other stories: exact, by blocks of matrix products on a card (torch) or
                 the processor (numpy; slow at corpus scale); faiss (approximate, recorded as such) when chosen
     align       the candidate regions (neighbours and exact seeds) bucketed by story pair on disk, scored in batches
@@ -202,6 +203,31 @@ def _model_init(backend, device, threads):
     elif backend == "st":
         from sentence_transformers import SentenceTransformer
         _W["model"] = SentenceTransformer(MODEL, device=device)
+    elif backend == "hf":
+        _W["model"] = HFEmbedder(device)
+
+
+class HFEmbedder:
+    """bge-small-en-v1.5 through transformers alone (CLS pooling, L2 norm, as the model card says), for a card inside a
+    container that has torch and transformers but not sentence-transformers (the vLLM image)."""
+
+    def __init__(self, device):
+        import torch
+        from transformers import AutoModel, AutoTokenizer
+        self.torch = torch
+        self.device = torch.device(device)
+        self.tok = AutoTokenizer.from_pretrained(MODEL)
+        self.model = AutoModel.from_pretrained(MODEL, torch_dtype=torch.float16 if self.device.type == "cuda" else torch.float32).to(self.device).eval()
+
+    def encode(self, texts, batch_size=256):
+        out = []
+        with self.torch.no_grad():
+            for i in range(0, len(texts), batch_size):
+                enc = self.tok(texts[i:i + batch_size], padding=True, truncation=True, max_length=512, return_tensors="pt").to(self.device)
+                h = self.model(**enc).last_hidden_state[:, 0]
+                h = self.torch.nn.functional.normalize(h.float(), p=2, dim=1)
+                out.append(h.cpu().numpy())
+        return np.vstack(out)
 
 
 def embed_texts(texts, backend="fake", model=None):
@@ -211,6 +237,8 @@ def embed_texts(texts, backend="fake", model=None):
         vec = np.vstack([np.asarray(v, dtype=np.float32) for v in model.embed(texts, batch_size=64)])
     elif backend == "st":
         vec = np.asarray(model.encode(texts, batch_size=256, convert_to_numpy=True, show_progress_bar=False), dtype=np.float32)
+    elif backend == "hf":
+        vec = model.encode(texts)
     else:
         raise ValueError(backend)
     vec /= np.maximum(np.linalg.norm(vec, axis=1, keepdims=True), 1e-9)
@@ -257,14 +285,20 @@ def step_embed(snap=SNAP, outdir=OUTDIR, backend="fastembed", workers=30, device
                 "device": device, "chunk": EMB_CHUNK, "started": time.strftime("%Y-%m-%d %H:%M"), "done": False}
         json.dump(meta, open(meta_p, "w", encoding="utf-8"), indent=1)
     os.makedirs(os.path.join(outdir, "emb_done"), exist_ok=True)
-    if backend == "fastembed":                       # the model files are fetched once here, not by every worker at once
-        from fastembed import TextEmbedding
-        TextEmbedding(MODEL, threads=1)
+    # every worker gets `threads` threads for the model and no more: the tokenizer library (Rayon) and OpenMP would
+    # otherwise start a pool of every core in each of the 24 processes and the machine would spend its time switching
+    for var, val in (("TOKENIZERS_PARALLELISM", "false"), ("RAYON_NUM_THREADS", str(threads)), ("OMP_NUM_THREADS", str(threads)),
+                     ("MKL_NUM_THREADS", str(threads)), ("OPENBLAS_NUM_THREADS", str(threads))):
+        os.environ[var] = val
+    if backend == "fastembed":                       # the model files are fetched once, in a separate process, before the pool forks
+        import subprocess
+        subprocess.run([sys.executable, "-c", f"from fastembed import TextEmbedding; TextEmbedding({MODEL!r}, threads=1)"], check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     chunks = [c for c in range(-(-n // EMB_CHUNK)) if not os.path.exists(os.path.join(outdir, "emb_done", f"{c:06d}.ok"))]
     log(f"[r04c] embedding {n:,} passages in {len(chunks)} chunks of {EMB_CHUNK:,} ({backend}, {workers} process{'es' if workers > 1 else ''})")
     t0 = time.time()
     done_p = 0
-    if backend == "st":
+    if backend in ("st", "hf"):
         workers = 1
     _W["corpus"] = r2c.Corpus.load(snap, mmap=True)
     _W["P"] = P
@@ -1030,7 +1064,7 @@ def main():
     ap.add_argument("step", nargs="?", choices=["alts", "passages", "embed", "knn", "candidates", "align", "report", "all"])
     ap.add_argument("--snap", default=SNAP, help="the r02 snapshot and results (data/reuse/corpus_dryrun)")
     ap.add_argument("--out", default=OUTDIR)
-    ap.add_argument("--backend", default=None, help="embed: fastembed | st | fake; knn: torch | numpy | faiss")
+    ap.add_argument("--backend", default=None, help="embed: fastembed | st | hf | fake; knn: torch | numpy | faiss")
     ap.add_argument("--device", default="cpu", help="st embeddings or torch neighbours: cpu, cuda:0, cuda:2 …")
     ap.add_argument("--workers", type=int, default=30)
     ap.add_argument("--threads", type=int, default=2, help="onnxruntime threads per fastembed process")

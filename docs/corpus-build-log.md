@@ -1167,3 +1167,66 @@ restarted on v0.22.0; the pilot check of the new engine, then the snapshot of th
 items fail at the imaging step and stay set aside — a sudo install is Heejin's call); the reader guide for Sujin and
 the start of the reading; the floor for the cluster files (ten tokens) and the pages for the corpus set, to be put to
 Heejin with the first numbers.
+
+### 2026-10-15, 10:45 KST — p50t and p50u ran on the server: the missing issues classified, the sample drawn, exact reuse over the whole corpus in nine minutes
+
+Heejin ran PASTE 9u–9x between 09:45 and 09:55 KST (commits 16e6bf0, 31bd57e, a894cbd; the server fast-forwarded, no
+tracked file differing; the r02 selftest passed on the server; numpy 2.2.6, Python 3.10.12). The work script (tmux
+p50t, data/corpus/p50t-2026-10-15/work.log) ran from 09:49:01 to 10:09:46.
+
+The missing issues. The script classified the 134 from the archive's item records (fetched once, 0.4 s apart, cached in
+data/corpus/p50t-2026-10-15/archive_metadata.json): 94 set aside (89 not a scan, 3 without images, 1 bound volume, 1
+restricted), 40 to fetch or retry (25 comic-book archives, 2 zips, 13 passing failures); the failure marks of the 40
+were cleared and the run started again at 09:52 (by 10:13 it had downloaded 35 and imaged 25 of them). A look at the
+records behind the classes showed three things the first rules got wrong, and the rules were refined the same morning
+(p50v, PASTE 9y–9aa): (1) five items hold several issues each — Astounding Stories 1932 (eight monthly comic-book
+archives and 1,169 page images), Astounding 1933 (two archives, "January and March 1933"), Astounding Science Fiction
+1940–1942 (18 archives), Fantastic Adventures 1948–1950 (30 archives), and the 1931 volume already set aside (1,621
+images) — fetching one archive of each would have put one month's issue under a year's record; two or more comic-book
+archives with different names, 600 or more page images, or a title with a year range or two months now mean "several
+issues in one item", set aside; (2) the two Love Story items of 15 May 1926 (the same upload twice) are flip-book
+exports whose 100 pages sit beside 100 thumbnails and 60 icons, numbered 1–148 with 48 pages missing (6–9, 56–99): the
+page rule now takes the largest group of numbered files in one folder (the downloader's own rule, so what is fetched is
+what was classified), and a sequence with a fifth to a half of its numbers missing is an incomplete scan, set aside;
+(3) two illustration sets (Walter M. Baumhofer, 138 images; Peter Driben, 92) whose file names carry years are not
+scans (numbers that are all years do not count as page numbers). With the refined rules on the cached records: 99 set
+aside (87 not a scan, 6 several issues in one item, 2 incomplete scans, 3 without images, 1 restricted), 35 to fetch
+or retry (20 single-issue comic-book archives — 11 ZIP, 9 RAR, 1.5 GB — 2 zips, 13 passing failures). The server has
+no RAR tool (bsdtar, 7z, unrar all absent): PASTE 9z puts the free unrar in ~/bin without sudo; until it is there the
+nine RAR scans fail at the imaging step. The reading of the fetched issues waits: the reading server on GPU 0 is down
+and the card is held by another project's job until about 16 October, 10:00 (Heejin, 15 October: "GPU 0 is used by
+another project. The work will end in 24 hours. Let's start using it after that."); PASTE 7i starts the server again
+then, and the run's workers go on by themselves.
+
+The verification sample: 150 issues drawn from the 7,306 assembled (seed 20261014), 58 cells, 30 read by a second
+reader; by decade 1890s 14, 1900s 12, 1910s 14, 1920s 22, 1930s 24, 1940s 23, 1950s 25, undated 16; by genre science
+fiction 27, other 22, adventure 19, detective 19, western 19, general 18, weird 15, romance 11. The site is v0.22.0
+(/verify/sample is a workroom page, so it asks for the login). The population is the assembled issues of 15 October;
+the few issues fetched afterwards are not in it, and that is recorded in the sample file.
+
+Exact reuse over the whole corpus (the dry run; data/reuse/corpus_dryrun/). The pilot check on the server's pilot
+stories (78 stories, 625,352 tokens) gave the pilot's own numbers at k = 6, 7, 8 (423, 36 and 3 cross-issue matches;
+211, 30 and 3 clusters). The snapshot: 63,041 stories (type story, 50 tokens or more) of 6,828 issues from the 7,306
+export files, 423,431,756 tokens, 668,471 distinct, 2.3 GB of text, 38 s in 32 processes. The passes: k = 6 in 529 s
+(the engine 294 s): 89.5 million shared shingle positions, 36.6 million shingle groups, 104 million seeds on 43.9
+million diagonal runs; 43,714,611 cross-issue matches and 137,731 same-issue; 11,942 commonplace shingles skipped
+(in more than 50 stories); 38,343,399 story pairs with a match; 62,138 of the 63,041 stories with some match — the
+six-word stock phrases reach almost every story; by length 43,132,531 matches of 6–9 tokens, 288,859 of 10–19, 142,923
+of 20–49, 66,852 of 50–99, 64,420 of 100–499 and 19,026 of 500 or more; the longest 39,517 tokens; 103,143 clusters
+over the 582,080 matches of ten tokens or more (9,243 with three or more witnesses). k = 7 in 226 s: 9,369,996
+cross-issue matches, 3,375 commonplace, 8,352,330 pairs; k = 8 in 209 s: 2,324,357 matches, 2,084 commonplace,
+1,748,638 pairs; the matches of ten tokens or more are nearly the same set at every k (585,428 and 589,307 written).
+Region families: every story its own (no two records of one issue share a region key in the corpus assembly), so
+the same-issue matches are repeats, not shared-region duplicates.
+
+What the numbers say, for the record and not as findings: (a) the 19,026 matches of 500 tokens or more and the
+longest of 39,517 are whole stories present twice or more — reprint magazines and British editions, but also the
+archive's duplicate items of one issue under several names (the journal's open item "a duplicate check by text for
+issues the archive holds under several names"): the pair table (machine_k6_pairs.npz: 38 million pairs with their
+cover) now gives that check its data — pairs with cover near 1.0 on both sides and the same magazine and date are
+duplicate items, to be resolved before any analysis counts them as reuse; (b) the commonplace cap at 50 stories
+removed 11,942 shingles at k = 6 and left 43 million short matches: the journal's estimate of 22 September (200
+million pairs with a six-word match at the pilot's rates) was high because the cap bites harder in a corpus of 63,000
+stories; (c) the ten-token floor for the text files and the clusters holds 1.3 percent of the k = 6 matches and every
+match of 20 tokens or more. Open for Heejin: that floor (ten tokens, the pilot's own bin boundary) for the cluster
+files and the pages; the duplicate-item check before the study's run.

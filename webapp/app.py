@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.22.0"
+APP_VERSION = "0.23.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -1619,6 +1619,7 @@ import collection_pages as CP  # noqa: E402
 import corpus_run_pages as CR  # noqa: E402      the corpus run, live (v0.17.0)
 import model_review_pages as MR  # noqa: E402     the model check review (v0.19.0)
 import verify_pages as VP  # noqa: E402           the verification sample (v0.22.0)
+import corpus_reuse_pages as CRP  # noqa: E402    text reuse over the whole corpus, the dry run (v0.23.0)
 RP.bind(globals())
 EX.bind(globals())
 RV.bind(globals())
@@ -1626,6 +1627,7 @@ CP.bind(globals())
 CR.bind(globals())
 MR.bind(globals())
 VP.bind(globals())
+CRP.bind(globals())
 
 
 # ---------------- request handler ----------------
@@ -1979,6 +1981,17 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, RP.overview(render=self._page))
         if path == "/reuse/clusters":
             return self._send(200, RP.clusters_page(qs, render=self._page))
+        if path == "/reuse/corpus":
+            return self._send(200, CRP.overview(render=self._page))
+        if path == "/reuse/corpus/clusters":
+            return self._send(200, CRP.clusters_page(qs, render=self._page))
+        if path == "/reuse/corpus/pairs":
+            return self._send(200, CRP.pairs_page(qs, render=self._page))
+        if path == "/reuse/corpus/duplicates":
+            return self._send(200, CRP.duplicates_page(qs, render=self._page))
+        m = re.fullmatch(r"/reuse/corpus/cluster/(exact|para)/(\d+)/(\d+)", path)
+        if m:
+            return self._send(200, CRP.cluster_page(m.group(1), int(m.group(2)), int(m.group(3)), render=self._page, user=self.user))
         if path == "/assembly":
             return self._send(200, RP.assembly_page(qs, render=self._page))
         if path == "/reuse/progress":
@@ -2080,8 +2093,8 @@ class H(BaseHTTPRequestHandler):
                     "Judging and marking need a named account, so the log shows who did it.")
                     + "<h1>Guests cannot judge</h1>"))
             if path == "/reuse/validate":
-                RV.append_judgment(self.user, get("set_id"), get("item"), get("judgment"), get("note"))
-                return self._redirect(f"/reuse/validate?after={urllib.parse.quote(get('item'))}")
+                RV.append_judgment(self.user, get("set_id"), get("item"), get("judgment"), get("note"), get("set") or "pilot")
+                return self._redirect(f"/reuse/validate?after={urllib.parse.quote(get('item'))}" + (f"&set={urllib.parse.quote(get('set'))}" if get("set") and get("set") != "pilot" else ""))
             return self._redirect(RV.do_case(get, self.user))
         if path == "/annotate":
             if self.user == "guest":
