@@ -81,6 +81,24 @@ class Contents(unittest.TestCase):
         self.assertEqual(R["toc_kind"], "chapters")
         self.assertEqual(R["entries"], [])
 
+class Speed(unittest.TestCase):
+    """16 October 2026: three corpus issues held the 10b report for hours (rows of thousands of characters; spaced
+    leader dots that do not end in a number)."""
+
+    def test_long_and_dotted_lines_are_fast(self):
+        import time
+        prose = ("He bent, plunged his straw into the brilliancy that filled the vessel, and straightened up. " * 200).strip()
+        dots = "THE LAST ROW " + " .  " * 60 + " by Nobody"
+        pages = {1: page(1, [("Text", (50, 100, 950, 1300), prose)]),
+                 2: page(2, [("SectionHeader", (50, 60, 950, 100), "CONTENTS"),
+                             ("TableOfContents", (50, 120, 950, 900), "THE MAD WORLD by A. L. Burkholder..... 35\n" + dots + "\n"
+                              "Two Worlds . . . . 41 The Third Man . . . . . . 52\n" + prose[:290])])}
+        t0 = time.time()
+        R = T.analyse_issue(pages)
+        self.assertLess(time.time() - t0, 5)
+        self.assertIsNone(T.TWO_RE.match(dots))
+        self.assertTrue(isinstance(R["entries"], list))
+
 
 if __name__ == "__main__":
     unittest.main()

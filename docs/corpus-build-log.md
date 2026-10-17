@@ -1230,3 +1230,39 @@ million pairs with a six-word match at the pilot's rates) was high because the c
 stories; (c) the ten-token floor for the text files and the clusters holds 1.3 percent of the k = 6 matches and every
 match of 20 tokens or more. Open for Heejin: that floor (ten tokens, the pilot's own bin boundary) for the cluster
 files and the pages; the duplicate-item check before the study's run.
+
+### 2026-10-16 to 17 — the project taken over by Sujin Kang; p50w and rules 2.7 installed; the near-verbatim stage over the corpus (p52)
+
+Heejin Kim handed the project to Sujin Kang on 16 October; her decisions since then (TAKEOVER-TODO-2026-10-16.md in
+the folder). Every command was run by Sujin from pilot_export/p52_takeover/p52_pastes.txt.
+
+The server rebooted on 15 October at 18:01. The site came back on 16 October at 15:33 (an @reboot line now starts
+it); the site refresh, the model-check follower, the embeddings and the containers pulp-llm-8023 and
+surya-vllm-8020 (run with --rm) did not. After the reboot the lab's citl containers took GPU 0 and GPU 2; GPU 1
+holds the lab's vllm-qwen3-14b. Sujin's decision: this project uses GPU 3, and the embeddings run on a card.
+
+Code: p50w (written on 15 October by Heejin's session and left uncommitted) and p51 (rules 2.7, toc_folio) committed
+as 790d79b and 4260f49 (the git name on these two is "XZ", an old setting on Sujin's Mac); the set-aside list as
+370d9da. The missing issues classified again with the p50w rules: 121 reviewed, 99 never downloaded and set aside
+(87 not a scan, 6 bound volumes, 3 without images, 2 incomplete scans, 1 restricted), 22 to fetch or retry. The
+duplicate check: 3,549 same-text story pairs and 519 issue pairs (408 another magazine: an edition or a reprint; 46
+the same issue under two identifiers; the rest the same magazine under another date). Site v0.23.0.
+
+The near-verbatim stage over the corpus (engineering dry run of 14 October 2026 onward; not the study's numbers).
+The processor's partial embedding run of 15 October (334 of 846 chunks, fastembed) was moved aside so that all
+vectors come from one run; bge-small-en-v1.5 through transformers on GPU 3 inside vllm/vllm-openai:latest (the
+container needs USER and LOGNAME: the image has no name for uid 1001) embedded 16,904,488 passages in 2,990 s.
+Neighbours (20 each, exact, torch on GPU 3) in 3,130 s; 381,942,102 candidate regions in 96 buckets; alignment in 60
+processes: 362,699,077 candidates, 9,244,241 alignments at the keep score. Report: K=5 196,283, K=10 201,565, K=20
+212,200 cross-issue alignments, about 11,200 clusters of 40 or more columns at each K. Review set (r06) 20261017_005345:
+275 items in 11 strata. Background (r05): 36,286,370 matched pairs (exact k=6 or near-verbatim K=20, both dated) and
+two samples of about 480,000 unmatched pairs, standing for 1,855,043,955 cross-issue pairs; 6,597 s.
+
+Rules 2.7 on the corpus: the read-only report (10b) stopped at 3,500 of 7,316 issues. Three issues kept toc_folio
+busy for hours: mammoth_detective_1946_07_4194607beb and naked_screaming_terror_undated_sue3gorbag have OCR lines of
+thousands of characters (15,702 on one page), and new_worlds_1949_49akv10jpg a line of spaced leader dots that does
+not end in a number; the row patterns' nested repetition took exponential time on them. toc_folio 1.1: lines longer
+than 300 characters are not read as rows, and the leader groups of the two-entries pattern are a single character
+class. On the 217 layout issues of the development and test sets the readings are identical except one, which gains
+a true entry (wonder_stories_1936_01: "THE MAD WORLD by A. L. Burkholder..... 800"); the three issues now take 0.1 to
+0.3 s. A regression test was added (242 tests).

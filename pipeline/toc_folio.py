@@ -45,7 +45,7 @@ import re
 import statistics
 import sys
 
-VERSION = "1.0"
+VERSION = "1.1"
 
 ROMAN = re.compile(r"^[IVXLC]+$")
 MONTHS = r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?"
@@ -71,7 +71,7 @@ PART_RE = re.compile(r"\((?:\w+[- ]parts?\.?\s*)?part\s+(?:[IVX]+|\d+|\w+)\.?\)|
                      r"(?:part|pt\.?)\s+(?:[IVX]+|\d+|one|two|three|four|five|six|seven|eight|nine|ten|"
                      r"first|second|third|fourth|fifth|sixth|last|final)\b\.?\)?|\((?:conclusion|concluded|conclusion\s+of\s+[^)]*)\)", re.I)
 BYLINE_RE = re.compile(r"^\W{0,3}(?:(?:a|an)\s+[\w\- ]{0,40}?\s+)?\b(?:by|BY|By)\s+(.{3,70})$")
-LEADER_RE = re.compile(r"(?:\s*[.·•‧∙°',:;_~=…\-—]){3,}\s*|(?:\s+[.·•:;,_~=…]\s*){2,}")
+LEADER_RE = re.compile(r"(?:\s*[.·•‧∙°',:;_~=…\-—]){3,}\s*|(?:\s+[.·•:;,_~=…]){2,}\s*")
 NOT_ENTRY = re.compile(r"\b(?:vol(?:ume)?|no\.|number|copyright|entered|subscription|price|issue|published|publishers?|printed|"
                        r"address|street|avenue|ave\.|n\.\s*y\.|cents?|per\s+copy|\$|post\s+office|act\s+of|pat\.|registered|"
                        r"on\s+sale|phone|thru|manuscripts?|reserved|second[- ]class|trade\s*mark)\b", re.I)
@@ -560,7 +560,7 @@ def parse_blocks(p, maxpage=None):
                                                     and not re.search(r"contents|cover", tt, re.I))):
             section = _sec(tt)
             continue
-        raw = [y for x in t.split("\n") for y in _split_two(x.strip())]
+        raw = [y for x in t.split("\n") if len(x) <= MAX_ROW_CHARS for y in _split_two(x.strip())]
         if sum(1 for x in raw if x) < 3:
             continue
         def anchor(x):
@@ -703,7 +703,15 @@ def parse_blocks(p, maxpage=None):
     return out, used
 
 
-TWO_RE = re.compile(r"^(.*?[A-Za-z]{3}.*?)(?:\s*[.·•…]\s*)*\s+([0-9]{1,4})\s+([A-Z\"“‘'][^\d]*?[A-Za-z]{3}[^\d]*?)(?:\s*[.·•…]\s*)*\s+([0-9lIOS]{1,4})\W*$")
+# The leader groups in TWO_RE are one character class ([\s.·•…]*), not a repeated group of optional spaces around a
+# dot, which on a line of spaced dots that does not match tries every way of sharing the spaces (new_worlds_1949_49akv10jpg).
+# A contents row is short. OCR can give a whole paragraph, or a whole page of prose, as one line (15,702 characters
+# on one page of mammoth_detective_1946_07); the row patterns below have several lazy groups, and on lines that long
+# they take hours. Lines longer than this are not read as rows.
+MAX_ROW_CHARS = 300
+
+
+TWO_RE = re.compile(r"^(.*?[A-Za-z]{3}.*?)[\s.·•…]*\s+([0-9]{1,4})\s+([A-Z\"“‘'][^\d]*?[A-Za-z]{3}[^\d]*?)[\s.·•…]*\s+([0-9lIOS]{1,4})\W*$")
 
 
 def _split_two(x):
@@ -763,7 +771,7 @@ def parse_contents_page(p, maxpage=None):
     bentries, bused = parse_blocks(p, maxpage)
     Hp = p.get("height") or 1
     lines = [l for l in page_lines(p) if l["ri"] not in bused and (l["label"] or "").lower() not in ("pageheader", "pagefooter", "footnote")
-             and not (l["y1"] < 0.06 * Hp or l["y0"] > 0.94 * Hp)]
+             and not (l["y1"] < 0.06 * Hp or l["y0"] > 0.94 * Hp) and len(l["text"]) <= MAX_ROW_CHARS]
     # two entries set side by side in one line ('Fifty Million Trees 66 Preservation Of Moles 122')
     split_lines = []
     for l in lines:
