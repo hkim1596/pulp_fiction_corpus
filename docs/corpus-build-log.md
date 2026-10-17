@@ -1266,3 +1266,25 @@ than 300 characters are not read as rows, and the leader groups of the two-entri
 class. On the 217 layout issues of the development and test sets the readings are identical except one, which gains
 a true entry (wonder_stories_1936_01: "THE MAD WORLD by A. L. Burkholder..... 800"); the three issues now take 0.1 to
 0.3 s. A regression test was added (242 tests).
+
+### 2026-10-17, 11:20 KST — rules 2.7 over the corpus (10b) and on the verification sample (10c)
+
+10b, the read-only comparison of the contents-page reading of rules 2.6 and toc_folio 1.1 over every assembled issue
+(data/corpus/toc_folio_report.json; 117 s on 16 processes): 7,316 issues, 3 errors (circled digits read as page
+numbers; toc_folio 1.2 fixes them). A contents page found: 5,726 issues with 2.6, 6,171 with 2.7; a contents page with
+entries: 5,009 and 6,099. Entries: 60,880 and 78,385; of the 2.7 entries 62,698 are confirmed on the page they point to,
+911 were found by title and by-line, 10,524 rest on the page number alone. 26 contents pages are a book's chapter list.
+The folio map changed the page offset of 52 issues; 633 issues have inserted or missing leaves and 1,172 leaves are out
+of order.
+
+10c, the 150 issues of the verification sample re-assembled with rules 2.7 by Codex's protected upgrade
+(scripts/upgrade_continuity.py; none held, none skipped): 138 complete, 12 refused with "cannot safely retain
+cross-issue metadata for <record>". The 12 keep their 2.6 assembly. In the one looked at (weird_tales_1949_11, record
+a019) the 2.6 record carries the contents entry "64. Final Blackout" (a serial part) over pages 23–25, which hold a
+Jules de Grandin story: 2.7 no longer makes that record, and the upgrade will not drop its serial metadata without a
+rule for it. The twelve: 10_short_novels_magazine_1938_10_1n01193810, amazing_stories_1926_10_ctober1926,
+all_story_weekly_1914_05_0119140502, argosy_1919_09_90913ibcbc, blue_book_1921_11_4n01192111,
+death_at_sea_by_richard_sale_1940_athsea1940, silken_threads_a_detective_s_1890_ardner1890,
+strange_stories_of_coinciden_1891_redway1891, swift_nick_of_the_york_road__1913_3backcover,
+the_complete_sherlock_holmes_1891_holmesvol2, weird_tales_1949_11_rgon776sas, hammer_s_house_of_horror_undated_sproutscan.
+Sujin's reading of the sample starts with the 138; the 12 wait until each is looked at.

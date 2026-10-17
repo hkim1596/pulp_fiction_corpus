@@ -45,7 +45,7 @@ import re
 import statistics
 import sys
 
-VERSION = "1.1"
+VERSION = "1.2"
 
 ROMAN = re.compile(r"^[IVXLC]+$")
 MONTHS = r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?"
@@ -144,9 +144,9 @@ def int_token(t):
     t = t.strip("()[]{}.,;:*•'\"‘’“”—–-_|")
     if not t or len(t) > 4:
         return None
-    if t.isdigit():
+    if re.fullmatch(r"[0-9]{1,4}", t):               # ASCII digits only: '③' is a digit to str.isdigit() but not to int()
         return int(t)
-    if re.fullmatch(r"[0-9lIOoSsBZ]{1,4}", t) and sum(c.isdigit() for c in t) >= max(1, len(t) - 1):
+    if re.fullmatch(r"[0-9lIOoSsBZ]{1,4}", t) and sum(c in "0123456789" for c in t) >= max(1, len(t) - 1):
         return int(t.translate(str.maketrans("lIOoSsBZ", "11005582")))
     return None
 

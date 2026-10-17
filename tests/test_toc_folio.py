@@ -20,6 +20,8 @@ class Helpers(unittest.TestCase):
         self.assertEqual(T._split_tail_number("WEREWOLVES OF WAR D. W. HALL 153"), ("WEREWOLVES OF WAR D. W. HALL", 153))
         self.assertIsNone(T._split_tail_number("The Portal to Power (Part 3)")[1])
         self.assertIsNone(T._split_tail_number("(Novel — 35,000 words)")[1])
+        self.assertIsNone(T.int_token("③"))                # circled digits (all_american_fiction_1938_02, 10b, 17 October)
+        self.assertEqual(T.int_token("l2"), 12)
 
     def test_two_entries_in_one_line(self):
         self.assertEqual(len(T._split_two("Interglacial Forest in Alaska . . . 65 Sun Dance on Fort Hall Reservation . 98")), 2)
