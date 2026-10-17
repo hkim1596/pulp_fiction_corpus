@@ -120,7 +120,7 @@ def sample_page(qs, user, render=None):
             continue
         if want == "second" and not i["second_reader"]:
             continue
-        who = ", ".join(f"{_esc(_G['display_name'](u))} {c}" for u, c in readers.get(i["id"], {}).most_common(3))
+        who = ", ".join(f"{_esc(_G['display_name'](u))} {c}" for u, c in readers.get(i["id"], Counter()).most_common(3))
         rows.append([E.N(i["order"]), f"<a href='/issue/{_esc(i['id'])}'>{_esc(i['magazine'] or i['id'])}</a>", _esc(i.get("cover_date") or ""),
                      _esc(i["decade"]), _esc(i["genre"]) + (f" <span class='fine'>({_esc(i['genre_as_filed'])})</span>" if i.get("genre_as_filed") and i.get("genre_as_filed") != i["genre"] else ""),
                      E.N(n), E.N(v), f"<span class='chip {'stV' if done else ('stM' if v else '')}'>{state}</span>",
