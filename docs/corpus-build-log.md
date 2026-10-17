@@ -1288,3 +1288,18 @@ death_at_sea_by_richard_sale_1940_athsea1940, silken_threads_a_detective_s_1890_
 strange_stories_of_coinciden_1891_redway1891, swift_nick_of_the_york_road__1913_3backcover,
 the_complete_sherlock_holmes_1891_holmesvol2, weird_tales_1949_11_rgon776sas, hammer_s_house_of_horror_undated_sproutscan.
 Sujin's reading of the sample starts with the 138; the 12 wait until each is looked at.
+
+### 2026-10-17, 12:45 KST — the corpus run on GPU 3; archives read by their first bytes
+
+The reading server ran on GPU 3 (surya-gpu3-8020, the recipe of PASTE 7i) and the corpus run started again at 11:23
+with the set-aside list of 16 October (99 issues). It ended at 12:21 with "nothing left to do": 7,329 issues read and
+assembled (23 more than on 15 October), 978,178 pages read. Twelve issues failed: four downloads of comic-book
+archives stopped with "File is not a zip file" (wonder_stories_1935_04_6n11193504, h65r4ewsx2_1931_07_8019310718,
+crack_detective_stories_1949_05_inationdpp, ten_detective_aces_1945_11_inationdpp), and eight .cbr archives could not
+be unpacked with unrar (exit 10: argosy_1897_03_oundvolume, astounding_1934_11_4n03193411,
+astounding_1942_04_04dtsg0318, wild_west_weekly_1907_12_1227tousey, griffit_m_300_years_hence_undated_yearshence;
+exit 3: astounding_1934_03_3n01193403, spaceway_british_ed_1954_02_1n02195402, other_worlds_undated_5gorgon776).
+The archive's file names do not say what the files are: s01c chose zip or RAR by the extension, so a .cbz that is a
+RAR failed at the download check and a .cbr that is a zip failed at unrar ("no files to extract", exit 10). s01c now
+reads the first bytes (archive_kind: zip, RAR or 7z) at both steps; the self-test has a zip named .cbr. Exit 3 is
+unrar's checksum error: those archives may be damaged; the retry shows which.

@@ -415,11 +415,17 @@ def fetch_issue(issue, root=None):
         if src == "jp2":
             with zipfile.ZipFile(dest) as z:
                 leaves = sum(1 for nm in z.namelist() if nm.lower().endswith(".jp2"))
-        elif src in ("cbz", "raw_zip"):
-            with zipfile.ZipFile(dest) as z:
-                leaves = sum(1 for nm in z.namelist() if nm.lower().endswith(IMAGE_EXT) and not nm.endswith("/"))
-            if not leaves:
-                raise RuntimeError(f"{ident}: the zip {f['name']} holds no page images")
+        elif src in ("cbz", "raw_zip") or (src == "cbr" and archive_kind(dest) == "zip"):
+            kind = archive_kind(dest)
+            if kind == "zip":
+                with zipfile.ZipFile(dest) as z:
+                    leaves = sum(1 for nm in z.namelist() if nm.lower().endswith(IMAGE_EXT) and not nm.endswith("/"))
+                if not leaves:
+                    raise RuntimeError(f"{ident}: the zip {f['name']} holds no page images")
+            elif kind in ("rar", "7z"):
+                leaves = None                               # a .cbz that is in fact a RAR (17 October): counted at imaging
+            else:
+                raise RuntimeError(f"{ident}: {f['name']} is neither a zip, a RAR nor a 7z archive")
     # provenance for the record: the archive's own dates for the item (upload and last change), from the item record
     md = meta.get("metadata") or {}
     rec = {"src": src, "master": os.path.relpath(dest, root), "bytes": sum(v["bytes"] for v in got.values()), "files": got,
@@ -496,7 +502,9 @@ def image_issue(iid, root=None):
     if low.endswith(".zip") and not _zip_has_jp2(master):            # p50t: a cbz-like zip, a raw zip, or our zip of loose images
         n, sizes = _image_from_archive(master, "zip", pages_dir, thumbs_dir, img)
     elif low.endswith((".cbz", ".cbr", ".rar")):
-        n, sizes = _image_from_archive(master, "zip" if low.endswith(".cbz") and zipfile.is_zipfile(master) else "rar", pages_dir, thumbs_dir, img)
+        # by the file's first bytes, not its name: the archive holds .cbr files that are zips and .cbz files that are
+        # RARs (17 October 2026: eight "no tool could unpack the RAR" and four "File is not a zip file")
+        n, sizes = _image_from_archive(master, "zip" if archive_kind(master) == "zip" else "rar", pages_dir, thumbs_dir, img)
     elif low.endswith(".zip"):
         with zipfile.ZipFile(master) as z:
             names = sorted(nm for nm in z.namelist() if nm.lower().endswith(".jp2"))
@@ -547,6 +555,22 @@ def image_issue(iid, root=None):
     if ppi and med:
         rec["trim_in"] = [round(med[0] / ppi, 2), round(med[1] / ppi, 2)]     # the scanned leaf in inches (from a nominal dpi: a hint, not a measurement)
     return rec
+
+
+def archive_kind(path):
+    """'zip', 'rar' or '7z' by the file's first bytes; None for anything else."""
+    try:
+        with open(path, "rb") as fh:
+            head = fh.read(8)
+    except OSError:
+        return None
+    if head.startswith(b"PK\x03\x04") or head.startswith(b"PK\x05\x06"):
+        return "zip"
+    if head.startswith(b"Rar!\x1a\x07"):
+        return "rar"
+    if head.startswith(b"7z\xbc\xaf\x27\x1c"):
+        return "7z"
+    return None
 
 
 def _zip_has_jp2(path):
@@ -812,6 +836,15 @@ def selftest():
         r = image_issue(iid, root=tmp)
         assert r["pages"] == 3 and sorted(os.listdir(paths["pages"])) == ["page_0001.jpg", "page_0002.jpg", "page_0003.jpg"], r
         assert Image.open(os.path.join(paths["pages"], "page_0003.jpg")).getpixel((5, 5))[0] > 150   # page 10 came last
+        # a .cbr that is in fact a zip (17 October 2026) is read as a zip
+        os.remove(os.path.join(paths["master"], "issue.cbz"))
+        shutil.rmtree(paths["pages"]); shutil.rmtree(paths["thumbs"], ignore_errors=True)
+        os.makedirs(paths["pages"]); os.makedirs(paths["thumbs"], exist_ok=True)
+        with zipfile.ZipFile(os.path.join(paths["master"], "issue.cbr"), "w") as z:
+            z.writestr("p1.jpg", jpg(50)); z.writestr("p2.jpg", jpg(100))
+        assert archive_kind(os.path.join(paths["master"], "issue.cbr")) == "zip"
+        r = image_issue(iid, root=tmp)
+        assert r["pages"] == 2, r
         tools = [t for t in ("bsdtar", "7z", "7za", "unrar") if shutil.which(t)]
         print("s01c selftest ok" + (f" (RAR tools here: {', '.join(tools)})" if tools else " (NO RAR TOOL on this machine: a Comic Book RAR cannot be unpacked; install bsdtar, p7zip or unrar)"))
     finally:
