@@ -1021,8 +1021,12 @@ def find_contents(pages, maxpage=None, front=16):
         es = parse_contents_page(pages[s], maxpage)
         parsed[s] = es
         sc, word = contents_score(pages[s], es, maxpage)
-        if s not in scans[:front] and not word:
-            continue                                   # at the back only a page that says it is the contents
+        if s not in scans[:front] and not re.search(r"\bCONTENTS\b|\bContents\b|TABLE OF CONTENTS|IN THIS ISSUE",
+                                                   " ".join(l["text"] for l in page_lines(pages[s]))):
+            # at the back only a page that says, in words, that it is the contents: a publisher's list of titles
+            # with their numbers at the back of a paperback is laid out like one and labelled like one
+            # (Avon Fantasy Reader, 1947; toc_folio 1.3)
+            continue
         if sum(1 for e in es if re.match(r"^[A-Z][A-Za-z'’.\- ]+,\s+[A-Z][A-Za-z.\- ]+:", e.get("label", ""))) >= 3:
             continue                                   # an index of authors ('CHRISTIE, AGATHA: ...') is not this issue's contents
         if sum(1 for e in es if MONTH_ONLY.match(e.get("line", "").split("|")[-1].split("/")[-1].strip() or "x")) >= 3:

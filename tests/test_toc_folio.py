@@ -129,6 +129,30 @@ class Contents(unittest.TestCase):
         self.assertEqual(T._split_tail_number("In The Year 2000 . . . . ."), ("In The Year 2000 . . . . .", None))
         self.assertEqual(T._split_tail_number("The Camp-Fire ..... 13."), ("The Camp-Fire", 13))
 
+    def test_a_publishers_list_at_the_back_is_not_the_contents(self):
+        # Avon Fantasy Reader, 1947 (toc_folio 1.3): the last page lists the publisher's other titles with their
+        # numbers, laid out and labelled like a contents page; it says nothing of contents. The front page wins.
+        pages = {}
+        for n in range(1, 21):
+            pages[n] = page(n, [("Text", (100, 200, 900, 400), f"Body text of page {n}. " * 20), ("PageFooter", (480, 1350, 520, 1380), str(n + 2))])
+        pages[3] = page(3, [("SectionHeader", (300, 150, 700, 200), "CONTENTS"),
+                            ("TableOfContents", (100, 250, 900, 700), "RHYTHM OF THE SPHERES .....\nA. Merritt\n7\n\n\nTHE SILENT TREES .....\nFrank Owen\n19\n\n\nTHE SILVER KEY .....\nH. P. Lovecraft\n44")])
+        catalogue = "\n\n\n".join(f"{70 + k}\n{t} .....\n{a}" for k, (t, a) in enumerate(
+            [("The Saint Intervenes", "Leslie Charteris"), ("The Ghost Patrol", "Sinclair Lewis"), ("Catherine Herself", "James Hilton"),
+             ("The Red Box", "Rex Stout"), ("Sight Unseen", "Mary Roberts Rinehart"), ("Mistress Wilding", "Rafael Sabatini"),
+             ("The Regatta Mystery", "Agatha Christie"), ("Unconscious Witness", "R. Austin Freeman")]))
+        pages[20] = page(20, [("SectionHeader", (200, 100, 800, 150), "NEW AVON LIBRARY"),
+                              ("SectionHeader", (200, 160, 800, 200), "Partial List of Best-Selling Titles"),
+                              ("TableOfContents", (100, 220, 900, 1200), catalogue)])
+        entries, toc_pages = T.find_contents(pages)
+        self.assertEqual(toc_pages, [3])
+        self.assertEqual([(e["title"], e["author"], e["page"]) for e in entries][:3],
+                         [("RHYTHM OF THE SPHERES", "A. Merritt", 7), ("THE SILENT TREES", "Frank Owen", 19), ("THE SILVER KEY", "H. P. Lovecraft", 44)])
+        # the same list at the back with the word on it is read
+        pages[20]["regions"][0]["text"] = "CONTENTS"
+        entries, toc_pages = T.find_contents(pages)
+        self.assertIn(20, toc_pages)
+
     def test_blurb_with_number_takes_title_above(self):
         p = page(4, [("SectionHeader", (100, 200, 500, 230), "The Cat from Siam"),
                      ("Text", (100, 240, 500, 270), "by Fredric Brown"),

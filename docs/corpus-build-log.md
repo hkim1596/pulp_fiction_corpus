@@ -1344,3 +1344,16 @@ Three tests from the real pages (253 tests). Next: 10e, scripts/toc_entries_repo
 many installed issues carry the fault, which entries change); 10f, the upgrade to 2.8 over the whole corpus; then
 run_corpus.py --link, the cross-issue pass the upgrade does not do. The rules are written out in
 pilot_export/p52_takeover/rules-p52-2026-10-18.md.
+
+### 2026-10-18, 14:40 KST — 10e: the installed contents readings against toc_folio 1.3
+
+scripts/toc_entries_report.py over the 7,347 issues with an assembly (176 s on 16 processes; data/corpus/p52-2026-10-16/
+toc_entries_report.json): 76,559 installed contents entries against 78,870 read with 1.3; 73,288 the same. Of the 6,702
+issues on rules 2.7, **137 change their reading**: 143 entries that 2.7 read with the author as the title now have their
+title, 146 more are split into title and author ("by Isaac Asimov" / none → "THE DEEP" / Isaac Asimov), and no entry is
+read with the author as the title any more. Of the 614 issues on 2.6 (the refused), 561 change, as 2.6 and 2.8 read
+differently; in 39 of them 1.3 still reads an author as a title (section heads above a by-line: "SERIALS" / R. G. EMERY;
+"(Two Part Serial—Conclusion)" / Skidmore) — left for a later round. One regression found and fixed before the 2.8 run:
+in three issues of Avon Fantasy Reader (six scans) 1.3 took the publisher's list of titles at the back of the book,
+laid out and labelled like a contents page, for the contents; at the back of an issue only a page that says CONTENTS
+in words is read as one (patch 0008; a test from that book).
