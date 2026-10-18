@@ -56,7 +56,19 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from layout_order import order_region_keys
 from corpus_lib import write_json_atomic
 
-VERSION = "2.7"
+VERSION = "2.8"
+# 2.8 (2026-10-18, Claude in Sujin Kang's session; toc_folio 1.3): four contents layouts that 2.7 read with the
+# author's name as the title and no author, or with the title line dropped — a title line ending in its leader
+# with the author and the number on the next printed line ('The Voyage of the Neutralia (part 2) . . . . .' /
+# 'B. Wallis 726': Weird Tales, 1937-12, 12 of 14 entries wrong); 'TITLE.....AUTHOR..... 689' in a cell list,
+# broken after the leader (Argosy, 1909-11); two-line heading boxes 'Title .....' over 'AUTHOR 102' and a
+# department's description carrying the number (Adventure, 1947-09); a name with its own leader under the title
+# (Western Story, 1935-07); a year in a title is not a page number ('In The Year 2000 . . . . .'). Found through
+# the 2.7 upgrade's refusals (p52, 10d): 634 issues kept 2.6 because their cross-issue metadata could not be
+# carried over, most of them because the 2.7 record no longer had the title. On 150 of those issues the fixes
+# change 30 entries in 4 issues, every one to the printed reading, and nothing else; against 2.6, entries read
+# with the author as the title fall from 29 to 6. The upgrade guard gains one case for the excerpt inference
+# (scripts/upgrade_continuity.py, absorbed_excerpt_inference). The assembly itself is unchanged.
 # 2.7 (2026-10-15, Claude): the contents page and the printed page numbers are read together by
 # pipeline/toc_folio.py — the folio map is a path of offsets fitted through the whole issue (inserted
 # and missing leaves, volume pagination, numbers in running heads, leaves bound out of order) instead of

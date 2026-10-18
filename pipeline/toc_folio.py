@@ -45,7 +45,7 @@ import re
 import statistics
 import sys
 
-VERSION = "1.2"
+VERSION = "1.3"
 
 ROMAN = re.compile(r"^[IVXLC]+$")
 MONTHS = r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?"
@@ -166,7 +166,9 @@ def deglue(t):
     t = re.sub(r"(?<=\.\.)(\d{1,4})(?=[A-Z\"“'‘★*])", r"\1\n", t)
     t = re.sub(r"(?<=[A-Za-z.'’)\]])(\d{1,4})(?=[ \t]{2,}\S)", r" \1\n", t)
     t = re.sub(r"(?<=\d)(?=[A-Z][A-Za-z'’]{2,}\b)", "\n", t)
-    t = re.sub(r"(?<=[a-z?!.])(?=[A-Z]{2,}[A-Z'’ \-!?,]*\.{3,})", "\n", t)      # '...would"THE NEXT TITLE.....'
+    # '...would"THE NEXT TITLE.....'; not after a leader's own dots ('SPEECH.....LEE BERTRAND..... 689' is one
+    # entry with the author in capitals: Argosy, 1909-11; toc_folio 1.3)
+    t = re.sub(r"(?<!\.\.)(?<=[a-z?!.])(?=[A-Z]{2,}[A-Z'’ \-!?,]*\.{3,})", "\n", t)
     # a blurb run into the next title ('... but He Knew How to SufferCandle-Light .....'): break at the
     # last join of a lower-case letter and a capital before the leader
     out = []
@@ -397,9 +399,9 @@ def _split_tail_number(t):
     m2 = re.match(r"^(.*?[A-Za-z].*?\S)[\s.·•…]*\s([0-9]{1,4})\s*(?:,|&|and)\s*[0-9]{1,4}[\s.,;:*'\"’)]*$", t)
     if m2:
         return m2.group(1), int(m2.group(2))                # 'Railroad Rimes ..... 57, 97': the first
-    m = re.match(r"^(.*?\S)[\s.·•,;:_~=…\-—]*\s([0-9lIOS]{1,4})[\s.,;:*'\"’)]*$", t)
+    m = re.match(r"^(.*?\S)[\s.·•,;:_~=…\-—]*\s([0-9lIOS]{1,4})[\s,;:*'\"’)]*\.?[\s,;:*'\"’)]*$", t)
     if not m:
-        return t, None
+        return t, None                                       # a number followed by a leader is in the title ('In The Year 2000 . . . . .')
     v = int_token(m.group(2))
     if v is None:
         return t, None
@@ -601,6 +603,12 @@ def parse_blocks(p, maxpage=None):
                                                  and not _is_section(pending[0]))) \
                     and anchor(x)[1] is not None and anchor(x)[0] == "":
                 blank = 0                                    # the number of the entry above, after a blank line
+            if blank and len(pending) == 1 and re.search(r"(?:[.·•…]\s*){3,}$", pending[0]) and not _prose(pending[0]) \
+                    and anchor(x)[1] is not None and anchor(x)[0] and not anchor(x)[0].startswith(("\x00", "\x01")):
+                # 'The Voyage of the Neutralia (part 2) . . . . .' / blank / 'B. Wallis 726' (Weird Tales, 1937-12): the
+                # title line ends in its leader, the author and the number are the next printed line. Without this the
+                # title line was dropped at the blank line and the author's name became the title (toc_folio 1.3).
+                blank = 0
             if blank and pending:
                 one = pending[0] if len(pending) == 1 else ""
                 if es and one and re.match(r"^(?:an?|the)\s", one, re.I) and TYPE_LABEL.search(one) and len(one.split()) <= 7:
@@ -616,16 +624,32 @@ def parse_blocks(p, maxpage=None):
                 fresh = True
             blank = 0
             head, num = anchor(x)
+            if num is None and len(pending) == 1 and re.search(r"(?:[.·•…]\s*){3,}$", pending[0]) and not _prose(pending[0]):
+                # under a title that ends in its leader, a line of description with the number is the entry's
+                # number even when it reads as prose ('The Camp-Fire .....' / 'Where readers, writers and
+                # adventurers meet 6': Adventure, 1947-09; toc_folio 1.3)
+                h2, n2 = _split_tail_number(x)
+                if n2 is not None and re.search(r"[A-Za-z]{3}", h2) and len(h2.split()) <= 12 and not NOT_ENTRY.search(h2) \
+                        and not re.search(r"\bby\s", h2, re.I):
+                    head, num = "\x01" + h2, n2
             if num is not None and head and not head.startswith(("\x00", "\x01")) and (not pending or all(_prose(c) for c in pending)):
                 head = "\x01" + head                        # a name-like title with nothing above it ('Ask Adventure 92')
             if num is not None and head and head.startswith("\x01"):
-                if pending and es and all(_prose(c) or len(c.split()) >= 4 for c in pending):
+                title, blurb_here = _cell(head[1:]), None
+                if len(pending) == 1 and re.search(r"(?:[.·•…]\s*){3,}$", pending[0]) and not _prose(pending[0]) \
+                        and re.search(r"[A-Za-z]{3}", pending[0]) and not _is_section(pending[0]) \
+                        and not NOT_TITLE.match(pending[0]) and not STAFF_RE.match(pending[0]):
+                    # 'The Camp-Fire .....' / 'Where readers, writers and adventurers meet 6': the title ends in its
+                    # leader; the number's line is the department's description (Adventure, 1947-09; toc_folio 1.3)
+                    title, blurb_here = _cell(pending[0]), title
+                elif pending and es and all(_prose(c) or len(c.split()) >= 4 for c in pending):
                     es[-1].setdefault("blurb", " ".join(pending)[:400])
-                title = _cell(head[1:])
                 if maxpage and num > maxpage + 8:
                     num = None
                 if title and not NOT_ENTRY.search(title) and not NOT_TITLE.match(title) and not STAFF_RE.match(title):
-                    es.append(_make_entry(title, "", num, section, r, len(es), x, "free"))
+                    es.append(_make_entry(title, "", num, section, r, len(es), " / ".join(pending + [x]) if blurb_here else x, "free"))
+                    if blurb_here:
+                        es[-1]["blurb"] = blurb_here[:400]
                 pending = []
                 fresh = False
                 continue
@@ -808,7 +832,7 @@ def parse_contents_page(p, maxpage=None):
         if cur:
             cut.append(cur)
         rows += cut
-    entries, consumed = [], set()
+    entries, consumed, row_entry = [], set(), {}
     section, section_row = "", None
     prev_section = ""
     for i, row in enumerate(rows):
@@ -857,8 +881,20 @@ def parse_contents_page(p, maxpage=None):
         if len(segs) >= 2 and not LEADER_RE.search(segs[0]):
             title, author, kind = segs[0], " ".join(segs[1:]), "box"
         seg0 = re.sub(r"\s+", " ", re.sub(r"\([^)]*\)", " ", segs[0])).strip() if len(segs) == 1 else ""
+        # the row above read as a title alone, its leader at the end and no number ('Brick-top In Blue Rock . . . . .')
+        prior = row_entry.get(i - 1)
+        above_title_only = (prior is not None and prior.get("page") is None and not prior.get("author")
+                            and bool(re.search(r"(?:[.·•…]\s*){3,}$", " ".join(q["text"] for q in rows[i - 1]))))
         name_only = len(segs) == 1 and (re.match(r"^\W*(?:by|BY|By)\s", seg0) and _looks_like_name(seg0)
-                                        or (_looks_like_name(seg0) and not has_leader and len(seg0.split()) <= 5))
+                                        or (_looks_like_name(seg0) and not has_leader and len(seg0.split()) <= 5)
+                                        # 'Johnston McCulley . . .' with its number under that title: a name followed by
+                                        # its own leader (Western Story, 1935-07; toc_folio 1.3). Only under such a row:
+                                        # 'Blood Money—Rafael Sabatini . . . . . 60' also has the shape of a name.
+                                        or (has_leader and above_title_only and len(seg0.split()) <= 7
+                                            and _looks_like_name(_cell(seg0))
+                                            and len([q for q in LEADER_RE.split(seg0) if q.strip()]) == 1))
+        if name_only and has_leader:
+            seg0 = _cell(seg0)
         prose_anchor = len(segs) == 1 and not LEADER_RE.search(segs[0]) and not re.search(r"\s[.·•]\s|\bby\s+[A-Z]", segs[0], re.I) \
             and (_prose(segs[0]) or len(segs[0].split()) >= 10)
         if name_only:
@@ -871,7 +907,15 @@ def parse_contents_page(p, maxpage=None):
             for j in range(i - 1, max(-1, i - (9 if prose_anchor else 4)), -1):
                 up = rows[j]
                 if j in consumed:
-                    break
+                    prior = row_entry.get(j)
+                    if (name_only and prior is not None and prior.get("page") is None and not prior.get("author")
+                            and re.search(r"(?:[.·•…]\s*){3,}$", " ".join(q["text"] for q in up))):
+                        # the row above was read as a title alone, its number unread: it is this name's title
+                        # ('The Man Who Didn't Like Texas .....' / 'CLIFTON ADAMS 102': Adventure, 1947-09; toc_folio 1.3)
+                        entries.remove(prior)
+                        del row_entry[j]
+                    else:
+                        break
                 gap = row[0]["y0"] - max(q["y1"] for q in up)
                 if gap > 3.0 * lh:
                     break
@@ -883,8 +927,12 @@ def parse_contents_page(p, maxpage=None):
                 if _prose(ut):
                     continue                                  # the blurb of the entry before
                 if name_only and seg0.isupper() and len(seg0.split()) >= 2 and not re.match(r"^\W*BY\s", seg0) \
-                        and not re.search(r"\b[A-Z]\.", seg0) and not ut.isupper() and len(ut.split()) >= 4:
-                    title, author, kind = seg0, "", "free"   # 'SUNLIGHT KILLS SNAKES 97' under a blurb set in title case
+                        and not re.search(r"\b[A-Z]\.", seg0) and not ut.isupper() and len(ut.split()) >= 4 \
+                        and not re.search(r"(?:[.·•…]\s*){3,}$", ut):
+                    # 'SUNLIGHT KILLS SNAKES 97' under a blurb set in title case; but a line above that ends in its
+                    # leader is the title, and the capitals are its author ('When Your Number's Up .....' /
+                    # 'EARL SUTTERFIELD 120': Adventure, 1947-09; toc_folio 1.3)
+                    title, author, kind = seg0, "", "free"
                     break
                 mb_up = re.match(r"^\W*(?:by|BY|By)\s+(.{3,60})$", ut)
                 if prose_anchor and mb_up and _looks_like_name(mb_up.group(1)) and title is None:
@@ -923,6 +971,7 @@ def parse_contents_page(p, maxpage=None):
         e = _make_entry(title, author or "", num, section, {"bbox": [row[0]["x0"], row[0]["y0"]]}, 0,
                         " | ".join(q["text"] for q in row), kind)
         entries.append(e)
+        row_entry[i] = e
     # a blurb: prose rows under an entry, before the next one
     for k, e in enumerate(entries):
         nxt = entries[k + 1]["y"] if k + 1 < len(entries) else 1e9

@@ -1303,3 +1303,44 @@ The archive's file names do not say what the files are: s01c chose zip or RAR by
 RAR failed at the download check and a .cbr that is a zip failed at unrar ("no files to extract", exit 10). s01c now
 reads the first bytes (archive_kind: zip, RAR or 7z) at both steps; the self-test has a zip named .cbr. Exit 3 is
 unrar's checksum error: those archives may be damaged; the retry shows which.
+
+### 2026-10-17, 17:35 KST — rules 2.7 over the whole corpus (10d)
+
+10d, the protected upgrade over every assembled issue not yet on 2.7 (7,168 selected, 8 workers, 16:00–17:35): 6,533
+installed, 635 refused with "cannot safely retain cross-issue metadata for <record>", all kept on 2.6. With the 169
+already on 2.7, 6,702 of the 7,337 assembled issues are on rules 2.7 (91.3%). D5 sorted the 635 refused records by
+what the refused record carries (data/corpus/p52-2026-10-16/refused_2.7.json): 347 a house or advertisement record
+flagged as quoting a story (A), 159 a story whose serial information came from the contents line only (B), 27 a
+serial marker read from the page and unlinked (B2), 96 a serial part linked to another issue (C), 5 a work identity
+or title only (D, E).
+
+### 2026-10-18, 14:30 KST — what the refusals were made of; one guard rule; six contents layouts (rules 2.8)
+
+All 634 refused issues were fetched through the data door into Sujin's session and re-assembled there with 2.7, and
+every record the guard refuses was traced to the new records holding its boxes (988 records; an issue stops at its
+first refusal). Kind A (639 records) is 2.6's error almost throughout: a block cut out of a story or a book as "a
+house announcement quoting a story" (its title a sentence of the story), which 2.7 puts back. Kind B (170) is the
+guard protecting a better 2.6 reading: in those issues 2.7 read the contents line worse than 2.6 — the title line
+dropped and the author's name taken as the title, so the story record had no title to match ("B. Wallis", no author,
+typed poem, 187 boxes; Weird Tales 1937-12, 12 of 14 entries). The fault is in toc_folio 1.0 (p51), not in 1.1 or
+1.2: the three versions were run on the same issue.
+
+One rule was added to the guard (scripts/upgrade_continuity.py, absorbed_excerpt_inference): an old advertisement or
+house record flagged as quoting a story, with no work identity and no serial, whose every box is retained in the new
+assembly and which no advertisement/house record holds whole, has its excerpt flag retired into the audit when the
+flag was local only (no story in the corpus matched it) or when every box is still advertising, house or contents
+matter (the cross-issue pass re-matches those). A text-matched block absorbed into a story, feature, poem or letters
+record stays refused. Over the 634 refused issues, whole-issue with validation: 175 pass (300 records retired), 459
+still refuse. Codex's tests pass unchanged; six tests were added from the refused records' shapes.
+
+Six contents layouts were fixed in toc_folio (1.3; the assembly stamps rules 2.8; the grouping of boxes is unchanged):
+a title line ending in its leader with the author and the number on the next printed line (Weird Tales 1937-12);
+"TITLE.....AUTHOR..... 689" in a cell list, which deglue broke after the leader (Argosy 1909-11); two-line heading
+boxes "Title ....." over "AUTHOR 102", and a department's description carrying the number (Adventure 1947-09); a name
+with its own leader under the title (Western Story 1935-07); a year in a title taken for a page number (Adventure
+1928-06). On 150 of the refused issues the fixes change 33 entries in 6 issues, every one to the printed reading, and
+leave the other 1,999 entries as they were; against 2.6, entries read with the author as the title fall from 29 to 3.
+Three tests from the real pages (253 tests). Next: 10e, scripts/toc_entries_report.py over the corpus (read-only: how
+many installed issues carry the fault, which entries change); 10f, the upgrade to 2.8 over the whole corpus; then
+run_corpus.py --link, the cross-issue pass the upgrade does not do. The rules are written out in
+pilot_export/p52_takeover/rules-p52-2026-10-18.md.

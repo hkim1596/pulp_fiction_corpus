@@ -795,6 +795,52 @@ def removed_transactional_tail(before, after, pages):
             and bool(re.search(r"(?i)\b(?:book|manual|charts)\b", text)))
 
 
+def absorbed_excerpt_inference(before, candidate):
+    """Retire an excerpt inference whose advertisement/house record no longer exists.
+
+    An old advertisement or house record flagged as quoting a story carries no
+    work identity and no serial. Its flag is a local inference of the assembler
+    (classify_ad: house copy with a run of prose); its text match, when there is
+    one, is the cross-issue pass's, which recomputes it for every advertisement
+    and house record (run_corpus.py --link). The inference is retired into the
+    audit, never attached to the records that absorbed the boxes, when every box
+    of the old record is retained (in records or furniture, none unsorted), no
+    advertisement/house record holds the whole block, and either
+      - the flag was local only (no text match named another issue's story), or
+      - every record that holds a box is itself an advertisement, house or
+        contents record: the text is still advertising or contents matter, and
+        the cross-issue pass re-matches it.
+    A text-matched block absorbed into a story, feature, poem or letters record
+    stays refused: the assembler may have merged an announcement quoting another
+    issue's story into reading text, and that needs a person. A same-kind record
+    that still holds the whole block is left to the general paths.
+    (p52, 18 October 2026; written from the 639 refused records of 10d.)
+    """
+    if (before.get("type") not in ("ad", "house")
+            or not (before.get("contains_excerpt") or before.get("excerpt_of"))
+            or any(before.get(k) for k in ("work_id", "work_title", "serial"))):
+        return None
+    old = record_keys(before)
+    if not old:
+        return None
+    furniture = {f"{f['page']}:{f['idx']}" for f in candidate.get("furniture", [])}
+    owners = [r for r in candidate.get("articles", []) if old & record_keys(r)]
+    owned = set().union(*(old & record_keys(r) for r in owners)) if owners else set()
+    if (old - owned - furniture) or (old & unsorted_keys(candidate)):
+        return None
+    if any(r.get("type") in ("ad", "house") and old <= record_keys(r) for r in owners):
+        return None
+    text_matched = bool((before.get("excerpt_of") or {}).get("issue"))
+    nonreading = all(r.get("type") in ("ad", "house", "toc") for r in owners)
+    if text_matched and not nonreading:
+        return None
+    return {"text_matched": text_matched, "owners_nonreading": nonreading,
+            "candidate_owners": [{"article_id": r.get("article_id"), "type": r.get("type"), "title": r.get("title"),
+                                  "shared_regions": len(old & record_keys(r)), "regions": len(record_keys(r))}
+                                 for r in owners],
+            "furniture_regions": len(old & furniture), "original_regions": len(old)}
+
+
 def preserve_links(old, candidate, pages=None, audit=None):
     """Keep a link only when one old record uniquely matches one new record."""
     fields = ("work_id", "work_title", "serial", "excerpt_of", "contains_excerpt")
@@ -902,6 +948,18 @@ def preserve_links(old, candidate, pages=None, audit=None):
                 choices.append((2.0 if corrected or split_prefix or relocated or serial_end else overlap / len(ks | nk), j))
         choices.sort(reverse=True)
         if not choices or (len(choices) > 1 and choices[0][0] == choices[1][0]) or choices[0][1] in taken:
+            absorbed = absorbed_excerpt_inference(before, candidate)
+            if absorbed:
+                audit.append({"kind": "retired_absorbed_excerpt_inference", "article_id": before.get("article_id"),
+                              "proof": absorbed,
+                              "reason": ("old advertisement/house record flagged as quoting a story had no work identity or serial; every original box is retained and no advertisement/house record holds the block; "
+                                         + ("the text match named another issue's story but every box is still advertising, house or contents matter, which the cross-issue pass re-matches"
+                                            if absorbed["text_matched"] else
+                                            "the flag was the assembler's local inference and no story in the corpus matched the block")),
+                              "original_metadata": {k: copy.deepcopy(before[k]) for k in fields if k in before},
+                              "evidence": [f for f in before.get("flags", [])
+                                           if "excerpt" in f or "matched by text" in f or "quotes" in f]})
+                continue
             raise ValueError(f"cannot safely retain cross-issue metadata for {before.get('article_id')}")
         _, j = choices[0]
         taken.add(j)
