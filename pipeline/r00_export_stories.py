@@ -203,8 +203,19 @@ def export_corpus(ids=None, force=False, log=print):
     of issues written."""
     corpus = {i["id"]: i for i in json.load(open(os.path.join(ROOT, "config", "corpus_issues.json"), encoding="utf-8"))["issues"]}
     os.makedirs(CORPUS_EXPORT, exist_ok=True)
+    try:
+        from corpus_lib import set_aside
+        aside = set_aside()                   # 19 Oct 2026: set-aside issues leave the export (and so the explorer and the reuse stages)
+    except Exception:
+        aside = {}
     n = 0
+    removed = 0
     for iid in (ids or sorted(corpus)):
+        if iid in aside:
+            stale = os.path.join(CORPUS_EXPORT, f"{iid}.jsonl")
+            if os.path.exists(stale):
+                os.remove(stale); removed += 1
+            continue
         live = os.path.join(ROOT, "data", "articles", iid, "articles.json")
         if not os.path.exists(live) or iid not in corpus:
             continue
@@ -221,8 +232,8 @@ def export_corpus(ids=None, force=False, log=print):
                 f.write(json.dumps(record_of(a, iid, corpus[iid]), ensure_ascii=False) + "\n")
         os.replace(tmp, dst)
         n += 1
-    if n:
-        log(f"[r00] corpus: {n} issues exported to data/export/corpus/")
+    if n or removed:
+        log(f"[r00] corpus: {n} issues exported to data/export/corpus/" + (f"; {removed} set-aside issues' files removed" if removed else ""))
     return n
 
 

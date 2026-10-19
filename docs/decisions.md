@@ -257,3 +257,36 @@ Dropbox share carries the full context of each.
   workbench the boxes are coloured by role group with their ids in the
   margin; an action that cannot be saved says so; "Records" is
   "Stories" and the story page shows the whole text (site v0.16.0).
+- 2026-10-19 (Sujin Kang, who took the project over on 16 October:
+  "decisions 1 and 2 as recommended", on project-status-2026-10-19-EN)
+  — (1) *The corpus is pulp magazines.* Items the selection admitted
+  that are not magazine issues — standalone novels and story
+  collections, single stories or serials extracted from a magazine,
+  dime-novel and nickel-weekly numbers that passed the kind filter,
+  comics, indexes and portfolios, fanzines and items from after the
+  period — leave corpus 1.0: set aside in config/corpus_set_aside.json
+  with the class "not a magazine issue" (the files stay on disk; the
+  site, the export and the reuse stages leave them out; the datasheet
+  and the manifest count them under their reasons). The machine builds
+  the candidate list with a stated rule and a review table
+  (scripts/nonmagazine_candidates.py); the yes or no on each item is a
+  person's (scripts/set_aside_nonmagazine.py applies the filled table).
+  A sampled issue that leaves has its slot in the verification sample
+  redrawn in the same decade-and-genre cell, keeping the slot's order
+  and second-reader mark (scripts/draw_verification_sample.py
+  --replace); the design of the sample is unchanged. (2) *The sample is
+  read at two levels.* Level 1, the contents check, on all 150 issues
+  first: for every piece the contents page lists, does a record start
+  on the right page with the right title and author (Supplement A's 95
+  percent check) — about fifteen minutes an issue, on the site's
+  /verify/contents page, saved per entry under the reader's name in
+  data/review/contents_check.jsonl, the figure by stratum on the
+  Verification page. Level 2, the full box-level verification, goes on
+  in the reading order as time allows, with the interim accuracy
+  figure (s11 --corpus --sample) reported weekly; a second reader to be
+  named. Two reading rules from Sujin's first days on the sample (17–18
+  October), for the readers now and for the assembler's next version: a
+  book cover is type `other`, not `house`; a "What's Next"
+  or next-issue section is a `teaser` box when it stands in front of a
+  serial or a story and a `house` record when it fills its own page.
+  Site v0.24.0.

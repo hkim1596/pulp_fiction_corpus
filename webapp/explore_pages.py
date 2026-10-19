@@ -363,9 +363,16 @@ def build_db(sig, path, log=None):
     # corpus run's own records of them stay on disk and on the workbench (they measure the corpus pipeline)
     pilot_ia = {i.get("ia_identifier") for i in cfg.get("issues", []) if i.get("ia_identifier")}
     also_pilot = set()
+    # 19 Oct 2026: the set-aside issues (config/corpus_set_aside.json: the download failures, the items that are not
+    # magazine issues) are not shown; their files stay on disk and the datasheet counts them under their reasons
+    aside = {e.get("id") for e in (_json(os.path.join(_G["ROOT"], "config", "corpus_set_aside.json")) or {}).get("issues", [])}
+    n_aside = 0
     for i in corpus_cfg.get("issues", []):
         iid = i["id"]
         if iid in issues:
+            continue
+        if iid in aside:
+            n_aside += 1
             continue
         if i.get("ia_identifier") in pilot_ia:
             also_pilot.add(iid)
@@ -393,7 +400,7 @@ def build_db(sig, path, log=None):
             "exported": 0, "events": 0, "complete": 0, "events_archived": 0,
         }
         n_corpus += 1
-    say(f"  corpus issues {n_corpus:,} (and {len(also_pilot)} shown as their pilot issue)")
+    say(f"  corpus issues {n_corpus:,} (and {len(also_pilot)} shown as their pilot issue; {n_aside} set aside, not shown)")
     # ---- records from the export
     authors = {}
     n_rec = 0

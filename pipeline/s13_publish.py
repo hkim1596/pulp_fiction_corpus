@@ -745,11 +745,12 @@ def publish_all(force=False):
         log("s13", "publication held: continuity upgrade is installing complete issue snapshots")
         return {"mode": mode, "published": 0, "current": 0, "held": 0, "from_rules_and_model": 0,
                 "from_llm": 0, "from_rules": 0, "needs_look": 0, "held_source_conflict": 0, "held_upgrade": 1}
-    from corpus_lib import corpus_config, partition_issue_ids
+    from corpus_lib import corpus_config, partition_issue_ids, set_aside
     states = all_states()
+    aside = set_aside()                       # 19 Oct 2026: set-aside issues (not a magazine issue, ...) are not published
     issues, conflicts = partition_issue_ids(corpus_config()["issues"])
     counts = {"mode": mode, "published": 0, "current": 0, "held": 0, "from_rules_and_model": 0, "from_llm": 0, "from_rules": 0,
-              "needs_look": 0, "held_source_conflict": len(conflicts)}
+              "needs_look": 0, "held_source_conflict": len(conflicts), "set_aside": 0}
     if conflicts:
         counts["held"] += len(conflicts)
         log("s13", f"held {len(conflicts)} issue IDs naming different archive sources; existing live records kept: " + ", ".join(sorted(conflicts)))
@@ -759,6 +760,9 @@ def publish_all(force=False):
         if iid in seen:
             continue
         seen.add(iid)
+        if iid in aside:
+            counts["set_aside"] += 1
+            continue
         st = states.get(iid)
         if not st or "assembled" not in st["stages"]:
             continue

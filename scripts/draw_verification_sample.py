@@ -16,9 +16,19 @@ that order is read by a second reader too (so that reader agreement can be repor
 
     python3 scripts/draw_verification_sample.py                       # on the server: from the assembled issues
     python3 scripts/draw_verification_sample.py --list <issues.json> --any-state   # a dry run anywhere
+    python3 scripts/draw_verification_sample.py --replace             # replace the sampled issues that were set aside since
 Writes config/verification_sample.json (tracked in git: the sample is part of the study's record) and prints the cells.
 Safe to run again: the same seed and the same population give the same sample; a changed population changes it, so the
 file is drawn once and committed.
+
+--replace (decision 1 of 19 October 2026: items that are not magazine issues leave corpus 1.0): every sampled issue
+that is now in config/corpus_set_aside.json is replaced by an assembled issue of the same decade-and-genre cell, chosen
+at random (seeded by the slot's order number, so a rerun chooses the same) among the issues not yet in the sample. The
+replacement takes the slot's order number and second-reader mark; the issue it replaces is kept in the file under
+"replaced" with the reason. A cell the exclusion empties (every 1910s western was a Wild West Weekly number, say) gives
+its slot to its decade — the replacement is drawn from the decade's other genres — and failing that to its genre, so
+the sample keeps its 150 and its spread over the decades; the entry says so ("cell_fallback"). The verification done on
+a replaced issue stays in the annotation logs; it does not count toward the sample.
 """
 import argparse
 import json
@@ -106,6 +116,56 @@ def draw(issues, n=N, seed=SEED, min_per_cell=MIN_PER_CELL):
     return out, cell_rows
 
 
+def replace_set_aside(sample, population, aside, seed=SEED, now=None):
+    """The sampled issues now set aside, each replaced within its cell (see --replace above). Pure: returns the new
+    sample dict and the list of (old id, new id or None, cell, fallback or None). population: the assembled issues to
+    draw from (the set-aside ones already left out)."""
+    now = now or time.strftime("%Y-%m-%dT%H:%M:%S")
+    in_sample = {i["id"] for i in sample["issues"]}
+    cells = defaultdict(list)
+    for i in population:
+        if i["id"] not in in_sample and i["id"] not in aside:
+            cells[(decade_of(i), genre_class(i))].append(i)
+    out = dict(sample)
+    out["issues"] = []
+    replaced = list(sample.get("replaced") or [])
+    changes = []
+    for i in sample["issues"]:
+        if i["id"] not in aside:
+            out["issues"].append(i)
+            continue
+        key = (i["decade"], i["genre"])
+        reason = (aside[i["id"]] or {}).get("reason") or (aside[i["id"]] or {}).get("class") or "set aside"
+        old = dict(i, replaced_on=now, replaced_reason=reason)
+        pool, fallback = sorted(cells.get(key, []), key=lambda x: x["id"]), None
+        if not pool:                      # the cell is empty now: the slot goes to the decade, then to the genre
+            pool = sorted((x for k, v in cells.items() if k[0] == key[0] for x in v), key=lambda x: x["id"])
+            fallback = "decade"
+        if not pool:
+            pool = sorted((x for k, v in cells.items() if k[1] == key[1] for x in v), key=lambda x: x["id"])
+            fallback = "genre"
+        if not pool:
+            replaced.append(dict(old, replaced_by=None, note="no assembled issue left in the cell, the decade or the genre: the slot is dropped"))
+            changes.append((i["id"], None, key, None))
+            continue
+        rnd = random.Random(f"{seed}:{i['order']}")
+        pick = rnd.choice(pool)
+        pkey = (decade_of(pick), genre_class(pick))
+        cells[pkey].remove(pick)
+        new = {"order": i["order"], "id": pick["id"], "ia_identifier": pick.get("ia_identifier"), "magazine": pick.get("magazine"),
+               "cover_date": pick.get("cover_date"), "decade": pkey[0], "genre": pkey[1], "genre_as_filed": pick.get("genre"),
+               "second_reader": i["second_reader"], "replaces": i["id"], "replaced_on": now}
+        if fallback:
+            new["cell_fallback"] = f"the {key[0]} / {key[1]} cell is empty after the exclusion: drawn from the {fallback}"
+        out["issues"].append(new)
+        replaced.append(dict(old, replaced_by=pick["id"], **({"cell_fallback": new["cell_fallback"]} if fallback else {})))
+        changes.append((i["id"], pick["id"], key, fallback))
+    out["replaced"] = replaced
+    out["n"] = len(out["issues"])
+    out["replacements_on"] = sorted(set((out.get("replacements_on") or []) + ([now] if changes else [])))
+    return out, changes
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--list", help="the issue list (default: config/corpus_issues.json)")
@@ -113,6 +173,7 @@ def main():
     ap.add_argument("--n", type=int, default=N)
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--out", default=os.path.join(ROOT, "config", "verification_sample.json"))
+    ap.add_argument("--replace", action="store_true", help="replace the sampled issues that are now set aside, within their cells")
     args = ap.parse_args()
     from corpus_lib import corpus_config, all_states, set_aside
     cfg = json.load(open(args.list, encoding="utf-8")) if args.list else corpus_config()
@@ -122,6 +183,17 @@ def main():
     if not args.any_state:
         states = all_states()
         issues = [i for i in issues if "assembled" in states.get(i["id"], {}).get("stages", {})]
+    if args.replace:
+        S = json.load(open(args.out, encoding="utf-8"))
+        new, changes = replace_set_aside(S, issues, aside, S.get("seed", args.seed))
+        if not changes:
+            print("nothing to replace: no sampled issue is set aside"); return
+        json.dump(new, open(args.out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+        for old, nid, key, fb in changes:
+            print(f"  {key[0]} / {key[1]}: {old} -> {nid or '(slot dropped: nothing left in the cell, the decade or the genre)'}" + (f"  [cell empty: drawn from the {fb}]" if fb else ""))
+        print(f"{sum(1 for c in changes if c[1])} slots replaced ({sum(1 for c in changes if c[3])} from outside an emptied cell), {sum(1 for c in changes if not c[1])} dropped; "
+              f"{new['n']} issues in the sample; written {os.path.relpath(args.out, ROOT)}")
+        return
     sample, cells = draw(issues, args.n, args.seed)
     rec = {"_comment": "The verification sample (plan section 6.1; Heejin, 14 October 2026): 150 assembled issues, stratified by decade "
                        "and genre, drawn once with a fixed seed by scripts/draw_verification_sample.py; read on the workbench and marked "

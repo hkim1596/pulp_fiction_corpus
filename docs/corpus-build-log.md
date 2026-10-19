@@ -1385,3 +1385,45 @@ old links over by identity and computes no new ones; this pass had not been run 
 then republished the records (23:38: 7,298 issues current, 39 held for human corrections; 326,165 records, 66,444
 stories, 18,300 authors; 295 records verified by Sujin's reading so far). Weird Tales 1937-12, refused at 2.7 for its
 author-as-title reading, is on 2.8.
+
+### 2026-10-19, 11:30 KST — decisions 1 and 2: the corpus is pulp magazines; the sample is read at two levels
+
+Sujin's morning examination of the project (project-status-2026-10-19-EN.md in the share) found the verification
+sample on the critical path — six issues worked through in two days at about an hour each, 150 to read — and standalone
+books in the corpus and in the sample (the first slot of the reading order is H. G. Wells's *The Plattner Story and
+Others*, Methuen 1897; also *Silken Threads* 1890 and *The Shadow* 1931). Sujin decided both recommendations as proposed
+(docs/decisions.md, 2026-10-19).
+
+**Decision 1, the candidate rule (scripts/nonmagazine_candidates.py, rule 1.0).** Every selected issue is scored on
+signals from the archive's item record (a Title - Author (Publisher, Year) title; a book's description with page count
+and binding; no volume or number; subjects; a modern date; an index, comic or dime-novel name), the selection (a
+"magazine" of one issue; a book's or a paperback series' name) and the assembly's reading (a chapter list for a
+contents page; no by-lines on the pages; chapter heads; entries without authors; a dime novel's shape of 40 pages or
+fewer before 1925), with strong magazine evidence counting against (a volume-and-number title, by-lines on several
+pages and authors on the contents entries). Each signal carries a class; the item's class is the one with most points,
+and the proposal is EXCLUDE at 5 points, LOOK at 3. Run in Sujin's session on a mirror of the server's meta.json and
+analysis.json for all 7,440 selected issues (every file fetched through the data door; 8 s to score): **proposed
+EXCLUDE 526** — 278 books, 195 dime-novel and nickel-weekly numbers (Wild West Weekly, New Nick Carter Weekly, Pluck and
+Luck, Tip Top Weekly, Frank Reade Library, Blue and Gray Weekly, Chums ...), 42 single stories extracted from magazines,
+9 indexes and portfolios, 2 comics — **LOOK 374** (96 dime novel, 71 not a fiction magazine — Physical Culture, True
+Detective, the newspaper supplements —, 69 book, 59 outside the period, 41 comic, 38 single story), KEEP 6,540. In the verification
+sample: 32 proposed EXCLUDE, 11 LOOK, 107 KEEP. The review table (nonmagazine_candidates_2026-10-19.md and .csv in the
+share's p52_takeover folder) lists every EXCLUDE and LOOK row with its signals and evidence and every sample issue;
+Sujin confirms item by item (or class by class, marking exceptions), scripts/set_aside_nonmagazine.py applies the
+filled table to config/corpus_set_aside.json (class "not a magazine issue", the kind and signals kept with each entry)
+and scripts/draw_verification_sample.py --replace redraws the sample slots the excluded issues held, within their
+decade-and-genre cells, keeping each slot's order and second-reader mark; a cell the exclusion empties (every 1910s
+western in the corpus was a Wild West Weekly number) gives its slot to its decade, so the sample keeps its 150 — on the
+proposal as it stands, 32 slots would be redrawn, 13 of them from outside an emptied cell. Set-aside issues now leave the publication
+(s13), the export (r00: their export files are removed) and the explorer's issue list; their files stay on disk. The
+same script is to be run on the server for the record (P52t).
+
+**Decision 2, the contents check (site v0.24.0).** /verify/contents/<issue>: the contents page's scan beside the entries
+the assembly read from it, each with the record the machine made for it (found by the record's own contents entry,
+else a reading record starting on the entry's scan page or one off, else by title), and a verdict per entry — right as
+made, fixed, missing, not a piece — with the entries the parser missed counted below; saved as one line per check in
+data/review/contents_check.jsonl under the reader's name. The Verification page gains the contents column (CHECK /
+checked, with the issue's right-over-listed count and the readers), the figure of the study (listed pieces assembled
+right, over all checked issues, against Supplement A's 95 percent; by decade and genre; the first reader's check
+counts, a second reader's agreement is reported), a "contents check to do" filter, and the checklist in two levels.
+docs/verification-reader-guide.md has the level-1 section. 272 tests.
