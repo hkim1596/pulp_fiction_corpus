@@ -1427,3 +1427,54 @@ checked, with the issue's right-over-listed count and the readers), the figure o
 right, over all checked issues, against Supplement A's 95 percent; by decade and genre; the first reader's check
 counts, a second reader's agreement is reported), a "contents check to do" filter, and the checklist in two levels.
 docs/verification-reader-guide.md has the level-1 section. 272 tests.
+
+### 2026-10-19, 14:30 KST — the B refusals looked at again: two more guard cases (Weird Tales 1949-11)
+
+Sujin opened sample issue #7, Weird Tales 1949-11, for verification and found the stories cut to a page or two each.
+The issue is one of the 441 kept on rules 2.6 by the upgrade's guard: 2.6 had taken a book club's numbered list on
+page 5 ("*41. Minions of the Moon—Beyer", "74. Fox Woman", "32. Works of M. P. Shiel") for the contents page and
+placed story starts from it, so "32. Works of M. P. Shiel" owned pp. 8–18 of Allison V. Harding's *The Underbody* and
+"66. Legion of Space" pp. 25–31 of Seabury Quinn's *Conscience Maketh Cowards*. The 2.8 candidate reads the real
+contents page and the eleven stories whole; the guard refused it because the seven fake records carry a serial read
+from the contents and a work identity made from the list item, which no candidate record can take over by identity.
+Yesterday's survey of the B refusals (one record per issue; "found under its author") undercounted this: many of the
+2.6 records in B have no author at all, their title being the by-line.
+
+Every refused metadata record of the 441 issues surveyed again against the cached 2.8 candidates (560 records: 231 A,
+183 B, 109 C, 35 B2, 2 other). Of the 183 B records, the candidate's main holder covers all the old boxes in 121 and
+sixty percent or more in 168; the holder is a story in 139, a feature in 40. By the relation between the old title
+and the holder's: the old title is the holder's by-line ("By David M. Speaker") 21, a contents line read whole with
+the holder's title inside it ("THE LUNAR CONSUL by Sidney Patszer", "DAWN TO DUSK a new novel by Eando Binder") 36,
+the holder's author alone 5, a list item or a bare number 9; the same title with a different cut 36 (the old record
+had swallowed the pieces after it, or was a two-box contents stub the candidate grew into the whole piece); the same
+author under another title 13; the reverse fault — the candidate titled the piece with the author's name, where a
+section head stands above the by-line — 14; no relation (the candidate lost the start, or titled the holder "May",
+"Contents for July") 45.
+
+Two named cases added to scripts/upgrade_continuity.py, in the style of Codex's: **retired_contents_misreading** — the
+old record is a reading record whose serial came from the contents, with no link to another issue and no external
+provenance; every box is retained; and either the old title is junk (a numbered list item whatever follows it; a bare
+or roman numeral, chapter number or section word with no author read) or one candidate record holding sixty percent
+of the boxes reads the piece with its own printed title and author and the old title is its by-line, its author, or a
+contents line containing its title or author. The inference is retired into the audit; the candidate's own contents
+reading supplies serial and work identity, and the cross-issue pass recomputes the links. The reverse fault, links,
+provenance, a lost box and a holder under sixty percent all still refuse. **transferred_same_title_trimmed / grown** —
+the same title (a trailing part marker apart, then with both authors read and equal), same author or one side unread,
+and either the candidate record holds a subset of at least a quarter of the old boxes with every other old box in
+furniture or in a reading record with its own printed title and author (a box cut off into an advertisement or an
+untitled record refuses), or the old boxes all lie inside the candidate record; the old metadata is transferred as on
+any match. Codex's tests unchanged; 10 new tests (test_continuity_contents_misreading.py); 282 pass.
+
+Measured on the 441 refused issues in the session (the cached candidates): **90 pass** — 65 B with work_id, 3 B, 16 C
+(an issue's other records), 6 B2 — 56 misreadings retired, 30 trimmed and 30 grown records transferred, 12 absorbed
+excerpt inferences retired; 351 stay refused (163 A text-matched, 85 B, 77 C, 23 B2, 3 other). Of the sample's six
+2.6 issues, Weird Tales 1949-11 (#7) and Argosy 1919-09 (#14) pass; Amazing Stories 1926-10 (#103: the candidate
+merged a serial's conclusion into the editorial before it) and All-Story Weekly 1914-05 (#145: the candidate titled
+the pieces of a 100-page novel "May", "The Cavalier (Weekly)") stay on 2.6, rightly. P52v runs the upgrade again on
+the server (a plain run selects the issues below 2.8) and then the cross-issue pass.
+
+Sujin's proposal in the feedback — bound each piece by the next piece's start page from the contents, with other rules
+for advertisements and features mixed in — is what the assembler does when the contents page is read right (pieces
+are placed from the contents entries and run to the next start; running heads and continuation notices are checked);
+the fault here was the choice of the contents page, fixed in 2.7/2.8 (toc_folio's find_contents; cf. the Avon catalogue
+of 18 October), and the guard's caution kept the old reading. Her two further rules of 17–18 October stand.

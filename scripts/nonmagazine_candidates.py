@@ -43,7 +43,7 @@ from collections import Counter, defaultdict
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
 
-RULE_VERSION = "1.0"
+RULE_VERSION = "1.1"      # 1.1 (19 Oct, 14:50): R1 only for single-issue items without a magazine word in the name
 SCORE_EXCLUDE = 5
 SCORE_LOOK = 3
 OUT_DIR = os.path.join("data", "corpus", "p52-2026-10-16")
@@ -76,7 +76,7 @@ SIGNALS = {
     "A4": ("book", 1, "five or more contents entries, none with an author"),
     "A5": ("book", 2, "a book's shape: no contents page, five or more chapter heads, at most two starts (a title over a by-line) in 48 scan pages or more"),
     "D1": ("dime novel", 4, "a dime novel's shape: 40 scan pages or fewer, dated 1925 or before, five or more chapter heads, no contents page, by-lines on at most three pages"),
-    "R1": ("book", 2, "the records: at most one story record, or all story records by one author, in an item of 60 scan pages or more"),
+    "R1": ("book", 2, "the records: at most one story record, or all story records by one author, in an item of 60 scan pages or more — only for a single-issue 'magazine' whose name has no magazine word (a magazine the assembler read poorly has few stories too)"),
     # evidence of a magazine takes points away from every class
     "N1": (None, -3, "a volume-and-number title (v01n01, Vol. 3 No. 2, #12, [1947-03]) or [vN #N] in the description — against book and single story"),
     "N2": (None, -3, "by-lines on four or more pages and three or more contents entries with authors — against book, single story, dime novel, index or portfolio and comic"),
@@ -258,7 +258,8 @@ def score(issue, n_in_magazine, archive, assembly, records=None):
             codes.append("D1"); ev["D1"] = f"{pages} pages, {yr}, {assembly['chapters']} chapter heads"
         if assembly["byline_pages"] >= 4 and assembly["toc_authors"] >= 3:
             codes.append("N2"); ev["N2"] = f"{assembly['byline_pages']} by-line pages, {assembly['toc_authors']} contents authors"
-    if records and pages >= 60 and (records["stories"] <= 1 or records["story_authors"] <= 1):
+    if (records and pages >= 60 and (records["stories"] <= 1 or records["story_authors"] <= 1)
+            and n_in_magazine == 1 and not RE_MAGAZINE_WORD.search(name)):
         codes.append("R1"); ev["R1"] = f"{records['stories']} stories, {records['story_authors']} author(s)"
     return codes, ev
 

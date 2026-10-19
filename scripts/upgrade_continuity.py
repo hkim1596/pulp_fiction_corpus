@@ -841,6 +841,155 @@ def absorbed_excerpt_inference(before, candidate):
             "furniture_regions": len(old & furniture), "original_regions": len(old)}
 
 
+READING_TYPES = ("story", "feature", "poem", "letters")
+SECTION_TITLES = {"serial", "serials", "serial story", "novel", "novels", "novelette", "novelettes", "short stories", "short story",
+                  "complete novel", "table of contents", "contents", "author s", "authors", "by", "part", "chapter", "conclusion"}
+
+
+def _title_key(text):
+    """A title for comparison: lower case, punctuation and marks (a reader's tick, a trailing full stop) dropped."""
+    return normalized(re.sub(r"[\u2713\u2714\u2611*]", " ", text or ""))
+
+
+def junk_contents_title(title, author=None):
+    """A contents 'title' that cannot be a piece's title: an item of a numbered list ('*41. Minions of the Moon—Beyer',
+    a book club's list read as the contents; junk whatever name follows it), or — when no author was read either — a
+    bare numeral or roman numeral ('64.', 'Xxi.'), a chapter number, or a section word ('Serial', 'Table of Contents';
+    with an author read, 'SERIALS' / R. G. Emery still identifies the story). Returns the reason or None."""
+    raw = (title or "").strip()
+    key = _title_key(raw)
+    if re.match(r"^\W*\d{1,3}\.\s", raw):
+        return "a numbered list item"
+    if normalized(author):
+        return None
+    if not key:
+        return "empty title"
+    if not re.search(r"[a-z]", key):
+        return "no letters"
+    if re.fullmatch(r"(?:[ivxlc]+|chapter [ivxlc0-9]+|[ivxlc]+ .{0,20})", key) and len(key.split()) <= 3:
+        return "a chapter number"
+    if key in SECTION_TITLES:
+        return "a section word"
+    return None
+
+
+def contents_misreading_superseded(before, candidate):
+    """Retire a contents-only serial inference whose record was a misreading of the contents page that the candidate
+    reads correctly.
+
+    The 2.6 assembler took, for a piece's title, a line of the contents page that is not one — a by-line ('By A. Hyatt
+    Verrill'), the author's name alone, a whole contents line ('DAWN TO DUSK a new novel by Eando Binder'), an item of a
+    numbered list the page took for the contents ('*41. Minions of the Moon—Beyer', a book club's list), a bare number
+    — and placed a story start from it, cutting the real piece. Such a record carries a serial read from the contents
+    (source 'contents') and a work identity derived from the misread title; it has no link to another issue (no
+    prev/next, no excerpt match) and no external provenance for its part numbers. It is retired into the audit when
+    every one of its boxes is retained (none unsorted) and either
+      - the old title is junk (junk_contents_title: a numbered list item, or a bare number, chapter number or section
+        word with no author read either), whatever holds the boxes, or
+      - one candidate record holds at least 60 percent of them, is a reading record with a printed title and author of
+        its own, different from the old title, and
+        the old title is that holder's by-line ('By <author>'), the holder's author alone, or a line containing the
+        holder's title or author with more words around it (a contents line read whole).
+    The candidate's own contents reading supplies the serial and the work identity; the cross-issue pass (run_corpus.py
+    --link) recomputes the links. The reverse case — the candidate titled the piece with the author's name — does not
+    qualify (the old title is not a misreading of the holder's) and stays refused.
+    (p52, 19 October 2026; written from the 183 refused contents-only records of 10f, Weird Tales 1949-11 among them.)
+    """
+    serial = before.get("serial") or {}
+    if before.get("type") not in READING_TYPES:
+        return None
+    if any(serial.get(k) for k in ("prev", "next", "part_n_source", "part_total_source")) or before.get("excerpt_of") or before.get("contains_excerpt"):
+        return None                      # a link to another issue or an external provenance: never retired here
+    if serial and serial.get("source") not in ("contents", None):
+        return None
+    if not serial and not (before.get("work_id") and before.get("toc")):
+        return None
+    old = record_keys(before)
+    if not old or (old & unsorted_keys(candidate)):
+        return None
+    owners = [r for r in candidate.get("articles", []) if old & record_keys(r)]
+    if not owners:
+        return None
+    main = max(owners, key=lambda r: len(old & record_keys(r)))
+    share = len(old & record_keys(main)) / len(old)
+    ot = _title_key(before.get("title"))
+    mt, ma = _title_key(main.get("title")), normalized(main.get("author"))
+    junk = junk_contents_title(before.get("title"), before.get("author"))
+    if junk:
+        how = f"the old title is {junk}"          # whatever holds the boxes: the inference itself was nothing
+    elif share < .6:
+        return None
+    else:
+        if main.get("type") not in READING_TYPES or not mt or not ma or mt == ot:
+            return None
+        if re.match(r"^(?:by|par)\s", ot) and ma in ot:
+            how = "the old title is the holder's by-line"
+        elif ot == ma:
+            how = "the old title is the holder's author"
+        elif mt in ot and len(ot.split()) > len(mt.split()):
+            how = "the old title is a contents line containing the holder's title"
+        elif ma in ot and len(ot.split()) >= len(ma.split()) + 2:
+            how = "the old title is a contents line containing the holder's author"
+        else:
+            return None
+    return {"how": how, "holder": {"article_id": main.get("article_id"), "type": main.get("type"), "title": main.get("title"),
+                                   "author": main.get("author"), "shared_regions": len(old & record_keys(main)), "regions": len(record_keys(main)),
+                                   "serial": copy.deepcopy(main.get("serial")), "work_id": main.get("work_id")},
+            "share_of_old_regions": round(share, 3), "original_regions": len(old),
+            "other_holders": [{"article_id": r.get("article_id"), "type": r.get("type"), "title": r.get("title"), "shared_regions": len(old & record_keys(r))}
+                              for r in owners if r is not main]}
+
+
+PART_TAIL = re.compile(r"(?:\s*(?:part\s+[ivxlc0-9]+|parts?\s+[ivxlc0-9]+|conclusion|concluded|the end|in\s+(?:two|three|four|five|six|seven|eight|\d+)\s+parts?"
+                       r"|\d+(?:st|nd|rd|th)\s+of\s+\d+\s+parts?|[ivxlc]{1,6}))+\s*$")
+
+
+def _without_part_tail(key):
+    return PART_TAIL.sub("", key).strip() if key else key
+
+
+def same_title_resized(before, after, candidate):
+    """The same piece — same title (a trailing part marker apart), same author or one side unread — whose boxes the
+    candidate trimmed or grew:
+      - trimmed: the candidate record's boxes are a subset of the old record's holding at least a quarter of them, and
+        every other old box is in furniture or in a reading record with a printed title and author of its own (the old
+        record had swallowed the pieces that follow; a box cut off into an advertisement or an untitled record is a
+        fault, not a trim); when the titles differ by the part marker, both authors must be read and the same;
+      - grown: the old record's boxes are a subset of the candidate record's (the old record was a contents stub on
+        the first page; the candidate found the whole piece).
+    Returns 'trimmed', 'grown' or None. Such a record is a match for the transfer of the old metadata."""
+    ot, nt = _title_key(before.get("title")), _title_key(after.get("title"))
+    if not ot or not nt or junk_contents_title(before.get("title"), before.get("author")):
+        return None
+    oa, na = normalized(before.get("author")), normalized(after.get("author"))
+    if oa and na and oa != na:
+        return None
+    if ot != nt:
+        if _without_part_tail(ot) != _without_part_tail(nt) or not _without_part_tail(ot) or not (oa and na):
+            return None
+    if after.get("type") not in READING_TYPES or before.get("type") not in READING_TYPES:
+        return None
+    ks, nk = record_keys(before), record_keys(after)
+    if not ks or not nk or ks == nk:
+        return None
+    if nk <= ks and len(nk) >= .25 * len(ks):
+        rest = ks - nk
+        furniture = {f"{f['page']}:{f['idx']}" for f in candidate.get("furniture", [])}
+        if rest & unsorted_keys(candidate):
+            return None
+        for r in candidate.get("articles", []):
+            if r is after or not (rest & record_keys(r)):
+                continue
+            if r.get("type") not in READING_TYPES or not (normalized(r.get("title")) and normalized(r.get("author"))):
+                return None                  # reading text cut off into an advertisement or an untitled record: a fault, not a trim
+        if rest - furniture - set().union(*(record_keys(r) for r in candidate.get("articles", []) if r is not after)):
+            return None
+        return "trimmed"
+    if ks <= nk:
+        return "grown"
+    return None
+
+
 def preserve_links(old, candidate, pages=None, audit=None):
     """Keep a link only when one old record uniquely matches one new record."""
     fields = ("work_id", "work_title", "serial", "excerpt_of", "contains_excerpt")
@@ -926,9 +1075,13 @@ def preserve_links(old, candidate, pages=None, audit=None):
             continue
         ks = record_keys(before)
         choices = []
+        resized_by = {}
         for j, after in enumerate(new_records):
             nk = record_keys(after)
             overlap = len(ks & nk)
+            resized = same_title_resized(before, after, candidate)
+            if resized:
+                resized_by[j] = resized
             corrected = corrected_suffix(before, after, candidate, pages)
             contained = nonstory_containment(before, after)
             advertising_tail = removed_transactional_tail(before, after, pages)
@@ -941,7 +1094,7 @@ def preserve_links(old, candidate, pages=None, audit=None):
                 continue
             exact = ks == nk
             same_title = norm(before.get("title")) == norm(after.get("title")) and bool(norm(before.get("title")))
-            if exact or (same_title and overlap / len(ks) >= .8 and overlap / len(nk) >= .8) \
+            if exact or (same_title and overlap / len(ks) >= .8 and overlap / len(nk) >= .8) or resized \
                     or corrected or contained or advertising_tail or cleaned_ad or split_prefix or relocated or serial_end or byline_alias:
                 # A verified printed heading can recover a misplaced contents
                 # record whose old body actually belongs to the preceding story.
@@ -960,10 +1113,29 @@ def preserve_links(old, candidate, pages=None, audit=None):
                               "evidence": [f for f in before.get("flags", [])
                                            if "excerpt" in f or "matched by text" in f or "quotes" in f]})
                 continue
+            misread = contents_misreading_superseded(before, candidate)
+            if misread:
+                audit.append({"kind": "retired_contents_misreading", "article_id": before.get("article_id"),
+                              "proof": misread,
+                              "reason": ("old contents-only serial inference rested on a misread contents line (" + misread["how"] + "); every original box is retained, "
+                                         "the record that holds them reads the piece with its printed title and author (or is not a piece at all), and the "
+                                         "candidate's own contents reading supplies serial and work identity; the cross-issue pass recomputes the links"),
+                              "original_metadata": {k: copy.deepcopy(before[k]) for k in fields if k in before},
+                              "evidence": copy.deepcopy(before.get("toc"))})
+                continue
             raise ValueError(f"cannot safely retain cross-issue metadata for {before.get('article_id')}")
         _, j = choices[0]
         taken.add(j)
         after = new_records[j]
+        if resized_by.get(j):
+            audit.append({"kind": "transferred_same_title_" + resized_by[j], "article_id": before.get("article_id"),
+                          "candidate_article_id": after.get("article_id"),
+                          "reason": ("same title and author; the candidate record holds a subset of the old boxes and every other old box is furniture or a "
+                                     "record with its own printed title and author (the old record had swallowed the piece that follows)"
+                                     if resized_by[j] == "trimmed" else
+                                     "same title and author; the old record's boxes are all inside the candidate record (the old record was a contents stub; the candidate found the whole piece)"),
+                          "original_regions": len(ks), "candidate_regions": len(record_keys(after)),
+                          "original_metadata": {k: copy.deepcopy(before[k]) for k in fields if k in before}})
         contained = nonstory_containment(before, after)
         advertising_tail = removed_transactional_tail(before, after, pages)
         cleaned_ad = corrected_ad_subset(before, after, candidate, pages)
