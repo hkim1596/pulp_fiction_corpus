@@ -1357,3 +1357,31 @@ differently; in 39 of them 1.3 still reads an author as a title (section heads a
 in three issues of Avon Fantasy Reader (six scans) 1.3 took the publisher's list of titles at the back of the book,
 laid out and labelled like a contents page, for the contents; at the back of an issue only a page that says CONTENTS
 in words is read as one (patch 0008; a test from that book).
+
+### 2026-10-18, 22:22 KST — rules 2.8 over the whole corpus (10f); the cross-issue pass (P52r)
+
+10f, the protected upgrade to rules 2.8 over every assembled issue (7,337 selected, 8 workers, 14:52–22:22): 6,896
+installed (94.0%), 441 refused, 0 skipped. 439 of the refused are issues the 2.7 upgrade had refused (they keep 2.6);
+two were on 2.7 and stay there (weird_tales_1929_12_6192912sas, weird_tales_1938_04_04atlpmurf: their records changed
+shape between the two readings). 440 refusals are "cannot safely retain cross-issue metadata for <record>", one
+"conflicting excerpt_of in merged nonstory metadata". Of the 634 issues refused on 17 October, 195 passed: 175 through
+the guard's new case, 20 through the contents fixes alone.
+
+The 441 by the refused record's kind, after re-assembling all of them with 2.8 in Sujin's session: 153 B (a story
+whose serial information came from the contents line; in 137 of 183 such records the story is still not found under
+its author — the author's name read as the title where a section head or a descriptor line stands above the by-line,
+the body in a feature or poem record, or the 2.6 record itself titled with a by-line; in 36 the same story is found
+smaller, the old record having swallowed what follows); 162 A (an advertisement or house block whose text matched a
+story in another issue, now inside a story, feature, poem or letters record: refused on purpose, 100 ad and 62
+house); 93 C (a serial part linked to another issue); 29 B2 (a printed serial marker, unlinked); 4 other. No guard
+rule for B: the refusals protect 2.6 assemblies that are better than the 2.8 ones in those issues; the release of B
+is another round on the contents parser (the "section head or descriptor line above the by-line" layouts, 39 issues
+listed by 10e) and on the assembler's start detection. Recommendation for corpus 1.0: the refused issues keep their
+current assembly, recorded by backend in the manifest and the data paper.
+
+P52r, the cross-issue pass (run_corpus.py --link) over every magazine, 22:45–22:50: 1,506 magazines linked — work
+identities, serial links between issues and excerpt matches for the records the upgrade rebuilt. The upgrade carries
+old links over by identity and computes no new ones; this pass had not been run after 10d either. The site refresh
+then republished the records (23:38: 7,298 issues current, 39 held for human corrections; 326,165 records, 66,444
+stories, 18,300 authors; 295 records verified by Sujin's reading so far). Weird Tales 1937-12, refused at 2.7 for its
+author-as-title reading, is on 2.8.
