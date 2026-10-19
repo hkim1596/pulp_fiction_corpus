@@ -8,12 +8,14 @@ single stories, dime-novel and nickel-weekly numbers, comics, indexes and portfo
 period are excluded from corpus 1.0 and their verification-sample slots redrawn (scripts/draw_verification_sample.py
 --replace, which this script runs last unless --no-redraw).
 
-The input is the review CSV with its "decision" column filled: x (or exclude) = exclude, k (or keep) = keep, blank =
-not decided. With --accept-proposed, rows the rule proposed EXCLUDE are taken as excluded unless the decision says k,
-so a reader can decide class by class and mark only the exceptions. Rows proposed LOOK or KEEP are excluded only
-when marked x.
+The input is either the review CSV with its "decision" column filled (x = exclude, k = keep, blank = not decided), or
+the site's click log data/review/nonmagazine_review.jsonl (/review/nonmagazine; the latest line per item counts)
+joined to the candidate table. With --accept-proposed, rows the rule proposed EXCLUDE are taken as excluded unless the
+decision says k, so a reader can decide class by class and mark only the exceptions. Rows proposed LOOK or KEEP are
+excluded only when marked x; "not sure" counts as undecided.
 
     python3 scripts/set_aside_nonmagazine.py --csv <reviewed.csv> --decided-by "Sujin Kang" --decided 2026-10-20 [--accept-proposed] [--dry-run]
+    python3 scripts/set_aside_nonmagazine.py --decisions data/review/nonmagazine_review.jsonl --table data/corpus/p52-2026-10-16/nonmagazine_candidates.json ...
 
 Safe to run again: ids already set aside are skipped. Refuses an id that is not in the selection.
 """
@@ -60,6 +62,37 @@ def read_decisions(path, accept_proposed=False):
     return exc, kept, undecided
 
 
+def read_log_decisions(log_path, table_path, accept_proposed=False):
+    """(excluded rows, kept rows, undecided rows) from the site's click log joined to the candidate table: the rows are
+    the table's listed items (proposed EXCLUDE or LOOK, and the sample's) in the CSV's shape, each with its decision."""
+    T = json.load(open(table_path, encoding="utf-8"))
+    latest = {}
+    for line in open(log_path, encoding="utf-8"):
+        try:
+            r = json.loads(line)
+        except ValueError:
+            continue
+        if r.get("id") and r.get("decision") in ("x", "k", "?"):
+            latest[r["id"]] = r
+    exc, kept, undecided = [], [], []
+    for it in T.get("items", []):
+        if it.get("proposed") == "KEEP" and not it.get("in_sample"):
+            continue
+        d = latest.get(it["id"], {})
+        row = {"id": it["id"], "ia_identifier": it.get("ia_identifier"), "class": it.get("class") or "", "proposed": it.get("proposed"),
+               "signals": " ".join(it.get("signals") or []), "note": (d.get("note") or "") if d.get("note") != "marked with the view" else "",
+               "decision": d.get("decision", ""), "decided_by_site": d.get("user"), "decided_at": d.get("ts")}
+        if row["decision"] == "x":
+            exc.append(row)
+        elif row["decision"] == "k":
+            kept.append(row)
+        elif accept_proposed and row["proposed"] == "EXCLUDE":
+            exc.append(row)
+        else:
+            undecided.append(row)
+    return exc, kept, undecided
+
+
 def entry_for(row, decided_by, decided):
     cls = (row.get("class") or "").strip()
     reason = f"{CLASS}: {WORDS.get(cls, cls or 'as reviewed')}"
@@ -102,7 +135,11 @@ def apply(rows, decided_by, decided, path=None, selection=None, dry_run=False):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--csv", required=True, help="the review table with its decision column filled")
+    src = ap.add_mutually_exclusive_group(required=True)
+    src.add_argument("--csv", help="the review table with its decision column filled")
+    src.add_argument("--decisions", help="the site's click log (data/review/nonmagazine_review.jsonl)")
+    ap.add_argument("--table", default=os.path.join(ROOT, "data", "corpus", "p52-2026-10-16", "nonmagazine_candidates.json"),
+                    help="the candidate table the log's decisions refer to (with --decisions)")
     ap.add_argument("--decided-by", required=True)
     ap.add_argument("--decided", default=time.strftime("%Y-%m-%d"))
     ap.add_argument("--accept-proposed", action="store_true", help="rows proposed EXCLUDE count as excluded unless the decision says k")
@@ -111,7 +148,10 @@ def main():
     args = ap.parse_args()
     from corpus_lib import corpus_config
     selection = {i["id"] for i in corpus_config()["issues"]}
-    exc, kept, undecided = read_decisions(args.csv, args.accept_proposed)
+    if args.csv:
+        exc, kept, undecided = read_decisions(args.csv, args.accept_proposed)
+    else:
+        exc, kept, undecided = read_log_decisions(args.decisions, args.table, args.accept_proposed)
     print(f"{len(exc)} to exclude, {len(kept)} kept, {len(undecided)} undecided rows" + (" (dry run)" if args.dry_run else ""))
     from collections import Counter
     print("to exclude by class: " + ", ".join(f"{k} {v}" for k, v in Counter((r.get('class') or '?') for r in exc).most_common()))

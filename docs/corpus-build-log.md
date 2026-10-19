@@ -1478,3 +1478,19 @@ for advertisements and features mixed in — is what the assembler does when the
 are placed from the contents entries and run to the next start; running heads and continuation notices are checked);
 the fault here was the choice of the contents page, fixed in 2.7/2.8 (toc_folio's find_contents; cf. the Avon catalogue
 of 18 October), and the guard's caution kept the old reading. Her two further rules of 17–18 October stand.
+
+### 2026-10-19, 15:10 KST — the non-magazine review by clicks (site v0.25.0); P52v and P52w done
+
+P52v (13:03–13:39): the upgrade over the 441 issues below rules 2.8 with the two new guard cases — **91 installed, 350
+refused** (as measured in the session: 90/351); the cross-issue pass after it, 1,506 magazines. Weird Tales 1949-11 is
+on 2.8 (eleven stories whole); its republication was held by the publisher because Sujin had made 358 actions on the
+old, misread records that morning — the annotation log was moved to data/assembly_archive/2026-10-19_wt_1949_11/ with
+the old live records, and the issue republished (P52w, 14:34; the site now 7,297 current, 40 held).
+
+Sujin asked for the non-magazine review by clicks rather than in a CSV: **/review/nonmagazine** (WORKROOM → "Not a
+magazine?") lists the candidate table's rows — proposed EXCLUDE or LOOK, and the sample's issues — with the cover
+thumbnail, the selection name and the archive's title, date, pages, class and score, the signals (their meaning on
+hover) and the evidence, a link to the issue and to archive.org; EXCLUDE / KEEP / ? per row with a note, and one
+button to mark every undecided row of the current view (filters: proposal, class, decided or not, in the sample).
+Every click is a line in data/review/nonmagazine_review.jsonl under the reader's name; the latest per item counts.
+scripts/set_aside_nonmagazine.py --decisions reads the log joined to the candidate table (the CSV route stays).

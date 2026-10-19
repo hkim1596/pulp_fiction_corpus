@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.24.0"
+APP_VERSION = "0.25.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -1444,7 +1444,7 @@ def esc(s):
 NAV_EXPLORE = [("/overview", "Overview"), ("/authors", "Authors"), ("/magazines", "Magazines"), ("/issues", "Issues"),
                ("/stories", "Stories"), ("/pairs", "Pairs"), ("/reuse", "Reuse"), ("/collection", "Collection"),
                ("/corpus", "Corpus"), ("/datasheet", "Datasheet"), ("/method", "Method")]
-NAV_WORKROOM = [("/guide", "Guide"), ("/articles", "Workbench"), ("/verify/sample", "Verification"), ("/review/model", "Model check"), ("/reuse/validate", "Paraphrase review"),
+NAV_WORKROOM = [("/guide", "Guide"), ("/articles", "Workbench"), ("/verify/sample", "Verification"), ("/review/nonmagazine", "Not a magazine?"), ("/review/model", "Model check"), ("/reuse/validate", "Paraphrase review"),
                 ("/reuse/cases", "Cases"), ("/reuse/progress", "Progress"), ("/run", "Corpus run"), ("/log", "Build log"), ("/assembly", "Assembly"),
                 ("/timing", "Timing"), ("/activity", "Activity"), ("/feedback", "Feedback")]
 
@@ -1619,6 +1619,7 @@ import collection_pages as CP  # noqa: E402
 import corpus_run_pages as CR  # noqa: E402      the corpus run, live (v0.17.0)
 import model_review_pages as MR  # noqa: E402     the model check review (v0.19.0)
 import verify_pages as VP  # noqa: E402           the verification sample (v0.22.0); the contents check, level 1 (v0.24.0)
+import nonmagazine_review_pages as NM  # noqa: E402   the review of the non-magazine candidates (v0.25.0)
 import corpus_reuse_pages as CRP  # noqa: E402    text reuse over the whole corpus, the dry run (v0.23.0)
 RP.bind(globals())
 EX.bind(globals())
@@ -1627,6 +1628,7 @@ CP.bind(globals())
 CR.bind(globals())
 MR.bind(globals())
 VP.bind(globals())
+NM.bind(globals())
 CRP.bind(globals())
 
 
@@ -2009,6 +2011,8 @@ class H(BaseHTTPRequestHandler):
         m = re.fullmatch(r"/verify/contents/([\w\-]+)", path)
         if m:
             return self._send(200, VP.contents_page(m.group(1), qs, self.user, render=self._page))
+        if path == "/review/nonmagazine":
+            return self._send(200, NM.review_page(qs, self.user, render=self._page))
         if path == "/reuse/cases":
             return self._send(200, RV.cases_page(qs, self.user, render=self._page))
         m = re.fullmatch(r"/reuse/cluster/(\w+)/(exact|para)/(\d+)/(\d+)", path)
@@ -2090,6 +2094,11 @@ class H(BaseHTTPRequestHandler):
                     + "<h1>Guests cannot judge</h1>"))
             MR.append_judgment(self.user, get)
             return self._redirect("/review/model")
+        if path == "/review/nonmagazine":                    # a decision on a non-magazine candidate (19 Oct 2026)
+            if self.user == "guest":
+                return self._send(403, self._page("No", howto("Deciding needs a named account, so the log shows who did it.") + "<h1>Guests cannot decide</h1>"))
+            back = NM.handle_post(self.user, get)
+            return self._redirect(back if back.startswith("/review/nonmagazine") else "/review/nonmagazine")
         if path == "/verify/contents":                       # the contents check of one sampled issue (level 1; 19 Oct 2026)
             if self.user == "guest":
                 return self._send(403, self._page("No", howto(
