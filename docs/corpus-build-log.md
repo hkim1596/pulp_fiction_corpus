@@ -1526,3 +1526,14 @@ the sample's slots (books leave the sample too: scripts/draw_verification_sample
 runs **scripts/reassemble_books.py** (the book mode over every book, the annotation logs made on the chapter-split
 records archived under data/assembly_archive/<stamp>_books/, each book published). The export carries `kind` on every
 record (r00). 287 tests.
+
+### 2026-10-21, 10:45 KST — the kinds applied; 629 books re-assembled; the contents check page fixed (v0.25.1)
+
+P52y–P52u: Sujin reviewed the candidate table by cover and title on /review/nonmagazine and found the rule's
+suggestions right; a bulk click on the dime-novel view marked 192 items "excerpt" by mistake and was corrected by
+192 appended "book" lines (the log is append-only; the latest decision counts). apply_kinds.py wrote
+config/corpus_kinds.json and the set-aside reasons, redrew the sample's slots, and reassemble_books.py re-read
+**629 books in the book mode** (published 629, held 0; e.g. Work and Win no. 1030, 1918: one story of 17 records, 6
+joined). The contents check page (/verify/contents) answered 502 on Weird Tales 1949-11: the analysis's `toc_pages`
+is the list of the contents spread's scans there, not a count; read both ways now, and the route answers a message
+instead of taking the site down. Site v0.25.1.

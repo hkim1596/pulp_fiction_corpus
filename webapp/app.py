@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.25.0"
+APP_VERSION = "0.25.1"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -2010,7 +2010,11 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, VP.sample_page(qs, self.user, render=self._page))
         m = re.fullmatch(r"/verify/contents/([\w\-]+)", path)
         if m:
-            return self._send(200, VP.contents_page(m.group(1), qs, self.user, render=self._page))
+            try:
+                return self._send(200, VP.contents_page(m.group(1), qs, self.user, render=self._page))
+            except Exception as e:                   # one issue's odd analysis must not take the site down (21 Oct 2026)
+                return self._send(500, self._page("Contents check", "<h1>The contents check could not be shown</h1><p class='muted'>"
+                                                  + esc(f"{type(e).__name__}: {e}") + " — leave feedback with this issue's name.</p>"))
         if path == "/review/nonmagazine":
             return self._send(200, NM.review_page(qs, self.user, render=self._page))
         if path == "/reuse/cases":

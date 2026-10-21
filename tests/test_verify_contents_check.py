@@ -111,6 +111,13 @@ class PagesAndLog(unittest.TestCase):
         self.tmp.cleanup()
 
     def test_contents_page_shows_entries_scan_and_records(self):
+        # toc_pages as the list of scans (what the assembler writes for a contents spread) and as a count
+        p = os.path.join(VP._G["DATA"], "assembly_v2", "rules", "wt_1937_12", "analysis.json")
+        a = json.load(open(p)); a["toc_pages"] = [3, 4]; json.dump(a, open(p, "w"))
+        self.assertEqual(VP.contents_reading("wt_1937_12")["toc_scans"], [3, 4])
+        a["toc_pages"] = 2; json.dump(a, open(p, "w"))
+        self.assertEqual(VP.contents_reading("wt_1937_12")["toc_scans"], [3, 4])
+        a["toc_pages"] = 1; json.dump(a, open(p, "w"))
         page = VP.contents_page("wt_1937_12", {}, "sujin")
         self.assertIn("/img/wt_1937_12/page_0003.png", page)
         self.assertIn("The Voyage of the Neutralia", page)

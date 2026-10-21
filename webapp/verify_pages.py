@@ -145,10 +145,17 @@ def contents_reading(iid):
     except Exception:
         return None
     toc = a.get("toc") or []
-    pages = a.get("toc_pages") or 1
+    pages = a.get("toc_pages")                      # a count of pages from toc_page on, or the list of the scans themselves
     tp = a.get("toc_page")
-    return {"toc": toc, "toc_page": tp, "toc_scans": [tp + k for k in range(int(pages))] if tp else [], "toc_kind": a.get("toc_kind"),
-            "offset": a.get("offset")}
+    if isinstance(pages, (list, tuple)):
+        scans = [int(x) for x in pages if isinstance(x, (int, float, str)) and str(x).isdigit()] or ([tp] if tp else [])
+    else:
+        try:
+            n = max(1, int(pages or 1))
+        except (TypeError, ValueError):
+            n = 1
+        scans = [tp + k for k in range(n)] if tp else []
+    return {"toc": toc, "toc_page": tp, "toc_scans": scans, "toc_kind": a.get("toc_kind"), "offset": a.get("offset")}
 
 
 def _norm(s):
