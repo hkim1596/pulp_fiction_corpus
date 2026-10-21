@@ -8,8 +8,9 @@ the verification sample's slots held by books or set-aside items are redrawn (sc
 Decision 1 of 19 October 2026 as revised by Sujin Kang on 21 October: items are sorted by kind, not thrown out.
 A magazine issue is the default kind and is not written. With --accept-proposed, an undecided row takes the rule's
 suggestion: class book or dime novel -> book; index or portfolio -> not a text; comic -> comic; outside the period ->
-outside the period; single story stays undecided (an excerpt is a duplicate only when its issue is in the corpus:
-decide it by hand); not a fiction magazine -> magazine. "?" stays undecided.
+outside the period; single story -> excerpt of a magazine (Sujin checked the suggestions on 21 October: a lone story
+cut out of an issue is neither a magazine issue nor a book; whether its issue is in the corpus is noted for the
+datasheet); not a fiction magazine -> magazine. "?" stays undecided.
 
     python3 scripts/apply_kinds.py --decided-by "Sujin Kang" --decided 2026-10-21 [--accept-proposed] [--dry-run] [--no-reassemble]
     python3 scripts/apply_kinds.py --migrate            # the 19 October clicks (x/k) turned into kinds, appended to the log
@@ -37,7 +38,7 @@ REASONS = {"excerpt": ("excerpt of a magazine", "pages cut out of a magazine iss
            "comic": ("comic", "a comic"),
            "outside": ("outside the period", "a reprint, fanzine or magazine from after the period")}
 PROPOSED = {"book": "book", "dime novel": "book", "index or portfolio": "not_text", "comic": "comic", "outside the period": "outside",
-            "not a fiction magazine": "magazine"}
+            "not a fiction magazine": "magazine", "single story": "excerpt"}      # single story: Sujin, 21 Oct — the suggestions stand
 
 
 def read_log(path=LOG):
