@@ -2,7 +2,7 @@
  "_comment": "Issues of the approved list set aside after the download (p50t; Heejin, 14 October 2026: 'Fetch the real scans, set the rest aside'). They stay in the approved list (its fingerprint is untouched); corpus_lib.set_aside() keeps every stage off them; the datasheet counts them by reason. Made by scripts/missing_issues.py from the run's events and the archive's item records.",
  "decided_by": "Heejin Kim",
  "decided": "2026-10-14",
- "written": "2026-10-16T19:58:41",
+ "written": "2026-10-21T10:33:51",
  "issues": [
   {
    "id": "about_the_pulps_newsletters__undated_aboutpulps",
@@ -597,6 +597,3085 @@
    "ia_identifier": "weirdtalesmagazine",
    "class": "set aside: not a scan",
    "reason": "1 image(s) only: a cover or illustrations, not a scanned issue"
+  },
+  {
+   "id": "a_fishing_trip_on_the_planet_undated_planetmars",
+   "ia_identifier": "AFishingTripOnThePlanetMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "a_gift_for_terra_undated_ftforterra",
+   "ia_identifier": "AGiftForTerra",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "a_visit_to_suari_undated_sittosuari",
+   "ia_identifier": "AVisitToSuari",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "absurd_10_tc_cg_undated_surd10tccg",
+   "ia_identifier": "Absurd10.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "absurd_1_tc_cg_undated_bsurd1tccg",
+   "ia_identifier": "Absurd1.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "absurd_2_tc_cg_undated_bsurd2tccg",
+   "ia_identifier": "Absurd2.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "absurd_3_tc_cg_undated_bsurd3tccg",
+   "ia_identifier": "Absurd3.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "absurd_4_tc_cg_undated_bsurd4tccg",
+   "ia_identifier": "Absurd4.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "absurd_5_tc_cg_undated_bsurd5tccg",
+   "ia_identifier": "Absurd5.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "absurd_6_tc_cg_undated_bsurd6tccg",
+   "ia_identifier": "Absurd6.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "absurd_7_tc_cg_undated_bsurd7tccg",
+   "ia_identifier": "Absurd7.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "absurd_8_tc_cg_undated_bsurd8tccg",
+   "ia_identifier": "Absurd8.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "absurd_9_tc_cg_undated_bsurd9tccg",
+   "ia_identifier": "Absurd9.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "adventure_1930_re19301969",
+   "ia_identifier": "adventure-1930-1969",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M2",
+    "M3",
+    "N3",
+    "M5b",
+    "N4",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "alien_equivalent_undated_equivalent",
+   "ia_identifier": "AlienEquivalent",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "ally_sloper_s_half_holiday_1949_y0011949uk",
+   "ia_identifier": "allyslopershalfholiday0011949uk",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "amazing_adventures_undated_sv3n010c2c",
+   "ia_identifier": "Amazing_Adventures_v3n010_c2c",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "M10",
+    "M7",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "amazing_adventures_undated_sv3n012c2c",
+   "ia_identifier": "Amazing_Adventures_v3n012_c2c",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "M10",
+    "M7",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "amazing_serials_01_verne_jul_1926_04_omet192645",
+   "ia_identifier": "AmazingSerials01VerneJulesOffInAComet192645",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "S1",
+    "S3",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "Amazing Serial is a partial page excerpt from Amazing Stories. [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "amazing_serials_02_wertenbak_1926_04_atom192645",
+   "ia_identifier": "AmazingSerials02WertenbakerTheManFromTheAtom192645",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "S1",
+    "S3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "Amazing Serial is a partial page excerpt from Amazing Stories. [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "amazing_serials_03_verne_jul_1926_05_rth1926567",
+   "ia_identifier": "AmazingSerials03VerneJ.TripToTheCenterOfTheEarth1926567",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "S1",
+    "S3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "amazing_serials_04_winsor_g__1926_onx1926789",
+   "ia_identifier": "AmazingSerials04WinsorMcLeodStationX1926789",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "S1",
+    "S3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "amazing_serials_05_serviss_g_1926_ce19268910",
+   "ia_identifier": "AmazingSerials05ServissG.P.ColumbusOfSpace19268910",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "S1",
+    "S3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "amazing_serials_06_verne_jul_1926_ole1926910",
+   "ia_identifier": "AmazingSerials06VerneJ.PurchaseOfTheNorthPole1926910",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "S1",
+    "S3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "amazing_serials_07_verrill_a_1926_le19261011",
+   "ia_identifier": "AmazingSerials07VerrillH.BeyondThePole19261011",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "S1",
+    "S2",
+    "S3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "amazing_serials_08_wells_h_g_1926_au19260910",
+   "ia_identifier": "AmazingSerials08WellsH.G.IslandOfDr.Moreau19260910",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "S1",
+    "S3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "amazing_serials_09_serviss_g_1926_1112192712",
+   "ia_identifier": "AmazingSerials09ServissG.P.TheSecondDeluge1926111219271.2",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "M11",
+    "S1",
+    "S2",
+    "S3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "amazing_serials_10_wells_h_g_1926_2612192712",
+   "ia_identifier": "AmazingSerials10WellsH.G.FirstMenInTheMoon192612192712",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "S1",
+    "S3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "amazing_serials_11_burroughs_1927_got1927234",
+   "ia_identifier": "AmazingSerials11BurroughsE.R.TheLandThatTimeForgot1927234",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "S1",
+    "S3",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "amazing_serials_13_wells_h_g_1927_08_rlds192789",
+   "ia_identifier": "AmazingSerials13WellsH.G.WarOfTheWorlds192789",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "N3",
+    "S1",
+    "S3",
+    "A3",
+    "A5"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "an_index_to_unknown_and_unkn_1955_spress1955",
+   "ia_identifier": "hoffman-stuart-index-to-unknown-and-unknown-worlds-sirius-press-1955",
+   "class": "not a text",
+   "reason": "not a text: an index, a checklist, a cover gallery or another item without reading text",
+   "kind_by_rule": "index or portfolio",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "M6",
+    "S1",
+    "S2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "argosy_1955_5501202010",
+   "ia_identifier": "argosy-uk-195501_202010",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M4",
+    "M5",
+    "N4",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "argosy_serials_roscoe_theodo_1934_mustbedeep",
+   "ia_identifier": "GraveMustBeDeep",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "S1",
+    "S3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "it is a partial page excerpt from magazine [migrated from the 19 October click: x]"
+  },
+  {
+   "id": "artifact_undated_rtifact796",
+   "ia_identifier": "Artifact_796",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "avon_murder_mystery_monthly__1942_thlycovers",
+   "ia_identifier": "avonmurdermysterymonthlycovers",
+   "class": "not a text",
+   "reason": "not a text: an index, a checklist, a cover gallery or another item without reading text",
+   "kind_by_rule": "index or portfolio",
+   "signals": [
+    "M2b",
+    "M3",
+    "N3",
+    "M6",
+    "S1",
+    "N4",
+    "A5"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "bizarre_fantasy_tales_undated_1n02197103",
+   "ia_identifier": "bizarre-fantasy-tales-02-v-01n-02-1971-03",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M5b",
+    "S1",
+    "N4",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "blood_and_black_lace_2_tc_cg_undated_klace2tccg",
+   "ia_identifier": "Blood_and_Black_Lace2.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cargo_to_mars_undated_argotomars",
+   "ia_identifier": "CargoToMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "castle_of_frankenstein_undated_nitchdregs_63071a9ec1be",
+   "ia_identifier": "Castle_of_Frankenstein_020_whole_Vol5n4c2cPeePeeTheSnitch-DREGS",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "M10",
+    "M7",
+    "A2",
+    "A3",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "castle_of_frankenstein_undated_razordregs_71580654af7c",
+   "ia_identifier": "Castle_of_Frankenstein_018_whole_Vol5n2c2cChersUsedRazor-DREGS",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "M10",
+    "M7",
+    "A2",
+    "A3",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "coffin_of_life_and_death_undated_feanddeath",
+   "ia_identifier": "CoffinOfLifeAndDeath",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cold_sweat_1_tc_cg_undated_sweat1tccg",
+   "ia_identifier": "Cold_Sweat1.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cold_sweat_2_tc_cg_undated_sweat2tccg",
+   "ia_identifier": "Cold_Sweat2.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cold_sweat_3_tc_cg_undated_sweat3tccg",
+   "ia_identifier": "Cold_Sweat3.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cold_sweat_4_tc_cg_undated_sweat4tccg",
+   "ia_identifier": "Cold_Sweat4.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cold_sweat_5_tc_cg_undated_sweat5tccg",
+   "ia_identifier": "Cold_Sweat5.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cold_sweat_6_tc_cg_undated_sweat6tccg",
+   "ia_identifier": "Cold_Sweat6.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cold_sweat_7_tc_cg_undated_sweat7tccg",
+   "ia_identifier": "Cold_Sweat7.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cold_sweat_8_tc_cg_undated_sweat8tccg",
+   "ia_identifier": "Cold_Sweat8.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cowgirl_romances_1951_omances005",
+   "ia_identifier": "cowgirl-romances-005",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "M7",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cowgirl_romances_1951_omances006",
+   "ia_identifier": "cowgirl-romances-006",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "M7",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cowgirl_romances_1951_omances007",
+   "ia_identifier": "cowgirl-romances-007",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "M7",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cowgirl_romances_1951_omances008",
+   "ia_identifier": "cowgirl-romances-008",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "M7",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cowgirl_romances_1952_omances009",
+   "ia_identifier": "cowgirl-romances-009",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "M7",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cowgirl_romances_1952_omances010",
+   "ia_identifier": "cowgirl-romances-010",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "M7",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cowgirl_romances_1952_omances011",
+   "ia_identifier": "cowgirl-romances-011",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "M7",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "cowgirl_romances_1952_omances012",
+   "ia_identifier": "cowgirl-romances-012",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "M7",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "crime_illustrated_1955_12_immerian32",
+   "ia_identifier": "crimeillustrated01195512.ecc2c.cimmerian32",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "S1",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "daredevil_comics_1941_07_lytitanfan",
+   "ia_identifier": "daredevilcomics01c2clevgleason1941julytitanfan",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "M7",
+    "S1",
+    "N4",
+    "A2",
+    "A5"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "dark_horizons_undated_micjukebox",
+   "ia_identifier": "Dark_Horizons_20_n.d._Cosmic-Jukebox",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "death_desert_undated_eathdesert",
+   "ia_identifier": "DeathDesert",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "deep_red_undated_d02fantaco",
+   "ia_identifier": "Deep_Red_02_FantaCo",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "deep_red_undated_d05fantaco",
+   "ia_identifier": "Deep_Red_05_FantaCo",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "deep_red_undated_d06fantaco",
+   "ia_identifier": "Deep_Red_06_FantaCo",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "deep_red_undated_d07fantaco",
+   "ia_identifier": "Deep_Red_07_FantaCo",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "demonique_undated_orbagfixed",
+   "ia_identifier": "Demonique_issue_4_gorbag_FIXED",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "devil_s_planet_undated_vilsplanet",
+   "ia_identifier": "DevilsPlanet",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "doc_savage_club_reader_undated_wilddogdcp",
+   "ia_identifier": "Doc_Savage_Club_Reader_010_Wilddog-DCP",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "N3",
+    "M10",
+    "S1",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "don_desperado_by_l_l_foreman_1941_perado1941",
+   "ia_identifier": "l-l-foreman-don-desperado-1941",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "double_trouble_for_oscar_undated_leforoscar",
+   "ia_identifier": "DoubleTroubleForOscar",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "ecco_magazine_undated_7mattspong",
+   "ia_identifier": "Ecco-Magazine-17_mattspong",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "ecco_magazine_undated_9mattspong",
+   "ia_identifier": "Ecco-Magazine-19_mattspong",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "exiles_of_mars_undated_ilesofmars",
+   "ia_identifier": "ExilesOfMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "famous_fantastic_mysteries_a_1942_nlay1942fi",
+   "ia_identifier": "Famous_Fantastic_Mysteries_A_Portfolio_of_Illustrations_by_Virgil_Finlay_1942_FI",
+   "class": "not a text",
+   "reason": "not a text: an index, a checklist, a cover gallery or another item without reading text",
+   "kind_by_rule": "index or portfolio",
+   "signals": [
+    "M3",
+    "M6",
+    "S1",
+    "S2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "famous_fantastic_mysteries_f_1942_o1942fixed",
+   "ia_identifier": "Famous_Fantastic_Mysteries_Finlay_Portfolio_1942_FIXED",
+   "class": "not a text",
+   "reason": "not a text: an index, a checklist, a cover gallery or another item without reading text",
+   "kind_by_rule": "index or portfolio",
+   "signals": [
+    "M3",
+    "M6",
+    "S1",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "famous_monster_movie_art_of__undated_basilgogos",
+   "ia_identifier": "Famous_Monster_Movie_Art_of_Basil_Gogos",
+   "class": "not a text",
+   "reason": "not a text: an index, a checklist, a cover gallery or another item without reading text",
+   "kind_by_rule": "index or portfolio",
+   "signals": [
+    "M3",
+    "M6",
+    "M9",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "famous_science_fiction_undated_6768winter",
+   "ia_identifier": "famous-science-fiction-05-v-01n-05-1967-68-winter",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M5b",
+    "N4",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "famous_science_fiction_undated_nter202504",
+   "ia_identifier": "famous-science-fiction-05-v-01n-05-1967-68-winter_202504",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M5b",
+    "N4",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "fantasynopsis_1_tc_cg_undated_opsis1tccg",
+   "ia_identifier": "Fantasynopsis1.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "fantasynopsis_3_tc_cg_undated_opsis3tccg",
+   "ia_identifier": "Fantasynopsis3.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "fantasynopsis_5_tc_cg_undated_opsis5tccg",
+   "ia_identifier": "Fantasynopsis5.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "flash_gordon_strange_adventu_1936_12_eblowgrade",
+   "ia_identifier": "flash-gordon-strange-adventure-magazine-v-01n-01-1936-12-js-beblow-grade",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "S1",
+    "N4",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "flight_into_fog_undated_ghtintofog",
+   "ia_identifier": "FlightIntoFog",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "four_color_1943_rneybaxter",
+   "ia_identifier": "4c0020DellBarneyBaxter",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "M7",
+    "S1",
+    "R1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "frank_reade_library_1892_12_1318921217",
+   "ia_identifier": "FrankReadeLibraryV01n1318921217",
+   "class": "not a text",
+   "reason": "not a text: an index, a checklist, a cover gallery or another item without reading text",
+   "kind_by_rule": "dime novel",
+   "signals": [
+    "N1",
+    "M4",
+    "M8",
+    "N4",
+    "A3",
+    "D1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "grit_story_section_1932_02_320221mdia",
+   "ia_identifier": "grit-story-section-1932-02-21-m-d-ia",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "N3",
+    "M7",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "h_p_lovecraft_a_bibliography_1952_olycus0152",
+   "ia_identifier": "brennan-joseph-payne-h.-p.-lovecraft-a-bibliography-1952-autolycus-0152",
+   "class": "not a text",
+   "reason": "not a text: an index, a checklist, a cover gallery or another item without reading text",
+   "kind_by_rule": "index or portfolio",
+   "signals": [
+    "M1",
+    "M3",
+    "N3",
+    "M6",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "hagerty_s_enzymes_undated_tysenzymes",
+   "ia_identifier": "HagertysEnzymes",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "haunted_after_dark_003_sampl_undated_lertruepdf",
+   "ia_identifier": "Haunted.After.Dark.003.Sampler.True.PDF",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M10",
+    "S1",
+    "S4",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "haunted_after_dark_004_sampl_undated_lertruepdf",
+   "ia_identifier": "Haunted.After.Dark.004.Sampler.True.PDF",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "haunted_after_dark_006_true__undated_006truepdf",
+   "ia_identifier": "Haunted.After.Dark.006.True.PDF",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "S1",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "hemingway_in_space_undated_wayinspace",
+   "ia_identifier": "HemingwayInSpace",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "holy_city_of_mars_undated_cityofmars",
+   "ia_identifier": "HolyCityOfMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "illustration_3_undated_ustration3",
+   "ia_identifier": "illustration_3",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "imaginator_1_tc_cg_undated_nator1tccg",
+   "ia_identifier": "Imaginator1.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "imaginator_2_tc_cg_undated_nator2tccg",
+   "ia_identifier": "Imaginator2.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "A3",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "imaginator_3_tc_cg_undated_nator3tccg",
+   "ia_identifier": "Imaginator3.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "imaginator_5_tc_cg_undated_nator5tccg",
+   "ia_identifier": "Imaginator5.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "imaginator_6_tc_cg_undated_nator6tccg",
+   "ia_identifier": "Imaginator6.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "imaginator_7_tc_cg_undated_nator7tccg",
+   "ia_identifier": "Imaginator7.TC-CG",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "S1",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "intelligence_factor_undated_encefactor",
+   "ia_identifier": "IntelligenceFactor",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "ismail_the_outworlder_undated_outworlder",
+   "ia_identifier": "IsmailTheOutworlder",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "killing_moon_undated_lingmoon02",
+   "ia_identifier": "KILLING_MOON_02",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "lady_killer_undated_ladykiller",
+   "ia_identifier": "LadyKiller",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "liberation_undated_eration688",
+   "ia_identifier": "Liberation_688",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "lost_treasure_of_mars_undated_sureofmars",
+   "ia_identifier": "LostTreasureOfMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "lunchmeat_undated_unchmeat03",
+   "ia_identifier": "Lunchmeat_03",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "martians_never_die_undated_nsneverdie",
+   "ia_identifier": "MartiansNeverDie",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "master_file_black_mask_1938_11_h2020final",
+   "ia_identifier": "masterfileblackmasknov1938partialocrmarch2020final",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M5b",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "men_on_mars_undated_menonmars",
+   "ia_identifier": "MenOnMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "mo_shanshon_undated_moshanshon",
+   "ia_identifier": "Mo-Shanshon",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "monster_international_undated_cerptsonly",
+   "ia_identifier": "Monster_International_004_Jess_Franco_excerpts_only",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "monster_undated_monster74",
+   "ia_identifier": "Monster_74",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "monster_undated_monster76",
+   "ia_identifier": "Monster_76",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "monsterland_undated_eachbug777",
+   "ia_identifier": "Monsterland_05_C2C_teachbug-777",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "S1",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "monsters_of_the_movies_undated_c2cteammal",
+   "ia_identifier": "Monsters_of_The_Movies_001_c2c_Team_Mal",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "monsters_of_the_movies_undated_tmrwoodman",
+   "ia_identifier": "Monsters_of_The_Movies_002_Fixed_Gambit-Mr._Woodman",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "nine_shadows_at_doomsday_undated_atdoomsday",
+   "ia_identifier": "NineShadowsAtDoomsday",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "no_more_sea_undated_nomoresea",
+   "ia_identifier": "NoMoreSea",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "nonstop_to_mars_undated_stoptomars",
+   "ia_identifier": "NonstopToMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "odyssey_1934_09_nnysamouse",
+   "ia_identifier": "odyssey-10-secret-agent-x-1934-09-1976-facsimile-lenny-s-a-mouse",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "N3",
+    "M5",
+    "M11",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "on_the_screen_presents_super_undated_reenwarren",
+   "ia_identifier": "onthescreen-warren",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "M7",
+    "M9",
+    "S1",
+    "A2",
+    "A4",
+    "R1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "pulpwesterncov_list_undated_erncovlist",
+   "ia_identifier": "PulpWesternCov_list",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "queen_of_the_martian_catacom_undated_tacombs225",
+   "ia_identifier": "QueenOfTheMartianCatacombs_225",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "red_mask_undated_r9fichec2c",
+   "ia_identifier": "RedMask054paper9fiche-c2c",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M10",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "schrader_paul_poetry_of_idea_undated_tryofideas",
+   "ia_identifier": "Schrader_Paul_Poetry_of_Ideas",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "screem_undated_3mattspong",
+   "ia_identifier": "Screem_003_mattspong",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "screem_undated_c2creemdcp_56238f2fa754",
+   "ia_identifier": "Screem_024_c2c_Re-em-DCP",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "screem_undated_c2creemdcp_7426fe33eeff",
+   "ia_identifier": "Screem_023_c2c_Re-em-DCP",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "screem_undated_c2creemdcp_7705b395bc02",
+   "ia_identifier": "Screem_022_c2c_Re-em-DCP",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "seven_came_back_undated_encameback",
+   "ia_identifier": "SevenCameBack",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "sherlock_holmes_in_the_case__undated_gmartian03",
+   "ia_identifier": "Sherlock_Holmes_in_the_Case_of_the_Missing_Martian_03",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "sherlock_holmes_in_the_case__undated_gmartian04",
+   "ia_identifier": "Sherlock_Holmes_in_the_Case_of_the_Missing_Martian_04",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "M7",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "snap_1940_10_10darwinia",
+   "ia_identifier": "snap-v-01n-02-1940-10-darwin-ia",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "space_busters_1952_04s_spring1952",
+   "ia_identifier": "space-busters-no.-1-spring-1952",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "space_busters_1952_10s_o2fall1952",
+   "ia_identifier": "space-busters-no.-2-fall-1952",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "star_of_blue_undated_starofblue",
+   "ia_identifier": "StarOfBlue",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "startling_mystery_stories_undated_6768winter",
+   "ia_identifier": "startling-mystery-stories-07-v-02n-01-1967-68-winter",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M5b",
+    "S1",
+    "N4",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "suicide_ship_to_earth_undated_hiptoearth",
+   "ia_identifier": "SuicideShipToEarth",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_1953_014bogof39",
+   "ia_identifier": "superdetectivelibrary014bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "M11",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_1953_03_ondbogof39",
+   "ia_identifier": "superdetectivelibrary003195303bulldogdrummondbogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_1953_illbogof39",
+   "ia_identifier": "superdetectivelibrary002ernestdudleyintheriddleoffrenshammillbogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_1954_037bogof39",
+   "ia_identifier": "superdetectivelibrary037bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "M11",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_1954_038bogof39",
+   "ia_identifier": "superdetectivelibrary038bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "M11",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_1954_040bogof39",
+   "ia_identifier": "superdetectivelibrary040bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "M11",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_1954_046bogof39",
+   "ia_identifier": "superdetectivelibrary046bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "M11",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_1955_049bogof39",
+   "ia_identifier": "superdetectivelibrary049bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_1955_65fbogof39",
+   "ia_identifier": "superdetectivelibrary065fbogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "M11",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_undated_048bogof39",
+   "ia_identifier": "superdetectivelibrary048bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_undated_101bogof39",
+   "ia_identifier": "superdetectivelibrary101bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "M11",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_undated_102bogof39",
+   "ia_identifier": "superdetectivelibrary102bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "M11",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_undated_104bogof39",
+   "ia_identifier": "superdetectivelibrary104bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_undated_111bogof39",
+   "ia_identifier": "superdetectivelibrary111bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "M11",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_undated_118bogof39",
+   "ia_identifier": "superdetectivelibrary118bogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "M11",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_detective_library_undated_37fbogof39",
+   "ia_identifier": "superdetectivelibrary137fbogof39",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "N3",
+    "M7",
+    "M11",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "super_whost_undated_superwhost",
+   "ia_identifier": "SuperWhost",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "suspense_magazine_1953_01ca1953uk",
+   "ia_identifier": "suspensemagazine001ca.1953uk",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "M7",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_beast_jewel_of_mars_undated_lofmars599",
+   "ia_identifier": "TheBeast-jewelOfMars_599",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_brain_stealers_of_mars_undated_lersofmars",
+   "ia_identifier": "TheBrain-stealersOfMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_cave_undated_thecave788",
+   "ia_identifier": "TheCave_788",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_crowded_colony_undated_wdedcolony",
+   "ia_identifier": "TheCrowdedColony",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_farmer_s_daughter_the_ma_undated_themartian",
+   "ia_identifier": "TheFarmersDaughterTheMartian",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_fate_of_the_poseidonia_undated_poseidonia",
+   "ia_identifier": "TheFateOfThePoseidonia",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_first_martian_undated_rstmartian",
+   "ia_identifier": "TheFirstMartian",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_forest_of_knives_undated_stofknives",
+   "ia_identifier": "TheForestOfKnives",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_hermit_of_mars_undated_rmitofmars",
+   "ia_identifier": "TheHermitOfMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_horror_collection_undated_llection01",
+   "ia_identifier": "The_Horror_Collection_01",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S4",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_horror_collection_undated_llection02",
+   "ia_identifier": "The_Horror_Collection_02",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S4",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_horror_collection_undated_llection03",
+   "ia_identifier": "The_Horror_Collection_03",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S4",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_horror_collection_undated_llection04",
+   "ia_identifier": "The_Horror_Collection_04",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S4",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_horror_collection_undated_llection05",
+   "ia_identifier": "The_Horror_Collection_05",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S4",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_lost_machine_undated_ostmachine",
+   "ia_identifier": "TheLostMachine",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_martian_avenger_undated_ianavenger",
+   "ia_identifier": "MartianAvenger",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_martian_undated_themartian",
+   "ia_identifier": "TheMartian",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_martians_are_coming_undated_sarecoming",
+   "ia_identifier": "theMartiansAreComing",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_martians_came_to_dinner_undated_metodinner",
+   "ia_identifier": "TheMartiansCameToDinner",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_message_from_the_void_undated_romthevoid",
+   "ia_identifier": "TheMessageFromTheVoid",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_quetenestel_towers_undated_steltowers",
+   "ia_identifier": "TheQuetenestelTowers",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_retreat_to_mars_undated_reattomars",
+   "ia_identifier": "TheRetreatToMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_secret_sense_undated_ecretsense",
+   "ia_identifier": "TheSecretSense",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_signals_to_mars_undated_nalstomars",
+   "ia_identifier": "TheSignalsToMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_splatter_times_undated_8toecutter",
+   "ia_identifier": "The_Splatter_Times_08_toecutter",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_statue_undated_thestatue",
+   "ia_identifier": "TheStatue",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_stronger_undated_hestronger",
+   "ia_identifier": "TheStronger",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_winking_lights_of_mars_undated_ghtsofmars",
+   "ia_identifier": "TheWinkingLightsOfMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "the_work_out_planet_undated_koutplanet",
+   "ia_identifier": "TheWork-outPlanet",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "things_to_come_1955_01_come195501",
+   "ia_identifier": "thingstocome195501",
+   "class": "not a text",
+   "reason": "not a text: an index, a checklist, a cover gallery or another item without reading text",
+   "kind_by_rule": "index or portfolio",
+   "signals": [
+    "M3",
+    "M6",
+    "M9",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "thriller_picture_library_1952_tlaworphan",
+   "ia_identifier": "thriller-picture-library-017-1952-the-outlaw-orphan",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "M3",
+    "N3",
+    "M7",
+    "S1",
+    "N4",
+    "A2",
+    "A5"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "thrilling_western_magazine_undated_061970fall",
+   "ia_identifier": "thrilling-western-magazine-06-v-01n-06-1970-fall",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M5b",
+    "S1",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "tom_corbett_space_cadet_1955_05_0119550506",
+   "ia_identifier": "TomCorbettSpaceCadetV02n0119550506",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "M7"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "tom_corbett_space_cadet_1955_07_pgprizejon",
+   "ia_identifier": "TomCorbettSpaceCadetV02n021955070836pgPrizeJon",
+   "class": "comic",
+   "reason": "comic: a comic",
+   "kind_by_rule": "comic",
+   "signals": [
+    "N1",
+    "M7"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "underestimation_undated_estimation",
+   "ia_identifier": "Underestimation",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "warren_presents_010_strange__undated_editmothra",
+   "ia_identifier": "Warren_Presents_010_Strange_Stories_Of_Vampires_Comix_re-edit_mothra",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M10",
+    "S1",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "we_re_civilized_undated_ecivilized",
+   "ia_identifier": "WereCivilized",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "weird_terror_tales_undated_1969winter",
+   "ia_identifier": "weird-terror-tales-01-v-01n-01-1969-winter",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M5b",
+    "S1",
+    "N4",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "weirdtalespresentation_undated_esentation",
+   "ia_identifier": "WeirdTalesPresentation",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "weirdtalesuk_article_undated_sukarticle",
+   "ia_identifier": "WeirdTalesUK_Article",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "when_the_half_gods_go_undated_halfgodsgo",
+   "ia_identifier": "WhenTheHalfGodsGo--",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "single story",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "S4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  {
+   "id": "world_wide_adventure_undated_041968fall",
+   "ia_identifier": "world-wide-adventure-04-v-01n-04-1968-fall",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "M3",
+    "M5b",
+    "S1",
+    "N4",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  }
+ ],
+ "decisions": [
+  {
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "added": 199,
+   "by_class": {
+    "excerpt of a magazine": 91,
+    "outside the period": 57,
+    "comic": 43,
+    "not a text": 8
+   },
+   "source": "/review/nonmagazine clicks, applied by scripts/apply_kinds.py"
   }
  ]
 }

@@ -1,4 +1,5234 @@
 {
  "_comment": "Items that are not magazine issues but stay in the data, by kind (Sujin Kang, 21 October 2026): 'book' — a standalone book, a story collection, a paperback, a dime-novel or nickel-weekly number with one novel. An item not listed is a magazine issue. The protocol's corpus is the magazine issues; the books are assembled as books (pipeline/s08_book.py) and are the other side of a reuse match. Written by scripts/apply_kinds.py from the clicks on /review/nonmagazine.",
- "kinds": {}
+ "kinds": {
+  "3_powder_valley_westerns_ban_1947_payoff1947": {
+   "kind": "book",
+   "ia_identifier": "peter-field-powder-valley-pay-off-1947",
+   "magazine": "3 Powder Valley westerns - Bantam Books",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "[migrated from the 19 October click: k]"
+  },
+  "5_powder_valley_westerns_poc_1945_goguns1945": {
+   "kind": "book",
+   "ia_identifier": "peter-field-gringo-guns-1945",
+   "magazine": "5 Powder Valley westerns - Pocket Books",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "5_vintage_western_paperbacks_1950_dicine1961": {
+   "kind": "book",
+   "ia_identifier": "a-b-guthrie-jr-mountain-medicine-1961",
+   "magazine": "5 Vintage Western Paperbacks",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "[migrated from the 19 October click: k]"
+  },
+  "a_bullet_for_cinderella_1955_cinderella": {
+   "kind": "book",
+   "ia_identifier": "ABulletForCinderella",
+   "magazine": "A Bullet for Cinderella",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: k]"
+  },
+  "a_fighting_man_of_mars_1931_gmanofmars": {
+   "kind": "book",
+   "ia_identifier": "a-fighting-man-of-mars",
+   "magazine": "A Fighting Man Of Mars",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "a_final_triumph_1895_riumph1895": {
+   "kind": "book",
+   "ia_identifier": "old-sleuth-a-final-triumph-1895",
+   "magazine": "A Final Triumph",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "a_knight_of_the_air_or_the_a_1895_bylong1895": {
+   "kind": "book",
+   "ia_identifier": "coxwell-henry-a-knight-of-the-air-or-the-aerial-rivals-digby-long-1895",
+   "magazine": "A Knight Of The Air; Or, The Aerial Rivals - Henry Coxwell",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "a_town_is_drowning_frederick_1955_5amousesas": {
+   "kind": "book",
+   "ia_identifier": "pohl-frederik-kornbluth-c.-m.-a-town-is-drowning-ballantine-123-1955-amouse-sas",
+   "magazine": "A Town Is Drowning - Frederick Pohl & C. M. Kornbluth (Ballantine 123",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "a_vocabulary_of_criminal_sla_1914_lslang1914": {
+   "kind": "book",
+   "ia_identifier": "jacksonlouise.hellyerc.r.avocabularyofcriminalslang1914",
+   "magazine": "A Vocabulary Of Criminal Slang, With Some Examples Of Common Usages - Louis E. Jackson & C.R. Hellyer",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "ace_double_012_western_novel_1953_horserange": {
+   "kind": "book",
+   "ia_identifier": "ace-d-012-dan-j-stevens-wild-horse-range",
+   "magazine": "Ace Double 012 - Western novels by DJ Stevens & D Owen",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "ace_f_248_ray_cummings_beyon_undated_ndthestars": {
+   "kind": "book",
+   "ia_identifier": "ace-f-248-ray-cummings-beyond-the-stars",
+   "magazine": "Ace F 248 Ray Cummings Beyond The Stars",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "adam_parfrey_it_s_a_man_s_wo_undated_emagazines": {
+   "kind": "book",
+   "ia_identifier": "its-a-mans-world-mens-adventure-magazines",
+   "magazine": "Adam Parfrey - It's a Man's World: Men's Adventure Magazines",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "air_service_boys_flying_for__1919_919wilddog": {
+   "kind": "book",
+   "ia_identifier": "Air_Service_Boys_Flying_for_France_1919_Wilddog",
+   "magazine": "Air Service Boys Flying for France",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_1019241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._10_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_1119241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._11_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_1219241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._12_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_1319241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._13_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_1419241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._14_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_1519241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._15_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_1619241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._16_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_1719241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._17_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_1819241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._18_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_2019241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._20_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_aryno21924": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._2_1924",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_o319241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._3_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_o419241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._4_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_o519241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._5_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_o619241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._6_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_o719241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._7_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_o819241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._8_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aldine_r_hood_library_1924_o919241927": {
+   "kind": "book",
+   "ia_identifier": "Aldine_Robin_Hood_Library_no._9_1924-1927",
+   "magazine": "Aldine R Hood Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "all_sports_library_1905_03_0519050311": {
+   "kind": "book",
+   "ia_identifier": "all-sports-library-no.-05-1905-03-11",
+   "magazine": "All-Sports Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": " [migrated from the 19 October click: k]"
+  },
+  "all_sports_library_1906_01_5019060120": {
+   "kind": "book",
+   "ia_identifier": "AllSportsLibraryNo.5019060120",
+   "magazine": "All-Sports Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "all_that_love_allows_paul_da_1955_91darwinia": {
+   "kind": "book",
+   "ia_identifier": "all-that-love-allows-paul-darcy-boles-1955.-popular-691-darwin-ia",
+   "magazine": "All That Love Allows - Paul Darcy Boles",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "all_true_library_undated_elibrary01": {
+   "kind": "book",
+   "ia_identifier": "all-true-library-01",
+   "magazine": "All True Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "all_we_marsmen_undated_lwemarsmen": {
+   "kind": "book",
+   "ia_identifier": "AllWeMarsmen",
+   "magazine": "All We Marsmen",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "ally_slopers_half_holiday_1923_02_caleslinky": {
+   "kind": "book",
+   "ia_identifier": "Ally_Slopers_Half_Holiday_1736_1923-02-10_c2c.greyscale_Slinky",
+   "magazine": "Ally Slopers Half Holiday",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "amazing_stories_08_1928_ddon2419ad": {
+   "kind": "book",
+   "ia_identifier": "Amazing_Stories_08-1928_Buck_Rogers_Armageddon_2419_AD_",
+   "magazine": "Amazing Stories (08",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "amazing_stories_for_children_undated_urdufuncom": {
+   "kind": "book",
+   "ia_identifier": "AmazingStoriesForChildrensPakurdufun.com",
+   "magazine": "Amazing Stories For Childrens Pakurdufun.com",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "american_library_02_guadalca_1943_3mckaydmia": {
+   "kind": "book",
+   "ia_identifier": "american-library-02-guadalcanal-diary-1943.-mc-kay-d-m-ia",
+   "magazine": "American Library 02 Guadalcanal Diary",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "amoshatter_crossroadsofdesir_1953_desire1953": {
+   "kind": "book",
+   "ia_identifier": "AmosHatter_CrossroadsOfDesire_1953",
+   "magazine": "AmosHatter CrossroadsOfDesire",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "an_index_on_the_weird_fantas_1953_azines1953": {
+   "kind": "book",
+   "ia_identifier": "DayBradfordM.AnIndexOnTheWeirdFantasticaInMagazines1953",
+   "magazine": "An Index On The Weird & Fantastica In Magazines - Bradford M. Day",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "ann_carmeny_by_hoffman_birne_1952_fmanbirney": {
+   "kind": "book",
+   "ia_identifier": "ann-carmeny-by-hoffman-birney",
+   "magazine": "Ann Carmeny By Hoffman Birney",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "anthony_boucher_ed_great_ame_1945_ies1945sas": {
+   "kind": "book",
+   "ia_identifier": "anthony-boucher-ed-great-american-detective-stories-1945-sas",
+   "magazine": "Anthony Boucher (ed) - Great American Detective Stories",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "argosy_1891_04_0411covers": {
+   "kind": "book",
+   "ia_identifier": "argosy-v-011n-20-1891-04-11-covers",
+   "magazine": "Argosy",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "argosy_1891_04_0418covers": {
+   "kind": "book",
+   "ia_identifier": "argosy-v-011n-21-1891-04-18-covers",
+   "magazine": "Argosy",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "argosy_1891_10_6518911031": {
+   "kind": "book",
+   "ia_identifier": "argosy-v-013n-465-1891-10-31",
+   "magazine": "Argosy",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "arhur_c_clarke_isole_cosmich_1952_urania1952": {
+   "kind": "book",
+   "ia_identifier": "Arhur_C.Clarke_Isole_cosmiche_URANIA_1952",
+   "magazine": "Arhur C.Clarke Isole cosmiche (URANIA",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "arm_chair_library_1890_hamno21890": {
+   "kind": "book",
+   "ia_identifier": "Arm_Chair_Library_Brigham_no._2_1890",
+   "magazine": "Arm Chair Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "arm_chair_library_1897_01_ry79189701": {
+   "kind": "book",
+   "ia_identifier": "the-arm-chair-library-79-1897-01",
+   "magazine": "Arm Chair Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "army_and_navy_weekly_1897_11_2318971120": {
+   "kind": "book",
+   "ia_identifier": "army-and-navy-weekly-v-01n-23-1897-11-20",
+   "magazine": "Army And Navy Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "as_tough_as_they_come_will_o_1951_eycome1951": {
+   "kind": "book",
+   "ia_identifier": "will-oursler-ed.-as-tough-as-they-come-1951",
+   "magazine": "As Tough As They Come - Will Oursler (ed.) [Permabooks P118",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "atkey_1923_yelloweyes": {
+   "kind": "book",
+   "ia_identifier": "atkey-1923-the-man-with-yellow-eyes",
+   "magazine": "Atkey",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "aurochs_came_walking_undated_amewalking": {
+   "kind": "book",
+   "ia_identifier": "AurochsCameWalking",
+   "magazine": "Aurochs Came Walking",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "authentic_book_of_space_edit_1954_954bogof39": {
+   "kind": "book",
+   "ia_identifier": "CampbellH.J.ed.AuthenticBookOfSpace1954Bogof39",
+   "magazine": "Authentic Book Of Space - Edited by H. J. Campbell",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "authentic_science_fiction_mo_1951_01_115bogof39": {
+   "kind": "book",
+   "ia_identifier": "Authentic_Science_Fiction_Monthly_002_1951-01-15_Bogof39",
+   "magazine": "Authentic Science Fiction Monthly",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "authentic_science_fiction_mo_1951_02_215bogof39": {
+   "kind": "book",
+   "ia_identifier": "Authentic_Science_Fiction_Monthly_004_1951-02-15_Bogof39",
+   "magazine": "Authentic Science Fiction Monthly",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "authentic_science_fiction_mo_1951_05_105bogof39": {
+   "kind": "book",
+   "ia_identifier": "Authentic_Science_Fiction_Monthly_009_1951-05_Bogof39",
+   "magazine": "Authentic Science Fiction Monthly",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "authentic_science_fiction_mo_1951_10_110bogof39": {
+   "kind": "book",
+   "ia_identifier": "Authentic_Science_Fiction_Monthly_014_1951-10_Bogof39",
+   "magazine": "Authentic Science Fiction Monthly",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "authentic_science_fiction_mo_1951_12_y016195112": {
+   "kind": "book",
+   "ia_identifier": "Authentic_Science_Fiction_Monthly_016_1951-12",
+   "magazine": "Authentic Science Fiction Monthly",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "authentic_science_fiction_mo_1952_04_jvhexciter": {
+   "kind": "book",
+   "ia_identifier": "Authentic_Science_Fiction_Monthly_020_1952-04-15_jvh-EXciter",
+   "magazine": "Authentic Science Fiction Monthly",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "authentic_science_fiction_mo_1952_07_07madmaxau": {
+   "kind": "book",
+   "ia_identifier": "Authentic_Science_Fiction_Monthly_023_1952-07_MadMaxAU",
+   "magazine": "Authentic Science Fiction Monthly",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "authentic_science_fiction_mo_1952_09_09madmaxau": {
+   "kind": "book",
+   "ia_identifier": "Authentic_Science_Fiction_Monthly_025_1952-09_MadMaxAU",
+   "magazine": "Authentic Science Fiction Monthly",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "avon_western_reader_undated_ternreader": {
+   "kind": "book",
+   "ia_identifier": "avon-western-reader",
+   "magazine": "Avon Western Reader",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "bait_for_men_cases_of_the_la_1935_dyhell1935": {
+   "kind": "book",
+   "ia_identifier": "thomas-lady-hell-1935",
+   "magazine": "Bait for Men: Cases of The Lady From Hell, by Eugene Thomas",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "barbie_lane_egyptian_museum_undated_umcape1736": {
+   "kind": "book",
+   "ia_identifier": "Barbie_Lane_-_Egyptian_Museum_cape1736",
+   "magazine": "Barbie Lane - Egyptian Museum",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "bat_man_by_lew_merrill_1936_002reprint": {
+   "kind": "book",
+   "ia_identifier": "Bat_Man_by_Lew_Merrill_1936_2002_Reprint",
+   "magazine": "Bat Man by Lew Merrill",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "battle_on_mercury_1953_rikvanlhin": {
+   "kind": "book",
+   "ia_identifier": "Battle_On_Mercury_1953.Winston_cape1736_Erik_Van_Lhin",
+   "magazine": "Battle On Mercury",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "baynard_h_kendrick_the_whist_1937_inghangman": {
+   "kind": "book",
+   "ia_identifier": "baynard-h.-kendrick-the-whistling-hangman",
+   "magazine": "Baynard H. Kendrick The Whistling Hangman",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "beadle_s_frontier_series_1908_ries251908": {
+   "kind": "book",
+   "ia_identifier": "beadles-frontier-series-25-1908",
+   "magazine": "Beadle's Frontier Series",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "beadle_s_half_dime_library_v_1897_02_olxlno1020": {
+   "kind": "book",
+   "ia_identifier": "BeadlesHalfDimeLibraryVol.XlNo.1020",
+   "magazine": "Beadle's Half Dime Library Vol. XL",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "beadle_s_new_york_dime_libra_1893_02_8930208niu": {
+   "kind": "book",
+   "ia_identifier": "beadles-new-york-dime-library-v-058n-746-1893-02-08-niu",
+   "magazine": "Beadle's New York Dime Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "beadles_half_dime_library_10_1897_leandadams": {
+   "kind": "book",
+   "ia_identifier": "Beadles_Half_Dime_Library_1020_-_1897_-_Beadle_and_Adams",
+   "magazine": "Beadles Half Dime Library 1020",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "bear_paw_by_dane_coolidge_1941_lclassic53": {
+   "kind": "book",
+   "ia_identifier": "dane-coolidge-bear-paw-western-novel-classic-53",
+   "magazine": "Bear Paw by Dane Coolidge",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "bedtime_blonde_john_wilstach_1950_56darwinia": {
+   "kind": "book",
+   "ia_identifier": "bedtime-blonde-john-wilstach-1950.-quarter-books-56-darwin-ia",
+   "magazine": "Bedtime Blonde - John Wilstach",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "best_books_570_heading_for_a_1944_micscastle": {
+   "kind": "book",
+   "ia_identifier": "best-books-570-heading-for-a-wedding-1944-consolidated-book-pub.-c-2c-comics-castle",
+   "magazine": "Best Books 570 - Heading For A Wedding?: Gags, Laughs, Cartoons, Poems For The Bride - Compiled by R. M. Barrows",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "betty_s_paper_undated_9320723505": {
+   "kind": "book",
+   "ia_identifier": "bettys-paper-1932-07-23-505",
+   "magazine": "Betty's Paper",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "beyond_the_veil_of_time_b_h__1932_01s_barney1932": {
+   "kind": "book",
+   "ia_identifier": "beyond-the-veil-of-time-b.-h.-barney-1932",
+   "magazine": "Beyond The Veil Of Time - B. H. Barney (Excerpted from the Fall-Winter",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "biggers_1928_hatcurtain": {
+   "kind": "book",
+   "ia_identifier": "biggers-1928-behind-that-curtain",
+   "magazine": "Biggers",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "biggers_1929_blackcamel": {
+   "kind": "book",
+   "ia_identifier": "biggers-1929-the-black-camel",
+   "magazine": "Biggers",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "biggers_1930_eson1st1st": {
+   "kind": "book",
+   "ia_identifier": "biggers-1930-charlie-chan-carries-on-1st-1st",
+   "magazine": "Biggers",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "billy_bunter_s_banknote_1948_10_rsbanknote": {
+   "kind": "book",
+   "ia_identifier": "richards-frank-02-billy-bunters-banknote",
+   "magazine": "Billy Bunter's Banknote",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "black_gold_stampede_by_ed_mo_1940_lclassic81": {
+   "kind": "book",
+   "ia_identifier": "ed-moore-black-gold-stampede-western-novel-classic-81",
+   "magazine": "Black Gold Stampede by Ed Moore",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "black_river_ranch_by_lynn_we_1948_lclassic85": {
+   "kind": "book",
+   "ia_identifier": "lynn-westland-black-river-ranch-western-novel-classic-85",
+   "magazine": "Black River Ranch by Lynn Westland",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blackest_heart_1_undated_kestheart1": {
+   "kind": "book",
+   "ia_identifier": "Blackest_Heart_1",
+   "magazine": "Blackest Heart 1",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blackest_heart_2_undated_kestheart2": {
+   "kind": "book",
+   "ia_identifier": "Blackest_Heart_2",
+   "magazine": "Blackest Heart 2",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blade_and_ledger_1929_05_1n11192905": {
+   "kind": "book",
+   "ia_identifier": "BladeAndLedgerV41n11192905",
+   "magazine": "Blade And Ledger",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blade_and_ledger_1929_08_112damaged": {
+   "kind": "book",
+   "ia_identifier": "BladeAndLedgerV42n02192908pg1112Damaged",
+   "magazine": "Blade And Ledger",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "bleiler_everett_f_ed_the_che_1948_10madmaxau": {
+   "kind": "book",
+   "ia_identifier": "BleilerEverettF.ed.TheChecklistOfFantasticLiterature1948.1st.Ed.v1.0madmaxau",
+   "magazine": "Bleiler, Everett F. (ed.) - The Checklist Of Fantastic Literature",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blood_brother_by_elliott_arn_1951_iottarnold": {
+   "kind": "book",
+   "ia_identifier": "blood-brother-by-elliott-arnold",
+   "magazine": "Blood Brother By Elliott Arnold",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blood_on_the_sage_by_louis_e_1950_lclassic84": {
+   "kind": "book",
+   "ia_identifier": "louis-e-legner-blood-on-the-sage-western-novel-classic-84",
+   "magazine": "Blood On The Sage by Louis E Legner",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_08_o119040812": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._1_1904-08-12",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "blue_and_gray_weekly_1904_08_o219040819": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._2_1904-08-19",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_08_o319040826": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._3_1904-08-26",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "blue_and_gray_weekly_1904_09_o419040902": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._4_1904-09-02",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "blue_and_gray_weekly_1904_09_o519040909": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._5_1904-09-09",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_09_o619040916": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._6_1904-09-16",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "blue_and_gray_weekly_1904_09_o719040923": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._7_1904-09-23",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_09_o819040930": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._8_1904-09-30",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_10_1019041014": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._10_1904-10-14",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_10_1119041021": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._11_1904-10-21",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_10_1219041028": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._12_1904-10-28",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_10_o919041007": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._9_1904-10-07",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "blue_and_gray_weekly_1904_11_1319041104": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._13_1904-11-04",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_11_1419041111": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._14_1904-11-11",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_11_1519041118": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._15_1904-11-18",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_11_1619041125": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._16_1904-11-25",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_12_1719041202": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._17_1904-12-02",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_12_1819041209": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._18_1904-12-09",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_12_1919041216": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._19_1904-12-16",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "blue_and_gray_weekly_1904_12_2019041223": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._20_1904-12-23",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1904_12_2119041230": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._21_1904-12-30",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1905_01_2219050106": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._22_1905-01-06",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1905_01_2319050113": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._23_1905-01-13",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1905_01_2419050120": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._24_1905-01-20",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1905_01_2519050127": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._25_1905-01-27",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1905_02_2619050203": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._26_1905-02-03",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1905_02_2719050210": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._27_1905-02-10",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1905_02_2819050217": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._28_1905-02-17",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1905_02_2919050224": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._29_1905-02-24",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1905_03_3019050303": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._30_1905-03-03",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1905_03_3119050310": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._31_1905-03-10",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "blue_and_gray_weekly_1905_03_3219050317": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._32_1905-03-17",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "bowery_boy_library_027_cover_undated_7coverless": {
+   "kind": "book",
+   "ia_identifier": "Bowery_Boy_Library_027_coverless",
+   "magazine": "Bowery Boy Library 027 coverless",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "bowery_boy_library_075_cover_undated_5coverless": {
+   "kind": "book",
+   "ia_identifier": "Bowery_Boy_Library_075_coverless",
+   "magazine": "Bowery Boy Library 075 coverless",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "bowery_boy_library_083_cover_undated_3coverless": {
+   "kind": "book",
+   "ia_identifier": "Bowery_Boy_Library_083_coverless",
+   "magazine": "Bowery Boy Library 083 coverless",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "boy_s_cinema_0531_1930_02_3119300215": {
+   "kind": "book",
+   "ia_identifier": "boyscinema053119300215",
+   "magazine": "Boy's Cinema 0531",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "boys_first_rate_pocket_libra_1904_7n02194207": {
+   "kind": "book",
+   "ia_identifier": "10-story-detective-v-07-n-02-1942-07",
+   "magazine": "Boys' First-Rate Pocket Library n432",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "boys_first_rate_pocket_libra_1905_11_2ufikussas": {
+   "kind": "book",
+   "ia_identifier": "boys-first-rate-pocket-library-n-472-ufikus-sas",
+   "magazine": "Boys' First-Rate Pocket Library n472",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "brave_and_bold_weekly_08_12__undated_ekly081226": {
+   "kind": "book",
+   "ia_identifier": "brave_and_bold_weekly_08.12.26",
+   "magazine": "brave and bold weekly 08.12.26",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "buck_rogers_in_the_25th_cent_1933_994reprint": {
+   "kind": "book",
+   "ia_identifier": "Buck_Rogers_in_the_25th_Century_1933_1994_reprint",
+   "magazine": "Buck Rogers in the 25th Century",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "buckskin_empire_by_harry_sin_1942_skinempire": {
+   "kind": "book",
+   "ia_identifier": "harry-sinclair-drago-buckskin-empire",
+   "magazine": "Buckskin Empire by Harry Sinclair Drago",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "calendar_for_mars_undated_darformars": {
+   "kind": "book",
+   "ia_identifier": "CalendarForMars",
+   "magazine": "Calendar for Mars",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "chaffee_of_roaring_horse_1929_popular171": {
+   "kind": "book",
+   "ia_identifier": "ernest-haycox-chaffee-of-roaring-horse-popular-171",
+   "magazine": "Chaffee Of Roaring Horse",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "chas_balun_s_connoisseur_s_g_undated_horrorfilm": {
+   "kind": "book",
+   "ia_identifier": "Chas_Baluns_Connoisseurs_Guide_to_the_Contemporary_Horror_Film",
+   "magazine": "Chas Balun's Connoisseur's Guide to the Contemporary Horror Film",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "cheap_book_production_in_the_1937_7018911937": {
+   "kind": "book",
+   "ia_identifier": "shove-raymond-howard-cheap-book-production-in-the-united-states-1870-1891-1937",
+   "magazine": "Cheap Book Production In The United States",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "chicago_ledger_1923_09_3919230929": {
+   "kind": "book",
+   "ia_identifier": "chicago-ledger-v-51n-39-1923-09-29",
+   "magazine": "Chicago Ledger",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "christine_campbell_thomson_e_1931_fnight1931": {
+   "kind": "book",
+   "ia_identifier": "ChristineCampbellThomsonedAtDeadOfNight1931",
+   "magazine": "Christine Campbell Thomson (ed) - At Dead of Night",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "chums_1900_05_2lbexciter": {
+   "kind": "book",
+   "ia_identifier": "chums-v-008n-399-1900-05-02-lb-exciter",
+   "magazine": "Chums",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "chums_1900_08_1lbexciter": {
+   "kind": "book",
+   "ia_identifier": "chums-v-008n-412-1900-08-01-lb-exciter",
+   "magazine": "Chums",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "chums_1900_08_8lbexciter": {
+   "kind": "book",
+   "ia_identifier": "chums-v-008n-413-1900-08-08-lb-exciter",
+   "magazine": "Chums",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "chums_1907_09_chums785": {
+   "kind": "book",
+   "ia_identifier": "chums785",
+   "magazine": "Chums",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "chums_1917_09_2lbexciter": {
+   "kind": "book",
+   "ia_identifier": "chums-v-026n-1306-1917-09-22-lb-exciter",
+   "magazine": "Chums",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "chums_1917_09_5lbexciter": {
+   "kind": "book",
+   "ia_identifier": "chums-v-026n-1305-1917-09-15-lb-exciter",
+   "magazine": "Chums",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "closed_range_by_bliss_lomax_1936_lclassic96": {
+   "kind": "book",
+   "ia_identifier": "bliss-lomax-closed-range-western-novel-classic-96",
+   "magazine": "Closed Range by Bliss Lomax",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "cold_sweat_9_tc_cg_undated_sweat9tccg": {
+   "kind": "book",
+   "ia_identifier": "Cold_Sweat9.TC-CG",
+   "magazine": "Cold Sweat#9.TC CG",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "colorado_by_william_mac_leod_1927_necolorado": {
+   "kind": "book",
+   "ia_identifier": "william-mac-leod-raine-colorado",
+   "magazine": "Colorado by William Mac Leod Raine",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "cowboy_comics_library_1950_04_rsmrtweedy": {
+   "kind": "book",
+   "ia_identifier": "cowboycomicslibrary001195004buckjonesonthetrailoftherydersmr.tweedy",
+   "magazine": "Cowboy Comics Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "cowboy_comics_library_1950_1ndbogof39": {
+   "kind": "book",
+   "ia_identifier": "cowboycomicslibrary091n.d.bogof39",
+   "magazine": "Cowboy Comics Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "cowboy_comics_library_1950_3ndbogof39": {
+   "kind": "book",
+   "ia_identifier": "cowboycomicslibrary093n.d.bogof39",
+   "magazine": "Cowboy Comics Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "cowboy_comics_library_1950_5ndbogof39": {
+   "kind": "book",
+   "ia_identifier": "cowboycomicslibrary095n.d.bogof39",
+   "magazine": "Cowboy Comics Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "cowboy_comics_library_1950_6ndbogof39": {
+   "kind": "book",
+   "ia_identifier": "cowboycomicslibrary086n.d.bogof39",
+   "magazine": "Cowboy Comics Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "cowboy_comics_library_1950_9ndbogof39": {
+   "kind": "book",
+   "ia_identifier": "cowboycomicslibrary059n.d.bogof39",
+   "magazine": "Cowboy Comics Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "cradle_of_the_sun_by_john_cl_1954_larlibrary": {
+   "kind": "book",
+   "ia_identifier": "john-clagett-cradle-of-the-sun-1954-popular-library",
+   "magazine": "Cradle Of The Sun by John Clagett",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "cry_wolf_1945_toncrywolf": {
+   "kind": "book",
+   "ia_identifier": "marjorie-carleton-cry-wolf",
+   "magazine": "Cry Wolf",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "dangerous_lady_1946_1946202511": {
+   "kind": "book",
+   "ia_identifier": "dangerous-lady-octavus-roy-cohen-macmillan-1946_202511",
+   "magazine": "Dangerous Lady",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "dead_end_trail_by_norman_a_f_1944_dtrail1944": {
+   "kind": "book",
+   "ia_identifier": "norman-a-fox-dead-end-trail-1944",
+   "magazine": "Dead End Trail by Norman A Fox",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "death_at_sea_by_richard_sale_1940_athsea1940": {
+   "kind": "book",
+   "ia_identifier": "sale-death-sea-1940",
+   "magazine": "Death at Sea, by Richard Sale",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "death_in_the_saddle_by_archi_1946_lclassic70": {
+   "kind": "book",
+   "ia_identifier": "archie-joscelyn-death-in-the-saddle-western-novel-classic-70",
+   "magazine": "Death In The Saddle by Archie Joscelyn",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "deep_red_horror_handbook_undated_orhandbook": {
+   "kind": "book",
+   "ia_identifier": "Deep_Red_Horror_Handbook",
+   "magazine": "Deep Red Horror Handbook",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "detective_weekly_1933_04_0919330422": {
+   "kind": "book",
+   "ia_identifier": "detective-weekly-009-1933-04-22",
+   "magazine": "Detective Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "detective_weekly_1939_01_1019390128": {
+   "kind": "book",
+   "ia_identifier": "detective-weekly-310-1939-01-28",
+   "magazine": "Detective Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "detective_weekly_1940_04_7219400406": {
+   "kind": "book",
+   "ia_identifier": "detective-weekly-372-1940-04-06",
+   "magazine": "Detective Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "detective_weekly_1940_05_7919400525": {
+   "kind": "book",
+   "ia_identifier": "detective-weekly-379-1940-05-25",
+   "magazine": "Detective Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "detective_weekly_n251_1937_12_5119371211": {
+   "kind": "book",
+   "ia_identifier": "detective-weekly-n-251-1937-12-11",
+   "magazine": "Detective Weekly n251",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "detective_weekly_n340_1939_08_4019390826": {
+   "kind": "book",
+   "ia_identifier": "detective-weekly-n-340-1939-08-26",
+   "magazine": "Detective Weekly n340",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "diamond_dick_jr_1897_12_4ufikusdpp": {
+   "kind": "book",
+   "ia_identifier": "diamond-dick-jr.-060-1897-12-04-ufikus-dpp",
+   "magazine": "Diamond Dick, Jr.",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "diamond_dick_jr_1908_04_8ufikusdpp": {
+   "kind": "book",
+   "ia_identifier": "diamonddickjr.60119080418ufikusdpp",
+   "magazine": "Diamond Dick, Jr.",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "diamond_dick_jr_1908_04_ddickjr600": {
+   "kind": "book",
+   "ia_identifier": "diamond-dick-jr-600",
+   "magazine": "Diamond Dick, Jr.",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "diamond_dick_jr_the_boy_s_be_1902_01_jr19020119": {
+   "kind": "book",
+   "ia_identifier": "diamond-dick-jr-1902-01-19",
+   "magazine": "Diamond Dick, Jr. - The Boy's Best Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "dime_a_dance_queen_doug_dupp_1951_96darwinia": {
+   "kind": "book",
+   "ia_identifier": "dime-a-dance-queen-doug-dupperault-1951.-quarter-book-96-darwin-ia",
+   "magazine": "Dime a Dance Queen - Doug Dupperault",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "dixon_hawke_s_case_book_1941_10s_1941autumn": {
+   "kind": "book",
+   "ia_identifier": "DixonHawkesCasebook071941Autumn",
+   "magazine": "Dixon Hawke's Case Book",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "dixon_hawke_s_case_book_1949_04s_k16bogof39": {
+   "kind": "book",
+   "ia_identifier": "DixonHawkeSCasebook16Bogof39",
+   "magazine": "Dixon Hawke's Case Book",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "dixon_hawke_s_case_book_1953_04s_k20bogof39": {
+   "kind": "book",
+   "ia_identifier": "DixonHawkeSCasebook20Bogof39",
+   "magazine": "Dixon Hawke's Case Book",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "don_estevan_s_honor_1907_09_evanshonor": {
+   "kind": "book",
+   "ia_identifier": "don-estevans-honor",
+   "magazine": "Don Estevan's Honor",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "dorcas_dene_detective_her_ad_1897_vwhite1897": {
+   "kind": "book",
+   "ia_identifier": "sims-george-r.-dorcas-dene-detective-f.-v.-white-1897",
+   "magazine": "Dorcas Dene, Detective: Her Adventures - George R. Sims (F. V. White",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "doris_cameron_disney_the_han_1949_ngmanstree": {
+   "kind": "book",
+   "ia_identifier": "doris-cameron-disney-the-hangmans-tree",
+   "magazine": "Doris Cameron Disney - The Hangmans Tree",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "dorothy_cameron_disney_crims_1946_msonfriday": {
+   "kind": "book",
+   "ia_identifier": "dorothy-cameron-disney-crimson-friday",
+   "magazine": "Dorothy Cameron Disney - Crimson Friday",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "dorothy_cameron_disney_explo_1950_yexplosion": {
+   "kind": "book",
+   "ia_identifier": "dorothy-cameron-disney-explosion",
+   "magazine": "Dorothy Cameron Disney - Explosion",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "dracula_undated_enmagazine": {
+   "kind": "book",
+   "ia_identifier": "dracula-warren-magazine",
+   "magazine": "Dracula",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "e_m_hull_the_captive_of_the__1931_sahara1931": {
+   "kind": "book",
+   "ia_identifier": "e.-m.-hull-the-captive-of-the-sahara-1931",
+   "magazine": "E. M. Hull - The Captive Of The Sahara",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "e_nesbit_in_the_strand_1903_stle190607": {
+   "kind": "book",
+   "ia_identifier": "nesbittheenchantedcastle190607",
+   "magazine": "E. Nesbit in the Strand",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "earth_s_last_citadel_c_l_moo_1943_argosy1943": {
+   "kind": "book",
+   "ia_identifier": "moorekuttnerearthslastcitadelargosy1943",
+   "magazine": "Earth's Last Citadel - C. L. Moore & Henry Kuttner",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "earth_s_last_citadel_c_l_moo_1943_serial1943": {
+   "kind": "book",
+   "ia_identifier": "moorec.l.kuttnerhenryearthslastcitadelargosyserial1943",
+   "magazine": "Earth's Last Citadel - C. L. Moore & Henry Kuttner",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "eric_of_the_strong_heart_by__1918_gheart1918": {
+   "kind": "book",
+   "ia_identifier": "rousseau-strong-heart-1918",
+   "magazine": "Eric of the Strong Heart, by Victor Rousseau",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "erie_publications_undated_5n04197108": {
+   "kind": "book",
+   "ia_identifier": "weird-v-05n-04-1971-08",
+   "magazine": "Erie publications",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "errol_flynn_beam_ends_1937_nnbeamends": {
+   "kind": "book",
+   "ia_identifier": "errol-flynn-beam-ends",
+   "magazine": "Errol Flynn - Beam Ends",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "errol_flynn_showdown_1946_nnshowdown": {
+   "kind": "book",
+   "ia_identifier": "ErrolFlynnShowdown",
+   "magazine": "Errol Flynn - Showdown",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "expiation_octave_thanet_warn_1890_nwarne1890": {
+   "kind": "book",
+   "ia_identifier": "thanet-octave-expiation-warne-1890",
+   "magazine": "Expiation - Octave Thanet (Warne",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "extenuating_circumstances_fr_1891_vwhite1891": {
+   "kind": "book",
+   "ia_identifier": "philips-f.-c.-extenuating-circumstances-f.-v.-white-1891",
+   "magazine": "Extenuating Circumstances - Francis Charles Philips (F. V. White",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "fame_and_fortune_weekly_0947_1923_11_ficeboydpp": {
+   "kind": "book",
+   "ia_identifier": "fame-and-fortune-weekly-0947-1923-11-23.-wolff-lucky-lee-the-office-boy-dpp",
+   "magazine": "Fame and Fortune Weekly 0947",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "famous_fantastic_mysteries_2_undated_1736reedit": {
+   "kind": "book",
+   "ia_identifier": "famous-fantastic-mysteries-v-09n-06-1948-08-cape-1736-re-edit",
+   "magazine": "Famous Fantastic Mysteries 2",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "five_continental_op_stories__1923_ellhammett": {
+   "kind": "book",
+   "ia_identifier": "FiveContinentalOpStoriesByDashiellHammett",
+   "magazine": "Five Continental Op Stories By Dashiell Hammett",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "four_sided_triangle_1949_liamtemple": {
+   "kind": "book",
+   "ia_identifier": "four-sided-triangle-by-william-temple",
+   "magazine": "Four Sided Triangle",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "fran_striker_lone_ranger_undated_eranger001": {
+   "kind": "book",
+   "ia_identifier": "Fran_Striker_Lone_Ranger_001",
+   "magazine": "Fran Striker - Lone Ranger",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "frank_frazetta_fantasy_illus_undated_lustrated1": {
+   "kind": "book",
+   "ia_identifier": "Frank_Frazetta_Fantasy_Illustrated_1",
+   "magazine": "Frank Frazetta Fantasy Illustrated 1",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "frank_frazetta_fantasy_illus_undated_lustrated2": {
+   "kind": "book",
+   "ia_identifier": "Frank_Frazetta_Fantasy_Illustrated_2",
+   "magazine": "Frank Frazetta Fantasy Illustrated 2",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "frank_frazetta_fantasy_illus_undated_lustrated4": {
+   "kind": "book",
+   "ia_identifier": "Frank_Frazetta_Fantasy_Illustrated_4",
+   "magazine": "Frank Frazetta Fantasy Illustrated 4",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "frank_frazetta_fantasy_illus_undated_lustrated5": {
+   "kind": "book",
+   "ia_identifier": "Frank_Frazetta_Fantasy_Illustrated_5",
+   "magazine": "Frank Frazetta Fantasy Illustrated 5",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "frank_frazetta_fantasy_illus_undated_lustrated6": {
+   "kind": "book",
+   "ia_identifier": "Frank_Frazetta_Fantasy_Illustrated_6",
+   "magazine": "Frank Frazetta Fantasy Illustrated 6",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "frank_frazetta_fantasy_illus_undated_lustrated7": {
+   "kind": "book",
+   "ia_identifier": "Frank_Frazetta_Fantasy_Illustrated_7",
+   "magazine": "Frank Frazetta Fantasy Illustrated 7",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "frank_frazetta_fantasy_illus_undated_lustrated8": {
+   "kind": "book",
+   "ia_identifier": "Frank_Frazetta_Fantasy_Illustrated_8",
+   "magazine": "Frank Frazetta Fantasy Illustrated 8",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "frank_gruber_smoky_road_1949_rsmokyroad": {
+   "kind": "book",
+   "ia_identifier": "frank-gruber-smoky-road",
+   "magazine": "Frank Gruber Smoky Road",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "frank_reade_library_1892_12_1218921210": {
+   "kind": "book",
+   "ia_identifier": "FrankReadeLibraryV01n1218921210",
+   "magazine": "Frank Reade Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "frank_reade_library_1892_12_1518921231": {
+   "kind": "book",
+   "ia_identifier": "FrankReadeLibraryV01n1518921231",
+   "magazine": "Frank Reade Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "frank_reade_library_1894_02_7318940210": {
+   "kind": "book",
+   "ia_identifier": "frankreadelibraryv03n7318940210",
+   "magazine": "Frank Reade Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "frank_reade_library_1895_12_2318951227": {
+   "kind": "book",
+   "ia_identifier": "frankreadelibraryv05n12318951227",
+   "magazine": "Frank Reade Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "frank_reade_library_1898_08_9118980805": {
+   "kind": "book",
+   "ia_identifier": "FrankReadeLibraryV08n19118980805",
+   "magazine": "Frank Reade Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "frank_reade_undated_ankreade01": {
+   "kind": "book",
+   "ia_identifier": "Frank_Reade_-_01",
+   "magazine": "Frank Reade",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "frank_reade_undated_ankreade15": {
+   "kind": "book",
+   "ia_identifier": "Frank_Reade_-_15",
+   "magazine": "Frank Reade",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "frank_reade_undated_ankreade19": {
+   "kind": "book",
+   "ia_identifier": "Frank_Reade_-_19",
+   "magazine": "Frank Reade",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "fun_section_1912_03_1nyworlddm": {
+   "kind": "book",
+   "ia_identifier": "fun-section-1912-03-31-n.-y.-world-d-m",
+   "magazine": "Fun Section",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "fun_section_1912_04_8nyworlddm": {
+   "kind": "book",
+   "ia_identifier": "fun-section-1912-04-28-n.-y.-world-d-m",
+   "magazine": "Fun Section",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "fungi_from_yuggoth_h_p_lovec_1943_06_94306fanac": {
+   "kind": "book",
+   "ia_identifier": "lovecraft-h.-p.-fungi-from-yuggoth-fapa-bill-evans-1943-06-fanac",
+   "magazine": "Fungi From Yuggoth - H. P. Lovecraft",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_novel_028_destiny_tim_1952_eiberfritz": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Novel_028_-_Destiny_Times_Three_1952_-_Leiber_Fritz",
+   "magazine": "Galaxy Novel 028 - Destiny Times Three",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1930_dbelow1930": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_05_S._Fowler_Wright_The_World_Below_1930",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1930_ibians1930": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_04_S._Fowler_Wright_The_Amphibians_1930",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1935_fspace1935": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_02_Jack_Williamson_The_Legion_Of_Space_1935",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1944_nspace1944": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_23_David_V._Reed_Murder_in_Space_1944",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1949_ceship1949": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_25_Murray_Leinster_The_Last_Spaceship_1949",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1949_ssfall1949": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_24_L._Sprague_de_Camp_Lest_Darkness_Fall_1949",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1950_anoids1950": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_21_Jack_Williamson_The_Humanoids_1950",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1950_arrier1950": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_01_Eric_Frank_Russell_Sinister_Barrier_1950",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1951_empire1951": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_07_Clifford_D._Simak_Empire_1951",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1951_intime1951": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_34_Manly_Wade_Wellman_Twice_in_Time_1951",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1951_sofday1951": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_16_James_Blish_The_Warriors_of_Day_1951",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1953_goback1953": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_15_Leslie_Mitchell_Three_Go_Back_1953",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1953_tocome1953": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_22_Sam_merwin_Jr._Killer_To_Come_1953",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1953_worlds1953": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_17_Lewis_Padgett_Well_of_the_Worlds_1953",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1954_galaxy1954": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_20_Murray_Leinster_The_Black_Galaxy_1954",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_1955_ntauri1955": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_32_F._L._Wallace_Address_Centauri_1955",
+   "magazine": "Galaxy Science Fiction Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_undated_armerflesh": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_41_Philip_Jose_Farmer_Flesh",
+   "magazine": "Galaxy Science Fiction Novel 41 Philip Jose Farmer Flesh",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_undated_dlaurencej": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_39_Pagan_Passions_by_Randall_Garrett_and_Laurence_J",
+   "magazine": "Galaxy Science Fiction Novel 39 Pagan Passions by Randall Garrett and Laurence Janifer",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "galaxy_science_fiction_novel_undated_hedeviates": {
+   "kind": "book",
+   "ia_identifier": "Galaxy_Science_Fiction_Novel_37_The_Deviates",
+   "magazine": "Galaxy Science Fiction Novel 37 The Deviates",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "george_harmon_coxe_murder_fo_1939_asking1939": {
+   "kind": "book",
+   "ia_identifier": "george-harmon-coxe-murder-for-the-asking-1939",
+   "magazine": "George Harmon Coxe Murder For The Asking",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "german_science_fiction_in_th_1926_sback19261": {
+   "kind": "book",
+   "ia_identifier": "German_Science_Fiction_in_the_Science-Fiction_Magazines_of_Hugo_Gernsback_1926-1",
+   "magazine": "German Science Fiction in the Science Fiction Magazines of Hugo Gernsback",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "good_luck_to_the_corpse_max__1951_olycus0152": {
+   "kind": "book",
+   "ia_identifier": "murray-max-good-luck-to-the-corpse-1951-google-autolycus-0152",
+   "magazine": "Good Luck To The Corpse - Max Murray",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "gore_noir_013_cbr_greasy_undated_3cbrgreasy": {
+   "kind": "book",
+   "ia_identifier": "Gore.Noir.013.CBR-GREASY",
+   "magazine": "Gore.Noir.013.CBR GREASY",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "great_railroad_stories_of_th_1954_nnysamouse": {
+   "kind": "book",
+   "ia_identifier": "GreatRailroadStoriesOfTheWorldSamuelMoskowitzLennySAMouse",
+   "magazine": "Great Railroad Stories Of The World - edited by Sam Moskowitz",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "griffit_m_300_years_hence_undated_yearshence": {
+   "kind": "book",
+   "ia_identifier": "Griffit_M_300_Years_Hence",
+   "magazine": "Griffit M - 300 Years Hence",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "gunner_cade_undated_gunnercade": {
+   "kind": "book",
+   "ia_identifier": "GunnerCade",
+   "magazine": "Gunner Cade",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "gunsmoke_gold_by_tom_west_1952_omwest1952": {
+   "kind": "book",
+   "ia_identifier": "gunsmoke-gold-by-tom-west-1952",
+   "magazine": "Gunsmoke Gold By Tom West",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "gunsmoke_yarns_gene_autry_ed_1948_ell2171948": {
+   "kind": "book",
+   "ia_identifier": "autry-gene-ed.-gunsmoke-yarns-dell-217-1948",
+   "magazine": "Gunsmoke Yarns - Gene Autry (ed.) (Dell 217",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "gypsy_rose_lee_the_g_string__1941_rs19411942": {
+   "kind": "book",
+   "ia_identifier": "gypsy-rose-lee-the-g-string-murders-1941-1942-",
+   "magazine": "Gypsy Rose Lee - The G String Murders",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "h65r4ewsx2_1931_07_8019310718": {
+   "kind": "book",
+   "ia_identifier": "themodernboyv07n18019310718",
+   "magazine": "h65r4ewsx2",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "h_bedford_jones_the_second_m_1922_secondmate": {
+   "kind": "book",
+   "ia_identifier": "H.BedfordJonesTheSecondMate",
+   "magazine": "H. Bedford Jones - The Second Mate",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "halls_of_horror_undated_fhorror027": {
+   "kind": "book",
+   "ia_identifier": "Halls_of_Horror_027",
+   "magazine": "Halls of Horror",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "hammer_s_house_of_horror_undated_fhorror019": {
+   "kind": "book",
+   "ia_identifier": "Hammers_House_of_Horror_019",
+   "magazine": "Hammer's House of Horror",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "hammer_s_house_of_horror_undated_fhorror020": {
+   "kind": "book",
+   "ia_identifier": "Hammers_House_of_Horror_020",
+   "magazine": "Hammer's House of Horror",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "hammer_s_house_of_horror_undated_sproutscan": {
+   "kind": "book",
+   "ia_identifier": "Hammers_House_of_Horror_001_SproutScan",
+   "magazine": "Hammer's House of Horror",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "hank_pays_a_debt_by_robert_d_1934_08_kpaysadebt": {
+   "kind": "book",
+   "ia_identifier": "hank-pays-a-debt",
+   "magazine": "Hank Pays A Debt by Robert D. Stelle",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "happy_days_1897_04_3villanova": {
+   "kind": "book",
+   "ia_identifier": "happy-days-v-05n-129-1897-04-03-villanova",
+   "magazine": "Happy Days",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "happy_days_1898_08_rvillanova": {
+   "kind": "book",
+   "ia_identifier": "happy-days-v-08n-200-1898-08-13.-tousey-tom-taylor-villanova",
+   "magazine": "Happy Days",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "hardcase_1947_rdcase1947": {
+   "kind": "book",
+   "ia_identifier": "luke-short-hardcase-1947",
+   "magazine": "Hardcase",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "harriet_ashbrook_murder_on_f_1941_friday1941": {
+   "kind": "book",
+   "ia_identifier": "HarrietAshbrookMurderOnFriday1941",
+   "magazine": "Harriet Ashbrook - Murder on Friday",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "haunted_after_dark_005_true__undated_005truepdf": {
+   "kind": "book",
+   "ia_identifier": "Haunted.After.Dark.005.True.PDF",
+   "magazine": "Haunted.After.Dark.005.True.PDF",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "haunted_after_dark_007_true__undated_007truepdf": {
+   "kind": "book",
+   "ia_identifier": "Haunted.After.Dark.007.True.PDF",
+   "magazine": "Haunted.After.Dark.007.True.PDF",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "haunted_after_dark_008_true__undated_008truepdf": {
+   "kind": "book",
+   "ia_identifier": "Haunted.After.Dark.008.True.PDF",
+   "magazine": "Haunted.After.Dark.008.True.PDF",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "haunted_after_dark_anthology_undated_ogytruepdf": {
+   "kind": "book",
+   "ia_identifier": "Haunted.After.Dark.Anthology.True.PDF",
+   "magazine": "Haunted.After.Dark.Anthology.True.PDF",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "helen_reilly_file_on_rufus_r_1937_yamousesas": {
+   "kind": "book",
+   "ia_identifier": "helen-reilly-crimefile-no-2-file-on-rufus-ray-amouse-sas",
+   "magazine": "Helen Reilly - File on Rufus Ray",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "hell_on_the_pecos_by_ed_earl_1935_epecos1935": {
+   "kind": "book",
+   "ia_identifier": "ed-earl-repp-hell-on-the-pecos-1935",
+   "magazine": "Hell On The Pecos by Ed Earl Repp",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "hnew_tales_of_space_and_time_1953_3gorgon776": {
+   "kind": "book",
+   "ia_identifier": "healyraymondj.ed.newtalesofspaceandtimepocketbooks9081953gorgon776",
+   "magazine": "HNew Tales Of Space And Time - Edited by Raymond J. Healy (Pocket Books 908",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "horror_monsters_undated_monsters05": {
+   "kind": "book",
+   "ia_identifier": "Horror_Monsters_05",
+   "magazine": "Horror Monsters",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "house_of_darkness_allan_mack_1948_innonatsas": {
+   "kind": "book",
+   "ia_identifier": "HouseOfDarknessAllanMacKinnonatSas",
+   "magazine": "House Of Darkness - Allan MacKinnon (Dell 237",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "in_quest_of_sheba_s_treasure_1897_ewarne1897": {
+   "kind": "book",
+   "ia_identifier": "walkey-samuel-in-quest-of-shebas-treasure-warne-1897",
+   "magazine": "In Quest Of Sheba's Treasure - Samuel Walkey (Frederick Warne & Co.",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "in_the_grip_of_terror_groff__1951_nysexciter": {
+   "kind": "book",
+   "ia_identifier": "conklin-groff-ed.-in-the-grip-of-terror-lenny-s-exciter",
+   "magazine": "In The Grip Of Terror - Groff Conklin (ed.) (Permabooks P117",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "indian_child_life_1899_inationdcp": {
+   "kind": "book",
+   "ia_identifier": "Indian_Child_Life_1899.ThereseEdwin_Deming_Darwination-DCP",
+   "magazine": "Indian Child Life",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "j_h_rosny_a_n_george_surdez__1931_eblueriver": {
+   "kind": "book",
+   "ia_identifier": "J.H.RosnyAnGeorgeSurdezHelgvorOfTheBlueRiver",
+   "magazine": "J. H. Rosny Aîné & George - Surdez Helgvor Of The Blue River",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "jim_jam_jems_1921_04_sapril1921": {
+   "kind": "book",
+   "ia_identifier": "JimJamJemsApril1921",
+   "magazine": "Jim Jam Jems",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "jim_jam_jems_1922_01_anuary1922": {
+   "kind": "book",
+   "ia_identifier": "JimJamJemsJanuary1922",
+   "magazine": "Jim Jam Jems",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "jim_jam_jems_1922_04_sapril1922": {
+   "kind": "book",
+   "ia_identifier": "JimJamJemsApril1922",
+   "magazine": "Jim Jam Jems",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "jim_jam_jems_1922_05_522may1922": {
+   "kind": "book",
+   "ia_identifier": "JimJamJems0522May1922",
+   "magazine": "Jim Jam Jems",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "johnny_bogan_1952_ante202512": {
+   "kind": "book",
+   "ia_identifier": "johnny-bogan-popular-library-1952-leonora-baccante_202512",
+   "magazine": "Johnny Bogan",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "joseph_t_shaw_hard_boiled_om_1952_ledomnibus": {
+   "kind": "book",
+   "ia_identifier": "joseph-t-shaw-hard-boiled-omnibus",
+   "magazine": "Joseph T. Shaw - Hard Boiled Omnibus",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "k876t54e_1939_04_6019390408": {
+   "kind": "book",
+   "ia_identifier": "modernboy06019390408",
+   "magazine": "k876t54e",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "kioga_of_the_wilderness_will_1936_04_0410jvhsas": {
+   "kind": "book",
+   "ia_identifier": "williaml.chesterkiogaofthewildernessbluebook19360410jvhsas",
+   "magazine": "Kioga Of The WIlderness - William L. Chester (Blue Book serial",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "lady_in_peril_ben_ames_willi_1948_sychainsaw": {
+   "kind": "book",
+   "ia_identifier": "williamsbenamesladyinperilsasdaisychainsaw",
+   "magazine": "Lady In Peril - Ben Ames Williams (Popular Library 164",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "leather_clad_tales_of_advent_1890_08_3818900823": {
+   "kind": "book",
+   "ia_identifier": "leather-clad-tales-of-adventure-and-romance-no.-38-1890-08-23",
+   "magazine": "Leather-Clad Tales Of Adventure And Romance",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "liberty_boys_of_undated_oysof76424": {
+   "kind": "book",
+   "ia_identifier": "Liberty_Boys_of_76_-_424",
+   "magazine": "Liberty Boys of",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "liberty_boys_of_undated_oysof76427": {
+   "kind": "book",
+   "ia_identifier": "Liberty_Boys_of_76_-_427",
+   "magazine": "Liberty Boys of",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "liberty_boys_of_undated_oysof76429": {
+   "kind": "book",
+   "ia_identifier": "Liberty_Boys_of_76_-_429",
+   "magazine": "Liberty Boys of",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "lost_continent_library_undated_tlibrary02": {
+   "kind": "book",
+   "ia_identifier": "Lost_Continent_Library_02",
+   "magazine": "Lost Continent Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "lost_continent_library_undated_tlibrary04": {
+   "kind": "book",
+   "ia_identifier": "Lost_Continent_Library_04",
+   "magazine": "Lost Continent Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "lost_continent_library_undated_tlibrary08": {
+   "kind": "book",
+   "ia_identifier": "Lost_Continent_Library_08",
+   "magazine": "Lost Continent Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "lost_continent_library_undated_tlibrary10": {
+   "kind": "book",
+   "ia_identifier": "Lost_Continent_Library_10",
+   "magazine": "Lost Continent Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "lucifer_s_wife_1913_06_rswifefull": {
+   "kind": "book",
+   "ia_identifier": "ingram-lucifers-wife-full",
+   "magazine": "Lucifer's Wife",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "mac_of_the_marines_in_china__1938_hitman1938": {
+   "kind": "book",
+   "ia_identifier": "smith-mark-mac-of-the-marines-in-china-blb-1400-whitman-1938",
+   "magazine": "Mac Of The Marines In China - Mark Smith (Big Little Book",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "mad_monsters_undated_nstersv1n7": {
+   "kind": "book",
+   "ia_identifier": "Mad_Monsters_v1n7",
+   "magazine": "Mad Monsters",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "mark_of_the_shadow_undated_ftheshadow": {
+   "kind": "book",
+   "ia_identifier": "mark-of-the-shadow",
+   "magazine": "Mark Of The Shadow",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "mary_hastings_bradley_the_du_1933_heduel1933": {
+   "kind": "book",
+   "ia_identifier": "MaryHastingsBradleyTheDuel1933",
+   "magazine": "Mary Hastings Bradley - The Duel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "mary_roberts_rinehart_doroth_1948_olycus0152": {
+   "kind": "book",
+   "ia_identifier": "disney-dorothy-cameron-mary-roberts-rinehart-1948-google-autolycus-0152",
+   "magazine": "Mary Roberts Rinehart - Dorothy Cameron Disney & Milton MacKaye",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "massacre_at_white_river_by_l_1952_952aced004": {
+   "kind": "book",
+   "ia_identifier": "lewis-b-patten-massacre-at-white-river-1952-ace-d-004",
+   "magazine": "Massacre at White River by Lewis B Patten",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "max_brands_western_undated_ndswestern": {
+   "kind": "book",
+   "ia_identifier": "max-brands-western",
+   "magazine": "Max Brands Western",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "maza_of_the_moon_1930_aofthemoon": {
+   "kind": "book",
+   "ia_identifier": "maza-of-the-moon",
+   "magazine": "Maza Of The Moon",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "missing_men_of_saturn_1953_lliplatham": {
+   "kind": "book",
+   "ia_identifier": "Missing_Men_of_Saturn_1953.Winston_cape1736_Phillip_Latham",
+   "magazine": "Missing Men of Saturn",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "monsters_of_the_movies_003_c_undated_sruinscans": {
+   "kind": "book",
+   "ia_identifier": "Monsters_of_the_Movies_003_csc_scan_by_EditorsRuinScans",
+   "magazine": "Monsters of the Movies 003 csc scan by EditorsRuinScans",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "munsey_s_magazine_1922_06_lywood4of6": {
+   "kind": "book",
+   "ia_identifier": "munseysmagazinevol.lxxvino.41922septemberthegirlfromhollywood4of6",
+   "magazine": "Munsey's Magazine",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "munsey_s_magazine_1922_07_lywood2of6": {
+   "kind": "book",
+   "ia_identifier": "munseysmagazinevol.lxxvino.21922julythegirlfromhollywood2of6",
+   "magazine": "Munsey's Magazine",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "munsey_s_magazine_1922_08_lywood3of6": {
+   "kind": "book",
+   "ia_identifier": "munseysmagazinevol.lxxvino.31922augustthegirlfromhollywood3of6",
+   "magazine": "Munsey's Magazine",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "munsey_s_magazine_1922_09_4of6201910": {
+   "kind": "book",
+   "ia_identifier": "munseysmagazinevol.lxxvino.41922septemberthegirlfromhollywood4of6_201910",
+   "magazine": "Munsey's Magazine",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "munsey_s_magazine_1922_10_lywood5of6": {
+   "kind": "book",
+   "ia_identifier": "munseysmagazinevol.lxxviino.11922octoberthegirlfromhollywood5of6",
+   "magazine": "Munsey's Magazine",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "munsey_s_magazine_1922_11_lywood6of6": {
+   "kind": "book",
+   "ia_identifier": "munseysmagazinevol.lxxviino.21922novemberthegirlfromhollywood6of6",
+   "magazine": "Munsey's Magazine",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "murder_is_a_fact_kurt_steel__1938_05_05to193807": {
+   "kind": "book",
+   "ia_identifier": "steelkurtmurderisafactscribners193805to193807",
+   "magazine": "Murder Is A Fact - Kurt Steel [Scribner's",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "murder_is_mutuel_1948_kdolph1948": {
+   "kind": "book",
+   "ia_identifier": "murder-is-mutuel-jack-dolph-1948",
+   "magazine": "Murder Is Mutuel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "my_best_science_fiction_stor_1954_nstory1949": {
+   "kind": "book",
+   "ia_identifier": "leomarguliesoscarj.friended.mybestsciencefictionstory1949",
+   "magazine": "My Best Science Fiction Story - Ed. by Leo Margulies & Oscar J. Friend",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "nebula_science_fiction_1953_03_303bogof39": {
+   "kind": "book",
+   "ia_identifier": "Nebula_Science_Fiction_003_1953-03_Bogof39",
+   "magazine": "Nebula Science Fiction",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "necronomicon_undated_onomicon02": {
+   "kind": "book",
+   "ia_identifier": "Necronomicon_02",
+   "magazine": "Necronomicon",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "new_detective_stories_sir_gi_1891_rdlock1891": {
+   "kind": "book",
+   "ia_identifier": "campbell-sir-gilbert-new-detective-stories-ward-lock-1891",
+   "magazine": "New Detective Stories - Sir Gilbert Campbell (Ward, Lock",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "new_magnet_library_1922_yno8601922": {
+   "kind": "book",
+   "ia_identifier": "new-magnet-library-no.-860-1922",
+   "magazine": "New Magnet Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_02_0818970220": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly0818970220",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_02_0918970227": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly0918970227",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_03_1118970313": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly1118970313",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_04_1518970410": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly1518970410",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_04_1718970424": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly1718970424",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_05_1818970501": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly1818970501",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_05_2218970529": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly2218970529",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_06_2318970605": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly2318970605",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_06_2418970612": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly2418970612",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_07_2718970703": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly2718970703",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_07_2818970710": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly2818970710",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_07_3118970731": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly3118970731",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_08_3318970814": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly3318970814",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_09_3718970911": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly3718970911",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_09_3818970918": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly3818970918",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_09_3918970925": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly3918970925",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_nick_carter_weekly_1897_10_4018971002": {
+   "kind": "book",
+   "ia_identifier": "NewNickCarterWeekly4018971002",
+   "magazine": "New Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "new_york_five_cent_library_1894_06_enovelclub": {
+   "kind": "book",
+   "ia_identifier": "newyorkfivecentlibrary8718940630dimenovelclub",
+   "magazine": "New York Five Cent Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "nick_carter_stories_1914_12_2019141226": {
+   "kind": "book",
+   "ia_identifier": "nick-carter-stories-120-1914-12-26",
+   "magazine": "Nick Carter Stories",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "nick_carter_stories_undated_stories126": {
+   "kind": "book",
+   "ia_identifier": "Nick_Carter_Stories_-_126",
+   "magazine": "Nick Carter Stories",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "nick_carter_stories_undated_stories129": {
+   "kind": "book",
+   "ia_identifier": "Nick_Carter_Stories_-_129",
+   "magazine": "Nick Carter Stories",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "nick_carter_stories_undated_stories136": {
+   "kind": "book",
+   "ia_identifier": "Nick_Carter_Stories_-_136",
+   "magazine": "Nick Carter Stories",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "nick_carter_stories_undated_terstories": {
+   "kind": "book",
+   "ia_identifier": "nick-carter-stories",
+   "magazine": "Nick Carter Stories",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "nick_carter_weekly_1908_05_9219080502": {
+   "kind": "book",
+   "ia_identifier": "nick-carter-weekly-n-592-1908-05-02",
+   "magazine": "Nick Carter Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "nick_carter_weekly_n718_1910_10_1819101001": {
+   "kind": "book",
+   "ia_identifier": "nick-carter-weekly-n-718-1910-10-01",
+   "magazine": "Nick Carter Weekly n718",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "no_boundaries_henry_kuttner__1955_ine1221955": {
+   "kind": "book",
+   "ia_identifier": "HenryKuttnerC.L.MooreNoBoundariesBallantine1221955",
+   "magazine": "No Boundaries - Henry Kuttner & C. L. Moore (Ballantine",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "no_time_like_the_future_nels_1954_vont801954": {
+   "kind": "book",
+   "ia_identifier": "bond-nelson-no-time-like-the-future-avon-t-80-1954",
+   "magazine": "No Time Like The Future - Nelson Bond (Avon T-80",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "notched_guns_by_william_hops_1947_estern1947": {
+   "kind": "book",
+   "ia_identifier": "william-hopson-notched-guns-century-western-1947",
+   "magazine": "Notched Guns by William Hopson",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "notches_on_the_rough_edge_of_1890_anhall1890": {
+   "kind": "book",
+   "ia_identifier": "d-oyle-lynn-cyril-notches-on-the-rough-edge-of-life-chapman-hall-1890",
+   "magazine": "Notches On The Rough Edge Of Life - Lynn Cyril D'Oyle (Chapman & Hall",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "old_cap_collier_library_1890_08_7918900804": {
+   "kind": "book",
+   "ia_identifier": "OldCap.CollierLibraryNo.37918900804",
+   "magazine": "Old Cap. Collier Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "old_sleuth_weekly_1908_05_0219080501": {
+   "kind": "book",
+   "ia_identifier": "old-sleuth-weekly-v-01-n-02-1908-05-01",
+   "magazine": "Old Sleuth Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "old_sleuth_weekly_1908_05_0319080515": {
+   "kind": "book",
+   "ia_identifier": "old-sleuth-weekly-v-01-n-03-1908-05-15",
+   "magazine": "Old Sleuth Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "old_sleuth_weekly_1911_03n1501911": {
+   "kind": "book",
+   "ia_identifier": "old-sleuth-weekly-v-03-n-150-1911",
+   "magazine": "Old Sleuth Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "outlaw_deputy_by_murray_lein_1950_deputy1950": {
+   "kind": "book",
+   "ia_identifier": "murray-leinster-outlaw-deputy-1950",
+   "magazine": "Outlaw Deputy by Murray Leinster",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "passion_c_o_d_albert_quandt_1951_06darwinia": {
+   "kind": "book",
+   "ia_identifier": "passion-c.-o.-d.-albert-quandt-1951.-detective-house.-cameo-books-306-darwin-ia",
+   "magazine": "Passion, C.O.D. - Albert Quandt",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "paul_jones_weekly_1905_10_0319051014": {
+   "kind": "book",
+   "ia_identifier": "PaulJonesWeekly0319051014",
+   "magazine": "Paul Jones Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "paul_jones_weekly_1905_12_1019051202": {
+   "kind": "book",
+   "ia_identifier": "PaulJonesWeekly1019051202",
+   "magazine": "Paul Jones Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "paul_valdez_killer_by_night__1951_rtdarwinia": {
+   "kind": "book",
+   "ia_identifier": "paul-valdez-killer-by-night-scientific-thriller-series-1951.-transport-darwin-ia",
+   "magazine": "Paul Valdez - Killer By Night - Scientific Thriller Series",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "peace_marshal_by_frank_grube_1939_arshal1939": {
+   "kind": "book",
+   "ia_identifier": "frank-gruber-peace-marshal-1939",
+   "magazine": "Peace Marshal by Frank Gruber",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "pick_up_girl_florenz_branch_1946_jvhexciter": {
+   "kind": "book",
+   "ia_identifier": "ThePickUpGirlFlorenzBranch1946jvhEXciter",
+   "magazine": "Pick-Up Girl - Florenz Branch",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "pluck_and_luck_1901_01_seamonitor": {
+   "kind": "book",
+   "ia_identifier": "JackWrightAndHisDeepSeaMonitor",
+   "magazine": "Pluck And Luck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "pluck_and_luck_1903_03_5019030318": {
+   "kind": "book",
+   "ia_identifier": "pluck-and-luck-n-250-1903-03-18",
+   "magazine": "Pluck And Luck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "pluck_and_luck_1903_07_6619030708": {
+   "kind": "book",
+   "ia_identifier": "pluck-and-luck-n-266-1903-07-08",
+   "magazine": "Pluck And Luck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "pluck_and_luck_1903_10_8219031028": {
+   "kind": "book",
+   "ia_identifier": "pluck-and-luck-n-282-1903-10-28",
+   "magazine": "Pluck And Luck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "pluck_and_luck_1912_02_andluck716": {
+   "kind": "book",
+   "ia_identifier": "pluck-and-luck-716",
+   "magazine": "Pluck And Luck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "pluck_and_luck_1917_03_andluck979": {
+   "kind": "book",
+   "ia_identifier": "PluckAndLuck979",
+   "magazine": "Pluck And Luck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "pluck_and_luck_1921_06_ndluck1204": {
+   "kind": "book",
+   "ia_identifier": "PluckAndLuck1204",
+   "magazine": "Pluck And Luck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "pluck_and_luck_1922_02_k01feb1922": {
+   "kind": "book",
+   "ia_identifier": "pluckandluck01feb1922",
+   "magazine": "Pluck And Luck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "pluck_and_luck_1923_01_ndluck1283": {
+   "kind": "book",
+   "ia_identifier": "pluck-and-luck-1283",
+   "magazine": "Pluck And Luck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "pluck_and_luck_1923_08_ndluck1315": {
+   "kind": "book",
+   "ia_identifier": "pluck-and-luck-1315",
+   "magazine": "Pluck And Luck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "pluck_and_luck_1926_08_ndluck1473": {
+   "kind": "book",
+   "ia_identifier": "pluck-and-luck-1473",
+   "magazine": "Pluck And Luck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "prince_of_peril_1930_nceofperil": {
+   "kind": "book",
+   "ia_identifier": "prince-of-peril",
+   "magazine": "Prince Of Peril",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "puck_1909_02_6619090203": {
+   "kind": "book",
+   "ia_identifier": "PuckV65n166619090203",
+   "magazine": "Puck",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_1915_12_ch19151208": {
+   "kind": "book",
+   "ia_identifier": "Punch_1915-12-08",
+   "magazine": "Punch",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "punch_4505_1927_11_0519271109": {
+   "kind": "book",
+   "ia_identifier": "Punch_4505_1927-11-09",
+   "magazine": "Punch 4505",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_afte_undated_nerstories": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-after-dinner-stories",
+   "magazine": "Punch Library Of Humour - After Dinner Stories",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_at_t_undated_theseaside": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-at-the-seaside",
+   "magazine": "Punch Library Of Humour - At The Seaside",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_book_undated_bookoflove": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-book-of-love",
+   "magazine": "Punch Library Of Humour - Book Of Love",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_cock_undated_kneyhumour": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-cockney-humour",
+   "magazine": "Punch Library Of Humour - Cockney Humour",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_golf_undated_olfstories": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-golf-stories",
+   "magazine": "Punch Library Of Humour - Golf Stories",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_in_b_undated_rinbohemia": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-in-bohemia",
+   "magazine": "Punch Library Of Humour - In Bohemia",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_in_t_undated_ehighlands": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-in-the-highlands",
+   "magazine": "Punch Library Of Humour - In The Highlands",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_mr_p_undated_unchafloat": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-mr-punch-afloat",
+   "magazine": "Punch Library Of Humour - Mr Punch Afloat",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_mr_p_undated_unchawheel": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-mr-punch-awheel",
+   "magazine": "Punch Library Of Humour - Mr Punch Awheel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_mr_p_undated_unchontour": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-mr-punch-on-tour",
+   "magazine": "Punch Library Of Humour - Mr Punch On Tour",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_on_t_undated_econtinong": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-on-the-continong",
+   "magazine": "Punch Library Of Humour - On The Continong",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_on_t_undated_thewarpath": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-on-the-warpath",
+   "magazine": "Punch Library Of Humour - On The Warpath",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "punch_library_of_humour_rail_undated_ailwaybook": {
+   "kind": "book",
+   "ia_identifier": "punch-library-of-humour-railway-book",
+   "magazine": "Punch Library Of Humour - Railway Book",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "rancho_bonita_by_dan_james_1940_bonita1940": {
+   "kind": "book",
+   "ia_identifier": "dan-james-rancho-bonita-1940",
+   "magazine": "Rancho Bonita by Dan James",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "range_of_golden_hoofs_by_joh_1940_lclassic71": {
+   "kind": "book",
+   "ia_identifier": "john-trace-range-of-golden-hoofs-western-novel-classic-71",
+   "magazine": "Range Of Golden Hoofs by John Trace",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "range_rider_1947_erider1947": {
+   "kind": "book",
+   "ia_identifier": "w-h-b-kent-range-rider-1947",
+   "magazine": "Range Rider",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "ransom_grace_allen_hardy_n01_1933_endarwinia": {
+   "kind": "book",
+   "ia_identifier": "ransom-grace-allen-hardy-n-01-1933.-nielen-darwin-ia",
+   "magazine": "Ransom! - Grace Allen Hardy n01",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "rebel_range_1942_rebelrange": {
+   "kind": "book",
+   "ia_identifier": "william-colt-mac-donald-rebel-range",
+   "magazine": "Rebel Range",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "red_river_1948_driver1948": {
+   "kind": "book",
+   "ia_identifier": "borden-chase-red-river-1948",
+   "magazine": "Red River",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "red_runs_the_river_william_h_1952_16darwinia": {
+   "kind": "book",
+   "ia_identifier": "red-runs-the-river-william-heuman-1952.-gold-medal-216-darwin-ia",
+   "magazine": "Red Runs the River - William Heuman",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "red_rustlers_by_frank_c_robe_1932_stlers1932": {
+   "kind": "book",
+   "ia_identifier": "frank-c-robertson-red-rustlers-1932",
+   "magazine": "Red Rustlers by Frank C Robertson",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "red_sheep_by_robert_d_stelle_1935_04_redsheep": {
+   "kind": "book",
+   "ia_identifier": "red-sheep",
+   "magazine": "Red Sheep by Robert D. Stelle",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "renegade_ranch_1950_eranch1950": {
+   "kind": "book",
+   "ia_identifier": "roy-manning-renegade-ranch-1950",
+   "magazine": "Renegade Ranch",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "richard_burke_the_frightened_1944_pigeon1944": {
+   "kind": "book",
+   "ia_identifier": "richard-burke-the-frightened-pigeon-1944",
+   "magazine": "Richard Burke - The Frightened Pigeon",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "rimrock_rider_by_walter_a_to_1950_950aced004": {
+   "kind": "book",
+   "ia_identifier": "walter-a-tompkins-rimrock-rider-1950-ace-d-004",
+   "magazine": "Rimrock Rider by Walter A Tompkins",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "rob_roy_library_1903_11_31103ibcbc": {
+   "kind": "book",
+   "ia_identifier": "rob-roy-library-no.-01-1903-11-03-ibc-bc",
+   "magazine": "Rob Roy Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "rob_roy_library_1903_21903ibcbc": {
+   "kind": "book",
+   "ia_identifier": "rob-roy-library-no.-02-1903-ibc-bc",
+   "magazine": "Rob Roy Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "rob_roy_library_1903_31903ibcbc": {
+   "kind": "book",
+   "ia_identifier": "rob-roy-library-no.-03-1903-ibc-bc",
+   "magazine": "Rob Roy Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "robert_w_chambers_secret_ser_1933_1319331942": {
+   "kind": "book",
+   "ia_identifier": "RobertW.ChambersSecretServiceOperator1319331942",
+   "magazine": "Robert W. Chambers - Secret Service Operator",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "robert_w_chambers_the_rake_a_1930_ssy1930sas": {
+   "kind": "book",
+   "ia_identifier": "robert-w.-chambers-the-rake-and-the-hussy-1930-sas",
+   "magazine": "Robert W. Chambers - The Rake And The Hussy",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "roger_sudden_by_thomas_h_rad_1953_ashraddall": {
+   "kind": "book",
+   "ia_identifier": "roger-sudden-by-thomas-h-raddall",
+   "magazine": "Roger Sudden By Thomas H Raddall",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "rohmer_1913_drfumanchu": {
+   "kind": "book",
+   "ia_identifier": "rohmer-1913-the-insidious-dr-fu-manchu",
+   "magazine": "Rohmer",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "round_the_world_library_1927_07_no67192707": {
+   "kind": "book",
+   "ia_identifier": "RoundTheWorldLibraryNo.67192707",
+   "magazine": "Round The World Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "samuel_hopkins_adams_tambay__1942_aygold1942": {
+   "kind": "book",
+   "ia_identifier": "samuel-hopkins-adams-tambay-gold-1942",
+   "magazine": "Samuel Hopkins Adams - Tambay Gold",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "scientific_thriller_series_k_1951_1transport": {
+   "kind": "book",
+   "ia_identifier": "Scientific_Thriller_Series_Killer_By_Night_-_1951_-_Transport",
+   "magazine": "Scientific Thriller Series Killer By Night",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "scream_beat_undated_eambeat001": {
+   "kind": "book",
+   "ia_identifier": "Scream_Beat_001",
+   "magazine": "Scream Beat",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "secret_of_saturn_s_rings_1954_36wollheim": {
+   "kind": "book",
+   "ia_identifier": "Secret_of_Saturns_Rings_1954.Winston_cape1736_Wollheim",
+   "magazine": "Secret of Saturn's Rings",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "selected_western_stories_edi_1949_arguliesed": {
+   "kind": "book",
+   "ia_identifier": "selected-western-stories-1949-leo-margulies-ed",
+   "magazine": "Selected Western Stories - Edited by Leo Margulies",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "shadow_over_mars_undated_owovermars": {
+   "kind": "book",
+   "ia_identifier": "ShadowOverMars",
+   "magazine": "Shadow Over Mars",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "shifting_sands_1913_01_sandswhole": {
+   "kind": "book",
+   "ia_identifier": "ingram-shifting-sands-whole",
+   "magazine": "Shifting Sands",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "silken_threads_a_detective_s_1890_ardner1890": {
+   "kind": "book",
+   "ia_identifier": "williams-harold-silken-threads-a-detective-story-alexander-gardner-1890",
+   "magazine": "Silken Threads: A Detective Story - Harold Williams (Alexander Gardner",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "skyrocket_adelaide_humphries_1937_04_eldarwinia": {
+   "kind": "book",
+   "ia_identifier": "skyrocket-adelaide-humphries-1937-04-11.-chicago-herald-and-examiner-sunday-novel-darwin-ia",
+   "magazine": "Skyrocket - Adelaide Humphries",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "star_begotten_h_g_wells_viki_1937_gotten1937": {
+   "kind": "book",
+   "ia_identifier": "WellsH.G.StarBegotten1937",
+   "magazine": "Star-Begotten - H. G. Wells (Viking Press",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "statten_vargo_2_000_years_on_1950_nscion1950": {
+   "kind": "book",
+   "ia_identifier": "StattenVargo2000YearsOnScion1950",
+   "magazine": "Statten, Vargo - 2,000 Years On (Scion",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "statten_vargo_cataclysm_scio_1951_mscion1951": {
+   "kind": "book",
+   "ia_identifier": "StattenVargoCataclysmScion1951",
+   "magazine": "Statten, Vargo - Cataclysm (Scion",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "statten_vargo_nebula_x_scion_1950_xscion1950": {
+   "kind": "book",
+   "ia_identifier": "StattenVargoNebulaXScion1950",
+   "magazine": "Statten, Vargo - Nebula X (Scion",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "statten_vargo_the_black_aven_1953_sscion1953": {
+   "kind": "book",
+   "ia_identifier": "StattenVargoBlackAvengersScion1953",
+   "magazine": "Statten, Vargo - The Black Avengers (Scion",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "statten_vargo_the_cosmic_fla_1950_escion1950": {
+   "kind": "book",
+   "ia_identifier": "StattenVargoTheCosmicFlameScion1950",
+   "magazine": "Statten, Vargo - The Cosmic Flame (Scion",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "statten_vargo_the_devouring__1951_escion1951": {
+   "kind": "book",
+   "ia_identifier": "StattenVargoTheDevouringFireScion1951",
+   "magazine": "Statten, Vargo - The Devouring Fire (Scion",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "statten_vargo_the_inner_cosm_1952_sscion1952": {
+   "kind": "book",
+   "ia_identifier": "StattenVargoTheInnerCosmosScion1952",
+   "magazine": "Statten, Vargo - The Inner Cosmos (Scion",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "statten_vargo_the_new_satell_1951_escion1951": {
+   "kind": "book",
+   "ia_identifier": "StattenVargoTheNewSatelliteScion1951",
+   "magazine": "Statten, Vargo - The New Satellite (Scion",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "stella_m_during_temptation_o_1917_07_rltonearle": {
+   "kind": "book",
+   "ia_identifier": "StellaM.DuringTemptationOfCarltonEarle",
+   "magazine": "Stella M. During - Temptation of Carlton Earle",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "strange_stories_of_coinciden_1891_redway1891": {
+   "kind": "book",
+   "ia_identifier": "doyle-arthur-conan-et-al.-strange-stories-of-coincidence-and-ghostly-adventure-george-redway-1891",
+   "magazine": "Strange Stories Of Coincidence And Ghostly Adventure - Arthur Conan Doyle, et al. (George Redway",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "strangers_in_love_vina_delma_1951_ok09darwin": {
+   "kind": "book",
+   "ia_identifier": "stangers-in-love-vina-delmar-1951.-dell-10-cent-book-09-darwin",
+   "magazine": "Strangers in Love - Vina Delmar",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "super_detective_library_1954_rilbogof39": {
+   "kind": "book",
+   "ia_identifier": "superdetectivelibrary029theplanetofperilbogof39",
+   "magazine": "Super Detective Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "swift_nick_of_the_york_road__1913_3backcover": {
+   "kind": "book",
+   "ia_identifier": "edgar-george-swift-nick-of-the-york-road-mills-boon-1913-back-cover",
+   "magazine": "Swift Nick Of The York Road - George Edgar (Mills & Boon",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "switch_on_the_light_1931_elight1931": {
+   "kind": "book",
+   "ia_identifier": "christine-campbell-thomson-ed-switch-on-the-light-1931",
+   "magazine": "Switch On The Light",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tanar_of_pellucidar_1929_rgorgon776": {
+   "kind": "book",
+   "ia_identifier": "ace-f-171-edgar-rice-burroughs-tanar-of-pellucidar-gorgon-776",
+   "magazine": "Tanar Of Pellucidar",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tarzan_and_the_leopard_men_1932_leopardmen": {
+   "kind": "book",
+   "ia_identifier": "TarzanAndTheLeopardMen",
+   "magazine": "Tarzan and the Leopard Men",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "terror_rides_the_range_by_al_1953_953aced008": {
+   "kind": "book",
+   "ia_identifier": "allan-k-echols-terror-rides-the-range-1953-ace-d-008",
+   "magazine": "Terror Rides The Range by Allan K Echols",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "texas_gun_law_by_murray_lein_1949_gunlaw1949": {
+   "kind": "book",
+   "ia_identifier": "murray-leinster-texas-gun-law-1949",
+   "magazine": "Texas Gun-Law by Murray Leinster",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_adventure_library_1926_hepole1926": {
+   "kind": "book",
+   "ia_identifier": "TheAdventureLibraryNo.144CookWilliamWallaceCastAwayAtThePole1926",
+   "magazine": "The Adventure Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_adventures_of_the_advent_1890_dnerco1890": {
+   "kind": "book",
+   "ia_identifier": "anonymous-the-adventures-of-the-adventurers-club-gardner-co.-1890",
+   "magazine": "The Adventures Of The Adventurers' Club - Anonymous (Gardner & Co.",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_aldine_boys_first_rate_p_1900_ryn3941900": {
+   "kind": "book",
+   "ia_identifier": "the-aldine-boys-first-rate-pocket-library-n-394-1900",
+   "magazine": "The Aldine Boys' First-Rate Pocket Library n394",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_aldine_boys_first_rate_p_1901_1ufikusdpp_25d3cef7e9f9": {
+   "kind": "book",
+   "ia_identifier": "the-aldine-boys-first-rate-pocket-library-n-401-1901-ufikus-dpp",
+   "magazine": "The Aldine Boys' First-Rate Pocket Library n401",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_aldine_boys_first_rate_p_1901_1ufikusdpp_e7b49cb24aac": {
+   "kind": "book",
+   "ia_identifier": "the-aldine-boys-first-rate-pocket-library-n-405-1901-ufikus-dpp",
+   "magazine": "The Aldine Boys' First-Rate Pocket Library n405",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_aldine_o_er_land_and_sea_1890_ary0011890": {
+   "kind": "book",
+   "ia_identifier": "the-aldine-oer-land-and-sea-library-001-1890",
+   "magazine": "The Aldine \"O'er Land And Sea\" Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_aldine_o_er_land_and_sea_1890_ary0111890": {
+   "kind": "book",
+   "ia_identifier": "the-aldine-oer-land-and-sea-library-011-1890",
+   "magazine": "The Aldine \"O'er Land And Sea\" Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_aldine_o_er_land_and_sea_1892_ary0941892": {
+   "kind": "book",
+   "ia_identifier": "the-aldine-oer-land-and-sea-library-094-1892",
+   "magazine": "The Aldine \"O'er Land And Sea\" Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_aldine_romance_of_invent_1894_library008": {
+   "kind": "book",
+   "ia_identifier": "TheAldineLibrary008",
+   "magazine": "The Aldine Romance Of Invention, Travel, & Adventure Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_aldine_romance_of_invent_undated_library196": {
+   "kind": "book",
+   "ia_identifier": "TheAldineLibrary196",
+   "magazine": "The Aldine Romance Of Invention, Travel, & Adventure Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_ant_men_1955_nericnorth": {
+   "kind": "book",
+   "ia_identifier": "The_Ant_Men_1955.Winston_Eric_North",
+   "magazine": "The Ant Men",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_beechcourt_mystery_carlt_1894_newnes1894": {
+   "kind": "book",
+   "ia_identifier": "strange-carlton-the-beechcourt-mystery-george-newnes-1894",
+   "magazine": "The Beechcourt Mystery - Carlton Strange [pseud.] (George Newnes",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_big_bow_mystery_israel_z_1895_bowden1895": {
+   "kind": "book",
+   "ia_identifier": "zangwill-israel-the-big-bow-mystery-ward-lock-bowden-1895",
+   "magazine": "The Big Bow Mystery - Israel Zangwill (Ward, Lock & Bowden",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_black_bloodhound_by_farn_1927_kblood1927": {
+   "kind": "book",
+   "ia_identifier": "bishop-black-blood-1927",
+   "magazine": "The Black Bloodhound, by Farnham Bishop",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_bloodcurdling_bookends_o_undated_sdegrandin": {
+   "kind": "book",
+   "ia_identifier": "The_Bloodcurdling_Bookends_of_Jules_de_Grandin",
+   "magazine": "The Bloodcurdling Bookends of Jules de Grandin",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_border_bandit_1948_bandit1948": {
+   "kind": "book",
+   "ia_identifier": "evan-evans-the-border-bandit-1948",
+   "magazine": "The Border Bandit",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_boys_friend_1910_10_ngminotaur": {
+   "kind": "book",
+   "ia_identifier": "boysfriend4871910oct8piecemissingminotaur",
+   "magazine": "The Boys' Friend",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_boys_magazine_1932_03_305bogof39": {
+   "kind": "book",
+   "ia_identifier": "boys-magazine-v-020n-522-1932-03-05-bogof-39",
+   "magazine": "The Boys' Magazine",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_boys_magazine_undated_9340120620": {
+   "kind": "book",
+   "ia_identifier": "boys-magazine-1934-01-20-620",
+   "magazine": "The Boys' Magazine",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_bridge_of_light_a_hyatt__1950_ypress1950": {
+   "kind": "book",
+   "ia_identifier": "verrill-a.-hyatt-the-bridge-of-light-fantasy-press-1950",
+   "magazine": "The Bridge Of Light - A. Hyatt Verrill (Fantasy Press",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_complete_sherlock_holmes_1891_holmesvol2": {
+   "kind": "book",
+   "ia_identifier": "doylecompletesherlockholmesvol2",
+   "magazine": "The Complete Sherlock Holmes",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_crime_and_the_criminal_r_1901_olycus0152": {
+   "kind": "book",
+   "ia_identifier": "marsh-richard-the-crime-and-the-criminal-new-amsterdam-book-co.-1901-google-autolycus-0152",
+   "magazine": "The Crime And The Criminal - Richard Marsh (New Amsterdam Book Co.",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_devil_s_signature_by_a_e_1908_06_heneberger": {
+   "kind": "book",
+   "ia_identifier": "TheDevilsSignatureByA.EllisHeneberger",
+   "magazine": "The Devil's Signature By A. Ellis Heneberger",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_face_in_the_abyss_a_merr_1931_dition1931": {
+   "kind": "book",
+   "ia_identifier": "TheFaceInTheAbyssFirstEdition1931",
+   "magazine": "The Face In The Abyss - A. Merritt",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_firebrand_from_burnt_cre_1940_tcreek1940": {
+   "kind": "book",
+   "ia_identifier": "frank-c-robertson-the-firebrand-from-burnt-creek-1940",
+   "magazine": "The Firebrand From Burnt Creek by Frank C Robertson",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_frisco_man_1920_01_oman192001": {
+   "kind": "book",
+   "ia_identifier": "The_Frisco_Man_1920_01",
+   "magazine": "The Frisco Man",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_ghost_strikes_back_1940_trikesback": {
+   "kind": "book",
+   "ia_identifier": "the-ghost-strikes-back",
+   "magazine": "The Ghost Strikes Back",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_great_ones_jon_j_deegan__1953_ganbogof39": {
+   "kind": "book",
+   "ia_identifier": "TheGreatOnesJonJDeeganBogof39",
+   "magazine": "The Great Ones - Jon J. Deegan (Panther",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_halfpenny_marvel_1895_12_0918951203": {
+   "kind": "book",
+   "ia_identifier": "the-halfpenny-marvel-v-05n-109-1895-12-03",
+   "magazine": "The Halfpenny Marvel",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_halfpenny_standard_journ_1897_03_charlesfox": {
+   "kind": "book",
+   "ia_identifier": "TheHalfpennyStandardJournal05218970303.CharlesFox",
+   "magazine": "The Halfpenny Standard Journal",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_halfpenny_surprise_1895_03_2018950315": {
+   "kind": "book",
+   "ia_identifier": "the-halfpenny-surprise-v-01n-20-1895-03-15",
+   "magazine": "The Halfpenny Surprise",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_hatch_way_1937_way1937sas": {
+   "kind": "book",
+   "ia_identifier": "eric-hatch-the-hatch-way-1937-sas",
+   "magazine": "The Hatch Way",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_heads_of_cerberus_by_fra_1919_cisstevens": {
+   "kind": "book",
+   "ia_identifier": "the-heads-of-cerberus-francis-stevens",
+   "magazine": "The Heads Of Cerberus by Francis Stevens",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_house_of_hammer_undated_wolloxedit_fd89d4bfba34": {
+   "kind": "book",
+   "ia_identifier": "The_House_of_Hammer_003_BollywolloxEdit",
+   "magazine": "The House of Hammer",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_human_pets_of_mars_1936_10_petsofmars": {
+   "kind": "book",
+   "ia_identifier": "TheHumanPetsOfMars",
+   "magazine": "The Human Pets of Mars",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_immortal_storm_a_history_1954_owitzsipdf": {
+   "kind": "book",
+   "ia_identifier": "The_Immortal_Storm_A_History_of_Science_Fiction_Fandom_1954_Sam_Moskowitz_siPDF",
+   "magazine": "The Immortal Storm A History of Science Fiction Fandom",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_iron_virgin_james_m_fox__1953_ell7191953": {
+   "kind": "book",
+   "ia_identifier": "jamesm.foxtheironvirgindell7191953",
+   "magazine": "The Iron Virgin - James M. Fox (Dell",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_land_of_the_hidden_men_1931_ngorgon776": {
+   "kind": "book",
+   "ia_identifier": "ace-f-232-edgar-rice-burroughs-the-land-of-the-hidden-men-gorgon-776",
+   "magazine": "The Land Of The Hidden Men",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_last_stroke_a_detective__1897_rdlock1897": {
+   "kind": "book",
+   "ia_identifier": "lynch-lawrence-l.-the-last-stroke-a-detective-story-ward-lock-1897",
+   "magazine": "The Last Stroke: A Detective Story - Lawrence L. Lynch",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_little_tales_of_smethers_1952_ethers1952": {
+   "kind": "book",
+   "ia_identifier": "dunsanylordthelittletalesofsmethers1952",
+   "magazine": "The Little Tales Of Smethers And Other Stories - Lord Dunsany",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_lone_ranger_traps_the_sm_1941_anger71941": {
+   "kind": "book",
+   "ia_identifier": "striker-lone-ranger-7-1941",
+   "magazine": "The Lone Ranger Traps the Smugglers",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_long_arm_of_the_mounted__1948_ounted1948": {
+   "kind": "book",
+   "ia_identifier": "MoweryWilliamByronTheLongArmOfTheMounted1948",
+   "magazine": "The Long Arm Of The Mounted - William Byron Mowery",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_love_pulps_thomas_h_uzze_1938_04_ners193804": {
+   "kind": "book",
+   "ia_identifier": "uzzellthomash.thelovepulpsarticlefromscribners193804",
+   "magazine": "The Love Pulps - Thomas H. Uzzell [article from Scribner's",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_lovecraft_collectors_lib_1952_essays1952": {
+   "kind": "book",
+   "ia_identifier": "WetzelGeorgeed.TheLovecraftCollectorsLibraryVolumeISelectedEssays1952",
+   "magazine": "The Lovecraft Collectors Library, Volume I: Selected Essays - Edited by George Wetzel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_lovecraft_collectors_lib_1953_essays1953": {
+   "kind": "book",
+   "ia_identifier": "WetzelGeorgeed.TheLovecraftCollectorsLibraryVolumeIISelectedEssays1953",
+   "magazine": "The Lovecraft Collectors Library, Volume II: Selected Essays - Edited by George Wetzel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_lovecraft_collectors_lib_1953_poetry1953": {
+   "kind": "book",
+   "ia_identifier": "WetzelGeorgeed.TheLovecraftCollectorsLibraryVolumeIIISelectedPoetry1953",
+   "magazine": "The Lovecraft Collectors Library, Volume III: Selected Poetry - Edited by George Wetzel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_lovecraft_collectors_lib_1955_aphies1955": {
+   "kind": "book",
+   "ia_identifier": "WetzelGeorgeed.TheLovecraftCollectorsLibraryVolumeVIIBibliographies1955",
+   "magazine": "The Lovecraft Collectors Library, Volume VII: Bibliographies - Edited by George Wetzel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_lovecraft_collectors_lib_1955_nalist1955": {
+   "kind": "book",
+   "ia_identifier": "WetzelGeorgeed.TheLovecraftCollectorsLibraryVolumeVTheAmateurJournalist1955",
+   "magazine": "The Lovecraft Collectors Library, Volume V: The Amateur Journalist - Edited by George Wetzel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_lovecraft_collectors_lib_1955_poetry1955": {
+   "kind": "book",
+   "ia_identifier": "WetzelGeorgeed.TheLovecraftCollectorsLibraryVolumeIVSelectedPoetry1955",
+   "magazine": "The Lovecraft Collectors Library, Volume IV: Selected Poetry - Edited by George Wetzel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_lovecraft_collectors_lib_1955_taries1955": {
+   "kind": "book",
+   "ia_identifier": "WetzelGeorgeed.TheLovecraftCollectorsLibraryVolumeVICommentaries1955",
+   "magazine": "The Lovecraft Collectors Library, Volume VI: Commentaries - Edited by George Wetzel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_man_who_saved_the_earth_undated_edtheearth": {
+   "kind": "book",
+   "ia_identifier": "TheManWhoSavedTheEarth",
+   "magazine": "The Man Who Saved the Earth",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_modern_boy_1928_03_0619280317": {
+   "kind": "book",
+   "ia_identifier": "themodernboyv01n00619280317",
+   "magazine": "The Modern Boy",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_modern_boy_1928_05_05minotaur": {
+   "kind": "book",
+   "ia_identifier": "themodernboyv01n01319280505minotaur",
+   "magazine": "The Modern Boy",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_modern_boy_1928_05_12minotaur": {
+   "kind": "book",
+   "ia_identifier": "themodernboyv01n01419280512minotaur",
+   "magazine": "The Modern Boy",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_modern_boy_1928_11_4119281117": {
+   "kind": "book",
+   "ia_identifier": "themodernboyv02n04119281117",
+   "magazine": "The Modern Boy",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_modern_boy_1932_12_5519321224": {
+   "kind": "book",
+   "ia_identifier": "themodernboyv10n25519321224",
+   "magazine": "The Modern Boy",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_modern_boy_1934_12_15minotaur": {
+   "kind": "book",
+   "ia_identifier": "themodernboyv14n35819341215minotaur",
+   "magazine": "The Modern Boy",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_new_york_detective_libra_1890_11_1618901115": {
+   "kind": "book",
+   "ia_identifier": "the-new-york-detective-library-v-01n-416-1890-11-15",
+   "magazine": "The New York Detective Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_original_mr_ed_the_talki_undated_e16stories": {
+   "kind": "book",
+   "ia_identifier": "brookswaltertheoriginalmr.edthetalkinghorse16stories",
+   "magazine": "The Original Mr. Ed, The Talking Horse: A Compilation Of 16 Stories - Walter Brooks",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_outlaw_brand_by_william__1940_lclassic87": {
+   "kind": "book",
+   "ia_identifier": "william-j-craig-the-outlaw-brand-western-novel-classic-87",
+   "magazine": "The Outlaw Brand by William J Craig",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_phantom_rickshaw_and_oth_1890_heeler1890": {
+   "kind": "book",
+   "ia_identifier": "kipling-rudyard-the-phantom-rickshaw-and-other-eerie-tales-a.-h.-wheeler-1890",
+   "magazine": "The Phantom 'Rickshaw And Other Eerie Tales - Rudyard Kipling (A. H. Wheeler",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_plattner_story_and_other_1897_ethuen1897": {
+   "kind": "book",
+   "ia_identifier": "wells-h.-g.-the-plattner-story-and-others-methuen-1897",
+   "magazine": "The Plattner Story And Others - H. G. Wells (Methuen",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_red_raven_library_1905_02_0419050204": {
+   "kind": "book",
+   "ia_identifier": "TheRedRavenLibrary0419050204",
+   "magazine": "The Red Raven Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_red_raven_library_1905_03_0819050304": {
+   "kind": "book",
+   "ia_identifier": "TheRedRavenLibrary0819050304",
+   "magazine": "The Red Raven Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_red_raven_library_1905_06_2119050603": {
+   "kind": "book",
+   "ia_identifier": "TheRedRavenLibrary2119050603",
+   "magazine": "The Red Raven Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_revolt_of_the_star_men_undated_thestarmen": {
+   "kind": "book",
+   "ia_identifier": "TheRevoltOfTheStarMen",
+   "magazine": "The Revolt of the Star Men",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_rogue_by_richard_sale_1938_erogue1938": {
+   "kind": "book",
+   "ia_identifier": "sale-the-rogue-1938",
+   "magazine": "The Rogue, by Richard Sale",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_rover_1940_03_3319400302": {
+   "kind": "book",
+   "ia_identifier": "the-rover-0933-1940-03-02",
+   "magazine": "The Rover",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_rover_1940_06_5019400629": {
+   "kind": "book",
+   "ia_identifier": "the-rover-0950-1940-06-29",
+   "magazine": "The Rover",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_scarlet_scourge_1925_letscourge": {
+   "kind": "book",
+   "ia_identifier": "TheScarletScourge",
+   "magazine": "The Scarlet Scourge",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_science_fiction_galaxy_e_1950_rmap671950": {
+   "kind": "book",
+   "ia_identifier": "conklin-groff-the-science-fiction-galaxy-perma-p-67-1950",
+   "magazine": "The Science Fiction Galaxy - Edited by Groff Conklin",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_sexton_blake_library_s1_1919_05_905bogof39": {
+   "kind": "book",
+   "ia_identifier": "SextonBlakeLibraryS1076191905Bogof39",
+   "magazine": "The Sexton Blake Library S1",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_sexton_blake_library_s1_1920_10_0bogof39bw": {
+   "kind": "book",
+   "ia_identifier": "SextonBlakeLibraryS1145192010Bogof39Bw",
+   "magazine": "The Sexton Blake Library S1",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_sexton_blake_library_s1_1921_11_111bogof39": {
+   "kind": "book",
+   "ia_identifier": "SextonBlakeLibraryS1198192111Bogof39",
+   "magazine": "The Sexton Blake Library S1",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_sexton_blake_library_s1_1922_01_1208192201": {
+   "kind": "book",
+   "ia_identifier": "SextonBlakeLibraryS1208192201",
+   "magazine": "The Sexton Blake Library S1",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_sexton_blake_library_s1_1922_06_206bogof39": {
+   "kind": "book",
+   "ia_identifier": "SextonBlakeLibraryS1236192206Bogof39",
+   "magazine": "The Sexton Blake Library S1",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_sexton_blake_library_s3_1943_08_308bogof39": {
+   "kind": "book",
+   "ia_identifier": "SextonBlakeLibraryS3054194308Bogof39",
+   "magazine": "The Sexton Blake Library S3",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_shadow_1931_vingshadow": {
+   "kind": "book",
+   "ia_identifier": "the-shadow-1-the-living-shadow",
+   "magazine": "The Shadow",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_shadow_destination_moon_undated_nationmoon": {
+   "kind": "book",
+   "ia_identifier": "the-shadow-destination-moon",
+   "magazine": "The Shadow Destination Moon",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_shadow_knows_undated_nows202208": {
+   "kind": "book",
+   "ia_identifier": "the-shadow-knows_202208",
+   "magazine": "The Shadow Knows",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_shadow_strikes_undated_dowstrikes": {
+   "kind": "book",
+   "ia_identifier": "the-shadow-strikes",
+   "magazine": "The Shadow Strikes",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_shawnee_witch_1908_ewitch1908": {
+   "kind": "book",
+   "ia_identifier": "the-shawnee-witch-1908",
+   "magazine": "The Shawnee Witch",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_shining_mountains_by_dal_1952_levanevery": {
+   "kind": "book",
+   "ia_identifier": "the-shining-mountains-by-dale-van-every",
+   "magazine": "The Shining Mountains By Dale Van Every",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_ship_of_ishtar_memorial__1949_olycus0152": {
+   "kind": "book",
+   "ia_identifier": "merritt-a.-the-ship-of-ishtar-memorial-edition-1949-google-autolycus-0152",
+   "magazine": "The Ship Of Ishtar (Memorial Edition) - A. Merritt (Illustrated by Virgil Finlay) (Borden",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_stolen_bacillus_and_othe_1895_ethuen1895": {
+   "kind": "book",
+   "ia_identifier": "wells-h.-g.-the-stolen-bacillus-and-other-incidents-methuen-1895",
+   "magazine": "The Stolen Bacillus And Other Incidents - H. G. Wells (Methuen",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_tatler_1921_02_lerfeb1921": {
+   "kind": "book",
+   "ia_identifier": "TheTatlerFeb.1921",
+   "magazine": "The Tatler",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_tatler_1922_08_august1922": {
+   "kind": "book",
+   "ia_identifier": "TatlerAugust1922",
+   "magazine": "The Tatler",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_tenderfoot_1948_erfoot1948": {
+   "kind": "book",
+   "ia_identifier": "w-h-b-kent-the-tenderfoot-1948",
+   "magazine": "The Tenderfoot",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_thirty_nine_steps_john_b_1915_08_johnbuchan": {
+   "kind": "book",
+   "ia_identifier": "TheThirtyNineStepsJohnBuchan",
+   "magazine": "The Thirty Nine Steps John Buchan",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_vanguard_of_venus_landel_1928_fvenus1928": {
+   "kind": "book",
+   "ia_identifier": "BartlettLandellTheVanguardOfVenus1928",
+   "magazine": "The Vanguard Of Venus - Landell Bartlett",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_western_novel_classic_be_1941_earpaw1941": {
+   "kind": "book",
+   "ia_identifier": "the-western-novel-classic-bear-paw-1941",
+   "magazine": "The Western Novel Classic: Bear Paw by Dane Coolidge",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_wheel_of_love_lillian_ba_1933_olycus0152": {
+   "kind": "book",
+   "ia_identifier": "barker-lillian-the-wheel-of-love-chelsea-house-1933-google-autolycus-0152",
+   "magazine": "The Wheel Of Love - Lillian Barker (Chelsea House",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "the_whirlpool_1913_04_ewhirlpool": {
+   "kind": "book",
+   "ia_identifier": "ingram-the-whirlpool",
+   "magazine": "The Whirlpool",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "the_wolf_men_a_tale_of_amazi_1911_sellca1911": {
+   "kind": "book",
+   "ia_identifier": "powell-frank-the-wolf-men-cassell-ca.-1911",
+   "magazine": "The Wolf-Men: A Tale Of Amazing Adventure In The Under-World - Frank Powell (Cassell, ca.",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "thegraynemesisebook_undated_mesisebook": {
+   "kind": "book",
+   "ia_identifier": "Thegraynemesisebook",
+   "magazine": "Thegraynemesisebook",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "thia_of_the_drylands_undated_hedrylands": {
+   "kind": "book",
+   "ia_identifier": "ThiaOfTheDrylands",
+   "magazine": "Thia of the Drylands",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "thrills_incorporated_undated_porated005": {
+   "kind": "book",
+   "ia_identifier": "thrills_incorporated_005",
+   "magazine": "Thrills Incorporated",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tiger_river_an_adventure_ser_1922_l1922fixed": {
+   "kind": "book",
+   "ia_identifier": "FrielArthurO.TigerRiverAnAdventureSerial1922FIXED",
+   "magazine": "Tiger River: An Adventure Serial - Arthur O. Friel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "time_for_murder_undated_rmurder542": {
+   "kind": "book",
+   "ia_identifier": "TimeForMurder_542",
+   "magazine": "Time for Murder",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tip_top_library_1896_10_etandsmith": {
+   "kind": "book",
+   "ia_identifier": "Tip_Top_Library_v01n28_1896-10-24.Street_and_Smith",
+   "magazine": "Tip Top Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "tip_top_library_1897_01_wbgsu12445": {
+   "kind": "book",
+   "ia_identifier": "tip-top-library-v-01n-038-1897-01-02.-street-smith-frank-merriwell-in-the-south-seas-b-w-bgsu-12445",
+   "magazine": "Tip Top Library",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "tip_top_weekly_1896_08_wbgsu12393": {
+   "kind": "book",
+   "ia_identifier": "tip-top-weekly-017-1896-08-08.-street-smith-frank-merriwell-in-mexico-b-w-bgsu-12393",
+   "magazine": "Tip Top Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "tip_top_weekly_1897_04_wbgsu12441": {
+   "kind": "book",
+   "ia_identifier": "tip-top-weekly-052-1897-04-10.-street-smith-frank-merriwells-dash-b-w-bgsu-12441",
+   "magazine": "Tip Top Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "tip_top_weekly_1897_06_wbgsu12434": {
+   "kind": "book",
+   "ia_identifier": "tip-top-weekly-061-1897-06-12.-street-smith-frank-merriwell-in-the-mines-b-w-bgsu-12434",
+   "magazine": "Tip Top Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "tip_top_weekly_1897_10_wbgsu12437": {
+   "kind": "book",
+   "ia_identifier": "tip-top-weekly-080-1897-10-23.-street-smith-frank-merriwell-as-anchor-b-w-bgsu-12437",
+   "magazine": "Tip Top Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "tip_top_weekly_1898_05_wbgsu12431": {
+   "kind": "book",
+   "ia_identifier": "tip-top-weekly-110-1898-05-21.-street-smith-frank-merriwells-catch-b-w-bgsu-12431",
+   "magazine": "Tip Top Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "tip_top_weekly_1898_07_wbgsu12443": {
+   "kind": "book",
+   "ia_identifier": "tip-top-weekly-118-1898-07-16.-street-smith-frank-merriwell-engine-wiper-b-w-bgsu-12443",
+   "magazine": "Tip Top Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "tip_top_weekly_1898_12_wbgsu12407": {
+   "kind": "book",
+   "ia_identifier": "tip-top-weekly-139-1898-12-10.-street-smith-frank-merriwells-father-b-w-bgsu-12407",
+   "magazine": "Tip Top Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "tit_bits_crime_fiction_libra_1954_psebogof39": {
+   "kind": "book",
+   "ia_identifier": "TitBitsCrimeFictionLibraryMurderMakesTheCorpseBogof39",
+   "magazine": "Tit-Bits Crime Fiction Library: Murder Makes The Corpse - Sean Gregory",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tit_bits_science_fiction_lib_1953_ersbogof39": {
+   "kind": "book",
+   "ia_identifier": "TitBitsSFLibraryTheStarSeekersBogof39",
+   "magazine": "Tit-Bits Science Fiction Library: The Star Seekers - Francis G. Rayer",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tit_bits_science_fiction_lib_1953_uitbogof39": {
+   "kind": "book",
+   "ia_identifier": "TitBitsSFLibraryTheHellFruitBogof39",
+   "magazine": "Tit-Bits Science Fiction Library: The Hell Fruit - Lawrence F. Rose",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tit_bits_science_fiction_lib_1954_954bogof39_4c4ff374c6a8": {
+   "kind": "book",
+   "ia_identifier": "TitBitsSFLibraryTheDissentizens1954Bogof39",
+   "magazine": "Tit-Bits Science Fiction Library: The Dissentizens - Bruno G. Condray",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tit_bits_science_fiction_lib_1954_954bogof39_8d3d3a3a2c2a": {
+   "kind": "book",
+   "ia_identifier": "TitBitsSFLibraryJupiterEquilateral1954Bogof39",
+   "magazine": "Tit-Bits Science Fiction Library: Jupiter Equilateral [Space Puppet 02] - John Rackham",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tit_bits_science_fiction_lib_1954_eedbogof39": {
+   "kind": "book",
+   "ia_identifier": "TitBitsSFLibraryTheMasterWeedBogof39",
+   "magazine": "Tit-Bits Science Fiction Library: The Master Weed - John Rackham",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tit_bits_science_fiction_lib_1954_masterweed": {
+   "kind": "book",
+   "ia_identifier": "TitBitsSFLibraryTheMasterWeed",
+   "magazine": "Tit-Bits Science Fiction Library: The Master Weed [Space Puppet 03] - John Rackham",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tit_bits_science_fiction_lib_1954_petbogof39": {
+   "kind": "book",
+   "ia_identifier": "TitBitsSFLibrarySpacePuppetBogof39",
+   "magazine": "Tit-Bits Science Fiction Library: Space Puppet [Space Puppet 01] - John Rackham",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tit_bits_science_fiction_lib_1955_955bogof39_5f97889a2d3c": {
+   "kind": "book",
+   "ia_identifier": "tit-bits-sf-library-exile-from-jupiter-1955-bogof-39",
+   "magazine": "Tit-Bits Science Fiction Library: Exile From Jupiter - Bruno G. Condray",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tit_bits_science_fiction_lib_1955_955bogof39_b7cbfbe5768f": {
+   "kind": "book",
+   "ia_identifier": "TitBitsSFLibraryDimensionOfIllion1955Bogof39",
+   "magazine": "Tit-Bits Science Fiction Library: Dimension Of Illion - Irving Heine",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tit_bits_science_fiction_lib_1955_nvirus1955": {
+   "kind": "book",
+   "ia_identifier": "JohnRackhamAlienVirus1955",
+   "magazine": "Tit-Bits Science Fiction Library: Alien Virus [Space Puppet 04] - John Rackham",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tomorrow_on_the_march_a_e_va_1946_07_hjuly41946": {
+   "kind": "book",
+   "ia_identifier": "van-vogt-a.-e.-tomorrow-on-the-march-pacificon-goh-speech-july-4-1946",
+   "magazine": "Tomorrow On The March - A. E. van Vogt (Pacificon GOH speech",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "trigger_vengeance_by_john_tr_1940_lclassic76": {
+   "kind": "book",
+   "ia_identifier": "john-trace-trigger-vengeance-western-novel-classic-76",
+   "magazine": "Trigger Vengeance by John Trace",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "tropical_passions_1950_von2551950": {
+   "kind": "book",
+   "ia_identifier": "tropical-passions-avon-255-1950",
+   "magazine": "Tropical Passions",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "true_romances_magazine_1936__1936_07_es20260413": {
+   "kind": "book",
+   "ia_identifier": "images_20260413",
+   "magazine": "True Romances magazine 1936_07JUL",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "uncanny_tales_1940_11_ales194011": {
+   "kind": "book",
+   "ia_identifier": "Uncanny_Tales_1940-11",
+   "magazine": "Uncanny Tales",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "uncanny_tales_november_1940_11_194011adam": {
+   "kind": "book",
+   "ia_identifier": "Uncanny_Tales_1940-11.Adam",
+   "magazine": "Uncanny Tales (November",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "underworld_of_zello_jon_j_de_1952_ganbogof39": {
+   "kind": "book",
+   "ia_identifier": "UnderworldOfZelloJonJDeeganBogof39",
+   "magazine": "Underworld Of Zello - Jon J. Deegan",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "vandals_of_the_void_1953_njackvance": {
+   "kind": "book",
+   "ia_identifier": "Vandals_of_the_Void_1953.Winston_-Jack_Vance",
+   "magazine": "Vandals of the Void",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "verdict_1953_07_ctjuly1953": {
+   "kind": "book",
+   "ia_identifier": "VerdictJuly1953",
+   "magazine": "Verdict",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "vicki_baum_once_in_vienna_1945_vienna1945": {
+   "kind": "book",
+   "ia_identifier": "dell-524-vicki-baum-once-in-vienna-1945",
+   "magazine": "Vicki Baum - Once In Vienna",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "villains_galore_the_heyday_o_1954_olycus0152": {
+   "kind": "book",
+   "ia_identifier": "noel-mary-villains-galore-1954-autolycus-0152",
+   "magazine": "Villains Galore: The Heyday Of The Popular Story Weekly - Mary Noel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "w_r_burnett_iron_man_1930_ronman1930": {
+   "kind": "book",
+   "ia_identifier": "w.-r.-burnett-iron-man-1930",
+   "magazine": "W. R. Burnett - Iron Man",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "walk_on_the_water_1952_eridge1952": {
+   "kind": "book",
+   "ia_identifier": "walk-on-the-water-signet-ralph-leveridge-1952",
+   "magazine": "Walk On The Water",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "walker_of_the_secret_service_1924_4zpexciter": {
+   "kind": "book",
+   "ia_identifier": "postmelvilledavissonwalkerofthesecretservice1924zpexciter",
+   "magazine": "Walker Of The Secret Service - Melville Davisson Post",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "war_stories_from_the_america_1906_canboy1906": {
+   "kind": "book",
+   "ia_identifier": "sprague-william-c.-ed-war-stories-from-the-american-boy-1906",
+   "magazine": "War Stories From ''The American Boy''",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "week_end_novels_undated_9240802247": {
+   "kind": "book",
+   "ia_identifier": "week-end-novels-1924-08-02-247",
+   "magazine": "Week End Novels",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "weird_tales_1923_03_production": {
+   "kind": "book",
+   "ia_identifier": "Weird_Tales_v01n01_1923-03_story_reproduction",
+   "magazine": "Weird Tales",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "weird_tales_leo_margulies_undated_nnysamouse": {
+   "kind": "book",
+   "ia_identifier": "Weird_Tales_Leo_Margulies_LennyS-aMouse",
+   "magazine": "Weird Tales Leo Margulies",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "weird_tales_serial_drome_joh_1927_drome": {
+   "kind": "book",
+   "ia_identifier": "Drome",
+   "magazine": "Weird Tales Serial: Drome - John Martin Leahy",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "weird_tales_serial_the_bat_m_1928_nofthorium": {
+   "kind": "book",
+   "ia_identifier": "BatMenOfThorium",
+   "magazine": "Weird Tales Serial: The Bat-Men Of Thorium - Bertram Russell",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "weirdtales_degrandin_firstla_undated_nfirstlast": {
+   "kind": "book",
+   "ia_identifier": "WeirdTales_deGrandin_FirstLast",
+   "magazine": "WeirdTales deGrandin FirstLast",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "western_movie_cowboy_heroes__undated_bookformat": {
+   "kind": "book",
+   "ia_identifier": "WesternMovieCowboysHeroesInShortStoryAndBookFormat",
+   "magazine": "Western Movie Cowboy Heroes in Short Story and Book Format",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "western_roundup_arnold_hano__1948_tam2561948": {
+   "kind": "book",
+   "ia_identifier": "hano-arnold-ed.-western-roundup-bantam-256-1948",
+   "magazine": "Western Roundup! - Arnold Hano (ed.) (Bantam 256",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "western_stories_gene_autry_e_1947_ell1531947": {
+   "kind": "book",
+   "ia_identifier": "autry-gene-ed.-western-stories-dell-153-1947",
+   "magazine": "Western Stories - Gene Autry (ed.) (Dell 153",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "whipple_chandler_under_the_m_1947_947exciter": {
+   "kind": "book",
+   "ia_identifier": "WhippleChandlerUnderTheMesaRimFightingWesternNovel02ca.1947EXciter",
+   "magazine": "Whipple, Chandler - Under The Mesa Rim (Fighting Western Novel",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "why_get_married_token_west_1949_arwination": {
+   "kind": "book",
+   "ia_identifier": "why-get-married-token-west-1949.-red-circle-12-darwination",
+   "magazine": "Why Get Married? - Token West",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "wild_is_the_river_by_louis_b_1951_sbromfield": {
+   "kind": "book",
+   "ia_identifier": "wild-is-the-river-by-louis-bromfield",
+   "magazine": "Wild Is The River By Louis Bromfield",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "wild_west_weekly_1907_12_1227tousey": {
+   "kind": "book",
+   "ia_identifier": "Wild_West_Weekly_-_271_1907-12-27.Tousey",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_1918_06_ly19180621": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-1918-06-21",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_1929_11_0toc202409": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-v-045-n-06-1929-11-23-covers-pp-109-110-toc_202409",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "wild_west_weekly_1934_11_0119341110": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-v-089-n-01-1934-11-10",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "wild_west_weekly_1937_02_0213202011": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-v-108-n-05-1937-02-13_202011",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "wild_west_weekly_1940_03_0619400330": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-v-135-n-06-1940-03-30",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "wild_west_weekly_n0074_1904_03_7419040318": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0074-1904-03-18",
+   "magazine": "Wild West Weekly n0074",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0113_1904_12_1319041216": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0113-1904-12-16",
+   "magazine": "Wild West Weekly n0113",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0155_1905_10_5519051006": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0155-1905-10-06",
+   "magazine": "Wild West Weekly n0155",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0212_1906_11_1219061109": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0212-1906-11-09",
+   "magazine": "Wild West Weekly n0212",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0252_1907_08_5219070816": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0252-1907-08-16",
+   "magazine": "Wild West Weekly n0252",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0255_1907_09_5519070906": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0255-1907-09-06",
+   "magazine": "Wild West Weekly n0255",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0365_1909_10_6519091015": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0365-1909-10-15",
+   "magazine": "Wild West Weekly n0365",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0371_1909_11_7119091126": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0371-1909-11-26",
+   "magazine": "Wild West Weekly n0371",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0451_1911_06_5119110609": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0451-1911-06-09",
+   "magazine": "Wild West Weekly n0451",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0716_1916_07_1619160707": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0716-1916-07-07",
+   "magazine": "Wild West Weekly n0716",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0740_1916_12_4019161222": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0740-1916-12-22",
+   "magazine": "Wild West Weekly n0740",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0749_1917_02_4919170223": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0749-1917-02-23",
+   "magazine": "Wild West Weekly n0749",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0757_1917_04_5719170420": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0757-1917-04-20",
+   "magazine": "Wild West Weekly n0757",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0800_1918_02_0019180215": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0800-1918-02-15",
+   "magazine": "Wild West Weekly n0800",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0807_1918_02_0119180222": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0801-1918-02-22",
+   "magazine": "Wild West Weekly n0807",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0812_1918_05_1219180510": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0812-1918-05-10",
+   "magazine": "Wild West Weekly n0812",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0833_1918_10_3319181004": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0833-1918-10-04",
+   "magazine": "Wild West Weekly n0833",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0841_1918_11_4119181129": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0841-1918-11-29",
+   "magazine": "Wild West Weekly n0841",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0842_1918_12_4219181206": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0842-1918-12-06",
+   "magazine": "Wild West Weekly n0842",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0846_1919_01_4619190103": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0846-1919-01-03",
+   "magazine": "Wild West Weekly n0846",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0847_1919_01_4719190110": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0847-1919-01-10",
+   "magazine": "Wild West Weekly n0847",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0848_1919_01_4819190117": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0848-1919-01-17",
+   "magazine": "Wild West Weekly n0848",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0890_1919_11_9019191107": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0890-1919-11-07",
+   "magazine": "Wild West Weekly n0890",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0892_1919_11_9219191121": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0892-1919-11-21",
+   "magazine": "Wild West Weekly n0892",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0963_1921_04_6319210401": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0963-1921-04-01",
+   "magazine": "Wild West Weekly n0963",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n0980_1921_07_8019210729": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0980-1921-07-29",
+   "magazine": "Wild West Weekly n0980",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n1006_1922_01_0619220127": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-1006-1922-01-27",
+   "magazine": "Wild West Weekly n1006",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n1054_1922_12_5419221229": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-1054-1922-12-29",
+   "magazine": "Wild West Weekly n1054",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n1055_1923_01_5519230105": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-1055-1923-01-05",
+   "magazine": "Wild West Weekly n1055",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n1080_1923_06_8019230629": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-1080-1923-06-29",
+   "magazine": "Wild West Weekly n1080",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n1110_1924_01_1019240125": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-1110-1924-01-25",
+   "magazine": "Wild West Weekly n1110",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n1162_1925_01_6219250123": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-1162-1925-01-23",
+   "magazine": "Wild West Weekly n1162",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n772_1917_08_7219170803": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-772-1917-08-03",
+   "magazine": "Wild West Weekly n772",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n776_1917_08_7619170831": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-776-1917-08-31",
+   "magazine": "Wild West Weekly n776",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n799_1918_02_9919180208": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0799-1918-02-08",
+   "magazine": "Wild West Weekly n799",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n805_1918_03_0519180322": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-805-1918-03-22",
+   "magazine": "Wild West Weekly n805",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n819_1918_06_1919180628": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-819-1918-06-28",
+   "magazine": "Wild West Weekly n819",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_n865_1919_05_6519190516": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-865-1919-05-16",
+   "magazine": "Wild West Weekly n865",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_undated_tweekly531": {
+   "kind": "book",
+   "ia_identifier": "Wild_West_Weekly_-_531",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_undated_tweekly536": {
+   "kind": "book",
+   "ia_identifier": "Wild_West_Weekly_-_536",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "wild_west_weekly_undated_tweekly539": {
+   "kind": "book",
+   "ia_identifier": "Wild_West_Weekly_-_539",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "work_and_win_1899_01_0718990120": {
+   "kind": "book",
+   "ia_identifier": "work-and-win-07-1899-01-20",
+   "magazine": "Work and Win",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "work_and_win_1922_02_n03feb1922": {
+   "kind": "book",
+   "ia_identifier": "work-and-win-03-feb-1922",
+   "magazine": "Work and Win",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "work_and_win_n1018_1918_06_1819180607": {
+   "kind": "book",
+   "ia_identifier": "work-and-win-n-1018-1918-06-07",
+   "magazine": "Work and Win n1018",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "work_and_win_n1021_1918_06_2119180628": {
+   "kind": "book",
+   "ia_identifier": "work-and-win-n-1021-1918-06-28",
+   "magazine": "Work and Win n1021",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "work_and_win_n1022_1918_07_2219180705": {
+   "kind": "book",
+   "ia_identifier": "work-and-win-n-1022-1918-07-05",
+   "magazine": "Work and Win n1022",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "work_and_win_n1025_1918_07_2519180726": {
+   "kind": "book",
+   "ia_identifier": "work-and-win-n-1025-1918-07-26",
+   "magazine": "Work and Win n1025",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "work_and_win_n1026_1918_08_2619180802": {
+   "kind": "book",
+   "ia_identifier": "work-and-win-n-1026-1918-08-02",
+   "magazine": "Work and Win n1026",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "work_and_win_n1030_1918_08_3019180830": {
+   "kind": "book",
+   "ia_identifier": "work-and-win-n-1030-1918-08-30",
+   "magazine": "Work and Win n1030",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "work_and_win_n1326_1924_05_2619240502": {
+   "kind": "book",
+   "ia_identifier": "work-and-win-n-1326-1924-05-02",
+   "magazine": "Work and Win n1326",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  },
+  "yellow_men_of_mars_undated_wmenofmars": {
+   "kind": "book",
+   "ia_identifier": "YellowMenOfMars",
+   "magazine": "Yellow Men of Mars",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21"
+  },
+  "young_rough_riders_weekly_ro_undated_dersweekly": {
+   "kind": "book",
+   "ia_identifier": "young-rough-riders-weekly",
+   "magazine": "Young Rough Riders Weekly/Rough Rider Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-21",
+   "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
+  }
+ },
+ "written": "2026-10-21T10:33:51"
 }
