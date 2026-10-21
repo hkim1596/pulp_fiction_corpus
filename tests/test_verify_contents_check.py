@@ -165,6 +165,49 @@ class PagesAndLog(unittest.TestCase):
         # a form without an issue writes nothing
         self.assertIsNone(VP.append_check("sujin", lambda k, d="": ""))
 
+    def test_a_kind_set_by_the_reader_is_kept_only_when_it_differs(self):
+        page = VP.contents_page("wt_1937_12", {}, "sujin")
+        self.assertIn("name='t_0' data-machine='story'", page)
+        self.assertIn("name='t_2' data-machine='feature'", page)            # The Eyrie's record is a feature
+        form = {"issue": "wt_1937_12", "v_0": "right", "v_1": "right", "v_2": "right", "v_3": "missing", "t_0": "story", "t_2": "letters", "t_3": "poem"}
+        rec = VP.append_check("sujin", lambda k, d="": form.get(k, d))
+        self.assertNotIn("type_set", rec["entries"][0])
+        self.assertEqual(rec["entries"][2]["type_set"], "letters")
+        self.assertEqual(rec["entries"][2]["record_type"], "feature")
+        self.assertNotIn("type_set", rec["entries"][3])                    # poem is what the machine's entry says
+        self.assertEqual(rec["n_retyped"], 1)
+        page = VP.contents_page("wt_1937_12", {}, "sujin")
+        self.assertIn("class='t changed' name='t_2'", page)
+        self.assertIn("<option value='letters' selected>", page)
+        self.assertIn("1 kind(s) changed", page)
+        self.assertEqual(VP.figure([rec])["retyped"], 1)
+
+    def test_an_issue_without_contents_entries(self):
+        p = os.path.join(VP._G["DATA"], "assembly_v2", "rules", "wt_1937_12", "analysis.json")
+        a = json.load(open(p)); a["toc"] = []; a["toc_page"] = None; a["toc_pages"] = None; json.dump(a, open(p, "w"))
+        page = VP.contents_page("wt_1937_12", {}, "sujin")
+        self.assertIn("read no contents entries", page)
+        self.assertIn("name='no_contents' value='none'", page)
+        self.assertNotIn("<table class='cct'>", page)
+        # saved without an answer: it says nothing, the sample asks for it again
+        rec = VP.append_check("sujin", lambda k, d="": {"issue": "wt_1937_12"}.get(k, d))
+        self.assertFalse(rec["complete"])
+        self.assertTrue(VP.needs_redo(rec))
+        self.assertIn("check again", VP.sample_page({}, "sujin"))
+        self.assertIn("/verify/contents/wt_1937_12", VP.sample_page({"show": ["contents"]}, "sujin"))
+        self.assertIn("please answer the question", VP.contents_page("wt_1937_12", {}, "sujin"))
+        # no contents page: counts for nothing
+        rec = VP.append_check("sujin", lambda k, d="": {"issue": "wt_1937_12", "no_contents": "none", "missed": "7"}.get(k, d))
+        self.assertTrue(rec["complete"])
+        self.assertEqual((rec["pieces"], rec["pieces_right"], rec["no_contents"]), (0, 0, "none"))
+        fig = VP.figure([rec])
+        self.assertEqual((fig["issues"], fig["pieces"], fig["no_contents"]), (1, 0, 1))
+        self.assertIn("no contents page", VP.sample_page({}, "sujin"))
+        # a contents page the machine did not read: its pieces are all missed
+        rec = VP.append_check("sujin", lambda k, d="": {"issue": "wt_1937_12", "no_contents": "unread", "contents_scan": "5", "missed": "7", "missed_right": "6"}.get(k, d))
+        self.assertEqual((rec["pieces"], rec["pieces_right"], rec["contents_scan"]), (7, 6, 5))
+        self.assertIn("6/7 right", VP.sample_page({}, "sujin"))
+
     def test_sample_page_has_the_contents_column_and_figure(self):
         page = VP.sample_page({}, "sujin")
         self.assertIn("/verify/contents/wt_1937_12", page)

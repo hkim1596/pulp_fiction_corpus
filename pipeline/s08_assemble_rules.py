@@ -56,7 +56,20 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from layout_order import order_region_keys
 from corpus_lib import write_json_atomic
 
-VERSION = "2.8"
+VERSION = "2.9"
+# 2.9 (2026-10-21, Claude in Sujin Kang's session): the kinds of contents entries, from Sujin's level-1 contents
+# checks of 31 sample issues on 21 October. An ARTICLES section, a 'true story', fact, hints, a quiz are features
+# (non-fiction), not stories; a FEATURED NOVELET is a story; a VERSE / POEMS / SONGS section or title is a poem; the
+# readers' and the editor's departments (letters, the Eyrie, the Camp-Fire, Our Air Mail, the Log-Book, Discussions,
+# an editorial or editor's page, 'Ask …', a department described as the readers' meeting place) are letters, kept
+# apart from features; a part marker, a serial label or 'In Five Parts' makes a serial part (the total is kept);
+# the publisher's club and next-issue notices are features that the departments list (config/departments.json,
+# extended) makes house. The entries are repaired before typing (repair_toc_entries): a name glued to the title
+# ('The Albino CanaryHal Moore'), an initial glued to the title's end ('Battle of WizardsL' / 'Ron Hubbard'), a
+# section word with its brace before the title ('VERSE { HALLOWE'EN CANDLE'), the previous entry's chapter range
+# before the title ('CHAPTERS IX-XIII LUCK'), a description in the author's place, a title that went into the
+# previous entry's blurb and left its own entry empty (Amazing Stories 1927-06, The Moon Pool). On the 31 checked
+# issues the kinds of 33 entries change, every one to Sujin's reading; the grouping of boxes is unchanged.
 # 2.8 (2026-10-18, Claude in Sujin Kang's session; toc_folio 1.3): four contents layouts that 2.7 read with the
 # author's name as the title and no author, or with the title line dropped — a title line ending in its leader
 # with the author and the number on the next printed line ('The Voyage of the Neutralia (part 2) . . . . .' /
@@ -203,7 +216,8 @@ CONT_ON_RE = re.compile(CONT_TO_PAGE_RE.pattern + r"|continued\s+on\s+(?:the\s+)
 VERSE_RE = re.compile(r"\bverse\b|\bpoem\b", re.I)
 SERIAL_RE = re.compile(r"serial|part (?:one|two|three|four|five|six|i{1,3}|iv|v)\b|(?:two|three|four|five|six)-part|conclusion|to be continued|continued from|concluded in", re.I)
 STOP_WORDS = {"the", "a", "an", "of", "with", "for", "and", "to", "in", "on", "at", "by", "your", "our", "this", "that"}
-LETTERS_RE = re.compile(r"\beyrie\b|letters|round-?up|readers|chat with", re.I)
+LETTERS_RE = re.compile(r"\beyrie\b|letters|round-?up|readers|reader's|chat with|air ?mail|mail ?bag|mailbag|camp-?fire|argonotes|brass tacks|"
+                        r"discussions|\bforum\b|log-?book", re.I)
 FEATURE_SECTIONS = re.compile(r"department|feature|introducing|miscellaneous|science department|editorial", re.I)
 STORY_SECTIONS = re.compile(r"novel|story|stories|novelet|serial", re.I)
 # advertisement classes (feedback of 2026-09-02, Sujin Kang; decision of 2026-09-03):
@@ -873,24 +887,150 @@ def parse_toc(pages):
     return entries, pno
 
 
+# the kinds of contents entries (rules 2.9; Sujin Kang's level-1 feedback of 21 October 2026, 31 issues checked)
+VERSE_SECTION_RE = re.compile(r"\bverses?\b|\bpoems?\b|\bpoetry\b|\bsongs\b|\bballads?\b|\brhymes?\b", re.I)
+NONFICTION_SECTIONS = re.compile(r"\barticles?\b|\btrue\b|\bfact\b|non-?fiction|\bhints?\b|how-?to|\bquiz\b|\bpictorial\b|\bpictures?\b", re.I)
+STORY_WORDS = re.compile(r"novel|story|stories|novelet|serial|\btales?\b|fiction", re.I)
+# a line of the contents page that is not a name in the author's place: a department's description
+# ("Where readers, writers and adventurers meet", "Information you can't get elsewhere")
+NAME_PARTICLES = {"Mac", "Mc", "Van", "Von", "De", "Del", "Della", "Des", "La", "Le", "Di", "Du", "St", "O"}
+SECTION_WORD_RE = re.compile(r"^(?P<sec>VERSE|POEMS?|POETRY|NOVELETTES?|NOVELS?|SHORT STORIES|SERIALS?|FEATURES?|DEPARTMENTS?|ARTICLES?)\s*[{(\[|:]\s*(?=\S)", re.I)
+CHAPTERS_PREFIX_RE = re.compile(r"^CHAPTERS?\s+[IVXLC\d]+(?:\s*[-–—]\s*[IVXLC\d]+)?\.?\s*(?=[A-Z])")
+ROMAN_RE = re.compile(r"M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3})")
+IN_PARTS_RE = re.compile(r"[\s,.(\[]*\(?\s*(?:a\s+)?(?:serial\s+)?in\s+(?P<tot>two|three|four|five|six|seven|eight|nine|ten|\d{1,2})\s+parts?\s*\)?\s*$", re.I)
+NUMBER_WORDS = {"two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+
+
+def is_subtitle_line(author):
+    """True when the author field holds a description, not a name: four or more words with at least two
+    lower-case words that are not name particles."""
+    if not author:
+        return False
+    ws = author.split()
+    if len(ws) < 4:
+        return False
+    lower = [w for w in ws if w[:1].islower() and w.strip(".,'") not in ("de", "la", "le", "van", "von", "di", "du", "y")]
+    return len(lower) >= 2
+
+
+def split_glued_name(title):
+    """'The Albino CanaryHal Moore' -> ('The Albino Canary', 'Hal Moore'); a title with no name glued on -> (title, None).
+    The join is a lower-case letter followed by a capital that begins a name of two to four capitalised words."""
+    if not title:
+        return title, None
+    for m in re.finditer(r"([a-z'’])(?=[A-Z][a-z])", title):
+        left, right = title[:m.end()], title[m.end():]
+        rw = right.split()
+        if 2 <= len(rw) <= 4 and all(re.fullmatch(r"[A-Z][A-Za-z'’.\-]*\.?", w) for w in rw) and words(left) >= 1:
+            last_left = left.split()[-1]
+            if last_left in NAME_PARTICLES or len(last_left) < 3:
+                continue
+            return left.strip(), right.strip()
+    return title, None
+
+
+def repair_toc_entries(entries):
+    """Faults of the printed contents that the readers leave in the entries (rules 2.9): a title with the
+    author's name glued on and no author; a stray capital glued to the title that is the author's initial
+    ('Battle of WizardsL' / 'Ron Hubbard'); a section word with its brace in front of the title ('VERSE { HALLOWE'EN
+    CANDLE'); the chapter range of the previous entry in front of the title ('CHAPTERS I-VI EVERYTHING BUT THE TRUTH');
+    'In Five Parts' after the title (the serial's total); a description in the author's place; a title that went
+    into the previous entry's blurb and left its own entry without one. In place; returns the entries."""
+    for n, e in enumerate(entries):
+        t = (e.get("title") or "").strip()
+        a = (e.get("author") or "").strip() or None
+        m = SECTION_WORD_RE.match(t)
+        if m:
+            t = t[m.end():].strip()
+            e["section_word"] = m.group("sec").upper()
+        m = CHAPTERS_PREFIX_RE.match(t)
+        if m:
+            rest = t[m.end():]
+            # the range's last numeral may have swallowed the title's first letters ('CHAPTERS IX-XIIILUCK'):
+            # the numeral is the longest valid one, the rest is the title
+            back = re.match(r"^(.*?[\s\-–—])?([IVXLC]+)$", t[:m.end()].rstrip(". "))
+            if back:
+                num = back.group(2)
+                for k in range(len(num), 0, -1):
+                    if ROMAN_RE.fullmatch(num[:k]):
+                        rest = num[k:] + rest
+                        break
+            if words(rest) >= 1:
+                t = rest.strip()
+        m = IN_PARTS_RE.search(t)
+        if m and words(t[:m.start()]) >= 1:
+            tot = m.group("tot").lower()
+            e["part_total"] = NUMBER_WORDS.get(tot) or (int(tot) if tot.isdigit() else None)
+            t = t[:m.start()].strip(" .,:-")
+        if a and is_subtitle_line(a):
+            e["subtitle"] = a
+            a = None
+        if not a:
+            t2, a2 = split_glued_name(t)
+            if a2:
+                t, a = t2, a2
+        if a and re.search(r"[a-z][A-Z]$", t) and re.fullmatch(r"[A-Z][a-z]+(?: [A-Z][A-Za-z'’.\-]+){1,3}", a):
+            a = t[-1] + ". " + a                           # the initial of the name went to the title's end
+            t = t[:-1].strip()
+        if not t and n > 0:
+            prev = entries[n - 1]
+            bl = (prev.get("blurb") or "").strip()
+            m = IN_PARTS_RE.search(bl)
+            core = bl[:m.start()].strip(" .,:-(") if m else bl
+            if core and words(core) <= 12 and core[:1].isupper():
+                t = core
+                if m:
+                    tot = m.group("tot").lower()
+                    e["part_total"] = NUMBER_WORDS.get(tot) or (int(tot) if tot.isdigit() else None)
+                    e["serial_mark"] = True
+                prev["blurb"] = ""
+        e["title"], e["author"] = t, a
+    return entries
+
+
 def type_toc_entries(entries):
-    """The kind of every contents entry from its section label, title and blurb (2.1 onwards)."""
+    """The kind of every contents entry from its section label, title, by-line and blurb (2.1 onwards; the kinds of
+    2.9 follow Sujin Kang's level-1 feedback of 21 October 2026): poem — a verse section or marker (verse, poems,
+    songs, ballads); letters — the readers' and the editor's departments (letters, the Eyrie, the Camp-Fire, Our Air
+    Mail, the Log-Book, Discussions, Brass Tacks, an editorial or editor's page, a department described as the
+    readers' meeting place); serial_part — a part marker, a serial section or label, 'In Five Parts'; feature — a
+    non-fiction section (articles, true stories, fact, helpful hints, a quiz, pictures), a departments or features
+    section without a story word, an unsigned entry outside a story section; story — a story section (novel,
+    novelette, short stories, serials, tales, fiction — 'FEATURED NOVELET' is a story section, not a feature) or a
+    signed entry."""
+    repair_toc_entries(entries)
     for e in entries:
         s = e.get("section") or ""
+        if e.get("section_word"):
+            s = (e["section_word"] + " " + s).strip()
         bl = e.get("blurb") or ""
+        sub = e.get("subtitle") or ""
+        lab = e.get("type_label") or ""
         prose_blurb = bl and sum(1 for c in bl if c.isupper()) < 0.5 * max(1, sum(1 for c in bl if c.isalpha()))
         if e["author"] and re.fullmatch(r"(?:a |the )?(?:department|editor|editors|readers|staff)s?", e["author"].strip(), re.I):
             s = (s + " " + e["author"]).strip()
             e["author"] = None
-        if VERSE_RE.search(s) or re.search(r"\bpoetry\b", s, re.I) or VERSE_RE.search(bl[:60]):
+        title = e.get("title") or ""
+        nonfiction = NONFICTION_SECTIONS.search(s) or NONFICTION_SECTIONS.search(lab)
+        story_section = STORY_WORDS.search(s) and not nonfiction
+        if re.search(r"\bclub\b|\bnext (?:issue|month|week)\b|coming next", title, re.I):
+            e["type"] = "feature"                     # the publisher's own notice: the departments list makes it house
+        elif VERSE_SECTION_RE.search(s) or VERSE_SECTION_RE.search(lab) or VERSE_RE.search(bl[:60]) or POEM_MARK_RE.search(title) \
+                or re.search(r"\bsongs\b", title, re.I):
             e["type"] = "poem"
-        elif LETTERS_RE.search(e["title"]) or LETTERS_RE.search(bl[:80]):
+        elif LETTERS_RE.search(title) or LETTERS_RE.search(sub) or LETTERS_RE.search(bl[:80]) or re.search(r"\bletters\b", s, re.I) \
+                or re.search(r"editorial|editor'?s? (?:page|notes?|desk|corner|chat)|^the editor\b|^ask\b", title, re.I):
             e["type"] = "letters"
-        elif SERIAL_RE.search(s) or (prose_blurb and SERIAL_RE.search(bl)) or SERIAL_RE.search(e["title"]):
+        elif e.get("part") or e.get("serial_mark") or e.get("part_total") or SERIAL_RE.search(s) or SERIAL_RE.search(lab) \
+                or (prose_blurb and SERIAL_RE.search(bl[:80])) or SERIAL_RE.search(title):
             e["type"] = "serial_part"
-        elif FEATURE_SECTIONS.search(s) or re.search(r"editorial|editor's page", e["title"], re.I):
+        elif nonfiction:
             e["type"] = "feature"
-        elif not e["author"] and not STORY_SECTIONS.search(s):
+        elif story_section and (e["author"] or STORY_WORDS.search(lab)):
+            e["type"] = "story"
+        elif FEATURE_SECTIONS.search(s) or FEATURE_SECTIONS.search(lab):
+            e["type"] = "feature"
+        elif not e["author"] and not story_section:
             e["type"] = "feature"                     # an unsigned short piece: a filler, a department
         else:
             e["type"] = "story"
@@ -3415,6 +3555,9 @@ class Assembler:
             lab = m_lab.group(1) if m_lab else None
             n = roman_int(re.sub(r"(?i)^part\s+", "", lab)) if lab and lab.lower().startswith("part") else (1 if lab and lab.lower() == "beginning" else None)
             serial = {"part_label": lab, "part_n": n, "part_total": None, "source": "contents" if (toc and toc.get("type") == "serial_part") else "head"}
+        if serial and toc and toc.get("part_total") and not serial.get("part_total"):
+            serial["part_total"] = toc["part_total"]        # 'In Five Parts' on the contents page (rules 2.9)
+            serial["part_total_source"] = "the contents page"
         if typ == "serial_part":
             typ = "story"
         if title and title.upper() == title:

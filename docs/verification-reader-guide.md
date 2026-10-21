@@ -29,7 +29,7 @@ verification, because the data paper's accuracy claim rests on it and it takes a
 
 Open CHECK in the contents column. The page shows the scan of the contents page on the left and, on the right, the
 entries the machine read from it — title, author, printed page — each with the record the machine made for it (its
-title, author, type and the scan where it starts; the record and the page open in a new tab). For each entry decide,
+title, author and the scan where it starts; the record and the page open in a new tab). For each entry decide,
 against the scan and, where in doubt, the record's first page:
 
 - **RIGHT AS MADE** — a record starts on the right page with the right title and author, as the machine left it.
@@ -39,6 +39,26 @@ against the scan and, where in doubt, the record's first page:
   the figure measures what the machine did).
 - **NOT A PIECE** — the entry is not a piece at all: a cover line, an illustration credit, a department heading with
   nothing under it, a misreading of the page. These leave the count.
+
+The **kind** column shows the kind the machine gave the piece. Change it when it is wrong; the change is saved with
+your check and is read back into the rules (Sujin Kang's notes of 21 October 2026 fixed the kinds in rules 2.9). The
+kinds are:
+
+- **story** — fiction of any length: a short story, a novelette, a novel, and a serial part (a serial part is a story
+  with its part number; "featured novelet" is a story, whatever the section says);
+- **poem** — verse, songs, ballads, limericks;
+- **feature** — non-fiction: an article, a "true story", a fact piece, helpful hints, a quiz, a picture feature, an
+  unsigned filler;
+- **letters** — the readers' and the editor's departments: the letters column (the Eyrie, the Camp-Fire, Our Air Mail,
+  the Log-Book, Discussions), the editor's notes or page, a readers' questions department (Ask Adventure). Editor's notes
+  are letters, not features, so that the magazine's conversation with its readers stays apart from its articles;
+- **house** — the publisher's own matter: the club notice, the next-issue announcement, a contest;
+- **other** — anything else that is a piece but none of the above.
+
+When the machine read **no contents entries** in an issue, the page asks instead whether the issue has no contents page
+(then it counts for nothing at level 1 and is read at level 2) or has one the machine did not read (give its scan and
+the number of pieces it lists, and how many of those have a right record anyway). A check saved with no entries and no
+answer says nothing: the Verification page shows CHECK AGAIN for it.
 
 Then, below the table: how many pieces the contents page lists that the machine's reading of the page *missed* (and how
 many of those nevertheless have a right record — a piece can be assembled from its own title and by-line without the

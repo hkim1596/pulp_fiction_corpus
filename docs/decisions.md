@@ -313,3 +313,19 @@ Dropbox share carries the full context of each.
   books or set-aside items are redrawn. Also from Sujin's reading of
   21 October: a cover page is typed `other` for now (whether a `cover`
   type is needed is decided later).
+- 2026-10-21 (Sujin Kang's level-1 contents checks, 31 issues, in the
+  notes of the checks) — **the kinds of pieces**, as the readers and the
+  assembler use them from now on: `story` is fiction of any length
+  including a serial part ("featured novelet" is a story); `poem` is
+  verse, songs, ballads; `feature` is non-fiction (an article, a "true
+  story", fact, hints, a quiz, pictures, an unsigned filler); `letters`
+  is the readers' and the editor's departments — the letters column,
+  the editor's notes or page, a readers' questions department — kept
+  apart from features ("let's classify editor's notes as letters to
+  keep them distinct from feature"); `house` is the publisher's own
+  matter (a club notice, the next issue). Rules 2.9 read the kinds from
+  the contents sections and the departments list that way; the kind of
+  a piece is changed by a click on the contents-check page (site
+  v0.26.0), saved with the check. An issue whose contents the machine
+  did not read is answered on the same page: no contents page (level 2
+  only) or a page not read (its pieces count as missed).

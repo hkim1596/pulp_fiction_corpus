@@ -1537,3 +1537,31 @@ config/corpus_kinds.json and the set-aside reasons, redrew the sample's slots, a
 joined). The contents check page (/verify/contents) answered 502 on Weird Tales 1949-11: the analysis's `toc_pages`
 is the list of the contents spread's scans there, not a count; read both ways now, and the route answers a message
 instead of taking the site down. Site v0.25.1.
+
+### 2026-10-21, 17:30 KST — the first 31 contents checks read back: the kinds of pieces (rules 2.9, site v0.26.0)
+
+Sujin Kang checked 31 sample issues at level 1 on 21 October (data/review/contents_check.jsonl): 27 with entries,
+every entry *right as made* except three *not a piece* — the start pages, titles and authors held — and her notes were
+all about the **kind** the machine gave a piece. Read back as rules (pipeline/s08_assemble_rules.py 2.9,
+type_toc_entries): an ARTICLES section, a "true story", helpful hints, a quiz are features, not stories (Blue Book
+1952-08, Ranch Romances 1955-03, Top-Notch 1911-11); a FEATURED NOVELET is a story (Golden West Romances 1950);
+VERSE, SONGS in a section or title make a poem (Weird Tales 1951-11, Fantasy Book 1949); the readers' and the editor's
+departments are letters, kept apart from features (Our Air Mail, the Camp-Fire, the Log-Book, Ask Adventure; Argosy
+1919-09, Adventure 1936-11); a part marker, a serial label or "In Five Parts" makes a serial part and the total is kept
+(Fantasy Book, Argosy); a club notice is the publisher's (Weird Tales 1949-11; config/departments.json extended with
+the departments her notes named, and the editor's columns there are letters now). The entries are repaired before
+typing (repair_toc_entries): a name glued to the title ("The Albino CanaryHal Moore" — six entries of Fantasy Book
+1949 had no author and were features for it), an initial glued to the title's end, a section word with its brace in
+front of the title ("VERSE { HALLOWE'EN CANDLE"), the previous entry's chapter range in front of the title ("CHAPTERS
+IX-XIII LUCK", Argosy 1919-09), a description in the author's place, a title that went into the previous entry's blurb
+(Amazing Stories 1927-06, "The Moon Pool" — her note "item 7 is missing its title"). On the 31 checked issues the
+kinds of 33 entries change, every one to her reading; the grouping of boxes does not change. 299 tests pass.
+
+The contents-check page (site v0.26.0) gains a **kind** column — a click sets the kind the machine gave a piece to
+story, poem, feature, letters, house or other; the change is saved with the check (`type_set`, counted as
+`n_retyped`) and reported on the Verification page — so the notes become data. Four sample issues (slots #4, #9,
+#10, #50) had no contents entries and were saved as complete with nothing in them; the page now asks instead whether
+the issue has no contents page (it then counts for nothing at level 1 and is read at level 2) or has one the machine
+did not read (its scan, its pieces, how many have a right record anyway), and the Verification page shows CHECK AGAIN
+for a check that says nothing. Reader guide updated (the kinds). Next: upgrade the sample issues to 2.9
+(scripts/upgrade_continuity.py --issues-file, the guard holding Sujin's corrected issues), then the corpus.
