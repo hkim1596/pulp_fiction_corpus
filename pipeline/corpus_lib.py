@@ -118,6 +118,29 @@ def set_aside():
     return {e["id"]: e for e in d.get("issues", []) if e.get("id")}
 
 
+KINDS_PATH = os.path.join(ROOT, "config", "corpus_kinds.json")
+
+
+def corpus_kinds():
+    """id -> kind for the items that are not magazine issues but stay in the data (config/corpus_kinds.json; Sujin
+    Kang's decision of 21 October 2026): "book" — a standalone book, a story collection, a paperback, a dime-novel or
+    nickel-weekly number with one novel. An item not listed is a magazine issue. The corpus of the protocol (counts,
+    the verification sample, the backgrounds) is the magazine issues; the books stay labelled, assembled as books
+    (s08_book), and serve as the other side of a reuse match (a story reprinted in a book)."""
+    try:
+        d = json.load(open(KINDS_PATH, encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {i: (e.get("kind") if isinstance(e, dict) else e) for i, e in (d.get("kinds") or {}).items() if i}
+
+
+def magazine_issues(issues):
+    """The issues of kind magazine among a list (the set-aside ones left out too): the protocol's corpus."""
+    kinds = corpus_kinds()
+    kept, _ = active_issues(issues)
+    return [i for i in kept if kinds.get(i.get("id"), "magazine") == "magazine"]
+
+
 def active_issues(issues):
     """The issues a stage works on: the list without the set-aside ones. Returns (issues, set-aside count)."""
     aside = set_aside()

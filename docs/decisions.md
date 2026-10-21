@@ -290,3 +290,26 @@ Dropbox share carries the full context of each.
   or next-issue section is a `teaser` box when it stands in front of a
   serial or a story and a `house` record when it fills its own page.
   Site v0.24.0.
+- 2026-10-21 (Sujin Kang: "not exclusion but a way to tell a standalone
+  book from a magazine … let us sort by kind; not too fine — magazine
+  and book, book including the dime novels") — Decision 1 of 19 October
+  revised: the items that are not magazine issues are **sorted by
+  kind, not thrown out**. Two kinds: `magazine` (an issue of a
+  magazine: the protocol's corpus — the counts, the verification
+  sample, the backgrounds) and `book` (a standalone book, a story
+  collection, a paperback, a dime-novel or nickel-weekly number with
+  one novel), recorded in config/corpus_kinds.json; a book stays in
+  the data, is assembled as a book (pipeline/s08_book.py: a novel is
+  one piece with its chapters, a collection its listed pieces; the
+  front matter and the publisher's catalogue apart) and serves as the
+  other side of a reuse match (a magazine story reprinted in a book is
+  reported as such). What leaves the corpus does so for a reason, not
+  a kind, in config/corpus_set_aside.json: an excerpt of a magazine
+  (pages cut out of an issue; a duplicate when the issue is in the
+  corpus), not English, not a text (an index, a cover gallery), a
+  comic, outside the period. The decision per item is made by clicks
+  on /review/nonmagazine (site v0.25.0; the rule's class suggests the
+  kind), applied by scripts/apply_kinds.py; the sample slots held by
+  books or set-aside items are redrawn. Also from Sujin's reading of
+  21 October: a cover page is typed `other` for now (whether a `cover`
+  type is needed is decided later).

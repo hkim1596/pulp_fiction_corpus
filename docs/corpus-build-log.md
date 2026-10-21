@@ -1494,3 +1494,35 @@ hover) and the evidence, a link to the issue and to archive.org; EXCLUDE / KEEP 
 button to mark every undecided row of the current view (filters: proposal, class, decided or not, in the sample).
 Every click is a line in data/review/nonmagazine_review.jsonl under the reader's name; the latest per item counts.
 scripts/set_aside_nonmagazine.py --decisions reads the log joined to the candidate table (the CSV route stays).
+
+### 2026-10-21, 12:30 KST — kinds, not exclusion: the book mode of the assembler (site v0.25.0, book mode 1.0)
+
+Sujin, reviewing the candidates: books are not to be thrown out but told apart from magazines, and the assembler
+cuts a novel's chapters into stories. Decided (docs/decisions.md, 2026-10-21): two kinds, magazine and book (the dime
+novels with the books); what leaves the corpus leaves for a reason (excerpt of a magazine, not English, not a text,
+comic, outside the period); the book mode now.
+
+**The book mode** (pipeline/s08_book.py; s08 reads the kind from config/corpus_kinds.json or the issue dict): a second
+pass over the engine's records for an item of kind book. A novel — the contents page a chapter list, most entries
+chapter-numbered, or no contents — becomes one story record titled with the book's title and author, chapter heads
+kept as chapter roles; what stands before the first chapter is one `other` record, the front matter. A collection —
+the contents page lists pieces — becomes one record per listed piece, its boxes every reading record from the piece's
+first page to the next piece's, the author the entry's or the book's. A reading record that reads like a publisher's
+catalogue (prices and formats several times per thousand words, or a catalogue's title; never the holder of a listed
+piece) becomes house matter. The book's title and author come from the archive's record ("Title - Author (Publisher,
+Year)", "Surname, Initials - Title", "Title, by Author"; the creator field) or the selection's name. Measured in the
+session on the server's layout pages: *Silken Threads* (1890) — one story, 333 pages, 29 chapters, 62,178 words (was
+31 "features" and 59 chapter heads); *The Plattner Story and Others* (Methuen 1897) — the dedication as front matter,
+17 stories by H. G. Wells placed from the contents (7,709 words for the title story … 9,714 for *A Slip Under the
+Microscope*), Methuen's catalogue (two records, 10,500 words) as house matter. No box unassigned or owned twice.
+
+**The review page** (/review/nonmagazine) asks for the kind or the reason by a click — MAGAZINE, BOOK, EXCERPT, NOT
+ENGLISH, NOT A TEXT, COMIC, OUTSIDE, ? — with the rule's suggestion shown (book and dime novel → book; index → not a
+text; comic; outside the period; single story → undecided: an excerpt is a duplicate only when its issue is in the
+corpus). The 19 October exclude/keep clicks show as "earlier" and are migrated once (scripts/apply_kinds.py --migrate:
+x on a Serials compilation or with "excerpt" in the note → excerpt; x or k on a book or dime novel → book).
+**scripts/apply_kinds.py** writes config/corpus_kinds.json (tracked; empty until then) and the set-aside list, redraws
+the sample's slots (books leave the sample too: scripts/draw_verification_sample.py --replace reads the kinds) and
+runs **scripts/reassemble_books.py** (the book mode over every book, the annotation logs made on the chapter-split
+records archived under data/assembly_archive/<stamp>_books/, each book published). The export carries `kind` on every
+record (r00). 287 tests.

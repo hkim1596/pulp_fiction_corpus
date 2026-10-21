@@ -1,0 +1,4 @@
+{
+ "_comment": "Items that are not magazine issues but stay in the data, by kind (Sujin Kang, 21 October 2026): 'book' — a standalone book, a story collection, a paperback, a dime-novel or nickel-weekly number with one novel. An item not listed is a magazine issue. The protocol's corpus is the magazine issues; the books are assembled as books (pipeline/s08_book.py) and are the other side of a reuse match. Written by scripts/apply_kinds.py from the clicks on /review/nonmagazine.",
+ "kinds": {}
+}

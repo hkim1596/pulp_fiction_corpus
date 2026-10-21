@@ -1,12 +1,18 @@
-"""The review of the non-magazine candidates on the site (v0.25.0; decision 1 of 19 October 2026, Sujin Kang).
+"""The review of the non-magazine candidates on the site (v0.25.0; decision 1 of 19 October 2026, revised 21 October:
+the items are sorted by KIND, not excluded — Sujin Kang).
 
   /review/nonmagazine   the candidate table scripts/nonmagazine_candidates.py wrote (data/corpus/p52-2026-10-16/
                         nonmagazine_candidates.json), one row per item proposed EXCLUDE or LOOK (and the verification
                         sample's issues), with the cover thumbnail, the archive's title, the signals and their evidence;
-                        a reader marks each item EXCLUDE (not a magazine issue) or KEEP by a click, with an optional
-                        note, or marks every unmarked row of the view at once. Each click is one line in
+                        a reader says by a click what each item is — MAGAZINE (an issue of a magazine), BOOK (a standalone
+                        book, a collection, a paperback, a dime-novel or nickel-weekly number with one novel: it stays in
+                        the data, labelled, and is assembled as a book) — or why it leaves the corpus — EXCERPT (pages cut
+                        out of a magazine: a duplicate when the issue is in the corpus), NOT ENGLISH, NOT A TEXT (an
+                        index, a cover gallery), COMIC, OUTSIDE THE PERIOD — or ? (not sure); with an optional note, or
+                        marks every unmarked row of the view at once. Each click is one line in
                         data/review/nonmagazine_review.jsonl (time, reader, id, decision, note); the latest line per
-                        item counts. scripts/set_aside_nonmagazine.py --decisions reads that log.
+                        item counts. scripts/apply_kinds.py reads that log. The earlier clicks (19 October: x = exclude,
+                        k = keep) are shown as "earlier" and count as undecided unless migrated (apply_kinds.py --migrate).
 
 Bound to the site's helpers with bind(globals()) from app.py, like the other page modules.
 """
@@ -20,7 +26,12 @@ from collections import Counter, defaultdict
 
 _G = {}
 _CACHE = {"table": (None, None), "log": (None, None)}
-DECISIONS = {"x": "exclude", "k": "keep", "?": "not sure"}
+DECISIONS = {"magazine": "magazine", "book": "book", "excerpt": "excerpt of a magazine", "not_english": "not English",
+             "not_text": "not a text", "comic": "comic", "outside": "outside the period", "?": "not sure"}
+KINDS = ("magazine", "book")                       # these stay in the data; the rest are reasons to set the item aside
+LEGACY = {"x": "earlier: exclude", "k": "earlier: keep"}
+PROPOSED_KIND = {"book": "book", "dime novel": "book", "single story": "excerpt", "index or portfolio": "not_text", "comic": "comic",
+                 "outside the period": "outside", "not a fiction magazine": "magazine"}
 
 
 def bind(g):
@@ -70,12 +81,12 @@ def _load_log(p):
     return rows
 
 
-def decisions():
-    """id -> the latest decision line."""
+def decisions(with_legacy=False):
+    """id -> the latest decision line (a kind or a reason); with_legacy, the 19 October exclude/keep clicks too."""
     rows = _cached("log", log_path(), _load_log) or []
     out = {}
     for r in rows:
-        if r.get("id") and r.get("decision") in DECISIONS:
+        if r.get("id") and (r.get("decision") in DECISIONS or (with_legacy and r.get("decision") in LEGACY)):
             out[r["id"]] = r
     return out
 
@@ -119,13 +130,16 @@ CSS = """
 .nm img.cov{width:54px;height:auto;border:1px solid var(--grid);border-radius:3px;background:#fff}
 .nm .sig{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink2)}
 .nm .ev{font-size:11.5px;color:var(--ink2);max-width:360px}
-.nm tr.dx{background:rgba(214,39,40,.07)}
-.nm tr.dk{background:var(--okbg)}
+.nm tr.dmagazine{background:var(--okbg)}
+.nm tr.dbook{background:rgba(138,92,199,.10)}
+.nm tr.dout{background:rgba(214,39,40,.07)}
 .nm tr.dq{background:var(--warnbg)}
+.nm tr.dlegacy{background:var(--surface2)}
 .nm form.d{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
 .nm form.d button{font-size:11.5px;padding:3px 8px;border:1px solid var(--grid2);border-radius:6px;background:var(--surface);cursor:pointer;font-family:inherit}
-.nm form.d button.x{background:rgba(214,39,40,.10)}
-.nm form.d button.k{background:var(--okbg)}
+.nm form.d button.m{background:var(--okbg)}
+.nm form.d button.b{background:rgba(138,92,199,.14)}
+.nm form.d button.o{background:rgba(214,39,40,.08)}
 .nm form.d input.n{width:120px;font-size:11px;font-family:inherit}
 .nm .bulk{border:1px solid var(--grid);background:var(--surface);border-radius:10px;padding:8px 12px;margin:8px 0 12px;font-size:13px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .nm .bulk button{font-size:12.5px;padding:5px 10px;border:1px solid var(--grid2);border-radius:8px;cursor:pointer;font-family:inherit;background:var(--surface2)}
@@ -136,21 +150,25 @@ CSS = """
 def review_page(qs, user, render=None):
     T = table()
     head = [CSS, _G["howto"](
-        "Decision 1 of 19 October 2026: the corpus is pulp magazines. A rule scored every selected issue for the signs of a "
-        "standalone book, a single story, a dime-novel or nickel-weekly number, a comic, an index or a portfolio, a fanzine or an "
-        "item from after the period, or a magazine that is not a fiction magazine (scripts/nonmagazine_candidates.py; the codes in "
-        "the SIGNALS column are explained when you hover over them). The rule proposes EXCLUDE at 5 points and LOOK at 3; the "
-        "decision is yours, item by item: EXCLUDE means the item leaves corpus 1.0 (its files stay on disk; it leaves the site and "
-        "the reuse stages; the datasheet lists it under its reason), KEEP means it stays. Look at the cover, the archive's title and "
-        "the evidence; open the issue when in doubt. Filter the view by proposal and class, then mark the exceptions and use the "
-        "button to mark the rest of the view at once. Every click is saved under your name; clicking again changes the decision. "
-        "The verification sample's issues are listed whatever their score. When you are done, the apply step (PASTE P52u) writes "
-        "the set-aside list and redraws the sample's slots."),
+        "Decision 1 of 19 October 2026, revised on 21 October: the items are sorted by kind, not thrown out. A rule scored every "
+        "selected issue for the signs of a standalone book, a single story, a dime-novel or nickel-weekly number, a comic, an index "
+        "or a portfolio, a fanzine or an item from after the period (scripts/nonmagazine_candidates.py; the codes in the SIGNALS "
+        "column are explained when you hover over them; the PROPOSAL column turns the rule's class into a suggested kind). Say what "
+        "each item is: MAGAZINE — an issue of a magazine (the protocol's corpus); BOOK — a standalone book, a story collection, a "
+        "paperback, a dime-novel or nickel-weekly number with one novel: it stays in the data, labelled, assembled as a book, and "
+        "serves as the other side of a reuse match. Or why it leaves the corpus: EXCERPT — pages cut out of a magazine (a duplicate "
+        "when the issue itself is in the corpus; note it if not); NOT ENGLISH; NOT A TEXT — an index, a checklist, a cover gallery; "
+        "COMIC; OUTSIDE — from after the period. ? when unsure. Look at the cover, the archive's title and the evidence; open the "
+        "issue when in doubt. Filter the view by proposal and class, mark the exceptions, then use the button to mark the rest of "
+        "the view at once. Every click is saved under your name; clicking again changes it. The verification sample's issues are "
+        "listed whatever their score. When you are done, the apply step (PASTE P52u) writes the kinds and the set-aside list, "
+        "redraws the sample's slots and re-assembles the books."),
         "<h1>Items that may not be magazine issues</h1>"]
     if not T:
         return _render(render, "Non-magazine review", head + ["<div class='empty'>No candidate table yet (scripts/nonmagazine_candidates.py writes data/corpus/p52-2026-10-16/nonmagazine_candidates.json).</div>"])
     rows_all = listed(T)
     D = decisions()
+    L = {i: d for i, d in decisions(with_legacy=True).items() if d["decision"] in LEGACY}
     can = bool(user) and user != "guest"
     prop = (qs.get("proposed") or ["EXCLUDE"])[0]
     cls = (qs.get("class") or [""])[0]
@@ -167,7 +185,8 @@ def review_page(qs, user, render=None):
     dc = Counter(D[it["id"]]["decision"] for it in rows_all if it["id"] in D)
     head.append(f"<p class='muted'>{len(rows_all):,} items listed of {T.get('selected', 0):,} selected issues (rule {_esc(T.get('rule_version', ''))}, "
                 f"written {_esc((T.get('written') or '')[:16].replace('T', ' '))}); proposed " + ", ".join(f"{k} {v}" for k, v in sorted((T.get("counts") or {}).get("proposed", {}).items()))
-                + f". <b>Decided: {n_dec:,} of {len(rows_all):,}</b> — exclude {dc.get('x', 0)}, keep {dc.get('k', 0)}, not sure {dc.get('?', 0)}; "
+                + f". <b>Decided: {n_dec:,} of {len(rows_all):,}</b> — " + ", ".join(f"{_esc(DECISIONS[k])} {dc[k]}" for k in DECISIONS if dc.get(k))
+                + (f"; {sum(1 for it in rows_all if it['id'] in L and it['id'] not in D)} earlier exclude/keep clicks still to be sorted" if L else "") + "; "
                 + ", ".join(f"{_esc(_G['display_name'](u))} {n}" for u, n in Counter(d['user'] for d in D.values()).most_common(3)) + ".</p>")
     classes = sorted({it.get("class") or "" for it in rows_all if it.get("class")})
 
@@ -183,13 +202,14 @@ def review_page(qs, user, render=None):
     if can and rows:
         head.append("<form method='POST' action='/review/nonmagazine' class='bulk'><input type='hidden' name='back' value='" + html.escape(back, quote=True) + "'>"
                     f"<input type='hidden' name='ids' value='{' '.join(undecided_ids)}'>"
-                    f"<span>{len(rows)} rows in this view, {len(undecided_ids)} undecided — mark the undecided ones:</span>"
-                    "<button name='bulk' value='x'>all EXCLUDE</button><button name='bulk' value='k'>all KEEP</button></form>")
+                    f"<span>{len(rows)} rows in this view, {len(undecided_ids)} undecided — mark the undecided ones all:</span>"
+                    + "".join(f"<button name='bulk' value='{v}'>{_esc(l.upper())}</button>" for v, l in DECISIONS.items() if v != "?") + "</form>")
     key = T.get("signal_key") or {}
     body_rows = []
     for it in rows:
-        d = D.get(it["id"])
-        klass = {"x": "dx", "k": "dk", "?": "dq"}.get(d["decision"]) if d else ""
+        d = D.get(it["id"]) or L.get(it["id"])
+        klass = ("dlegacy" if d["decision"] in LEGACY else {"magazine": "dmagazine", "book": "dbook", "?": "dq"}.get(d["decision"], "dout")) if d else ""
+        suggested = PROPOSED_KIND.get(it.get("class") or "", "magazine") if it.get("proposed") != "KEEP" else "magazine"
         sig = " ".join(f"<span title='{html.escape((key.get(c) or {}).get('says', ''), quote=True)}'>{_esc(c)}</span>" for c in it.get("signals", []))
         ev = "; ".join(f"{_esc(k)}: {_esc(str(v))}" for k, v in (it.get("evidence") or {}).items())
         name = (f"<a href='/issue/{_esc(it['id'])}'>{_esc(it.get('magazine') or it['id'])}</a>"
@@ -199,19 +219,22 @@ def review_page(qs, user, render=None):
         if can:
             act = (f"<form method='POST' action='/review/nonmagazine' class='d'><input type='hidden' name='id' value='{_esc(it['id'])}'>"
                    f"<input type='hidden' name='back' value='{html.escape(back, quote=True)}'>"
-                   "<button class='x' name='decision' value='x'>EXCLUDE</button><button class='k' name='decision' value='k'>KEEP</button>"
-                   "<button name='decision' value='?'>?</button>"
+                   "<button class='m' name='decision' value='magazine'>MAGAZINE</button><button class='b' name='decision' value='book'>BOOK</button>"
+                   "<button class='o' name='decision' value='excerpt'>EXCERPT</button><button class='o' name='decision' value='not_english'>NOT ENGLISH</button>"
+                   "<button class='o' name='decision' value='not_text'>NOT A TEXT</button><button class='o' name='decision' value='comic'>COMIC</button>"
+                   "<button class='o' name='decision' value='outside'>OUTSIDE</button><button name='decision' value='?'>?</button>"
                    f"<input class='n' name='note' placeholder='note' value='{html.escape((d or {}).get('note') or '', quote=True)}'></form>")
         else:
             act = "<span class='muted'>log in to decide</span>"
-        state = (f"<span class='chip {'stV' if d['decision'] == 'k' else ''}'>{_esc(DECISIONS[d['decision']])}</span><br><span class='fine'>{_esc(_G['display_name'](d['user']))} {_esc(d['ts'][5:16].replace('T', ' '))}</span>"
-                 + (f"<br><span class='fine'>“{_esc(d['note'])}”</span>" if d.get("note") and d["note"] != "marked with the view" else "")) if d else "<span class='muted'>—</span>"
+        label = DECISIONS.get(d["decision"]) or LEGACY.get(d["decision"]) if d else None
+        state = (f"<span class='chip {'stV' if d['decision'] in KINDS else ''}'>{_esc(label)}</span><br><span class='fine'>{_esc(_G['display_name'](d['user']))} {_esc(d['ts'][5:16].replace('T', ' '))}</span>"
+                 + (f"<br><span class='fine'>“{_esc(d['note'])}”</span>" if d.get("note") and d["note"] != "marked with the view" else "")) if d else f"<span class='muted'>— (suggested: {_esc(DECISIONS.get(suggested, suggested))})</span>"
         body_rows.append(f"<tr class='{klass}'><td><a href='/issue/{_esc(it['id'])}'><img class='cov' src='/thumb/{_esc(it['id'])}/page_0001.jpg' alt=''></a></td>"
                          f"<td>{name}</td><td>{_esc(it.get('cover_date') or '')}</td><td class='num'>{it.get('pages') or ''}</td>"
-                         f"<td class='cls'>{_esc(it.get('proposed'))}<br>{_esc(it.get('class') or '')}<br>{it.get('score')}</td>"
+                         f"<td class='cls'>{_esc(it.get('proposed'))}<br>{_esc(it.get('class') or '')}<br>{it.get('score')}<br><span class='fine'>→ {_esc(DECISIONS.get(suggested, suggested))}</span></td>"
                          f"<td class='sig'>{sig}</td><td class='ev'>{ev}</td><td>{state}</td><td>{act}</td></tr>")
     body = head + ["<div class='nm'><div style='overflow-x:auto'><table><tr><th>cover</th><th>item (selection name · archive title)</th><th>date</th><th>pages</th>"
-                   "<th>proposal · class · score</th><th>signals</th><th>evidence</th><th>decision</th><th>decide</th></tr>" + "".join(body_rows) + "</table></div></div>"]
+                   "<th>proposal · class · score · suggested kind</th><th>signals</th><th>evidence</th><th>decision</th><th>decide</th></tr>" + "".join(body_rows) + "</table></div></div>"]
     if not rows:
         body.append("<div class='empty'>Nothing in this view.</div>")
     return _render(render, "Non-magazine review", body)

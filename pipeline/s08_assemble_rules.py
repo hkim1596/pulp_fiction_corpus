@@ -3524,9 +3524,13 @@ class Assembler:
             s["_rec"]["teaser_matches_contents"] = round(best[0], 2) if blurb else None
 
 
-def assemble(iid, pages, A, variant="rules", model=None):
+def assemble(iid, pages, A, variant="rules", model=None, kind="magazine", book=None):
     asm = Assembler(iid, pages, A).run()
     records = asm.records
+    book_summary = None
+    if kind == "book":                                 # 21 Oct 2026: an item of kind "book" is read as a book (s08_book)
+        import s08_book
+        records, book_summary = s08_book.book_mode(iid, records, A, (book or {}).get("title") or A.get("magazine"), (book or {}).get("author"), pages)
     if variant == "rules_on_model" and model:
         lo, hi = A.get("content_range") or A["folio_range"] or [min(pages), max(pages)]
         keep = [r for r in records if any(lo <= pn <= hi for pn in r["pages"]) or r["type"] == "toc"]
@@ -3565,6 +3569,7 @@ def assemble(iid, pages, A, variant="rules", model=None):
     double = [k for k, c in owned.items() if c > 1]
     return {"issue": iid, "backend": f"rules_v{VERSION}" if variant == "rules" else f"rules_v{VERSION}+model",
             "variant": variant, "built": time.strftime("%Y-%m-%dT%H:%M:%S"), "articles": records,
+            **({"kind": "book", "book": dict(book or {}, **(book_summary or {}))} if kind == "book" else {}),
             "furniture": asm.furniture, "unsorted": [{"key": k} for k in unassigned],
             "checks": {"unassigned_regions": len(unassigned), "double_owned_regions": len(double),
                        "records": len(records), "story_records": sum(1 for r in records if r["type"] == "story"),
@@ -3573,6 +3578,30 @@ def assemble(iid, pages, A, variant="rules", model=None):
                        "flags": sum(len(r["flags"]) for r in records),
                        "ad_classes": dict(Counter(r.get("ad_class") or "?" for r in records if r["type"] == "ad")),
                        "house_excerpts": sum(1 for r in records if r.get("contains_excerpt"))}}
+
+
+def issue_kind(iid, cfg_issue=None):
+    """('magazine', None) or ('book', {title, author}) for an item: the kind from the issue dict (a trial) or
+    config/corpus_kinds.json; a book's title and author from the archive's record and the selection's name."""
+    kind = (cfg_issue or {}).get("kind")
+    if not kind:
+        try:
+            from corpus_lib import corpus_kinds
+            kind = corpus_kinds().get(iid, "magazine")
+        except Exception:
+            kind = "magazine"
+    if kind != "book":
+        return "magazine", None
+    import s08_book
+    meta = {}
+    try:
+        meta = json.load(open(os.path.join(ROOT, "data", "raw", iid, "meta.json"), encoding="utf-8")).get("metadata") or {}
+    except (OSError, ValueError):
+        pass
+    creator = meta.get("creator")
+    creator = creator[0] if isinstance(creator, list) and creator else (creator if isinstance(creator, str) else None)
+    title, author = s08_book.book_title_author((cfg_issue or {}).get("magazine"), meta.get("title") if isinstance(meta.get("title"), str) else None, creator)
+    return "book", {"title": title, "author": author}
 
 
 def run_issue(iid, cfg_issue=None, log=print):
@@ -3584,11 +3613,12 @@ def run_issue(iid, cfg_issue=None, log=print):
     A["magazine"] = (cfg_issue or {}).get("magazine", "")
     model_path = os.path.join(ROOT, "data", "articles", iid, "articles.json")
     model = json.load(open(model_path, encoding="utf-8")) if os.path.exists(model_path) else None
+    kind, book = issue_kind(iid, cfg_issue)
     outs = {}
     for variant in ("rules", "rules_on_model"):
         if variant == "rules_on_model" and not model:
             continue
-        out = assemble(iid, pages, A, variant, model)
+        out = assemble(iid, pages, A, variant, model, kind=kind, book=book)
         d = os.path.join(ROOT, "data", "assembly_v2", variant, iid)
         os.makedirs(d, exist_ok=True)
         write_json_atomic(os.path.join(d, "articles.json"), out)

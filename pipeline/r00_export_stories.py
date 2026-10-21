@@ -51,6 +51,7 @@ def record_of(a, iid, meta):
         "cover_date": meta.get("cover_date"),
         "genre": meta.get("genre"),
         "format": meta.get("format"),
+        "kind": meta.get("kind") or "magazine",            # 21 Oct 2026: "magazine" (the protocol's corpus) or "book" (config/corpus_kinds.json)
         "type": a.get("type") or "other",
         "title": a.get("title"),
         "author": a.get("author"),
@@ -204,8 +205,11 @@ def export_corpus(ids=None, force=False, log=print):
     corpus = {i["id"]: i for i in json.load(open(os.path.join(ROOT, "config", "corpus_issues.json"), encoding="utf-8"))["issues"]}
     os.makedirs(CORPUS_EXPORT, exist_ok=True)
     try:
-        from corpus_lib import set_aside
+        from corpus_lib import set_aside, corpus_kinds
         aside = set_aside()                   # 19 Oct 2026: set-aside issues leave the export (and so the explorer and the reuse stages)
+        for iid, k in corpus_kinds().items():  # 21 Oct 2026: a book's records carry kind "book"
+            if iid in corpus:
+                corpus[iid] = dict(corpus[iid], kind=k)
     except Exception:
         aside = {}
     n = 0

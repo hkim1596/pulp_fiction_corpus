@@ -21,8 +21,9 @@ Writes config/verification_sample.json (tracked in git: the sample is part of th
 Safe to run again: the same seed and the same population give the same sample; a changed population changes it, so the
 file is drawn once and committed.
 
---replace (decision 1 of 19 October 2026: items that are not magazine issues leave corpus 1.0): every sampled issue
-that is now in config/corpus_set_aside.json is replaced by an assembled issue of the same decade-and-genre cell, chosen
+--replace (decision 1 of 19 October 2026, revised 21 October: items that are not magazine issues are sorted by kind):
+every sampled issue that is now in config/corpus_set_aside.json or of a kind other than magazine in
+config/corpus_kinds.json is replaced by an assembled issue of the same decade-and-genre cell, chosen
 at random (seeded by the slot's order number, so a rerun chooses the same) among the issues not yet in the sample. The
 replacement takes the slot's order number and second-reader mark; the issue it replaces is kept in the file under
 "replaced" with the reason. A cell the exclusion empties (every 1910s western was a Wild West Weekly number, say) gives
@@ -175,17 +176,22 @@ def main():
     ap.add_argument("--out", default=os.path.join(ROOT, "config", "verification_sample.json"))
     ap.add_argument("--replace", action="store_true", help="replace the sampled issues that are now set aside, within their cells")
     args = ap.parse_args()
-    from corpus_lib import corpus_config, all_states, set_aside
+    from corpus_lib import corpus_config, all_states, set_aside, corpus_kinds
     cfg = json.load(open(args.list, encoding="utf-8")) if args.list else corpus_config()
     issues = cfg["issues"]
     aside = set_aside()
-    issues = [i for i in issues if i["id"] not in aside]
+    kinds = corpus_kinds()                       # 21 Oct 2026: the sample is drawn from the magazine issues; books leave it too
+    issues = [i for i in issues if i["id"] not in aside and kinds.get(i["id"], "magazine") == "magazine"]
     if not args.any_state:
         states = all_states()
         issues = [i for i in issues if "assembled" in states.get(i["id"], {}).get("stages", {})]
     if args.replace:
         S = json.load(open(args.out, encoding="utf-8"))
-        new, changes = replace_set_aside(S, issues, aside, S.get("seed", args.seed))
+        leaving = dict(aside)
+        for i in S["issues"]:
+            if i["id"] not in leaving and kinds.get(i["id"], "magazine") != "magazine":
+                leaving[i["id"]] = {"id": i["id"], "class": f"kind: {kinds[i['id']]}", "reason": f"kind: {kinds[i['id']]} (not a magazine issue; it stays in the data)"}
+        new, changes = replace_set_aside(S, issues, leaving, S.get("seed", args.seed))
         if not changes:
             print("nothing to replace: no sampled issue is set aside"); return
         json.dump(new, open(args.out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
