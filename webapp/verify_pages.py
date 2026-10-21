@@ -291,15 +291,19 @@ def one_per_issue(lc=None):
 
 CONTENTS_CSS = """
 <style>
-.cc{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
-.ccscan{flex:1 1 380px;max-width:620px}
+.cc{display:grid;grid-template-columns:minmax(340px,44%) minmax(0,1fr);gap:14px;align-items:start}
+.ccscan{position:sticky;top:6px;max-height:calc(100vh - 12px);overflow:auto}
 .ccscan img{width:100%;border:1px solid var(--grid);border-radius:6px;background:#fff}
-.ccside{flex:2 1 560px;min-width:320px}
-.cct{width:100%;border-collapse:collapse;font-size:13px}
-.cct th,.cct td{padding:5px 7px;vertical-align:top;border-bottom:1px solid var(--grid)}
+.ccside{max-height:calc(100vh - 12px);overflow:auto;min-width:0}
+.cct{width:100%;border-collapse:collapse;font-size:12.5px}
+.cct th{position:sticky;top:0;background:var(--surface);z-index:1}
+.cct th,.cct td{padding:4px 6px;vertical-align:top;border-bottom:1px solid var(--grid)}
 .cct td.v{white-space:nowrap}
-.cct td.v label{margin-right:8px;cursor:pointer}
-.cct input.n{width:100%;font-family:inherit;font-size:12px}
+.cct td.v label{margin-right:6px;cursor:pointer}
+.cct td.r{font-size:12px}
+.cct input.n{width:90px;font-family:inherit;font-size:11.5px}
+.ccsave{position:sticky;bottom:0;background:var(--surface);padding:8px 0;border-top:1px solid var(--grid)}
+@media (max-width:900px){.cc{grid-template-columns:1fr}.ccscan{position:static;max-height:none}.ccside{max-height:none}}
 .ccbtns{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
 .ccbtns button,.ccbtns a.b{font-size:14px;padding:7px 14px;border:1px solid var(--grid2);background:var(--okbg);cursor:pointer;font-family:inherit;border-radius:8px;text-decoration:none;color:inherit}
 .ccbtns button.g{background:var(--surface2)}
@@ -354,19 +358,22 @@ def contents_page(iid, qs, user, render=None):
         pn = (prev.get(k) or {}).get("note") or ""
         if rec:
             fp = _first_page(rec)
-            rtxt = (f"<a href='/article/{_esc(rec['article_id'])}' target='_blank'>{_esc(rec.get('title') or '(untitled)')}</a>"
+            rtxt = (f"<a href='/article/{_esc(rec['article_id'])}' target='_blank' title='{html.escape(how or '', quote=True)}'>{_esc(rec.get('title') or '(untitled)')}</a>"
                     + (f" · {_esc(rec.get('author'))}" if rec.get("author") else " · <span class='muted'>no author</span>")
-                    + f" · {_esc(rec.get('type') or '')}"
+                    + f" · <span class='fine'>{_esc(rec.get('type') or '')}</span>"
                     + (f" · <a href='/issue/{_esc(iid)}/p/{fp}' target='_blank'>scan {fp}</a>" if fp else "")
-                    + f"<div class='fine'>{_esc(how or '')}" + (f" · {_esc(rec.get('status'))}" if rec.get("status") and rec.get("status") != "auto" else "") + "</div>")
+                    + (f" · <span class='fine'>{_esc(rec.get('status'))}</span>" if rec.get("status") and rec.get("status") != "auto" else "")
+                    + (" <span class='fine' style='color:var(--warn)'>(one page off)</span>" if how == "starts one page off" else "")
+                    + (" <span class='fine' style='color:var(--warn)'>(by title only)</span>" if how and how.startswith("a record with a title like it") else ""))
         else:
             rtxt = "<span class='muted'>no record found for it</span>" + (f" · <a href='/issue/{_esc(iid)}/p/{e['scan']}' target='_blank'>scan {e['scan']}</a>" if e.get("scan") else "")
-        radios = "".join(f"<label><input type='radio' name='v_{k}' value='{v}'{' checked' if pv == v else ''}{'' if can else ' disabled'}> {l}</label>"
-                         for v, l in VERDICTS.items())
+        short = {"right": "right", "fixed": "fixed", "missing": "missing", "na": "not a piece"}
+        radios = "".join(f"<label><input type='radio' name='v_{k}' value='{v}'{' checked' if pv == v else ''}{'' if can else ' disabled'}> {short[v]}</label>"
+                         for v in VERDICTS)
         rows.append(f"<tr><td class='num'>{k + 1}</td><td class='num'>{e.get('page') if e.get('page') is not None else ''}</td>"
-                    f"<td><b>{_esc(e.get('title') or '')}</b>" + (f"<br><span class='fine'>{_esc(e.get('author'))}</span>" if e.get("author") else "")
-                    + (f"<br><span class='fine'>{_esc(e.get('section'))}</span>" if e.get("section") else "") + f"</td><td>{_esc(e.get('type') or '')}</td>"
-                    f"<td>{rtxt}</td><td class='v'>{radios}</td><td><input class='n' name='n_{k}' value='{html.escape(pn, quote=True)}' placeholder='note'{'' if can else ' disabled'}></td></tr>")
+                    f"<td><b>{_esc(e.get('title') or '')}</b>" + (f" <span class='fine'>{_esc(e.get('author'))}</span>" if e.get("author") else "")
+                    + (f" <span class='fine'>· {_esc(e.get('section'))}</span>" if e.get("section") else "") + (f" <span class='fine'>· {_esc(e.get('type'))}</span>" if e.get("type") else "") + "</td>"
+                    f"<td class='r'>{rtxt}</td><td class='v'>{radios}</td><td><input class='n' name='n_{k}' value='{html.escape(pn, quote=True)}' placeholder='note'{'' if can else ' disabled'}></td></tr>")
     side = ["<div class='ccside'>"]
     side.append(f"<div class='ccbox'>{len(matched)} entries as the assembly read the contents page"
                 + (f" (scan {reading['toc_page']})" if reading.get("toc_page") else "") + f"; {sum(1 for _, r, _ in matched if r)} of them have a record the machine made for them; "
@@ -380,15 +387,15 @@ def contents_page(iid, qs, user, render=None):
     form_open = f"<form method='POST' action='/verify/contents' id='ccform'><input type='hidden' name='issue' value='{_esc(iid)}'>" if can else "<div>"
     form_close = "</form>" if can else "</div>"
     side.append(form_open)
-    side.append("<div style='overflow-x:auto'><table class='cct'><tr><th>#</th><th>p.</th><th>the entry (title, author, section)</th><th>type</th>"
-                "<th>the machine's record</th><th>verdict</th><th>note</th></tr>" + "".join(rows) + "</table></div>")
+    side.append("<table class='cct'><tr><th>#</th><th>p.</th><th>the entry (title · author · section · type)</th>"
+                "<th>the machine's record (title · author · type · first scan)</th><th>verdict</th><th>note</th></tr>" + "".join(rows) + "</table>")
     g = lambda k: (mine or {}).get(k, 0) or 0
     side.append("<div class='ccbox ccnum'>Entries the machine's reading of the contents page <b>missed</b>: "
                 f"<input name='missed' value='{g('missed')}'{'' if can else ' disabled'}> of which assembled right anyway: <input name='missed_right' value='{g('missed_right')}'{'' if can else ' disabled'}>"
                 f" &nbsp;·&nbsp; pieces in the issue the contents page does not list: <input name='unlisted' value='{g('unlisted')}'{'' if can else ' disabled'}></div>")
     side.append(f"<textarea class='ccnote' name='note' placeholder='A note on this issue (optional)'{'' if can else ' disabled'}>{_esc((mine or {}).get('note') or '')}</textarea>")
     if can:
-        side.append("<div class='ccbtns'><button type='button' class='g' id='allright'>Mark the unmarked entries RIGHT AS MADE</button>"
+        side.append("<div class='ccbtns ccsave'><button type='button' class='g' id='allright'>Mark the unmarked entries RIGHT AS MADE</button>"
                     "<button type='submit'>Save the check</button></div>"
                     "<script>document.getElementById('allright').addEventListener('click',function(){"
                     "document.querySelectorAll('#ccform tr').forEach(function(tr){var rs=tr.querySelectorAll(\"input[type=radio]\");"
