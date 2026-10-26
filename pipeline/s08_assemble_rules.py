@@ -56,7 +56,14 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from layout_order import order_region_keys
 from corpus_lib import write_json_atomic
 
-VERSION = "2.10"
+VERSION = "2.11"
+# 2.11 (2026-10-26, Claude in Sujin Kang's session): 2.10 typed a 'true story' and the unsigned pieces of an unsigned
+# contents page as stories at the contents stage; assembled as stories, they swallowed the advertisement or house
+# block at their feet, which the feature path cuts (True Detective Mysteries 1929-02 p.104, Short Stories 1925-06,
+# Galaxy 1954-02, Fantastic Universe 1954-12: 35 issues the guard refused for a flagged block, and the same fault in
+# issues it installed). 2.11 assembles both as features and retypes the records story once assembled (7a, 7b); an
+# unsigned piece is retyped only when the contents page names no authors at all or the page itself gives the author
+# (an unsigned department of Adventure stays a feature). The kinds are 2.10's; the grouping of boxes is 2.9's.
 # 2.10 (2026-10-26, Claude in Sujin Kang's session): from the 100 kind clicks and the notes of the completed level-1
 # check (150 issues, 21-25 October). A contents page that names no authors makes its unsigned entries stories, not
 # features (True Romances, 12 Sports Aces, the Illustrated Detective: 52 clicks); a 'true story' is a story (Sujin,
@@ -938,7 +945,14 @@ def parse_toc(pages):
 
 # the kinds of contents entries (rules 2.9; Sujin Kang's level-1 feedback of 21 October 2026, 31 issues checked)
 VERSE_SECTION_RE = re.compile(r"\bverses?\b|\bpoems?\b|\bpoetry\b|\bsongs\b|\bballads?\b|\brhymes?\b", re.I)
-NONFICTION_SECTIONS = re.compile(r"\barticles?\b|\bfacts?\b|non-?fiction|\bhints?\b|how-?to|\bquiz\b|\bpictorial\b|\bpictures?\b", re.I)
+NONFICTION_SECTIONS = re.compile(r"\barticles?\b|\btrue\b|\bfacts?\b|non-?fiction|\bhints?\b|how-?to|\bquiz\b|\bpictorial\b|\bpictures?\b", re.I)
+# a 'true story' is a story for the readers (Sujin Kang, 26 October 2026) but is assembled as a feature: typed story as a
+# story, True Detective's pieces swallowed the advertisement at their foot (the feature path cuts it); the record is
+# retyped story once assembled (rules 2.10)
+TRUE_STORY_RE = re.compile(r"\btrue\b", re.I)
+# an unsigned entry that names a department rather than a piece, on a contents page that names no authors
+DEPARTMENT_TITLE_RE = re.compile(r"\b(?:circle|services?|department|club|readers?|free to|mail|forum|notes?|news|talk|chat|corner|page|editorial|"
+                                 r"editor|letters?|contest|prize|answers?|questions?|review|reviews|calendar|index|cover)\b", re.I)
 # not a piece: a month, a volume line, the word CONTENTS with a month (rules 2.10)
 NOT_A_PIECE_RE = re.compile(r"^(?:contents\s+)?(?:january|february|march|april|may|june|july|august|september|october|november|december)"
                             r"(?:\s+\d{1,2})?(?:,?\s+\d{4})?$|^contents\b|^vol(?:ume|\.)?\s*[\divxlc]+[,.]?\s*(?:no\.?\s*[\d]+)?\b|^no\.\s*\d+$", re.I)
@@ -1083,6 +1097,8 @@ def type_toc_entries(entries):
         title = e.get("title") or ""
         nonfiction = NONFICTION_SECTIONS.search(s) or NONFICTION_SECTIONS.search(lab)
         story_section = STORY_WORDS.search(s) and not nonfiction
+        if TRUE_STORY_RE.search(s) or TRUE_STORY_RE.search(lab) or re.search(r"\(true (?:story|tale)\)", title, re.I):
+            e["true_story"] = True
         if re.search(r"\bclub\b|\bnext (?:issue|month|week)\b|coming next", title, re.I):
             e["type"] = "feature"                     # the publisher's own notice: the departments list makes it house
         elif VERSE_SECTION_RE.search(s) or VERSE_SECTION_RE.search(lab) or VERSE_RE.search(bl[:60]) or POEM_MARK_RE.search(title) \
@@ -1100,8 +1116,10 @@ def type_toc_entries(entries):
             e["type"] = "story"
         elif FEATURE_SECTIONS.search(s) or FEATURE_SECTIONS.search(lab):
             e["type"] = "feature"
-        elif not e["author"] and not story_section and not unsigned_contents:
+        elif not e["author"] and not story_section:
             e["type"] = "feature"                     # an unsigned short piece: a filler, a department
+            if unsigned_contents and not DEPARTMENT_TITLE_RE.search(title) and not FEATURE_SECTIONS.search(s):
+                e["unsigned_story"] = "all" if signed == 0 else True   # ... but on a contents page that names no authors, a story: retyped once assembled
         else:
             e["type"] = "story"
     return entries
@@ -2253,6 +2271,19 @@ class Assembler:
             if len(SIGNATURE_RE.findall(txt)) < 2:
                 rec["type"] = "feature"
                 rec["flags"].append("typed feature: an editor's column with no signed letters")
+        # 7a. a 'true story' or '(True Tale)' is a story for the readers (Sujin Kang, 26 October 2026), assembled as a feature
+        if rec["type"] == "feature" and (rec.get("toc") or {}).get("true_story"):
+            rec["type"] = "story"
+            rec["flags"].append("typed story: a true story (assembled as a feature)")
+        # 7b. an unsigned piece of a contents page that names no authors is the magazine's ordinary piece, a story
+        # (True Romances, 12 Sports Aces, the Illustrated Detective: 52 of Sujin Kang's kind clicks), assembled as a
+        # feature — typed story at the contents stage, the stories swallowed the advertisements at their feet
+        # (when the contents page names some authors, only a piece whose author the page itself gives is retyped: an
+        # unsigned department of Adventure stays a feature)
+        if rec["type"] == "feature" and (rec.get("toc") or {}).get("unsigned_story") and not rec.get("department") \
+                and ((rec.get("toc") or {}).get("unsigned_story") == "all" or rec.get("author")):
+            rec["type"] = "story"
+            rec["flags"].append("typed story: an unsigned piece of a contents page without authors (assembled as a feature)")
         # 7. the contents page's 'Verse' label can sit under the entry it belongs to (Weird Tales, 1927-1932):
         # a poem by the contents whose text is prose is a story; a short story whose text is verse is a poem
         # (rules 2.10; 20 of Sujin Kang's 100 kind clicks of 24-25 October)
@@ -3665,7 +3696,7 @@ class Assembler:
         if title and title.upper() == title:
             title = title_case(title)                      # the printed capitals are kept as title_as_printed
         rec = self.new(typ, title=title, author=author, page=pno,
-                       toc=({k: toc.get(k) for k in ("title", "author", "page", "type", "blurb")} if toc else None))
+                       toc=({k: toc.get(k) for k in ("title", "author", "page", "type", "blurb", "true_story", "unsigned_story") if k in toc} if toc else None))
         if s.get("facing_title"):
             facing = s["facing_title"]
             self.steal(rec, facing["page"], facing["idx"], "title")

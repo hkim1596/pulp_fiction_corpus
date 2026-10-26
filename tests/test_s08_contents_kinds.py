@@ -24,11 +24,15 @@ class Kinds(unittest.TestCase):
     def test_articles_hints_and_quizzes_are_features_true_stories_are_stories(self):
         a, b, c, d = typed(E("Let's Finish the Lindbergh Case!", "Cecil Carnes", "ARTICLES"), E("Winter of Hell", "Will Watson", "a True Story"),
                            E("Fencing with Singlesticks", "Prof. Fairfax", "HELPFUL HINTS"), E("Know Your West, a Quiz", "Rattlesnake Robert", "DEPARTMENTS"))
-        self.assertEqual([x["type"] for x in (a, b, c, d)], ["feature", "story", "feature", "feature"])     # Sujin, 26 October: a true story is a story
+        self.assertEqual([x["type"] for x in (a, b, c, d)], ["feature", "feature", "feature", "feature"])
+        self.assertTrue(b.get("true_story"))          # Sujin, 26 October: a true story is a story — retyped once assembled (the feature path cuts the advertisement at its foot)
+        e, = typed(E("Seventy-Eight Years Ago (True Tale)", "William S. Lee", "SHORT STORIES"))
+        self.assertTrue(e.get("true_story"))
 
     def test_an_unsigned_contents_page_lists_stories(self):
-        es = typed(E("THE RED-LIGHT EXPRESS"), E("BASKET LARCENY"), E("KILL THE CHAMP!"), E("PIGSKIN PAY DIRT"), E("FIGHT FEVER"))
-        self.assertEqual([x["type"] for x in es], ["story"] * 5)
+        es = typed(E("THE RED-LIGHT EXPRESS"), E("BASKET LARCENY"), E("KILL THE CHAMP!"), E("PIGSKIN PAY DIRT"), E("FIGHT FEVER"), E("SPORTS QUIZ PAGE"))
+        self.assertEqual([x["type"] for x in es], ["feature"] * 6)               # assembled as features...
+        self.assertEqual([x.get("unsigned_story") for x in es], ["all"] * 5 + [None])   # ...retyped story once assembled; a department is not
         es = typed(E("Pawn of the Unseen", "Lyon Mearson"), E("Spirit Tales"), E("The Flaming Curse", "Paul Jacobs"), E("Guided by a Phantom Hound", "Bob Swift"))
         self.assertEqual(es[1]["type"], "feature")                     # a signed contents page: an unsigned entry is a filler
 

@@ -1612,3 +1612,23 @@ not list); the figure counts the sample as it stands; the workbench chooses segm
 chip, by Space, and gives a role to the chosen cards by a number key or the bar at the top (Sujin, 22 October: "one by
 one is hard"). 304 tests. Next: patch 0019 applied, 2.10 over the corpus, the ~12 slots marked and redrawn, the
 replacements checked, the figure recomputed and frozen.
+
+### 2026-10-26, 10:30–13:00 KST — rules 2.10 over the corpus; a regression found in its refusals; rules 2.11
+
+P52ad (09:35–10:24): the upgrade to 2.10 over every assembled issue — 6,940 of 7,337 installed, 397 refused; the
+cross-issue pass after it, 1,362 magazines linked. Against 2.9's refusals: 354 the same, 13 released, **43 new**. The
+43 were re-assembled in the session (the layout pages through the data door; the 2.9 rules file against a fresh
+candidate; scripts/upgrade_continuity.py preserve_links): 35 are advertisement or house blocks flagged by the
+cross-issue pass as quoting a story, and in 2.10 the block is **inside the story that precedes it** (True Detective
+Mysteries 1929-02, the International Correspondence Schools coupon at the foot of "Inside Story of George Remus";
+Short Stories 1925-06; Galaxy 1954-02; Fantastic Universe 1954-12; Adventure 1921-11). Bisecting 2.10's changes one by
+one: the cause is typing — a 'true story' (decision 3) and the unsigned pieces of an unsigned contents page (the 52
+clicks) became stories at the contents stage, and the story path keeps a block at its foot that the feature path cuts.
+A weakness of the story path, masked until now because those pieces were features. So 2.10's installed issues carry the
+same fault wherever a true-story section or an unsigned contents page occurs: **rules 2.11** assembles both as
+features and retypes the records story once assembled (an unsigned piece only when the contents page names no authors
+at all or the page gives the author; Adventure's unsigned departments stay features). On the eight refused issues
+re-assembled with 2.11, seven are accepted; the eighth (Weird Tales 1950-01, a subscription notice inside "Dark
+Rosaleen") is the old A kind, the same under 2.9 in the session. 304 tests. Next: 2.11 over the corpus (patch 0020),
+then the kinds from the level-1 checks (P52ae). The remaining refusals — 342 old (2.6/2.7), a few dozen flagged
+blocks — are reported by backend in the manifest, not fixed.
