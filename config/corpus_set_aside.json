@@ -2,7 +2,7 @@
  "_comment": "Issues of the approved list set aside after the download (p50t; Heejin, 14 October 2026: 'Fetch the real scans, set the rest aside'). They stay in the approved list (its fingerprint is untouched); corpus_lib.set_aside() keeps every stage off them; the datasheet counts them by reason. Made by scripts/missing_issues.py from the run's events and the archive's item records.",
  "decided_by": "Heejin Kim",
  "decided": "2026-10-14",
- "written": "2026-10-26T14:54:33",
+ "written": "2026-10-26T18:42:41",
  "issues": [
   {
    "id": "about_the_pulps_newsletters__undated_aboutpulps",
@@ -4652,6 +4652,20 @@
    "decided_by": "Sujin Kang",
    "decided": "2026-10-26",
    "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "monstroid_undated_onstroid01",
+   "ia_identifier": "MONSTROID_01",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period, as the note of 26 October 17:19 says ('does not appear to fall within the pulp fiction corpus'; the click said magazine); appended by P52aj"
   }
  ],
  "decisions": [
@@ -4693,6 +4707,15 @@
    "added": 60,
    "by_class": {
     "outside the period": 60
+   },
+   "source": "/review/nonmagazine clicks, applied by scripts/apply_kinds.py"
+  },
+  {
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "added": 1,
+   "by_class": {
+    "outside the period": 1
    },
    "source": "/review/nonmagazine clicks, applied by scripts/apply_kinds.py"
   }

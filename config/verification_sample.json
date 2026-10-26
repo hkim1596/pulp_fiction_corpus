@@ -704,16 +704,16 @@
   },
   {
    "order": 31,
-   "id": "monstroid_undated_onstroid01",
-   "ia_identifier": "MONSTROID_01",
-   "magazine": "MONSTROID",
+   "id": "ghosts_and_goblins_1_undated_ndgoblins1",
+   "ia_identifier": "Ghosts_and_Goblins_1",
+   "magazine": "Ghosts and Goblins 1",
    "cover_date": "undated",
    "decade": "undated",
    "genre": "weird",
    "genre_as_filed": "weird",
    "second_reader": false,
-   "replaces": "horrorhound_undated_orhound002",
-   "replaced_on": "2026-10-26T14:54:33"
+   "replaces": "monstroid_undated_onstroid01",
+   "replaced_on": "2026-10-26T18:42:42"
   },
   {
    "order": 32,
@@ -3135,12 +3135,28 @@
    "cell_fallback": "the 1890s / general cell is empty after the exclusion: drawn from the genre",
    "replaced_reason": "outside the period: a reprint, fanzine or magazine from after the period",
    "replaced_by": "the_popular_magazine_1925_12_0519251220"
+  },
+  {
+   "order": 31,
+   "id": "monstroid_undated_onstroid01",
+   "ia_identifier": "MONSTROID_01",
+   "magazine": "MONSTROID",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "weird",
+   "genre_as_filed": "weird",
+   "second_reader": false,
+   "replaces": "horrorhound_undated_orhound002",
+   "replaced_on": "2026-10-26T18:42:42",
+   "replaced_reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "replaced_by": "ghosts_and_goblins_1_undated_ndgoblins1"
   }
  ],
  "replacements_on": [
   "2026-10-21T10:33:52",
   "2026-10-26T12:10:38",
   "2026-10-26T13:24:07",
-  "2026-10-26T14:54:33"
+  "2026-10-26T14:54:33",
+  "2026-10-26T18:42:42"
  ]
 }
