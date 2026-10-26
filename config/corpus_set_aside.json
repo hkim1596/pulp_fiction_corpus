@@ -2,7 +2,7 @@
  "_comment": "Issues of the approved list set aside after the download (p50t; Heejin, 14 October 2026: 'Fetch the real scans, set the rest aside'). They stay in the approved list (its fingerprint is untouched); corpus_lib.set_aside() keeps every stage off them; the datasheet counts them by reason. Made by scripts/missing_issues.py from the run's events and the archive's item records.",
  "decided_by": "Heejin Kim",
  "decided": "2026-10-14",
- "written": "2026-10-26T12:10:38",
+ "written": "2026-10-26T13:24:06",
  "issues": [
   {
    "id": "about_the_pulps_newsletters__undated_aboutpulps",
@@ -3744,6 +3744,67 @@
    ],
    "decided_by": "Sujin Kang",
    "decided": "2026-10-26"
+  },
+  {
+   "id": "argosy_1891_04_1n04189104",
+   "ia_identifier": "argosy_v51n04_1891.04",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "N1",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  {
+   "id": "frank_frazetta_fantasy_illus_undated_lustrated3",
+   "ia_identifier": "Frank_Frazetta_Fantasy_Illustrated_3",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "S1",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  {
+   "id": "ilaria_1907_07_ilaria4",
+   "ia_identifier": "ilaria-4",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "N1",
+    "N3",
+    "M4",
+    "S1"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  {
+   "id": "thrilling_wonder_stories_1938_10_2n02193810",
+   "ia_identifier": "Thrilling_Wonder_Stories_v12n02_1938-10",
+   "class": "not a text",
+   "reason": "not a text: an index, a checklist, a cover gallery or another item without reading text",
+   "kind_by_rule": "book",
+   "signals": [
+    "N1",
+    "N4",
+    "A2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
   }
  ],
  "decisions": [
@@ -3765,6 +3826,17 @@
    "added": 5,
    "by_class": {
     "excerpt of a magazine": 5
+   },
+   "source": "/review/nonmagazine clicks, applied by scripts/apply_kinds.py"
+  },
+  {
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "added": 4,
+   "by_class": {
+    "excerpt of a magazine": 2,
+    "outside the period": 1,
+    "not a text": 1
    },
    "source": "/review/nonmagazine clicks, applied by scripts/apply_kinds.py"
   }

@@ -5157,7 +5157,160 @@
    "decided_by": "Sujin Kang",
    "decided": "2026-10-26",
    "note": "from the contents check"
+  },
+  "argosy_1897_03_oundvolume": {
+   "kind": "volume",
+   "ia_identifier": "Argosy_v23n06_1897-03.Munsey_from_bound_volume",
+   "magazine": "Argosy",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  "blue_and_gray_weekly_1904_08_o119040812": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._1_1904-08-12",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "book, as the note of 26 October 11:05 says (the click said magazine); appended by P52ag"
+  },
+  "blue_and_gray_weekly_1904_12_1919041216": {
+   "kind": "book",
+   "ia_identifier": "Blue_And_Gray_Weekly_no._19_1904-12-16",
+   "magazine": "Blue And Gray Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "book, as the note of 26 October 11:05 says (the click said magazine); appended by P52ag"
+  },
+  "horrophobic_undated_ophobicno1": {
+   "kind": "book",
+   "ia_identifier": "Horrophobic_No.1",
+   "magazine": "Horrophobic",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  "multum_in_parvo_library_1894_11_1villanova": {
+   "kind": "book",
+   "ia_identifier": "multum-in-parvo-library-v-01n-11-1894-11-villanova",
+   "magazine": "Multum In Parvo Library",
+   "class_by_rule": null,
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  "rohmer_1916_drfumanchu": {
+   "kind": "book",
+   "ia_identifier": "rohmer-1916-the-return-of-dr-fu-manchu",
+   "magazine": "Rohmer",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  "short_stories_1891_02_3coversads": {
+   "kind": "volume",
+   "ia_identifier": "ShortStoriesV005189102To189103CoversAds",
+   "magazine": "Short Stories",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  "short_stories_1891_04_6coversads": {
+   "kind": "volume",
+   "ia_identifier": "ShortStoriesV006189104To189106CoversAds",
+   "magazine": "Short Stories",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  "short_stories_1891_07_9coversads": {
+   "kind": "volume",
+   "ia_identifier": "ShortStoriesV007189107To189109CoversAds",
+   "magazine": "Short Stories",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  "the_english_illustrated_maga_1899_04_04to189909": {
+   "kind": "volume",
+   "ia_identifier": "the-english-illustrated-magazine-v-21-1899-04-to-1899-09",
+   "magazine": "The English Illustrated Magazine",
+   "class_by_rule": "book",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  "wild_west_weekly_1907_12_1227tousey": {
+   "kind": "book",
+   "ia_identifier": "Wild_West_Weekly_-_271_1907-12-27.Tousey",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "book, as the note of 26 October 11:05 says (the click said magazine); appended by P52ag"
+  },
+  "wild_west_weekly_1918_06_ly19180621": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-1918-06-21",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "book, as the note of 26 October 11:05 says (the click said magazine); appended by P52ag"
+  },
+  "wild_west_weekly_n0074_1904_03_7419040318": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0074-1904-03-18",
+   "magazine": "Wild West Weekly n0074",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "book, as the note of 26 October 11:05 says (the click said magazine); appended by P52ag"
+  },
+  "wild_west_weekly_n0113_1904_12_1319041216": {
+   "kind": "book",
+   "ia_identifier": "wild-west-weekly-n-0113-1904-12-16",
+   "magazine": "Wild West Weekly n0113",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "book, as the note of 26 October 11:05 says (the click said magazine); appended by P52ag"
+  },
+  "wild_west_weekly_undated_tweekly531": {
+   "kind": "book",
+   "ia_identifier": "Wild_West_Weekly_-_531",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "book, as the note of 26 October 11:05 says (the click said magazine); appended by P52ag"
+  },
+  "wild_west_weekly_undated_tweekly536": {
+   "kind": "book",
+   "ia_identifier": "Wild_West_Weekly_-_536",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "book, as the note of 26 October 11:05 says (the click said magazine); appended by P52ag"
+  },
+  "wild_west_weekly_undated_tweekly539": {
+   "kind": "book",
+   "ia_identifier": "Wild_West_Weekly_-_539",
+   "magazine": "Wild West Weekly",
+   "class_by_rule": "dime novel",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "book, as the note of 26 October 11:05 says (the click said magazine); appended by P52ag"
   }
  },
- "written": "2026-10-26T12:10:38"
+ "written": "2026-10-26T13:24:06"
 }
