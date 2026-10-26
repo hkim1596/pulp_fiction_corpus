@@ -2,7 +2,7 @@
  "_comment": "Issues of the approved list set aside after the download (p50t; Heejin, 14 October 2026: 'Fetch the real scans, set the rest aside'). They stay in the approved list (its fingerprint is untouched); corpus_lib.set_aside() keeps every stage off them; the datasheet counts them by reason. Made by scripts/missing_issues.py from the run's events and the archive's item records.",
  "decided_by": "Heejin Kim",
  "decided": "2026-10-14",
- "written": "2026-10-21T10:33:51",
+ "written": "2026-10-26T12:10:38",
  "issues": [
   {
    "id": "about_the_pulps_newsletters__undated_aboutpulps",
@@ -3662,6 +3662,88 @@
    ],
    "decided_by": "Sujin Kang",
    "decided": "2026-10-21"
+  },
+  {
+   "id": "argosy_1897_08_oundvolume",
+   "ia_identifier": "Argosy_v25n01_1897-08.Munsey_from_bound_volume",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "N1",
+    "N4",
+    "A2",
+    "A3",
+    "A5"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  {
+   "id": "earth_s_last_citadel_c_l_moo_1943_serial1943",
+   "ia_identifier": "moorec.l.kuttnerhenryearthslastcitadelargosyserial1943",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "N3",
+    "S2",
+    "S3",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26"
+  },
+  {
+   "id": "star_weekly_novel_1953_05_lsendetour",
+   "ia_identifier": "star-weekly-novel-1953-05-30-helen-nielsen-detour",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "not a fiction magazine",
+   "signals": [
+    "N1",
+    "N3",
+    "M9",
+    "N4",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "from the contents check"
+  },
+  {
+   "id": "the_human_pets_of_mars_1936_10_petsofmars",
+   "ia_identifier": "TheHumanPetsOfMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26"
+  },
+  {
+   "id": "yellow_men_of_mars_undated_wmenofmars",
+   "ia_identifier": "YellowMenOfMars",
+   "class": "excerpt of a magazine",
+   "reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "M4",
+    "M11",
+    "S1",
+    "A3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26"
   }
  ],
  "decisions": [
@@ -3674,6 +3756,15 @@
     "outside the period": 57,
     "comic": 43,
     "not a text": 8
+   },
+   "source": "/review/nonmagazine clicks, applied by scripts/apply_kinds.py"
+  },
+  {
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "added": 5,
+   "by_class": {
+    "excerpt of a magazine": 5
    },
    "source": "/review/nonmagazine clicks, applied by scripts/apply_kinds.py"
   }

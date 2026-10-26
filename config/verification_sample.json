@@ -691,14 +691,16 @@
   },
   {
    "order": 30,
-   "id": "argosy_1897_08_oundvolume",
-   "ia_identifier": "Argosy_v25n01_1897-08.Munsey_from_bound_volume",
+   "id": "argosy_1894_12_ctocadsibc",
+   "ia_identifier": "TheArgosyV19n03189412IfcTocAdsIbc",
    "magazine": "Argosy",
-   "cover_date": "1897-08",
+   "cover_date": "1894-12",
    "decade": "1890s",
    "genre": "general",
    "genre_as_filed": "general",
-   "second_reader": true
+   "second_reader": true,
+   "replaces": "argosy_1897_08_oundvolume",
+   "replaced_on": "2026-10-26T12:10:38"
   },
   {
    "order": 31,
@@ -1211,14 +1213,16 @@
   },
   {
    "order": 74,
-   "id": "star_weekly_novel_1953_05_lsendetour",
-   "ia_identifier": "star-weekly-novel-1953-05-30-helen-nielsen-detour",
-   "magazine": "Star Weekly Novel",
-   "cover_date": "1953-05",
+   "id": "this_week_magazine_1952_10_ne19521005",
+   "ia_identifier": "this-week-magazine-1952-10-05",
+   "magazine": "This Week Magazine",
+   "cover_date": "1952-10",
    "decade": "1950s",
    "genre": "other",
    "genre_as_filed": "unsorted",
-   "second_reader": false
+   "second_reader": false,
+   "replaces": "star_weekly_novel_1953_05_lsendetour",
+   "replaced_on": "2026-10-26T12:10:38"
   },
   {
    "order": 75,
@@ -1939,14 +1943,16 @@
   },
   {
    "order": 136,
-   "id": "whiz21may_p5_1921_whiz21may",
-   "ia_identifier": "whiz21may",
-   "magazine": "whiz21may p5",
-   "cover_date": "1921",
+   "id": "the_quirt_1921_10_irtoct1921",
+   "ia_identifier": "TheQuirtOct.1921",
+   "magazine": "The Quirt",
+   "cover_date": "1921-10",
    "decade": "1920s",
    "genre": "other",
    "genre_as_filed": "humor",
-   "second_reader": false
+   "second_reader": false,
+   "replaces": "whiz21may_p5_1921_whiz21may",
+   "replaced_on": "2026-10-26T12:10:38"
   },
   {
    "order": 137,
@@ -1974,14 +1980,16 @@
   },
   {
    "order": 139,
-   "id": "two_western_action_books_undated_ctionbooks",
-   "ia_identifier": "two-western-action-books",
-   "magazine": "Two Western-Action Books",
+   "id": "western_novel_and_short_stor_undated_ortstories",
+   "ia_identifier": "western-novel-and-short-stories",
+   "magazine": "Western Novel and Short Stories",
    "cover_date": "undated",
    "decade": "undated",
    "genre": "western",
    "genre_as_filed": "western",
-   "second_reader": false
+   "second_reader": false,
+   "replaces": "two_western_action_books_undated_ctionbooks",
+   "replaced_on": "2026-10-26T12:10:38"
   },
   {
    "order": 140,
@@ -2711,9 +2719,66 @@
    "replaced_reason": "kind: book (not a magazine issue; it stays in the data)",
    "replaced_by": "argosy_1891_04_0425covers",
    "cell_fallback": "the 1890s / science fiction cell is empty after the exclusion: drawn from the decade"
+  },
+  {
+   "order": 30,
+   "id": "argosy_1897_08_oundvolume",
+   "ia_identifier": "Argosy_v25n01_1897-08.Munsey_from_bound_volume",
+   "magazine": "Argosy",
+   "cover_date": "1897-08",
+   "decade": "1890s",
+   "genre": "general",
+   "genre_as_filed": "general",
+   "second_reader": true,
+   "replaced_on": "2026-10-26T12:10:38",
+   "replaced_reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "replaced_by": "argosy_1894_12_ctocadsibc"
+  },
+  {
+   "order": 74,
+   "id": "star_weekly_novel_1953_05_lsendetour",
+   "ia_identifier": "star-weekly-novel-1953-05-30-helen-nielsen-detour",
+   "magazine": "Star Weekly Novel",
+   "cover_date": "1953-05",
+   "decade": "1950s",
+   "genre": "other",
+   "genre_as_filed": "unsorted",
+   "second_reader": false,
+   "replaced_on": "2026-10-26T12:10:38",
+   "replaced_reason": "excerpt of a magazine: pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus",
+   "replaced_by": "this_week_magazine_1952_10_ne19521005"
+  },
+  {
+   "order": 136,
+   "id": "whiz21may_p5_1921_whiz21may",
+   "ia_identifier": "whiz21may",
+   "magazine": "whiz21may p5",
+   "cover_date": "1921",
+   "decade": "1920s",
+   "genre": "other",
+   "genre_as_filed": "humor",
+   "second_reader": false,
+   "replaced_on": "2026-10-26T12:10:38",
+   "replaced_reason": "kind: book (not a magazine issue; it stays in the data)",
+   "replaced_by": "the_quirt_1921_10_irtoct1921"
+  },
+  {
+   "order": 139,
+   "id": "two_western_action_books_undated_ctionbooks",
+   "ia_identifier": "two-western-action-books",
+   "magazine": "Two Western-Action Books",
+   "cover_date": "undated",
+   "decade": "undated",
+   "genre": "western",
+   "genre_as_filed": "western",
+   "second_reader": false,
+   "replaced_on": "2026-10-26T12:10:38",
+   "replaced_reason": "kind: book (not a magazine issue; it stays in the data)",
+   "replaced_by": "western_novel_and_short_stor_undated_ortstories"
   }
  ],
  "replacements_on": [
-  "2026-10-21T10:33:52"
+  "2026-10-21T10:33:52",
+  "2026-10-26T12:10:38"
  ]
 }
