@@ -1632,3 +1632,14 @@ re-assembled with 2.11, seven are accepted; the eighth (Weird Tales 1950-01, a s
 Rosaleen") is the old A kind, the same under 2.9 in the session. 304 tests. Next: 2.11 over the corpus (patch 0020),
 then the kinds from the level-1 checks (P52ae). The remaining refusals — 342 old (2.6/2.7), a few dozen flagged
 blocks — are reported by backend in the manifest, not fixed.
+
+### 2026-10-26, 12:30 KST — rules 2.11 over the corpus; the kinds from the level-1 checks applied (first pass)
+
+P52af (10:40–12:02): the upgrade to 2.11 over every assembled issue — **6,963 of 7,337 installed, 374 refused**
+(against 2.10: one new refusal, 23 released; the regression's issues came through); the cross-issue pass after it,
+1,362 magazines linked. P52ae (12:10) applied the first marks of the check page: 2 books and 5 excerpts, 4 sample
+slots redrawn. Nine of Sujin's marks did not reach the files: the items were KEEP rows of the candidate table that the
+review page does not show, and apply_kinds skipped a KEEP row whatever the log said — fixed (a decided row counts);
+and the bulk click of 10:30 on nine Wild West Weekly and Blue and Gray Weekly numbers, meant as BOOK, had been
+corrected to "magazine" (her note says BOOK), which took the nine out of the books: corrected in the log by the next
+paste from her note. Second pass to follow (P52ag).

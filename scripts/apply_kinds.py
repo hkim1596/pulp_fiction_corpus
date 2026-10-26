@@ -107,7 +107,9 @@ def decide(table_path=TABLE, log_path=LOG, accept_proposed=False, selection_rows
             items.append({"id": iid, "proposed": "LOOK", "class": None, "ia_identifier": (selection_rows or {}).get(iid, {}).get("ia_identifier"),
                           "magazine": (selection_rows or {}).get(iid, {}).get("magazine"), "signals": []})
     for it in items:
-        if it.get("proposed") == "KEEP" and not it.get("in_sample"):
+        # a KEEP row the table does not show is skipped — unless someone decided it anyway (the contents-check page
+        # since v0.27.0: Fu Manchu 1916, Horrophobic, Multum in Parvo were KEEP rows; 26 October)
+        if it.get("proposed") == "KEEP" and not it.get("in_sample") and it["id"] not in D:
             continue
         rows[it["id"]] = it
         d = (D.get(it["id"]) or {}).get("decision")

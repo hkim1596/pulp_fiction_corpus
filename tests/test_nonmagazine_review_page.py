@@ -102,11 +102,12 @@ class Page(unittest.TestCase):
         kd = json.load(open(kp, encoding="utf-8"))
         self.assertEqual(kd["kinds"]["plattner"]["kind"], "book")
         self.assertEqual(kd["kinds"]["plattner"]["note"], "a collection")
-        a2, skipped = AK.write_set_aside(reasons, rows, D, "Sujin Kang", "2026-10-21", path=sp, selection={"wild_west", "plattner", "jim_jam"})
-        self.assertEqual([e["id"] for e in a2], ["wild_west"])
-        self.assertEqual(a2[0]["class"], "excerpt of a magazine")
-        a2, skipped = AK.write_set_aside(reasons, rows, D, "Sujin Kang", "2026-10-21", path=sp, selection={"wild_west"})
-        self.assertEqual((a2, skipped), ([], ["wild_west"]))
+        # argosy_x, a KEEP row the table does not show, was decided (an excerpt): since 26 October it counts too
+        a2, skipped = AK.write_set_aside(reasons, rows, D, "Sujin Kang", "2026-10-21", path=sp, selection={"wild_west", "plattner", "jim_jam", "argosy_x"})
+        self.assertEqual([e["id"] for e in a2], ["argosy_x", "wild_west"])
+        self.assertEqual(a2[1]["class"], "excerpt of a magazine")
+        a2, skipped = AK.write_set_aside(reasons, rows, D, "Sujin Kang", "2026-10-21", path=sp, selection={"wild_west", "argosy_x"})
+        self.assertEqual((a2, sorted(skipped)), ([], ["argosy_x", "wild_west"]))
         # a kind changed back to magazine leaves the file
         kinds["plattner"] = "magazine"
         added, changed = AK.write_kinds(kinds, rows, D, "Sujin Kang", "2026-10-21", path=kp)
