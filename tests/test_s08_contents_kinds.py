@@ -118,3 +118,34 @@ class Repairs(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Cover(unittest.TestCase):
+    def page(self, texts, labels=None):
+        regs = [{"label": (labels or ["Text"] * len(texts))[i], "text": t, "bbox": [0, 60 * i, 1000, 60 * i + 50], "order": i} for i, t in enumerate(texts)]
+        return {"page": 1, "width": 1000, "height": 1600, "regions": regs}
+
+    def test_a_cover_scores_and_a_text_page_does_not(self):
+        cover = self.page(["WEIRD TALES", "25¢", "NOVEMBER 1949", "THE UNDERBODY by Allison V. Harding", "The Unique Magazine"], ["SectionHeader", "Text", "Text", "Text", "Text"])
+        score, ev = R.cover_page_score(cover, "Weird Tales")
+        self.assertGreaterEqual(score, 3)
+        self.assertIn("the magazine's name", ev)
+        body = self.page([("It was a strange old structure, and the strangest part of it was that green opaque window which looked out upon the street, " * 6)] * 2)
+        self.assertEqual(R.cover_page_score(body, "Weird Tales")[0], 0)
+        self.assertEqual(R.first_scan_kind({1: cover}, "Weird Tales")[0], "cover")
+        self.assertEqual(R.first_scan_kind({1: body}, "Weird Tales")[0], "body")
+        contents = self.page(["THE BLACK CAT", "CONTENTS", "The Mystery of the Pit ..... 1", "A Strange Voyage ..... 12", "The Last Word ..... 30", "5 cents"])
+        self.assertEqual(R.first_scan_kind({1: contents}, "The Black Cat")[0], "contents")
+        self.assertEqual(R.first_scan_kind({}, "x")[0], "blank")
+
+    def test_the_cover_is_never_the_contents_page(self):
+        import toc_folio as T
+        cover = self.page(["THE BLACK CAT", "5 cents", "MARCH 1897", "The Mystery of the Pit ..... 1", "A Strange Voyage ..... 12", "The Last Word ..... 30", "Another Tale ..... 44"])
+        self.assertTrue(T.looks_like_cover(cover, "The Black Cat"))
+        body = self.page([("It was a strange old structure, and the strangest part of it was that green opaque window which looked out upon the street, " * 6)] * 2)
+        self.assertFalse(T.looks_like_cover(body, "The Black Cat"))
+        body["page"] = 2
+        entries, toc_pages = T.find_contents({1: cover, 2: body}, None, magazine="The Black Cat")
+        self.assertEqual(toc_pages, [])                                  # the contents list on the cover is not read ...
+        entries, toc_pages = T.find_contents({1: cover, 2: body}, None, magazine="The Black Cat", force_scan=1)
+        self.assertEqual(toc_pages, [1])                                 # ... unless a reader names that scan

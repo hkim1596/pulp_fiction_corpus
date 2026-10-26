@@ -1010,7 +1010,26 @@ def contents_score(p, entries, maxpage):
     return score, word
 
 
-def find_contents(pages, maxpage=None, front=16, force_scan=None):
+COVER_MARK_RE = re.compile(r"\b\d{1,2}\s?(?:c|¢|cents)\b|\$\s?\d|\b(?:price|per copy)\b|\b(?:1[89]|20)\d\d\b|"
+                           r"\b(?:january|february|march|april|may|june|july|august|september|october|november|december)\b|\bvol(?:ume|\.)\s*[\divxlc]+", re.I)
+
+
+def looks_like_cover(p, magazine=None):
+    """A cover: display lines, a price or a date, no running prose. Sujin Kang, 26 October 2026: the cover is not
+    read as a contents page — it names the pieces the publisher wants to sell, not the pieces the issue holds."""
+    texts = [" ".join((region_text_for_toc(r) or "").split()) for r in (p.get("regions") or [])]
+    texts = [t for t in texts if t]
+    if not texts:
+        return False
+    if any(len(t.split()) >= 80 for t in texts):
+        return False
+    short = sum(1 for t in texts if len(t.split()) <= 12)
+    joined = "\n".join(texts)
+    named = bool(magazine) and any(norm(magazine) and norm(magazine) in norm(t) for t in texts if len(t.split()) <= 10)
+    return short >= max(3, 0.6 * len(texts)) and (named or bool(COVER_MARK_RE.search(joined)))
+
+
+def find_contents(pages, maxpage=None, front=16, force_scan=None, magazine=None):
     """The contents page(s): the best-scoring page among the first `front` scans (and the last three, where a
     few magazines print it), plus a neighbouring page that continues it. With force_scan (a reader's word on the
     check page, config/toc_page_overrides.json; toc_folio 1.4) that scan is the contents page whatever it scores."""
@@ -1021,6 +1040,8 @@ def find_contents(pages, maxpage=None, front=16, force_scan=None):
     best = None
     parsed = {}
     for s in look:
+        if force_scan is None and s == scans[0] and looks_like_cover(pages[s], magazine):
+            continue                                           # the cover is never the contents page (26 October 2026)
         es = parse_contents_page(pages[s], maxpage)
         parsed[s] = es
         sc, word = contents_score(pages[s], es, maxpage)
@@ -1269,13 +1290,13 @@ def place_entries(entries, pages, fol, toc_pages=()):
 
 # ------------------------------------------------------------------ the whole issue
 
-def analyse_issue(pages, force_scan=None):
+def analyse_issue(pages, force_scan=None, magazine=None):
     """Folio map, contents entries and their placement for one issue (pages: {scan: page JSON}); force_scan names
-    the contents page when a reader has found it where the search did not look."""
+    the contents page when a reader has found it where the search did not look; magazine helps to know the cover."""
     fol = fit_folios(pages)
     vals = [v for v in fol["printed"].values() if v]
     maxpage = max(vals) if vals else None
-    entries, toc_pages = find_contents(pages, maxpage, force_scan=force_scan)
+    entries, toc_pages = find_contents(pages, maxpage, force_scan=force_scan, magazine=magazine)
     kind = "pieces"
     # a book's list of chapters ('I—The Airplane Chums ..... 1') is not a list of pieces: the rules must
     # not start a record at every chapter

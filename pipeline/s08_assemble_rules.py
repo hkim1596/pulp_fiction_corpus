@@ -56,7 +56,16 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from layout_order import order_region_keys
 from corpus_lib import write_json_atomic
 
-VERSION = "2.11"
+VERSION = "2.12"
+# 2.12 (2026-10-26, Claude in Sujin Kang's session): the cover. An advertisement or house block that stands on the
+# first scan when that scan looks like the cover (the masthead, cover lines, a price, a date; no running prose:
+# cover_page_score) is the cover's record — type other, department "cover", ad_class "cover" — as Sujin's reading rule of
+# 17-21 October says (a cover is `other`, not house); until now it was house_self front matter. first_scan_kind() says
+# what an issue's first scan is (cover / contents / body / blank / other) for the survey of the files that have no
+# cover (scripts/cover_survey.py). The cover is never read as the contents page (Sujin, 26 October: "the cover
+# highlights particular pieces; it is unfit for extracting the contents; a file without a contents page goes by the
+# rules"): toc_folio and the 2.6 reading skip a first scan that looks like a cover unless a reader names that scan.
+# The grouping of boxes is unchanged.
 # 2.11 (2026-10-26, Claude in Sujin Kang's session): 2.10 typed a 'true story' and the unsigned pieces of an unsigned
 # contents page as stories at the contents stage; assembled as stories, they swallowed the advertisement or house
 # block at their feet, which the feature path cuts (True Detective Mysteries 1929-02 p.104, Short Stories 1925-06,
@@ -721,6 +730,63 @@ def looks_like_verse(text):
     return None
 
 
+COVER_PRICE_RE = re.compile(r"\b\d{1,2}\s?(?:c|¢|cents)\b|\$\s?\d|\b(?:price|per copy)\b|\b(?:1[89]|20)\d\d\b|"
+                            r"\b(?:january|february|march|april|may|june|july|august|september|october|november|december)\b|\bvol(?:ume|\.)\s*[\divxlc]+", re.I)
+
+
+def cover_page_score(p, magazine=None):
+    """How much a scan looks like a magazine's cover (rules 2.12): the masthead (the magazine's name in a display
+    line), a price, a date or a volume line, cover lines (short display lines), little or no running prose. Returns
+    (score, evidence). A score of 3 or more is a cover; a page with a paragraph of prose of 80 words or more, or
+    more than two such paragraphs, is not."""
+    regs = p.get("regions", [])
+    texts = [(r, " ".join(region_text(r).split())) for r in regs]
+    texts = [(r, t) for r, t in texts if t]
+    if not texts:
+        return 0, ["no text"]
+    ev, score = [], 0
+    prose = [t for r, t in texts if words(t) >= 80 and prose_like(r)]
+    if len(prose) >= 1:
+        return 0, [f"{len(prose)} paragraph(s) of prose"]
+    short = sum(1 for r, t in texts if words(t) <= 12)
+    if short >= max(3, 0.6 * len(texts)):
+        score += 1; ev.append("short display lines")
+    if magazine and any(sim(t, magazine) > 0.6 or norm(magazine) in norm(t) for r, t in texts if words(t) <= 10):
+        score += 2; ev.append("the magazine's name")
+    joined = "\n".join(t for _, t in texts)
+    if COVER_PRICE_RE.search(joined):
+        score += 1; ev.append("a price, a date or a volume line")
+    if sum(words(t) for _, t in texts) <= 120:
+        score += 1; ev.append("little text")
+    if any(r.get("label") in ("Picture", "Figure") for r in regs):
+        score += 1; ev.append("a picture")
+    return score, ev
+
+
+def first_scan_kind(pages, magazine=None):
+    """What the first scan of an issue is (the survey of 26 October 2026): 'cover', 'contents' (the contents list
+    on the first page, as The Black Cat printed it), 'body' (running text: the cover and the front matter are
+    missing), 'blank', or 'other' (an advertisement, a title page)."""
+    if not pages:
+        return "blank", []
+    pno = min(pages)
+    p = pages[pno]
+    regs = [r for r in p.get("regions", []) if region_text(r).strip()]
+    if not regs:
+        return "blank", ["no text on the first scan"]
+    score, ev = cover_page_score(p, magazine)
+    joined = "\n".join(region_text(r) for r in regs)
+    n_num_lines = len(re.findall(r"(?m)(?:\.\s*){3,}\s*\d{1,4}\s*$|^\s*\d{1,4}\s*$", joined))
+    if re.search(r"\bCONTENTS\b", joined, re.I) or n_num_lines >= 4:
+        return "contents", ev + ["a contents list on the first scan"]
+    if score >= 3:
+        return "cover", ev
+    prose = [r for r in regs if words(region_text(r)) >= 60 and prose_like(r)]
+    if len(prose) >= 2 or (prose and sum(words(region_text(r)) for r in regs) >= 200):
+        return "body", ev + [f"{len(prose)} paragraph(s) of running text on the first scan"]
+    return "other", ev
+
+
 def strip_poem_mark(title):
     m = POEM_MARK_RE.search(title or "")
     return (title[:m.start()].strip(), True) if m else (title, False)
@@ -850,6 +916,8 @@ def parse_toc(pages):
         if pno > 14:
             break
         p = pages[pno]
+        if pno == min(pages) and cover_page_score(p)[0] >= 3:
+            continue                                           # the cover is never the contents page (26 October 2026)
         texts = [region_text(r) for r in p["regions"]]
         joined = "\n".join(texts)
         has_word = bool(re.search(r"\bCONTENTS\b", joined, re.I)) or any(r["label"] == "TableOfContents" for r in p["regions"])
@@ -1200,14 +1268,14 @@ def toc_page_override(iid):
     return int(v) if isinstance(v, (int, float)) or (isinstance(v, str) and v.isdigit()) else None
 
 
-def analyse(pages, force_scan=None):
+def analyse(pages, force_scan=None, magazine=None):
     """Everything the rules need to know about every page."""
     A = {"pages": {}, "toc": [], "toc_page": None, "offset": None, "folio_range": None}
     TF = None
     if toc_folio_enabled():
         try:
             import toc_folio
-            TF = toc_folio.analyse_issue(pages, force_scan=force_scan)
+            TF = toc_folio.analyse_issue(pages, force_scan=force_scan, magazine=magazine)
             if force_scan is not None:
                 A["toc_forced_scan"] = force_scan
         except Exception as ex:                       # the 2.6 reading stands; the failure is recorded
@@ -1924,7 +1992,10 @@ class Assembler:
             if rec["type"] in ("ad", "house"):
                 was_house = rec["type"] == "house"
                 self.classify_ad(rec)
-                if (rec.get("ad_class") or "").startswith("house"):
+                if rec.get("ad_class") == "cover":
+                    rec["type"] = "other"                     # the cover (Sujin Kang, 17-21 October 2026: a cover is `other`, not house)
+                    rec["department"] = "cover"
+                elif (rec.get("ad_class") or "").startswith("house"):
                     rec["type"] = "house"                     # the publisher's own matter (decision of 2026-09-04)
                 elif was_house:
                     rec["ad_class"] = "house_next_issue"      # named as a department of the magazine: house by the list
@@ -1934,6 +2005,28 @@ class Assembler:
             del rec["keys"]
             rec.pop("_column_ad", None)
         self.records = [r for r in self.records if r["n_regions"]]
+        # the cover is one record (rules 2.12): the masthead, the cover lines and the price, read as several blocks,
+        # are joined under the magazine's name
+        covers = [r for r in self.records if r.get("ad_class") == "cover"]
+        if len(covers) > 1:
+            head, rest = covers[0], covers[1:]
+            for r in rest:
+                for fr in r["fragments"]:
+                    mine = next((f for f in head["fragments"] if f["page"] == fr["page"]), None)
+                    if mine:
+                        mine["region_ids"] = sorted(set(mine["region_ids"]) | set(fr["region_ids"]))
+                    else:
+                        head["fragments"].append(fr)
+                head["roles"].update(r.get("roles") or {})
+                head["text"] = (head.get("text") or "") + ("\n" if head.get("text") and r.get("text") else "") + (r.get("text") or "")
+                head["n_regions"] += r["n_regions"]
+            head["fragments"].sort(key=lambda f: f["page"])
+            head["flags"].append(f"the cover's {len(covers)} blocks joined")
+            own = self.magazine_name()
+            if own:
+                head["title_as_printed"] = head.get("title_as_printed") or head.get("title")
+                head["title"] = own
+            self.records = [r for r in self.records if r is head or r.get("ad_class") != "cover"]
         return self
 
     def demote(self, rec, pn, i, why):
@@ -2652,8 +2745,12 @@ class Assembler:
         next_issue = bool(HOUSE_NEXT_RE.search(full) or FILLER_RE.search(title) or announces)
         self_copy = bool(mentions_self and HOUSE_SELF_RE.search(full))
         toc_page = self.A.get("toc_page")
+        first = min(pages) if pages else None
         if rec.get("ad_class") == "house_form":
             cls, advertiser = "house_form", (own[0] if own else None)
+        elif first is not None and all(pn == first for pn, _ in rec["keys"]) and cover_page_score(pages[first], self.magazine_name())[0] >= 3:
+            cls, advertiser = "cover", (own[0] if own else None)             # the cover (rules 2.12): type other, not house
+            rec["flags"].append("the cover: the masthead, the cover lines, the price")
         elif toc_page and all(pn <= toc_page for pn, _ in rec["keys"]) and (mentions_self or announces):
             cls, advertiser = "house_self", (own[0] if own else None)     # front matter: the cover strip, the title page
             rec["flags"].append("front matter (on or before the contents page): the issue's own cover strip or title page")
@@ -3885,7 +3982,7 @@ def run_issue(iid, cfg_issue=None, log=print):
     if not pages:
         log(f"[s08] {iid}: no layout pages")
         return None
-    A = analyse(pages, force_scan=toc_page_override(iid))
+    A = analyse(pages, force_scan=toc_page_override(iid), magazine=(cfg_issue or {}).get("magazine", ""))
     A["magazine"] = (cfg_issue or {}).get("magazine", "")
     model_path = os.path.join(ROOT, "data", "articles", iid, "articles.json")
     model = json.load(open(model_path, encoding="utf-8")) if os.path.exists(model_path) else None

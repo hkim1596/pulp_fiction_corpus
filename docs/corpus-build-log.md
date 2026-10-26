@@ -1643,3 +1643,21 @@ review page does not show, and apply_kinds skipped a KEEP row whatever the log s
 and the bulk click of 10:30 on nine Wild West Weekly and Blue and Gray Weekly numbers, meant as BOOK, had been
 corrected to "magazine" (her note says BOOK), which took the nine out of the books: corrected in the log by the next
 paste from her note. Second pass to follow (P52ag).
+
+### 2026-10-26, 19:30 KST — the kinds applied; 60 items outside the period by rule; the cover (rules 2.12)
+
+P52ae, P52ag and P52ai (12:10–15:00): every mark of the check page and the review page applied — books 633, bound
+volumes 5, set aside 367 (excerpt 98, outside the period 118, comic 43, not a text 9, the earlier 99); 60 of the
+outside-the-period marks by rule from the archive's metadata (55 horror-film magazines of the 1960s or later that are
+undated in the archive — HorrorHound, Gore Gazette, Castle of Frankenstein, Midnight Marquee, Dark Terrors, Monsters
+of the Movies … — and 9 items dated before 1896, the corpus's first year: Argosy 1891–94, The Black Cat volume 1,
+Pearson's Library, Ally Sloper's, the Police Gazette); the sample's slots redrawn three times (69 replaced in all, 0
+dropped); 14 books of the day re-assembled in the book mode. **The corpus is 6,435 magazine issues** (7,440 selected −
+367 set aside − 633 books − 5 volumes). Two faults of the day's scripts fixed on the way (apply_kinds: a decided KEEP
+row counts, patch 0021; an id outside the selection is skipped, patch 0022). Sujin read 13 of the redrawn slots at
+level 1 by 18:10; 8 remain. Her notes: The Black Cat prints its contents on the cover only (no contents page; level 2
+is the surer check there); Argosy 1897-10 "lacks both a TOC page and a cover"; "handle the cover; the files that have
+no cover and begin with the text need looking at". Rules 2.12: the cover is a record of its own (type other,
+department cover; the masthead, the cover lines and the price joined under the magazine's name — until now house_self
+front matter); first_scan_kind() classifies an issue's first scan, and scripts/cover_survey.py runs it over the corpus
+for the manifest. 305 tests.

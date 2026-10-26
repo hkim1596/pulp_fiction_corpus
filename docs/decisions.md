@@ -342,3 +342,21 @@ Dropbox share carries the full context of each.
   the sample. D-2, D-3, D-4, D-6 and R-8 as recommended
   (decisions-reuse-D3-D4-D6-2026-10-18.md; R-8: tiers S7-S8 coded, S9
   deferred and reported). Rules 2.10 and site v0.27.0 carry (1)-(5).
+- 2026-10-26 (Sujin Kang, from the level-1 checks of the redrawn slots:
+  "handle the cover too; the files that have no cover and begin with the
+  text need looking at") — the **cover** is a record of its own: type
+  `other`, department `cover` (the masthead, the cover lines, the
+  price, joined under the magazine's name; rules 2.12), never house.
+  A survey of what every issue's first scan is (cover / contents on the
+  cover, as The Black Cat printed it / running text, the cover and the
+  front matter missing / blank / other) is run over the corpus
+  (scripts/cover_survey.py) and its result goes into the manifest as
+  `first_scan`; whether the files that begin with running text stay in
+  the corpus is decided on the survey (recommendation: they stay, flagged
+  incomplete; they count for nothing at level 1). **The cover is never
+  read as a contents page** (Sujin, 18:40: "the cover highlights
+  particular pieces and is unfit for extracting the contents; a file
+  without a contents page goes by the rules as far as possible"): the
+  contents search skips a first scan that looks like a cover, unless a
+  reader names that scan on the check page; an issue without a contents
+  page is assembled from its pages alone.
