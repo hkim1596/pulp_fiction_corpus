@@ -104,6 +104,9 @@ def decide(table_path=TABLE, log_path=LOG, accept_proposed=False, selection_rows
     # row comes from the selection
     for iid, r in D.items():
         if iid not in listed and r.get("decision") != "?":
+            if selection_rows is not None and iid not in selection_rows:
+                print(f"  (skipped: {iid} is not in the selection)")
+                continue
             items.append({"id": iid, "proposed": "LOOK", "class": None, "ia_identifier": (selection_rows or {}).get(iid, {}).get("ia_identifier"),
                           "magazine": (selection_rows or {}).get(iid, {}).get("magazine"), "signals": []})
     for it in items:
