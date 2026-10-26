@@ -1565,3 +1565,21 @@ the issue has no contents page (it then counts for nothing at level 1 and is rea
 did not read (its scan, its pieces, how many have a right record anyway), and the Verification page shows CHECK AGAIN
 for a check that says nothing. Reader guide updated (the kinds). Next: upgrade the sample issues to 2.9
 (scripts/upgrade_continuity.py --issues-file, the guard holding Sujin's corrected issues), then the corpus.
+
+### 2026-10-21, 19:00 KST — rules 2.9 over the sample and the whole corpus; the cross-issue pass
+
+P52ab (17:38–17:48): the 150 sample issues through the protected upgrade to 2.9 — 147 installed, 3 refused ("cannot
+safely retain cross-issue metadata"): adventure_1919_05 "The Trail Ahead", a next-issue department that 2.8 had made
+a serial linked across three issues (2.9 types it house through the departments list, so the chain cannot be carried
+over — the right refusal; a guard case that retires a serial on a known house department will release it);
+amazing_stories_1926_10 "By A. Hyatt Verill" (the author as title; the conclusion of A Columbus of Space);
+all_story_weekly_1914_05 "The Haunted Legacy". P52ac (17:55–19:00, 8 workers; an hour, against 2.8's seven and a half,
+the reading of the pages being cached): **6,823 of 7,190 selected issues installed (94.9%), 367 refused**, 0 skipped.
+Of the 350 issues still refused after P52v, 342 remain and 8 are released by the 2.9 reading; 25 refusals are new,
+of which 19 are advertisements and house blocks that the cross-issue pass of 18 October had since flagged as quoting
+a story in another issue (the A kind: refused on purpose, the flag staying with the 2.8 record), 3 are chapter records
+of items now of kind book with a work identity, 3 are serial or work-linked stories (The Dangerous Isles part four,
+Everybody's 1927-09; Wit and Humor, Arm Chair Library 1890). The cross-issue pass ran in the same tmux session
+(19:00–19:05): 1,362 magazines linked. The site after its refresh: 7,135 magazine issues read, 325,980 records,
+**65,633 stories** (66,444 before: the articles, true stories, hints and quizzes that 2.8 had typed as stories are
+features now), 288 verified. The refusals' log: data/corpus/p52-2026-10-16/upgrade_2.9.log.
