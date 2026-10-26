@@ -56,7 +56,19 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from layout_order import order_region_keys
 from corpus_lib import write_json_atomic
 
-VERSION = "2.9"
+VERSION = "2.10"
+# 2.10 (2026-10-26, Claude in Sujin Kang's session): from the 100 kind clicks and the notes of the completed level-1
+# check (150 issues, 21-25 October). A contents page that names no authors makes its unsigned entries stories, not
+# features (True Romances, 12 Sports Aces, the Illustrated Detective: 52 clicks); a 'true story' is a story (Sujin,
+# 26 October: "even with true in the section name, story"); a record the contents or the departments list typed
+# letters stays letters (the signed-letters test of 2.3 applies only to a record the page alone made one: 13
+# clicks); the departments list matches a magazine by its first distinctive word ('Galaxy' had never matched
+# 'Galaxy Science Fiction'); a 'Verse' label that Weird Tales (1927-1932) prints under the entry it belongs to is
+# corrected by the text itself — a contents poem whose text is prose is a story, a short story whose text is verse
+# is a poem (20 clicks); a month, a volume line or 'CONTENTS JUNE' is not a piece (5 clicks); a reader's word on
+# where the contents page is (config/toc_page_overrides.json) forces the reading of that scan (toc_folio 1.4).
+# Kind "volume" (a bound volume of several issues) joins book and magazine in config/corpus_kinds.json: kept in
+# the data, assembled as a magazine, not counted as an issue, not in the sample.
 # 2.9 (2026-10-21, Claude in Sujin Kang's session): the kinds of contents entries, from Sujin's level-1 contents
 # checks of 31 sample issues on 21 October. An ARTICLES section, a 'true story', fact, hints, a quiz are features
 # (non-fiction), not stories; a FEATURED NOVELET is a story; a VERSE / POEMS / SONGS section or title is a poem; the
@@ -685,6 +697,23 @@ def split_part(title):
     return (work or t), label, n, tot
 
 
+def looks_like_verse(text):
+    """True for a text set as verse (short lines, most beginning with a capital, many without sentence
+    punctuation at the end), False for prose, None when there is too little text to say (rules 2.10)."""
+    lines = [l.strip() for l in (text or "").split("\n") if l.strip()]
+    if len(lines) < 6:
+        return None
+    lens = sorted(len(l) for l in lines)
+    median = lens[len(lens) // 2]
+    caps = sum(1 for l in lines if l[0].isupper()) / len(lines)
+    open_end = sum(1 for l in lines if not l.endswith((".", "!", "?", "\"", "\u201d", ":"))) / len(lines)
+    if median <= 48 and caps >= 0.7 and open_end >= 0.4:
+        return True
+    if median >= 60 or caps < 0.4:
+        return False
+    return None
+
+
 def strip_poem_mark(title):
     m = POEM_MARK_RE.search(title or "")
     return (title[:m.start()].strip(), True) if m else (title, False)
@@ -728,12 +757,32 @@ def illustrators_of(magazine):
     return out
 
 
+GENERIC_FIRST_WORDS = {"the", "thrilling", "popular", "new", "all", "short", "famous", "true", "complete", "best", "super", "ten",
+                       "big", "real", "startling", "exciting", "spicy", "dime", "double", "triple", "two", "three", "five", "detective",
+                       "western", "love", "romance", "romances", "science", "fiction", "sea", "air", "war", "sport", "sports", "story",
+                       "stories", "magazine", "weird", "wonder", "amazing", "astonishing", "fantastic", "strange", "mystery"}
+
+
+def magazine_matches(key, magazine):
+    """Whether a departments-list key names the magazine: the names are alike, or they begin with the same
+    distinctive word ('Galaxy' / 'Galaxy Science Fiction', 'Astounding Stories' / 'Astounding Stories of
+    Super-Science'; rules 2.10)."""
+    nk, nm = norm(key), norm(magazine)
+    if not nk or not nm:
+        return False
+    if nk == nm or nk in nm or nm in nk or sim(key, magazine) > 0.85:
+        return True
+    a = [w for w in nk.split() if w != "the"]
+    b = [w for w in nm.split() if w != "the"]
+    return bool(a and b and a[0] == b[0] and a[0] not in GENERIC_FIRST_WORDS)
+
+
 def department_of(magazine, title):
     """(name, type, author) of the department a title names, else None."""
     if not title:
         return None
     for key, deps in departments().items():
-        if key != "*" and not (magazine and sim(key, magazine) > 0.6):
+        if key != "*" and not (magazine and magazine_matches(key, magazine)):
             continue
         for d in deps:
             names = [d["name"]] + list(d.get("also") or [])
@@ -889,7 +938,10 @@ def parse_toc(pages):
 
 # the kinds of contents entries (rules 2.9; Sujin Kang's level-1 feedback of 21 October 2026, 31 issues checked)
 VERSE_SECTION_RE = re.compile(r"\bverses?\b|\bpoems?\b|\bpoetry\b|\bsongs\b|\bballads?\b|\brhymes?\b", re.I)
-NONFICTION_SECTIONS = re.compile(r"\barticles?\b|\btrue\b|\bfact\b|non-?fiction|\bhints?\b|how-?to|\bquiz\b|\bpictorial\b|\bpictures?\b", re.I)
+NONFICTION_SECTIONS = re.compile(r"\barticles?\b|\bfacts?\b|non-?fiction|\bhints?\b|how-?to|\bquiz\b|\bpictorial\b|\bpictures?\b", re.I)
+# not a piece: a month, a volume line, the word CONTENTS with a month (rules 2.10)
+NOT_A_PIECE_RE = re.compile(r"^(?:contents\s+)?(?:january|february|march|april|may|june|july|august|september|october|november|december)"
+                            r"(?:\s+\d{1,2})?(?:,?\s+\d{4})?$|^contents\b|^vol(?:ume|\.)?\s*[\divxlc]+[,.]?\s*(?:no\.?\s*[\d]+)?\b|^no\.\s*\d+$", re.I)
 STORY_WORDS = re.compile(r"novel|story|stories|novelet|serial|\btales?\b|fiction", re.I)
 # a line of the contents page that is not a name in the author's place: a department's description
 # ("Where readers, writers and adventurers meet", "Information you can't get elsewhere")
@@ -988,6 +1040,19 @@ def repair_toc_entries(entries):
     return entries
 
 
+def drop_non_pieces(entries):
+    """Entries that are not pieces (rules 2.10, from the contents checks: 'March', 'JULY', 'CONTENTS JUNE',
+    'Vol. 27, No. 1 A THRILLING PUBLICATION'). In place; returns the entries."""
+    keep = []
+    for e in entries:
+        t = (e.get("title") or "").strip()
+        if t and NOT_A_PIECE_RE.match(t) and words(t) <= 8:
+            continue
+        keep.append(e)
+    entries[:] = keep
+    return entries
+
+
 def type_toc_entries(entries):
     """The kind of every contents entry from its section label, title, by-line and blurb (2.1 onwards; the kinds of
     2.9 follow Sujin Kang's level-1 feedback of 21 October 2026): poem — a verse section or marker (verse, poems,
@@ -999,6 +1064,11 @@ def type_toc_entries(entries):
     novelette, short stories, serials, tales, fiction — 'FEATURED NOVELET' is a story section, not a feature) or a
     signed entry."""
     repair_toc_entries(entries)
+    drop_non_pieces(entries)
+    # a contents page that names no authors at all (True Romances, 12 Sports Aces, the Illustrated Detective):
+    # an unsigned entry is not a filler there, it is the magazine's ordinary piece (rules 2.10)
+    signed = sum(1 for e in entries if e.get("author"))
+    unsigned_contents = len(entries) >= 4 and signed <= 0.34 * len(entries)
     for e in entries:
         s = e.get("section") or ""
         if e.get("section_word"):
@@ -1030,7 +1100,7 @@ def type_toc_entries(entries):
             e["type"] = "story"
         elif FEATURE_SECTIONS.search(s) or FEATURE_SECTIONS.search(lab):
             e["type"] = "feature"
-        elif not e["author"] and not story_section:
+        elif not e["author"] and not story_section and not unsigned_contents:
             e["type"] = "feature"                     # an unsigned short piece: a filler, a department
         else:
             e["type"] = "story"
@@ -1096,14 +1166,32 @@ def toc_from_reader(TF):
     return type_toc_entries(out)
 
 
-def analyse(pages):
+_TOC_OVERRIDES = {}
+
+
+def toc_page_override(iid):
+    """The contents page a reader named for an issue (config/toc_page_overrides.json, written by
+    scripts/apply_contents_scans.py from the check page's answers), or None."""
+    if not _TOC_OVERRIDES:
+        try:
+            _TOC_OVERRIDES.update(json.load(open(os.path.join(ROOT, "config", "toc_page_overrides.json"), encoding="utf-8")).get("scans", {}))
+        except Exception:
+            pass
+        _TOC_OVERRIDES.setdefault("_loaded", True)
+    v = _TOC_OVERRIDES.get(iid)
+    return int(v) if isinstance(v, (int, float)) or (isinstance(v, str) and v.isdigit()) else None
+
+
+def analyse(pages, force_scan=None):
     """Everything the rules need to know about every page."""
     A = {"pages": {}, "toc": [], "toc_page": None, "offset": None, "folio_range": None}
     TF = None
     if toc_folio_enabled():
         try:
             import toc_folio
-            TF = toc_folio.analyse_issue(pages)
+            TF = toc_folio.analyse_issue(pages, force_scan=force_scan)
+            if force_scan is not None:
+                A["toc_forced_scan"] = force_scan
         except Exception as ex:                       # the 2.6 reading stands; the failure is recorded
             A["toc_folio_error"] = repr(ex)[:300]
     A["toc"], A["toc_page"] = parse_toc(pages)
@@ -2158,11 +2246,25 @@ class Assembler:
                     rec["author"] = dauthor
                     rec["author_source"] = "department list"
         # 6. a letters page needs signed letters (Sujin's note of 2026-09-03): else it is a feature
-        if rec["type"] == "letters" and not rec.get("department"):
+        if rec["type"] == "letters" and not rec.get("department") and (rec.get("toc") or {}).get("type") != "letters":
+            # (rules 2.10: the editor's and the readers' departments are letters by Sujin Kang's decision of
+            # 21 October; the test below keeps only for a record the page alone made a letters record)
             txt = "\n".join(region_text(pages[pn]["regions"][i]) for pn, i in keys)
             if len(SIGNATURE_RE.findall(txt)) < 2:
                 rec["type"] = "feature"
                 rec["flags"].append("typed feature: an editor's column with no signed letters")
+        # 7. the contents page's 'Verse' label can sit under the entry it belongs to (Weird Tales, 1927-1932):
+        # a poem by the contents whose text is prose is a story; a short story whose text is verse is a poem
+        # (rules 2.10; 20 of Sujin Kang's 100 kind clicks of 24-25 October)
+        if rec["type"] in ("poem", "story") and (rec.get("toc") or {}).get("type") in ("poem", "story", "serial_part") and keys:
+            body = "\n".join(region_text(pages[pn]["regions"][i]) for pn, i in keys if rec["roles"].get(key(pn, i)) in (None, "", "body"))
+            verse = looks_like_verse(body)
+            if rec["type"] == "poem" and verse is False and words(body) >= 150:
+                rec["type"] = "story"
+                rec["flags"].append("typed story: the contents said verse, the text is prose")
+            elif rec["type"] == "story" and verse is True and words(body) <= 400 and not rec.get("serial"):
+                rec["type"] = "poem"
+                rec["flags"].append("typed poem: the text is verse")
 
     def merge_page_ads(self):
         """A full advertisement page cut at its display headlines into several
@@ -3752,7 +3854,7 @@ def run_issue(iid, cfg_issue=None, log=print):
     if not pages:
         log(f"[s08] {iid}: no layout pages")
         return None
-    A = analyse(pages)
+    A = analyse(pages, force_scan=toc_page_override(iid))
     A["magazine"] = (cfg_issue or {}).get("magazine", "")
     model_path = os.path.join(ROOT, "data", "articles", iid, "articles.json")
     model = json.load(open(model_path, encoding="utf-8")) if os.path.exists(model_path) else None

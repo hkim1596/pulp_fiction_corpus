@@ -44,16 +44,28 @@ The **kind** column shows the kind the machine gave the piece. Change it when it
 your check and is read back into the rules (Sujin Kang's notes of 21 October 2026 fixed the kinds in rules 2.9). The
 kinds are:
 
-- **story** — fiction of any length: a short story, a novelette, a novel, and a serial part (a serial part is a story
-  with its part number; "featured novelet" is a story, whatever the section says);
+- **story** — fiction of any length: a short story, a novelette, a novel, a serial part (a story with its part
+  number), a "true story" or "true tale" told as one ("featured novelet" is a story, whatever the section says);
 - **poem** — verse, songs, ballads, limericks;
-- **feature** — non-fiction: an article, a "true story", a fact piece, helpful hints, a quiz, a picture feature, an
+- **feature** — a one-off non-fiction piece: an article, a fact piece, helpful hints, a quiz, a picture feature, an
   unsigned filler;
-- **letters** — the readers' and the editor's departments: the letters column (the Eyrie, the Camp-Fire, Our Air Mail,
-  the Log-Book, Discussions), the editor's notes or page, a readers' questions department (Ask Adventure). Editor's notes
-  are letters, not features, so that the magazine's conversation with its readers stays apart from its articles;
-- **house** — the publisher's own matter: the club notice, the next-issue announcement, a contest;
+- **letters/department** — the magazine's own recurring departments: the letters column (the Eyrie, the Camp-Fire,
+  Our Air Mail, the Log-Book, Discussions), the editor's notes or page, a readers' questions department (Ask
+  Adventure), a conducted column (a science column, a song corral, a club page). The line is recurrence and the
+  magazine's voice, not the subject (Sujin Kang, 26 October 2026);
+- **house** — the publisher's own matter: the next-issue announcement, a subscription or contest notice;
 - **other** — anything else that is a piece but none of the above.
+
+Under the table the page lists the **reading records no entry claimed**. Tick each one that is a piece the contents
+page lists but the machine's reading of the page missed, when its record is right as made: the ticked ones count as
+"missed, assembled right anyway". Then type how many listed pieces the parser missed in all (at least the number
+ticked). The last field, pieces the contents page does not list at all, is for information only.
+
+If the item turns out not to be a magazine issue — a book, a bound volume of several issues, a partial file, a modern
+reprint, a scan without readable text — open **"This item is not a magazine issue?"** on the page and press the
+matching button: the mark goes to the non-magazine review log, the item is sorted by kind or set aside at the next run
+of scripts/apply_kinds.py, and the slot is redrawn. When the contents page exists but the machine did not read it,
+give its scan number in the "a contents page the machine did not read" answer: the assembler then reads that scan.
 
 When the machine read **no contents entries** in an issue, the page asks instead whether the issue has no contents page
 (then it counts for nothing at level 1 and is read at level 2) or has one the machine did not read (give its scan and

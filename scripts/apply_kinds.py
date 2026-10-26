@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.join(ROOT, "pipeline"))
 
 LOG = os.path.join(ROOT, "data", "review", "nonmagazine_review.jsonl")
 TABLE = os.path.join(ROOT, "data", "corpus", "p52-2026-10-16", "nonmagazine_candidates.json")
-KINDS = ("magazine", "book")
+KINDS = ("magazine", "book", "volume")          # volume: a bound volume (Sujin Kang, 26 October 2026)
 REASONS = {"excerpt": ("excerpt of a magazine", "pages cut out of a magazine issue; a duplicate of the issue when it is in the corpus"),
            "not_english": ("not English", "not in English"),
            "not_text": ("not a text", "an index, a checklist, a cover gallery or another item without reading text"),
@@ -93,12 +93,20 @@ def migrate(user="sujin", table_path=TABLE, log_path=LOG, now=None):
     return lines
 
 
-def decide(table_path=TABLE, log_path=LOG, accept_proposed=False):
+def decide(table_path=TABLE, log_path=LOG, accept_proposed=False, selection_rows=None):
     """(kinds: id -> kind, reasons: id -> reason key, undecided ids, rows by id) over the table's listed items."""
     T = json.load(open(table_path, encoding="utf-8"))
     D = latest(read_log(log_path))
     kinds, reasons, undecided, rows = {}, {}, [], {}
-    for it in T.get("items", []):
+    items = list(T.get("items", []))
+    listed = {it["id"] for it in items}
+    # a decision clicked on an item the table does not list (the contents-check page, since site v0.27.0): the
+    # row comes from the selection
+    for iid, r in D.items():
+        if iid not in listed and r.get("decision") != "?":
+            items.append({"id": iid, "proposed": "LOOK", "class": None, "ia_identifier": (selection_rows or {}).get(iid, {}).get("ia_identifier"),
+                          "magazine": (selection_rows or {}).get(iid, {}).get("magazine"), "signals": []})
+    for it in items:
         if it.get("proposed") == "KEEP" and not it.get("in_sample"):
             continue
         rows[it["id"]] = it
@@ -120,8 +128,8 @@ def write_kinds(kinds, rows, D, decided_by, decided, path=None, dry_run=False):
         d = json.load(open(path, encoding="utf-8"))
     except (OSError, ValueError):
         d = {"_comment": "Items that are not magazine issues but stay in the data, by kind (Sujin Kang, 21 October 2026): 'book' — a standalone "
-                         "book, a story collection, a paperback, a dime-novel or nickel-weekly number with one novel. An item not listed is a "
-                         "magazine issue. The protocol's corpus is the magazine issues; the books are assembled as books (pipeline/s08_book.py) "
+                         "book, a story collection, a paperback, a dime-novel or nickel-weekly number with one novel; 'volume' (26 October) — a bound "
+                         "volume of several issues, assembled as a magazine, not counted as an issue. An item not listed is a magazine issue. The protocol's corpus is the magazine issues; the books are assembled as books (pipeline/s08_book.py) "
                          "and are the other side of a reuse match. Written by scripts/apply_kinds.py from the clicks on /review/nonmagazine.",
              "kinds": {}}
     have = d.setdefault("kinds", {})
@@ -198,8 +206,9 @@ def main():
         print(f"{len(lines)} earlier clicks migrated: " + ", ".join(f"{k} {v}" for k, v in Counter(l['decision'] for l in lines).items()))
         return
     from corpus_lib import corpus_config
-    selection = {i["id"] for i in corpus_config()["issues"]}
-    kinds, reasons, undecided, rows, D = decide(accept_proposed=args.accept_proposed)
+    sel_rows = {i["id"]: i for i in corpus_config()["issues"]}
+    selection = set(sel_rows)
+    kinds, reasons, undecided, rows, D = decide(accept_proposed=args.accept_proposed, selection_rows=sel_rows)
     print(f"{len(rows)} listed items: kinds {dict(Counter(kinds.values()))}, set aside {dict(Counter(REASONS[r][0] for r in reasons.values()))}, "
           f"undecided {len(undecided)}" + (" (dry run)" if args.dry_run else ""))
     if undecided:
@@ -212,7 +221,7 @@ def main():
         return
     try:
         S = json.load(open(os.path.join(ROOT, "config", "verification_sample.json"), encoding="utf-8"))
-        leaving = [i for i in S["issues"] if kinds.get(i["id"]) == "book" or i["id"] in reasons]
+        leaving = [i for i in S["issues"] if kinds.get(i["id"]) in ("book", "volume") or i["id"] in reasons]
     except (OSError, ValueError):
         leaving = []
     print(f"{len(leaving)} sample slots to redraw" + (": " + ", ".join(f"#{i['order']}" for i in leaving[:40]) if leaving else ""))

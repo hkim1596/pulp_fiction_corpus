@@ -21,10 +21,36 @@ def typed(*entries):
 
 
 class Kinds(unittest.TestCase):
-    def test_articles_and_true_stories_are_features(self):
+    def test_articles_hints_and_quizzes_are_features_true_stories_are_stories(self):
         a, b, c, d = typed(E("Let's Finish the Lindbergh Case!", "Cecil Carnes", "ARTICLES"), E("Winter of Hell", "Will Watson", "a True Story"),
                            E("Fencing with Singlesticks", "Prof. Fairfax", "HELPFUL HINTS"), E("Know Your West, a Quiz", "Rattlesnake Robert", "DEPARTMENTS"))
-        self.assertEqual([x["type"] for x in (a, b, c, d)], ["feature", "feature", "feature", "feature"])
+        self.assertEqual([x["type"] for x in (a, b, c, d)], ["feature", "story", "feature", "feature"])     # Sujin, 26 October: a true story is a story
+
+    def test_an_unsigned_contents_page_lists_stories(self):
+        es = typed(E("THE RED-LIGHT EXPRESS"), E("BASKET LARCENY"), E("KILL THE CHAMP!"), E("PIGSKIN PAY DIRT"), E("FIGHT FEVER"))
+        self.assertEqual([x["type"] for x in es], ["story"] * 5)
+        es = typed(E("Pawn of the Unseen", "Lyon Mearson"), E("Spirit Tales"), E("The Flaming Curse", "Paul Jacobs"), E("Guided by a Phantom Hound", "Bob Swift"))
+        self.assertEqual(es[1]["type"], "feature")                     # a signed contents page: an unsigned entry is a filler
+
+    def test_months_and_volume_lines_are_not_pieces(self):
+        es = [E("March"), E("JULY"), E("CONTENTS JUNE"), E("Vol. 27, No. 1 A THRILLING PUBLICATION", "A Complete Novel"), E("March Hare", "A. Writer")]
+        R.type_toc_entries(es)
+        self.assertEqual([e["title"] for e in es], ["March Hare"])
+
+    def test_magazine_matching(self):
+        self.assertTrue(R.magazine_matches("Galaxy Science Fiction", "Galaxy"))
+        self.assertTrue(R.magazine_matches("Astounding Stories of Super-Science", "Astounding Stories"))
+        self.assertFalse(R.magazine_matches("Galaxy Science Fiction", "Astounding Science Fiction"))
+        self.assertFalse(R.magazine_matches("Thrilling Detective", "Thrilling Wonder Stories"))
+        self.assertEqual(R.department_of("Galaxy", "Editor's Page")[1], "letters")
+
+    def test_verse_or_prose(self):
+        verse = "\n".join(["The night was dark and cold,", "A shadow crossed the moor,", "And no one heard the bell", "That tolled beside the shore,",
+                           "Nor saw the rider pass", "Beneath the ancient door,", "Where once the king had stood", "In days of yore."])
+        prose = "\n".join(["It was a strange old structure, and the strangest part of it was that green opaque window which looked out upon the street."] * 7)
+        self.assertTrue(R.looks_like_verse(verse))
+        self.assertFalse(R.looks_like_verse(prose))
+        self.assertIsNone(R.looks_like_verse("one line"))
 
     def test_a_featured_novelet_is_a_story(self):
         a, b, c = typed(E("Colleen of the Wishing Hills", "Lee Floren", "FEATURED NOVELET"), E("Heart of the Range", None, "FEATURES"),
@@ -52,10 +78,10 @@ class Kinds(unittest.TestCase):
         self.assertEqual([x["type"] for x in (a, b, c)], ["serial_part"] * 3)
         self.assertEqual((c["title"], c["part_total"]), ("CROSSES OF STEEL", 5))
 
-    def test_club_notice_is_the_publishers(self):
+    def test_club_notice_is_a_department(self):
         a, = typed(E("WEIRD TALES CLUB", None, "VERSE"))
         self.assertEqual(a["type"], "feature")
-        self.assertEqual(R.department_of("Weird Tales", "WEIRD TALES CLUB")[1], "house")
+        self.assertEqual(R.department_of("Weird Tales", "WEIRD TALES CLUB")[1], "letters")     # Sujin, 26 October
 
 
 class Repairs(unittest.TestCase):

@@ -329,3 +329,16 @@ Dropbox share carries the full context of each.
   v0.26.0), saved with the check. An issue whose contents the machine
   did not read is answered on the same page: no contents page (level 2
   only) or a page not read (its pieces count as missed).
+- 2026-10-26 (Sujin Kang, answering the five questions of 25 October
+  after completing level 1 on 150 issues) — (1) the pieces the parser
+  missed are counted on the check page from the list of records no
+  entry claimed (site v0.27.0); (2) **letters/department** is the
+  kind of every recurring department of a magazine — the readers',
+  the editor's, a conducted column — and **feature** a one-off
+  non-fiction piece; (3) a "true story" is a **story** even when the
+  section says true; (4) the Weird Tales Club is letters/department;
+  (5) a **bound volume** of several issues is kind `volume`: kept in
+  the data, assembled as a magazine, not counted as an issue, not in
+  the sample. D-2, D-3, D-4, D-6 and R-8 as recommended
+  (decisions-reuse-D3-D4-D6-2026-10-18.md; R-8: tiers S7-S8 coded, S9
+  deferred and reported). Rules 2.10 and site v0.27.0 carry (1)-(5).

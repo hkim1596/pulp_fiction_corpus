@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.26.0"
+APP_VERSION = "0.27.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -513,14 +513,54 @@ window.addEventListener('load',function(){
   if(sn)sn.onclick=newFromSelected;
   var sc=document.getElementById('sb_clear');
   if(sc)sc.onclick=clearSel;
-  document.querySelectorAll('.pick').forEach(function(c){
-    c.addEventListener('click',function(e){e.stopPropagation();});
+  var lastPick=null;
+  var allPicks=[].slice.call(document.querySelectorAll('.pick'));
+  allPicks.forEach(function(c){
+    c.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(e.shiftKey&&lastPick&&lastPick!==c){
+        var a=allPicks.indexOf(lastPick),b=allPicks.indexOf(c);
+        if(a>b){var t=a;a=b;b=t;}
+        for(var i=a;i<=b;i++)allPicks[i].checked=true;
+      }
+      lastPick=c;updCardbar();
+    });
     c.addEventListener('change',updCardbar);
   });
+  // a card's role chip: tick every card of that role (Shift: on the same scan page only)
+  document.querySelectorAll('.card .rolechip').forEach(function(ch){
+    ch.style.cursor='pointer';ch.title='tick every card with this role (Shift: on this page only)';
+    ch.addEventListener('click',function(e){
+      e.stopPropagation();
+      var card=ch.closest('.card'),role=ch.textContent.trim();
+      var pg=(card.querySelector('.ch .muted')||{textContent:''}).textContent.replace(/·.*$/,'').trim();
+      var any=false;
+      document.querySelectorAll('.card').forEach(function(cd){
+        var rc=cd.querySelector('.rolechip'),pk=cd.querySelector('.pick');
+        if(!pk||!rc||rc.textContent.trim()!==role)return;
+        if(e.shiftKey){var pg2=(cd.querySelector('.ch .muted')||{textContent:''}).textContent.replace(/·.*$/,'').trim();if(pg2!==pg)return;}
+        pk.checked=true;any=true;
+      });
+      if(any)updCardbar();
+    });
+  });
+  var hover=null;
+  document.querySelectorAll('.card').forEach(function(cd){cd.addEventListener('mouseenter',function(){hover=cd;});cd.addEventListener('mouseleave',function(){if(hover===cd)hover=null;});});
+  var KEYROLES={'0':'','1':'title','2':'subtitle','3':'author','4':'chapter_number','5':'chapter_title','6':'section','7':'teaser','8':'synopsis','9':'note'};
+  document.addEventListener('keydown',function(e){
+    if(!CAN)return;
+    var tg=e.target;if(tg&&(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.tagName==='SELECT'||tg.isContentEditable))return;
+    if(e.key==='Escape'){document.querySelectorAll('.pick:checked').forEach(function(c){c.checked=false;});updCardbar();return;}
+    if(e.key===' '&&hover){var pk=hover.querySelector('.pick');if(pk){pk.checked=!pk.checked;lastPick=pk;updCardbar();e.preventDefault();}return;}
+    if(e.key in KEYROLES&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
+      var k=pickedKeys();
+      if(k.length){post({act:'role_many',frags:k.join(','),role:KEYROLES[e.key]});}
+      else if(hover){var key=hover.getAttribute('data-key');if(key)post({act:'role',frag:key,role:KEYROLES[e.key]});}
+    }
+  });
+  document.querySelectorAll('#cardbar .cbr').forEach(function(b){b.onclick=function(){var k=pickedKeys();if(k.length)post({act:'role_many',frags:k.join(','),role:b.getAttribute('data-role')});};});
   var cn=document.getElementById('cb_new');
   if(cn)cn.onclick=function(){var k=pickedKeys();if(k.length)post({act:'new_from',frags:k.join(','),type:'story'});};
-  var cr=document.getElementById('cb_role_go');
-  if(cr)cr.onclick=function(){var k=pickedKeys();if(k.length)post({act:'role_many',frags:k.join(','),role:document.getElementById('cb_role').value});};
   var co=document.getElementById('cb_out');
   if(co)co.onclick=function(){var k=pickedKeys();if(k.length)post({act:'remove_frags',frags:k.join(',')});};
   var cc=document.getElementById('cb_clear');
@@ -1418,6 +1458,9 @@ blockquote.proto{border-left:3px solid var(--accent);background:var(--surface);b
 .inclpanel .cardtext{max-height:130px}
 .selbar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--page);padding:9px 16px;border-radius:12px;box-shadow:var(--shadow);z-index:60;font-size:14px}
 .selbar button{cursor:pointer}
+.selbar.cardbar{bottom:auto;top:8px;max-width:min(96vw,1100px);text-align:center}
+.selbar.cardbar .cbr{background:var(--page);color:var(--ink);border:0;border-radius:7px;padding:4px 8px;margin:2px 1px;font-family:inherit;font-size:13px}
+.selbar.cardbar .cbr sup{font-size:9px;opacity:.7;margin-left:2px}
 g.selbox rect{stroke:var(--warn) !important;stroke-width:9 !important;fill:rgba(235,104,52,.28) !important}
 g.flash rect{stroke:var(--warn) !important;stroke-width:10 !important}
 .boxlabel{font-size:11px;fill:var(--accent)}
@@ -1627,6 +1670,12 @@ RV.bind(globals())
 CP.bind(globals())
 CR.bind(globals())
 MR.bind(globals())
+def kind_decision(iid):
+    """The latest kind or reason clicked for an item on /review/nonmagazine or the contents-check page (v0.27.0)."""
+    d = NM.decisions().get(iid)
+    return NM.DECISIONS.get(d["decision"], d["decision"]) if d else None
+
+
 VP.bind(globals())
 NM.bind(globals())
 CRP.bind(globals())
@@ -2108,6 +2157,9 @@ class H(BaseHTTPRequestHandler):
                 return self._send(403, self._page("No", howto(
                     "Checking needs a named account, so the log shows who did it.")
                     + "<h1>Guests cannot check</h1>"))
+            if get("kind_decision"):                         # v0.27.0: "this item is not a magazine issue", from the check page
+                NM.append_decision(self.user, get("issue"), get("kind_decision"), get("kind_note") or "from the contents check")
+                return self._redirect("/verify/contents/" + urllib.parse.quote(get("issue")))
             rec = VP.append_check(self.user, get)
             return self._redirect("/verify/sample?checked=" + urllib.parse.quote(rec["issue"]) if rec else "/verify/sample")
         if path in ("/reuse/validate", "/reuse/case"):
@@ -3358,17 +3410,16 @@ click first.</p>"""
                "article</button> "
                "<button class='go' id='sb_new'>Make a NEW record from them</button> "
                "<button id='sb_clear'>Clear choice</button></div>"
-               "<div id='cardbar' class='selbar' style='display:none'>"
-               "<span id='cb_n'>0</span> of this article's segments chosen · "
-               "<select id='cb_role'><option value=''>Body text (no role)</option><option value='title'>Title</option>"
-               "<option value='subtitle'>Subtitle</option><option value='author'>Author</option>"
-               "<option value='chapter_number'>Chapter no.</option><option value='chapter_title'>Chapter title</option>"
-               "<option value='section'>Section</option><option value='teaser'>Teaser</option>"
-               "<option value='synopsis'>Synopsis</option><option value='note'>Note</option></select> "
-               "<button class='go' id='cb_role_go'>Give them this role</button> · "
-               "<button class='go' id='cb_new'>Move them to a NEW record</button> "
-               "<button class='go' id='cb_out'>Move to non-article (kept aside as loose boxes)</button> "
-               "<button id='cb_clear'>Clear choice</button></div>"
+               "<div id='cardbar' class='selbar cardbar' style='display:none'>"
+               "<span id='cb_n'>0</span> segments chosen — give them a role: "
+               + "".join(f"<button class='cbr' data-role='{r}' title='key {k}'>{l}<sup>{k}</sup></button>" for k, r, l in
+                         (("0", "", "Body text"), ("1", "title", "Title"), ("2", "subtitle", "Subtitle"), ("3", "author", "Author"), ("4", "chapter_number", "Ch. no."),
+                          ("5", "chapter_title", "Ch. title"), ("6", "section", "Section"), ("7", "teaser", "Teaser"), ("8", "synopsis", "Synopsis"), ("9", "note", "Note")))
+               + " · <button class='go' id='cb_new'>NEW record from them</button> "
+               "<button class='go' id='cb_out'>Non-article (loose boxes)</button> "
+               "<button id='cb_clear'>Clear (Esc)</button>"
+               "<div class='fine' style='margin-top:4px'>Choose: tick the boxes; Shift-click a box to tick the range from the last tick; click a card's role chip to tick "
+               "every card of that role (Shift: on that page only); Space ticks the card under the mouse. Keys 0–9 give the role to the chosen cards, or to the card under the mouse.</div></div>"
                if can else ""))
         script = ("<script>"
                   + WB_JS.replace("__ISSUE__", iid).replace("__AID__", aid)

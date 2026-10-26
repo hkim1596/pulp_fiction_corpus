@@ -1583,3 +1583,32 @@ Everybody's 1927-09; Wit and Humor, Arm Chair Library 1890). The cross-issue pas
 (19:00–19:05): 1,362 magazines linked. The site after its refresh: 7,135 magazine issues read, 325,980 records,
 **65,633 stories** (66,444 before: the articles, true stories, hints and quizzes that 2.8 had typed as stories are
 features now), 288 verified. The refusals' log: data/corpus/p52-2026-10-16/upgrade_2.9.log.
+
+### 2026-10-26, 11:30 KST — level 1 complete on 150 issues: 97.7%; rules 2.10 and site v0.27.0 from its notes
+
+Sujin Kang finished the contents check (level 1) of all 150 sample issues on 25 October (163 saves; the latest per
+issue counts). **2,059 contents entries: 2,025 right as made, 1 missing, 8 not a piece; 46 listed pieces missed by the
+parser; 2,072 pieces, 2,025 right = 97.7%** (Supplement A asks for 95). By decade: 1890s–1910s 100%, 1920s 97.9, 1930s
+98.7, 1940s 96.4, 1950s 94.9, undated 89.6; by genre: romance 93.8, the rest 96–100. The figure is a lower bound: the
+46 missed pieces were counted as not right because the page's "assembled right anyway" field was not used (the "does
+not list" field took the same number). 23 issues had no entries: 13 without a contents page, 6 with a page the machine
+did not read, 4 unanswered; 6 checks incomplete. 100 kind clicks on 2,059 entries (4.9%): feature→story 52 (contents
+pages that name no authors), poem↔story 20 (Weird Tales 1927–1932 prints "Verse" under the entry it belongs to),
+feature→letters 13 (the rules' letters undone by the signed-letters test of 2.3, and "Galaxy" never matching the
+departments list), month and volume lines 5, other 10. Her notes found ~12 sample slots that are not magazine issues:
+books (Fu Manchu 1916, Two Western Action Books, Whiz, Horrophobic), partial files (Ilaria 1907, Star Weekly Novel
+1953, two Argosy 1891 cover files), a 1990s magazine (Frank Frazetta Fantasy Illustrated), an unread scan (Thrilling
+Wonder 1938-10), and bound volumes of several issues (Argosy 1897 ×2, English Illustrated 1899, Short Stories 1891 ×2).
+
+Her answers of 26 October (docs/decisions.md) became **rules 2.10**: an unsigned entry on a contents page that names no
+authors is a story; a true story is a story; a record the contents or the departments list typed letters stays letters;
+the departments list matches a magazine by its first distinctive word; a contents poem whose text is prose is a story
+and a short story whose text is verse a poem (looks_like_verse); a month, a volume line or CONTENTS JUNE is not a piece;
+a reader's word on where the contents page is forces its reading (config/toc_page_overrides.json,
+scripts/apply_contents_scans.py, toc_folio 1.4); kind **volume** beside book. **Site v0.27.0**: the check page lists the
+reading records no entry claimed, to tick as missed-and-right; the kind is shown as letters/department; "this item is
+not a magazine issue" buttons write to the non-magazine log (scripts/apply_kinds.py takes ids the candidate table does
+not list); the figure counts the sample as it stands; the workbench chooses segments by Shift-click range, by role
+chip, by Space, and gives a role to the chosen cards by a number key or the bar at the top (Sujin, 22 October: "one by
+one is hard"). 304 tests. Next: patch 0019 applied, 2.10 over the corpus, the ~12 slots marked and redrawn, the
+replacements checked, the figure recomputed and frozen.

@@ -1010,17 +1010,23 @@ def contents_score(p, entries, maxpage):
     return score, word
 
 
-def find_contents(pages, maxpage=None, front=16):
+def find_contents(pages, maxpage=None, front=16, force_scan=None):
     """The contents page(s): the best-scoring page among the first `front` scans (and the last three, where a
-    few magazines print it), plus a neighbouring page that continues it."""
+    few magazines print it), plus a neighbouring page that continues it. With force_scan (a reader's word on the
+    check page, config/toc_page_overrides.json; toc_folio 1.4) that scan is the contents page whatever it scores."""
     scans = sorted(pages)
     look = scans[:front] + [s for s in scans[-3:] if s not in scans[:front]]
+    if force_scan is not None and force_scan in pages:
+        look = [force_scan]
     best = None
     parsed = {}
     for s in look:
         es = parse_contents_page(pages[s], maxpage)
         parsed[s] = es
         sc, word = contents_score(pages[s], es, maxpage)
+        if force_scan is not None:
+            best = (max(sc, 4), s)
+            break
         if s not in scans[:front] and not re.search(r"\bCONTENTS\b|\bContents\b|TABLE OF CONTENTS|IN THIS ISSUE",
                                                    " ".join(l["text"] for l in page_lines(pages[s]))):
             # at the back only a page that says, in words, that it is the contents: a publisher's list of titles
@@ -1263,12 +1269,13 @@ def place_entries(entries, pages, fol, toc_pages=()):
 
 # ------------------------------------------------------------------ the whole issue
 
-def analyse_issue(pages):
-    """Folio map, contents entries and their placement for one issue (pages: {scan: page JSON})."""
+def analyse_issue(pages, force_scan=None):
+    """Folio map, contents entries and their placement for one issue (pages: {scan: page JSON}); force_scan names
+    the contents page when a reader has found it where the search did not look."""
     fol = fit_folios(pages)
     vals = [v for v in fol["printed"].values() if v]
     maxpage = max(vals) if vals else None
-    entries, toc_pages = find_contents(pages, maxpage)
+    entries, toc_pages = find_contents(pages, maxpage, force_scan=force_scan)
     kind = "pieces"
     # a book's list of chapters ('I—The Airplane Chums ..... 1') is not a list of pieces: the rules must
     # not start a record at every chapter

@@ -182,6 +182,25 @@ class PagesAndLog(unittest.TestCase):
         self.assertIn("1 kind(s) changed", page)
         self.assertEqual(VP.figure([rec])["retyped"], 1)
 
+    def test_unmatched_records_are_listed_and_ticked_as_missed_right(self):
+        self.docs["wt_1937_12"] = {"articles": ARTICLES + [globals()["rec"]("i_a006", "story", "A Filler Story", [50])]}
+        page = VP.contents_page("wt_1937_12", {}, "sujin")
+        self.assertIn("1 reading records no contents entry claimed", page)
+        self.assertIn("name='u_i_a006'", page)
+        self.assertNotIn("name='u_i_a001'", page)                             # the toc record is not a reading record...
+        self.assertNotIn("name='u_i_a002'", page)                             # ...a matched story is not listed
+        self.assertIn("letters/department", page)
+        self.assertIn("not a magazine issue", page)
+        self.assertIn("value='volume'", page)
+        c = VP.append_check("sujin", lambda k, d="": {"issue": "wt_1937_12", "v_0": "right", "v_1": "right", "v_2": "right", "v_3": "na", "u_i_a006": "1", "missed": "3"}.get(k, d))
+        self.assertEqual((c["missed"], c["missed_right"], c["missed_records"]), (3, 1, ["i_a006"]))
+        self.assertEqual((c["pieces"], c["pieces_right"]), (6, 4))
+        # a check of an issue that left the sample does not count
+        S = json.load(open(VP.sample_path())); S["issues"] = [i for i in S["issues"] if i["id"] != "wt_1937_12"]; json.dump(S, open(VP.sample_path(), "w"))
+        VP._CACHE["sample"] = (None, None)
+        self.assertEqual(VP.one_per_issue(only={"other"}), {})
+        self.assertIn("No issue checked yet", VP.sample_page({}, "sujin"))
+
     def test_an_issue_without_contents_entries(self):
         p = os.path.join(VP._G["DATA"], "assembly_v2", "rules", "wt_1937_12", "analysis.json")
         a = json.load(open(p)); a["toc"] = []; a["toc_page"] = None; a["toc_pages"] = None; json.dump(a, open(p, "w"))

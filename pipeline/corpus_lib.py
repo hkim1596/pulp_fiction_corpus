@@ -124,7 +124,8 @@ KINDS_PATH = os.path.join(ROOT, "config", "corpus_kinds.json")
 def corpus_kinds():
     """id -> kind for the items that are not magazine issues but stay in the data (config/corpus_kinds.json; Sujin
     Kang's decision of 21 October 2026): "book" — a standalone book, a story collection, a paperback, a dime-novel or
-    nickel-weekly number with one novel. An item not listed is a magazine issue. The corpus of the protocol (counts,
+    nickel-weekly number with one novel; "volume" (26 October) — a bound volume of several issues read as one item,
+    assembled as a magazine, not counted as an issue. An item not listed is a magazine issue. The corpus of the protocol (counts,
     the verification sample, the backgrounds) is the magazine issues; the books stay labelled, assembled as books
     (s08_book), and serve as the other side of a reuse match (a story reprinted in a book)."""
     try:

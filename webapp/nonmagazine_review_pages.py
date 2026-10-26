@@ -26,9 +26,11 @@ from collections import Counter, defaultdict
 
 _G = {}
 _CACHE = {"table": (None, None), "log": (None, None)}
-DECISIONS = {"magazine": "magazine", "book": "book", "excerpt": "excerpt of a magazine", "not_english": "not English",
+DECISIONS = {"magazine": "magazine", "book": "book", "volume": "bound volume", "excerpt": "excerpt of a magazine", "not_english": "not English",
              "not_text": "not a text", "comic": "comic", "outside": "outside the period", "?": "not sure"}
-KINDS = ("magazine", "book")                       # these stay in the data; the rest are reasons to set the item aside
+KINDS = ("magazine", "book", "volume")             # these stay in the data; the rest are reasons to set the item aside
+# volume (Sujin Kang, 26 October 2026): a bound volume of several issues read as one item — kept, assembled as a
+# magazine, not counted as an issue, not in the sample
 LEGACY = {"x": "earlier: exclude", "k": "earlier: keep"}
 PROPOSED_KIND = {"book": "book", "dime novel": "book", "single story": "excerpt", "index or portfolio": "not_text", "comic": "comic",
                  "outside the period": "outside", "not a fiction magazine": "magazine"}
@@ -208,7 +210,7 @@ def review_page(qs, user, render=None):
     body_rows = []
     for it in rows:
         d = D.get(it["id"]) or L.get(it["id"])
-        klass = ("dlegacy" if d["decision"] in LEGACY else {"magazine": "dmagazine", "book": "dbook", "?": "dq"}.get(d["decision"], "dout")) if d else ""
+        klass = ("dlegacy" if d["decision"] in LEGACY else {"magazine": "dmagazine", "book": "dbook", "volume": "dbook", "?": "dq"}.get(d["decision"], "dout")) if d else ""
         suggested = PROPOSED_KIND.get(it.get("class") or "", "magazine") if it.get("proposed") != "KEEP" else "magazine"
         sig = " ".join(f"<span title='{html.escape((key.get(c) or {}).get('says', ''), quote=True)}'>{_esc(c)}</span>" for c in it.get("signals", []))
         ev = "; ".join(f"{_esc(k)}: {_esc(str(v))}" for k, v in (it.get("evidence") or {}).items())

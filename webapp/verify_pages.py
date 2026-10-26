@@ -35,6 +35,13 @@ READING_TYPES = ("story", "poem", "feature", "letters", "other")
 # the kinds a reader can set an entry to (site v0.26.0; Sujin Kang's notes of 21 October 2026 asked for them as clicks):
 # a serial part is a story with serial fields; house is the publisher's own matter
 PIECE_TYPES = ("story", "poem", "feature", "letters", "house", "other")
+# letters = the magazine's own recurring departments (the readers', the editor's, a column); feature = a one-off
+# non-fiction piece (Sujin Kang, 26 October 2026)
+TYPE_LABELS = {"story": "story", "poem": "poem", "feature": "feature", "letters": "letters/department", "house": "house", "other": "other"}
+# "this item is not a magazine issue" from the check page (v0.27.0): a kind or a reason, as /review/nonmagazine takes them
+NOT_AN_ISSUE = (("book", "a book (a novel, a collection, a paperback)"), ("volume", "a bound volume of several issues"),
+                ("excerpt", "an excerpt or a partial file (not the whole issue)"), ("outside", "outside the period (a reprint, a fanzine, later)"),
+                ("not_text", "not a text (no readable OCR, an index, a gallery)"), ("comic", "a comic"), ("magazine", "a magazine issue after all"))
 NO_CONTENTS = {"none": "the issue has no contents page", "unread": "a contents page the machine did not read"}
 
 
@@ -218,6 +225,13 @@ def machine_type(entry, rec):
     return "story" if t == "serial_part" else (t if t in PIECE_TYPES else "other")
 
 
+def unmatched_records(matched, articles):
+    """The reading records no contents entry claimed: what a reader looks through to count the pieces the parser
+    missed (and how many of them are right anyway). Pure."""
+    taken = {r["article_id"] for _, r, _ in matched if r}
+    return [r for r in articles if r.get("type") in READING_TYPES and r["article_id"] not in taken]
+
+
 def summarize(entries_verdicts, missed=0, missed_right=0):
     """The counts of one check: listed pieces (entries that are pieces), right, fixed, missing, and the figure with the
     entries the parser missed added."""
@@ -259,9 +273,14 @@ def append_check(user, form, iid=None):
             return max(0, int(form(name) or 0))
         except ValueError:
             return 0
-    summ = summarize([x["verdict"] for x in entries], num("missed"), num("missed_right"))
+    # v0.27.0: the records no entry claimed are listed on the page; the reader ticks those that are listed pieces the
+    # parser missed and that are right as made (missed_right), and types how many listed pieces the parser missed in all
+    ticked = [r["article_id"] for r in unmatched_records(matched, doc.get("articles", [])) if form("u_" + r["article_id"]) == "1"]
+    missed = max(num("missed"), len(ticked))
+    missed_right = len(ticked) if ticked else min(num("missed_right"), missed)
+    summ = summarize([x["verdict"] for x in entries], missed, missed_right)
     rec = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "user": user, "issue": iid, "order": slot.get("order"), "decade": slot.get("decade"),
-           "genre": slot.get("genre"), "toc_page": reading.get("toc_page"), "entries": entries, **summ,
+           "genre": slot.get("genre"), "toc_page": reading.get("toc_page"), "entries": entries, **summ, "missed_records": ticked,
            "n_retyped": sum(1 for x in entries if x.get("type_set")),
            "unlisted": num("unlisted"), "note": (form("note") or "")[:2000], "complete": all(x["verdict"] for x in entries)}
     if not entries:
@@ -272,7 +291,7 @@ def append_check(user, form, iid=None):
         rec["contents_scan"] = num("contents_scan") or None
         rec["complete"] = bool(rec["no_contents"])
         if rec["no_contents"] == "none":
-            rec.update({"missed": 0, "missed_right": 0, "pieces": 0, "pieces_right": 0})
+            rec.update({"missed": 0, "missed_right": 0, "pieces": 0, "pieces_right": 0, "missed_records": []})
     os.makedirs(os.path.dirname(checks_path()), exist_ok=True)
     with open(checks_path(), "a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
@@ -311,12 +330,15 @@ def needs_redo(check):
     return not check.get("entries") and not check.get("no_contents")
 
 
-def one_per_issue(lc=None):
+def one_per_issue(lc=None, only=None):
     """issue -> the check that counts for the figure: the earliest reader's latest check (the second reader's check is
-    reported beside it, as agreement)."""
+    reported beside it, as agreement). With `only` (the ids of the sample as it stands) a check of an issue that has
+    left the sample is not counted (v0.27.0)."""
     lc = latest_checks() if lc is None else lc
     out = {}
     for iid, by_user in lc.items():
+        if only is not None and iid not in only:
+            continue
         first = min(by_user.values(), key=lambda c: c["ts"])
         out[iid] = first
     return out
@@ -338,6 +360,8 @@ CONTENTS_CSS = """
 .cct select.t{font-family:inherit;font-size:11.5px;max-width:84px}
 .cct select.t.changed{background:var(--warnbg,#fff3cd)}
 .ccnc label{display:block;margin:4px 0}
+.umlist{max-height:220px;overflow:auto;margin-top:6px}
+.umlist label.um{display:block;font-size:12.5px;margin:2px 0}
 .ccsave{position:sticky;bottom:0;background:var(--surface);padding:8px 0;border-top:1px solid var(--grid)}
 @media (max-width:900px){.cc{grid-template-columns:1fr}.ccscan{position:static;max-height:none}.ccside{max-height:none}}
 .ccbtns{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
@@ -366,8 +390,10 @@ def contents_page(iid, qs, user, render=None):
         "(left) and, where in doubt, open the record or its page. Mark each entry: RIGHT AS MADE when a record starts on "
         "the right page with the right title and author; FIXED when you corrected it on the workbench; MISSING when the "
         "piece has no record; NOT A PIECE when the entry is not a piece (a cover line, a credit, a misreading). The KIND "
-        "column shows the kind the machine gave the piece (story — a serial part is a story too —, poem, feature, letters, "
-        "house, other): change it when it is wrong; the change is saved with the check and goes back into the rules. Below "
+        "column shows the kind the machine gave the piece (story — a serial part is a story too —, poem, feature — a one-off "
+        "non-fiction piece —, letters/department — the magazine's own recurring departments —, house, other): change it when "
+        "it is wrong; the change is saved with the check and goes back into the rules. Under the table, the reading records "
+        "no entry claimed: tick those that are listed pieces the parser missed and that are right as made. Below "
         "the table, count the pieces the contents page lists that the machine's reading of the page missed (and how many of "
         "them nevertheless have a right record), and anything in the issue the contents page does not list. Then save. "
         "Your check is kept under your name; a second check of the same issue by another reader is kept beside it."),
@@ -410,7 +436,7 @@ def contents_page(iid, qs, user, render=None):
         mt = machine_type(e, rec)
         chosen = (prev.get(k) or {}).get("type_set") or mt
         kinds = (f"<select class='t{' changed' if chosen != mt else ''}' name='t_{k}' data-machine='{mt}' title='the kind the machine gave it: {mt}'{'' if can else ' disabled'}>"
-                 + "".join(f"<option value='{t}'{' selected' if t == chosen else ''}>{t}</option>" for t in PIECE_TYPES) + "</select>")
+                 + "".join(f"<option value='{t}'{' selected' if t == chosen else ''}>{TYPE_LABELS[t]}</option>" for t in PIECE_TYPES) + "</select>")
         rows.append(f"<tr><td class='num'>{k + 1}</td><td class='num'>{e.get('page') if e.get('page') is not None else ''}</td>"
                     f"<td><b>{_esc(e.get('title') or '')}</b>" + (f" <span class='fine'>{_esc(e.get('author'))}</span>" if e.get("author") else "")
                     + (f" <span class='fine'>· {_esc(e.get('section'))}</span>" if e.get("section") else "") + "</td>"
@@ -429,6 +455,15 @@ def contents_page(iid, qs, user, render=None):
     for u, c in others.items():
         side.append(f"<div class='ccbox'>Checked by {_esc(_G['display_name'](u))} on {_esc(c['ts'][:10])}: {c['n_right']} right, {c['n_fixed']} fixed, {c['n_missing']} missing, "
                     f"{c['n_na']} not a piece" + (f" — “{_esc(c['note'])}”" if c.get("note") else "") + "</div>")
+    if can:
+        kd = (_G.get("kind_decision") or (lambda i: None))(iid)
+        side.append("<details class='ccbox'><summary>This item is <b>not a magazine issue</b>?" + (f" <span class='chip stV'>marked: {_esc(kd)}</span>" if kd else "") + "</summary>"
+                    "<p class='fine'>A book, a bound volume, a partial file, a modern reprint, an unreadable scan: mark it here. The mark goes to the "
+                    "non-magazine review log; scripts/apply_kinds.py then sorts it by kind or sets it aside, and the sample's slot is redrawn. "
+                    "Mark <i>a magazine issue after all</i> to undo.</p>"
+                    f"<form method='POST' action='/verify/contents' class='ccbtns'><input type='hidden' name='issue' value='{_esc(iid)}'>"
+                    + "".join(f"<button name='kind_decision' value='{v}' class='g'>{_esc(l)}</button>" for v, l in NOT_AN_ISSUE)
+                    + "<input name='kind_note' placeholder='note (optional)' style='font-family:inherit'></form></details>")
     form_open = f"<form method='POST' action='/verify/contents' id='ccform'><input type='hidden' name='issue' value='{_esc(iid)}'>" if can else "<div>"
     form_close = "</form>" if can else "</div>"
     side.append(form_open)
@@ -436,9 +471,23 @@ def contents_page(iid, qs, user, render=None):
     if matched:
         side.append("<table class='cct'><tr><th>#</th><th>p.</th><th>the entry (title · author · section)</th>"
                     "<th>the machine's record (title · author · first scan)</th><th>kind</th><th>verdict</th><th>note</th></tr>" + "".join(rows) + "</table>")
-        side.append("<div class='ccbox ccnum'>Entries the machine's reading of the contents page <b>missed</b>: "
-                    f"<input name='missed' value='{g('missed')}'{'' if can else ' disabled'}> of which assembled right anyway: <input name='missed_right' value='{g('missed_right')}'{'' if can else ' disabled'}>"
-                    f" &nbsp;·&nbsp; pieces in the issue the contents page does not list: <input name='unlisted' value='{g('unlisted')}'{'' if can else ' disabled'}></div>")
+        um = unmatched_records(matched, doc.get("articles", []))
+        ticked = set((mine or {}).get("missed_records") or [])
+        if um:
+            lines = []
+            for r in um:
+                fp = _first_page(r)
+                lines.append(f"<label class='um'><input type='checkbox' name='u_{_esc(r['article_id'])}' value='1'{' checked' if r['article_id'] in ticked else ''}{'' if can else ' disabled'}> "
+                             f"<a href='/article/{_esc(r['article_id'])}' target='_blank'>{_esc(r.get('title') or '(untitled)')}</a>"
+                             + (f" · {_esc(r.get('author'))}" if r.get("author") else "") + f" · <span class='fine'>{_esc(TYPE_LABELS.get(r.get('type'), r.get('type')))}</span>"
+                             + (f" · <a href='/issue/{_esc(iid)}/p/{fp}' target='_blank'>scan {fp}</a>" if fp else "") + "</label>")
+            side.append(f"<div class='ccbox'><b>{len(um)} reading records no contents entry claimed.</b> Tick each one that is a piece the contents page "
+                        "lists but the machine's reading of the page missed, when its record is right as made (its start, title and author): "
+                        "the ticked ones count as <i>missed, assembled right anyway</i>.<div class='umlist'>" + "".join(lines) + "</div></div>")
+        side.append("<div class='ccbox ccnum'>Listed pieces the machine's reading of the contents page <b>missed</b>, in all: "
+                    f"<input name='missed' value='{g('missed')}'{'' if can else ' disabled'}> <span class='fine'>(at least the number ticked above; more when a missed piece has no right record)</span>"
+                    f"<input type='hidden' name='missed_right' value='{g('missed_right')}'>"
+                    f"<br>Pieces in the issue the contents page does <b>not</b> list at all (fillers, house matter; for information only): <input name='unlisted' value='{g('unlisted')}'{'' if can else ' disabled'}></div>")
     else:
         nc = (mine or {}).get("no_contents")
         dis = "" if can else " disabled"
@@ -481,7 +530,7 @@ def sample_page(qs, user, render=None):
     want = (qs.get("show") or ["all"])[0]
     saved = (qs.get("checked") or [""])[0]
     lc = latest_checks()
-    counted = one_per_issue(lc)
+    counted = one_per_issue(lc, only={i["id"] for i in S["issues"]})
     con = E.db()
     try:
         ids = [i["id"] for i in S["issues"]]
@@ -583,7 +632,7 @@ def run_lines():
     S = sample()
     if not S:
         return ""
-    fig = figure(list(one_per_issue().values()))
+    fig = figure(list(one_per_issue(only={i["id"] for i in S["issues"]}).values()))
     return (f"<p class='fine'>The <a href='/verify/sample'>verification sample</a>: {len(S['issues'])} issues drawn on "
             f"{_esc(S.get('drawn', '')[:10])}; the accuracy of the assembly on real corpus issues is measured on them"
             + (f" — the contents check so far: {fig['issues']} issues, {fig['right']:,} of {fig['pieces']:,} listed pieces right ({100 * fig['share']:.1f}%)" if fig["pieces"] else "") + ".</p>")
