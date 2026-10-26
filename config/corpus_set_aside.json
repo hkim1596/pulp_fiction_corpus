@@ -2,7 +2,7 @@
  "_comment": "Issues of the approved list set aside after the download (p50t; Heejin, 14 October 2026: 'Fetch the real scans, set the rest aside'). They stay in the approved list (its fingerprint is untouched); corpus_lib.set_aside() keeps every stage off them; the datasheet counts them by reason. Made by scripts/missing_issues.py from the run's events and the archive's item records.",
  "decided_by": "Heejin Kim",
  "decided": "2026-10-14",
- "written": "2026-10-26T13:24:06",
+ "written": "2026-10-26T14:54:33",
  "issues": [
   {
    "id": "about_the_pulps_newsletters__undated_aboutpulps",
@@ -3805,6 +3805,853 @@
    "decided_by": "Sujin Kang",
    "decided": "2026-10-26",
    "note": "from the contents check"
+  },
+  {
+   "id": "ally_slopers_half_holiday_1895_07_caleslinky",
+   "ia_identifier": "Ally_Slopers_Half_Holiday_0586_1895-07-20_c2c.greyscale_Slinky",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1895 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "argosy_1891_04_0404covers",
+   "ia_identifier": "argosy-v-011n-19-1891-04-04-covers",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M2",
+    "N1",
+    "N3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1891 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "argosy_1891_04_0425covers",
+   "ia_identifier": "argosy-v-011n-22-1891-04-25-covers",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M2",
+    "N1",
+    "N3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1891 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "argosy_1891_10_6318911017",
+   "ia_identifier": "argosy-v-013n-463-1891-10-17",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M2",
+    "N1",
+    "N3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1891 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "argosy_1891_10_6418911024",
+   "ia_identifier": "argosy-v-013n-464-1891-10-24",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M2",
+    "N1",
+    "N3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1891 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "argosy_1892_argosy1892",
+   "ia_identifier": "the-argosy-1892",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N3",
+    "N4",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1892 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "argosy_1894_05_ocadsibcbc",
+   "ia_identifier": "TheArgosyV18n02189405TocAdsIbcBc",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M2",
+    "N1",
+    "N3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1894 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "argosy_1894_12_ctocadsibc",
+   "ia_identifier": "TheArgosyV19n03189412IfcTocAdsIbc",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M2",
+    "N1",
+    "N3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1894 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "beneath_ceaseless_skies_undated_ssskies212",
+   "ia_identifier": "Beneath_Ceaseless_Skies_212",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "beneath_ceaseless_skies_undated_ssskies213",
+   "ia_identifier": "Beneath_Ceaseless_Skies_213",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "castle_of_frankenstein_undated_nitchdregs_b9495e81a875",
+   "ia_identifier": "Castle_of_Frankenstein_020_whole_Vol5n4_c2c_PeePeeTheSnitch-DREGS",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "outside the period",
+   "signals": [
+    "N1",
+    "M10",
+    "A2",
+    "A3",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "dark_terrors_undated_kterrors01",
+   "ia_identifier": "Dark_Terrors_01",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "dark_terrors_undated_kterrors02",
+   "ia_identifier": "Dark_Terrors_02",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "dark_terrors_undated_kterrors03",
+   "ia_identifier": "Dark_Terrors_03",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "dark_terrors_undated_kterrors04",
+   "ia_identifier": "Dark_Terrors_04",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "deep_red_undated_ialedition",
+   "ia_identifier": "Deep_Red_07_Special_Edition",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "early_pulp_fantasy_1893_1617201911",
+   "ia_identifier": "mundyking--ofthekhyberrifles191617_201911",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "M4",
+    "S1",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1893 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "frank_frazettas_thunda_tales_undated_ndatales01",
+   "ia_identifier": "Frank_Frazettas_Thunda_Tales_01",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "S1",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "gore_gazette_undated_0toecutter",
+   "ia_identifier": "Gore_Gazette_70_toecutter",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "gore_gazette_undated_1toecutter",
+   "ia_identifier": "Gore_Gazette_01_toecutter",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "gore_gazette_undated_3toecutter",
+   "ia_identifier": "Gore_Gazette_53_toecutter",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "gore_gazette_undated_6toecutter",
+   "ia_identifier": "Gore_Gazette_76_toecutter",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "gore_gazette_undated_7toecutter",
+   "ia_identifier": "Gore_Gazette_47_toecutter",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "gore_gazette_undated_8toecutter",
+   "ia_identifier": "Gore_Gazette_48_toecutter",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "gore_gazette_undated_9toecutter_632b0af0a817",
+   "ia_identifier": "Gore_Gazette_49_toecutter",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "gore_gazette_undated_9toecutter_d70861f0ffad",
+   "ia_identifier": "Gore_Gazette_89_toecutter",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "gore_gazette_undated_egazette09",
+   "ia_identifier": "Gore_Gazette_09",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "gore_gazette_undated_egazette81",
+   "ia_identifier": "Gore_Gazette_81",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "halls_of_horror_undated_fhorror028",
+   "ia_identifier": "Halls_of_Horror_028",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "halls_of_horror_undated_fhorror029",
+   "ia_identifier": "Halls_of_Horror_029",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound002",
+   "ia_identifier": "HorrorHound_002",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound003",
+   "ia_identifier": "HorrorHound_003",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound004",
+   "ia_identifier": "HorrorHound_004",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound005",
+   "ia_identifier": "HorrorHound_005",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound006",
+   "ia_identifier": "HorrorHound_006",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound007",
+   "ia_identifier": "Horrorhound_007",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound008",
+   "ia_identifier": "HorrorHound_008",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound009",
+   "ia_identifier": "HorrorHound_009",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound010",
+   "ia_identifier": "HorrorHound_010",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound012",
+   "ia_identifier": "HorrorHound_012",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound020",
+   "ia_identifier": "HorrorHound_020",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound021",
+   "ia_identifier": "HorrorHound_021",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound025",
+   "ia_identifier": "Horrorhound_025",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "horrorhound_undated_orhound028",
+   "ia_identifier": "HorrorHound_028",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "lunchmeat_undated_unchmeat02",
+   "ia_identifier": "Lunchmeat_02",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "lunchmeat_undated_unchmeat06",
+   "ia_identifier": "Lunchmeat_06",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "midnight_marquee_undated_tmarquee34",
+   "ia_identifier": "Midnight_Marquee_34",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "midnight_marquee_undated_tmarquee35",
+   "ia_identifier": "Midnight_Marquee_35",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "midnight_marquee_undated_tmarquee36",
+   "ia_identifier": "Midnight_Marquee_36",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "midnight_marquee_undated_tmarquee38",
+   "ia_identifier": "Midnight_Marquee_38",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "midnight_marquee_undated_tmarquee47",
+   "ia_identifier": "Midnight_Marquee_47",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3",
+    "N2"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "monsters_of_the_movies_annua_undated_l001curtis",
+   "ia_identifier": "Monsters_of_the_Movies_Annual_001_Curtis",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "S1",
+    "N4",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "monsters_of_the_movies_undated_odmanmal32",
+   "ia_identifier": "Monsters_of_the_Movies_004_Curtis_Gambit-Woodman-Mal32",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "monsters_of_the_movies_undated_s007curtis",
+   "ia_identifier": "Monsters_of_the_Movies_007_Curtis",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M3",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "pearson_s_library_1895_04_ishonoured",
+   "ia_identifier": "pearsons-library-07-1895-04-tinsley-lily-dishonoured",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "N1",
+    "M4",
+    "S1",
+    "N4",
+    "A3",
+    "A4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1895 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "the_black_cat_1895_no12189609",
+   "ia_identifier": "TheBlackCatV01no12189609",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "book",
+   "signals": [
+    "M2b",
+    "N1",
+    "M4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1895 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "the_national_police_gazette_1891_10_1010google",
+   "ia_identifier": "the-national-police-gazette-v-059n-0735-1891-10-10-google",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "not a fiction magazine",
+   "signals": [
+    "N1",
+    "N3",
+    "M9",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1891 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "the_national_police_gazette_1892_05_olycus0152",
+   "ia_identifier": "the-national-police-gazette-v-060n-0768-1892-05-28-float-autolycus-0152",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": "not a fiction magazine",
+   "signals": [
+    "N1",
+    "N3",
+    "M9",
+    "N4"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: dated 1892 (the corpus is 1896-1959); marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "toxic_horror_undated_ichorror02",
+   "ia_identifier": "Toxic_Horror_02",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
+  },
+  {
+   "id": "toxic_horror_undated_ichorror04",
+   "ia_identifier": "Toxic_Horror_04",
+   "class": "outside the period",
+   "reason": "outside the period: a reprint, fanzine or magazine from after the period",
+   "kind_by_rule": null,
+   "signals": [
+    "M3"
+   ],
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "note": "outside the period: a horror-film magazine of the 1960s or later, undated in the archive; marked by rule, P52ah 26 October"
   }
  ],
  "decisions": [
@@ -3837,6 +4684,15 @@
     "excerpt of a magazine": 2,
     "outside the period": 1,
     "not a text": 1
+   },
+   "source": "/review/nonmagazine clicks, applied by scripts/apply_kinds.py"
+  },
+  {
+   "decided_by": "Sujin Kang",
+   "decided": "2026-10-26",
+   "added": 60,
+   "by_class": {
+    "outside the period": 60
    },
    "source": "/review/nonmagazine clicks, applied by scripts/apply_kinds.py"
   }
