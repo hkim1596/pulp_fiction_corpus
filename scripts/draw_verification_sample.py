@@ -175,6 +175,8 @@ def main():
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--out", default=os.path.join(ROOT, "config", "verification_sample.json"))
     ap.add_argument("--replace", action="store_true", help="replace the sampled issues that are now set aside, within their cells")
+    ap.add_argument("--freeze", action="store_true", help="freeze the sample: its slots are not replaced any more (Sujin Kang, 27 October 2026)")
+    ap.add_argument("--unfreeze", action="store_true", help="lift the freeze (say why in the build log)")
     args = ap.parse_args()
     from corpus_lib import corpus_config, all_states, set_aside, corpus_kinds
     cfg = json.load(open(args.list, encoding="utf-8")) if args.list else corpus_config()
@@ -185,8 +187,22 @@ def main():
     if not args.any_state:
         states = all_states()
         issues = [i for i in issues if "assembled" in states.get(i["id"], {}).get("stages", {})]
+    if args.freeze or args.unfreeze:
+        S = json.load(open(args.out, encoding="utf-8"))
+        if args.freeze:
+            S["frozen"] = time.strftime("%Y-%m-%d")
+            S["frozen_note"] = ("The sample's 150 slots are final (Sujin Kang, 27 October 2026, after the level-1 check of every slot that was "
+                                "replaced): no slot is replaced any more; an issue found later not to be a magazine issue leaves the corpus "
+                                "but its slot stays, counted as checked at level 1 for nothing.")
+        else:
+            S.pop("frozen", None); S.pop("frozen_note", None)
+        json.dump(S, open(args.out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+        print(("frozen on " + S["frozen"]) if args.freeze else "unfrozen", "—", os.path.relpath(args.out, ROOT))
+        return
     if args.replace:
         S = json.load(open(args.out, encoding="utf-8"))
+        if S.get("frozen"):
+            print(f"the sample is frozen (since {S['frozen']}): no slot replaced; --unfreeze lifts it"); return
         leaving = dict(aside)
         for i in S["issues"]:
             if i["id"] not in leaving and kinds.get(i["id"], "magazine") != "magazine":

@@ -1676,3 +1676,16 @@ Then the upgrade to 2.12: **6,956 of 7,337 installed, 381 refused** — against 
 of kind book (Pluck and Luck, Wild West Weekly, Young Rough Riders, Multum in Parvo) whose first record changed shape
 with the cover rule; they keep 2.11. Sujin, 18:40: the cover is never read as a contents page; a file without a
 contents page goes by the rules.
+
+### 2026-10-27, 11:00 KST — the cover record reaches the site (rules 2.13); the sample frozen
+
+Sujin asked whether the covers were classified: on the site they were not. The published variant (rules_on_model)
+takes the rules' records inside the printed page range and the model's old records for the pages outside it — the
+cover page among them — so 2.12's cover record stayed in the rules variant and the site showed the model's old
+advertisement and house blocks of the cover (24 issues sampled: the cover record on 8, the old blocks on 16). Rules
+2.13 keeps the cover's record whatever the range; the upgrade to 2.13 republishes every issue. The last two open slots
+of the sample (Voice of Fashion 1897, Captain Billy's Whiz Bang 1921) Sujin kept as magazine issues on 27 October:
+**the sample is frozen** (scripts/draw_verification_sample.py --freeze; config/verification_sample.json `frozen`): its
+150 slots are final, 69 of them replaced since 15 October; apply_kinds no longer redraws. Level 1: 141 of 150 checked
+and complete; 9 to finish (Argosy 1897 ×5, Argosy 1909-02, The Black Cat 1897-04, Voice of Fashion's answer, Ten
+Detective Aces 1935-02). Site v0.27.1 shows the freeze on the Verification page.

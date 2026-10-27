@@ -56,7 +56,12 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from layout_order import order_region_keys
 from corpus_lib import write_json_atomic
 
-VERSION = "2.12"
+VERSION = "2.13"
+# 2.13 (2026-10-27): the cover's record survives the model's changes. The published variant (rules_on_model) takes the
+# rules' records inside the printed page range and the model's old records for the pages outside it — the cover page
+# among them, so the 2.12 cover record never reached the site (the model's old advertisement and house blocks of the
+# cover came through instead; found by Sujin Kang's check of 27 October). The cover's record is kept whatever the
+# range. Nothing else changes.
 # 2.12 (2026-10-26, Claude in Sujin Kang's session): the cover. An advertisement or house block that stands on the
 # first scan when that scan looks like the cover (the masthead, cover lines, a price, a date; no running prose:
 # cover_page_score) is the cover's record — type other, department "cover", ad_class "cover" — as Sujin's reading rule of
@@ -3906,7 +3911,9 @@ def assemble(iid, pages, A, variant="rules", model=None, kind="magazine", book=N
         records, book_summary = s08_book.book_mode(iid, records, A, (book or {}).get("title") or A.get("magazine"), (book or {}).get("author"), pages)
     if variant == "rules_on_model" and model:
         lo, hi = A.get("content_range") or A["folio_range"] or [min(pages), max(pages)]
-        keep = [r for r in records if any(lo <= pn <= hi for pn in r["pages"]) or r["type"] == "toc"]
+        # the rules' records inside the printed range, the contents record, and (rules 2.12) the cover's record, which
+        # stands outside the printed range: the model's old records of the cover page are not copied over it
+        keep = [r for r in records if any(lo <= pn <= hi for pn in r["pages"]) or r["type"] == "toc" or r.get("ad_class") == "cover"]
         owned = {key(f["page"], i) for r in keep for f in r["fragments"] for i in f["region_ids"]}
         n = len(keep)
         for a in model.get("articles", []):

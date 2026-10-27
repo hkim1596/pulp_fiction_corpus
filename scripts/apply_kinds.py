@@ -224,13 +224,16 @@ def main():
     print(f"set aside: {len(a2)} added, {len(skipped)} were already set aside" + ("" if args.dry_run else "; config/corpus_set_aside.json written"))
     if args.dry_run:
         return
+    frozen = None
     try:
         S = json.load(open(os.path.join(ROOT, "config", "verification_sample.json"), encoding="utf-8"))
         leaving = [i for i in S["issues"] if kinds.get(i["id"]) in ("book", "volume") or i["id"] in reasons]
+        frozen = S.get("frozen")
     except (OSError, ValueError):
         leaving = []
-    print(f"{len(leaving)} sample slots to redraw" + (": " + ", ".join(f"#{i['order']}" for i in leaving[:40]) if leaving else ""))
-    if leaving and not args.no_redraw:
+    print(f"{len(leaving)} sample slots to redraw" + (": " + ", ".join(f"#{i['order']}" for i in leaving[:40]) if leaving else "")
+          + (f" — the sample is frozen since {frozen}: the slots stay" if frozen else ""))
+    if leaving and not args.no_redraw and not frozen:
         subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "draw_verification_sample.py"), "--replace"], check=True)
     books = [i for i, k in kinds.items() if k == "book"]
     if books and not args.no_reassemble:

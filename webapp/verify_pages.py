@@ -583,6 +583,7 @@ def sample_page(qs, user, render=None):
     fig = figure(list(counted.values()))
     head.append(f"<p class='muted'>{len(S['issues'])} issues drawn on {_esc(S.get('drawn', '')[:10])} (seed {S.get('seed')}) from "
                 f"{S.get('population', '?'):,} assembled issues" + (f"; {len(S.get('replaced') or [])} slot(s) redrawn after issues were set aside" if S.get("replaced") else "")
+                + (f"; <b>frozen on {_esc(S['frozen'])}</b> — the slots are final" if S.get("frozen") else "")
                 + f". <b>Contents check (level 1):</b> {checked_n} of {len(S['issues'])} issues checked"
                 + (f"; {fig['right']:,} of {fig['pieces']:,} listed pieces assembled right ({100 * fig['share']:.1f}%; the check asks for 95%)" if fig["pieces"] else "")
                 + f". <b>Full verification (level 2):</b> {done_n} done, {sum(1 for i in S['issues'] if (iss.get(i['id']) or {}).get('verified'))} started; "
