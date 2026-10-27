@@ -1661,3 +1661,18 @@ no cover and begin with the text need looking at". Rules 2.12: the cover is a re
 department cover; the masthead, the cover lines and the price joined under the magazine's name — until now house_self
 front matter); first_scan_kind() classifies an issue's first scan, and scripts/cover_survey.py runs it over the corpus
 for the manifest. 305 tests.
+
+### 2026-10-26, 19:30 KST — the cover survey; rules 2.12 over the corpus
+
+P52aj (18:45–19:25): scripts/cover_survey.py over the 6,433 magazine issues — the first scan is a **cover in 5,735
+(89%)**, something else (an advertisement, a title page, the inside front cover) in 552, a list of pieces with page
+numbers in 80 (covers whose cover lines carry page numbers — Astounding 1935–36, Amazing 1929–32 — their contents
+page proper is scan 3–5 and is read as before), **running text in 57** (no cover and no front matter in the file; in
+29 the cover is the second scan, a page scanned out of order; in 28 the file is coverless — Wonder Stories 16 of the
+57, Amazing 5, Astounding 4), blank in 9. The table is pilot_export/p52_takeover/cover-survey-2026-10-26.md and the
+file data/corpus/p52-2026-10-16/cover_survey.json; it goes into the manifest as `first_scan`. Recommendation: the
+coverless files stay (the text is complete as far as it goes; Supplement A does not require covers), flagged.
+Then the upgrade to 2.12: **6,956 of 7,337 installed, 381 refused** — against 2.11 seven more, all dime-novel numbers
+of kind book (Pluck and Luck, Wild West Weekly, Young Rough Riders, Multum in Parvo) whose first record changed shape
+with the cover rule; they keep 2.11. Sujin, 18:40: the cover is never read as a contents page; a file without a
+contents page goes by the rules.
