@@ -26,7 +26,7 @@ overall and by stratum (weighted), the time table, the most unusual pairs — pl
 draws' agreement; the two-part model is fit on a capped, unweighted subsample as a machinery check only, as in the
 pilot (statsmodels, when present; --model, off by default). The pilot's placement table is not written: the by-stratum curves place any pair.
 
-    python3 pipeline/r05_background_corpus.py [--per-cell 20000] [--model]
+    python3 pipeline/r05_background_corpus.py [--per-cell 20000] [--model] [--from-pairs]
     python3 pipeline/r05_background_corpus.py --selftest
 
 Inputs: data/reuse/corpus_dryrun/ (the r02 snapshot and pair tables, r04's para/ tables and embeddings; pipeline/
@@ -618,8 +618,12 @@ def fit_models(R, corpus, cap=100_000, log=_log):
     for k in PARA_KS:
         for c in ("longest", "cover_a", "cover_b"):
             df[f"para_k{k}_{c}"] = sub[f"para_k{k}_{c}"].astype(float)
-    units = [{"story_id": s, "meta": corpus.units[i]["meta"]} for i, s in enumerate(sid)]
-    out = {"note": f"fit on an unweighted subsample of {len(df):,} cross-issue rows (half matched, half unmatched): a machinery check, not a finding"}
+    # the story effects of the stories in the subsample only, fit by L-BFGS-B (28 October 2026: the pilot's BFGS over all
+    # 66,122 stories needs a dense matrix of 132,000 x 132,000 — 140 GB — and the kernel killed the run)
+    present = sorted(set(sub["a"].tolist()) | set(sub["b"].tolist()))
+    units = [{"story_id": sid[i], "meta": corpus.units[i]["meta"]} for i in present]
+    out = {"note": f"fit on an unweighted subsample of {len(df):,} cross-issue rows (half matched, half unmatched), {len(units):,} story effects, "
+                   f"variational Bayes by L-BFGS-B: a machinery check, not a finding"}
     try:
         import statsmodels  # noqa: F401
     except ImportError:
@@ -627,7 +631,7 @@ def fit_models(R, corpus, cap=100_000, log=_log):
         return out
     for name, thr in (("exact_k6", 6), ("exact_k7", 7), ("para_k10", 20)):
         try:
-            out[name] = r5.fit_two_part(df, units, name, thr, log)
+            out[name] = r5.fit_two_part(df, units, name, thr, log, fit_method="L-BFGS-B")
         except Exception as e:  # noqa: BLE001
             out[name] = {"error": repr(e)[:200]}
     return out
@@ -635,13 +639,34 @@ def fit_models(R, corpus, cap=100_000, log=_log):
 
 # ---------------------------------------------------------------- run
 
-def run(snap=SNAP, outdir=OUTDIR, per_cell=PER_CELL, seeds=SEEDS, model=False, log=_log, all_pairs=False):
+def draws_info_from_rows(R, st, per_cell, seeds):
+    """The sampler's description (cells, their sizes and matched counts) rebuilt from a saved pair table."""
+    cell_total = exact_cell_counts(st["year"], st["issue"])
+    m = R[(R["matched"] == 1) & (R["same_issue"] == 0)]
+    mc = Counter()
+    for d, bcode in zip(m["later_decade"].astype(np.int64).tolist(), m["years_band"].astype(np.int64).tolist()):
+        mc[(d, BANDS[bcode])] += 1
+    return {"per_cell": per_cell, "seeds": list(seeds), "cells": {f"{d}s|{b}": {"pairs": cnt, "matched": mc.get((d, b), 0)} for (d, b), cnt in sorted(cell_total.items())}}
+
+
+def run(snap=SNAP, outdir=OUTDIR, per_cell=PER_CELL, seeds=SEEDS, model=False, log=_log, all_pairs=False, from_pairs=False):
     os.makedirs(outdir, exist_ok=True)
     t0 = time.time()
     corpus = r2c.Corpus.load(snap)
     st = story_table(corpus, raw_dir=os.path.join(ROOT, "data", "raw"))
     log(f"[r05c] {corpus.n_stories:,} stories; dated {int((~np.isnan(st['year'])).sum()):,}; {st['magazines']} magazines; "
         f"{st['authors']} author keys; publishers by source {st['publisher_sources']}")
+    if from_pairs:
+        # the pair table a previous run saved (28 October 2026: the run that built it was killed after saving it)
+        R = np.load(os.path.join(outdir, f"pairs_{SET_NAME}.npy"))
+        log(f"[r05c] the saved pair table: {R.size:,} rows; {time.time() - t0:.0f}s")
+        n = corpus.n_stories
+        dated = ~np.isnan(st["year"])
+        draws_info = draws_info_from_rows(R, st, per_cell, seeds)
+        base = R[(R["same_issue"] == 0) & (R["draw"] <= 1)]
+        qs = weighted_quantiles(base["topic_tfidf"].astype(np.float64), base["weight"].astype(np.float64), [0.25, 0.5, 0.75])
+        del base
+        return report(R, corpus, st, n, dated, qs, draws_info, snap, outdir, seeds, model, all_pairs, t0, log)
     exact = exact_inputs(snap, corpus, log)
     para = para_inputs(snap, corpus, log)
     n = corpus.n_stories
@@ -691,8 +716,16 @@ def run(snap=SNAP, outdir=OUTDIR, per_cell=PER_CELL, seeds=SEEDS, model=False, l
     # topic quartiles: weighted over the cross-issue rows of the first draw plus the matched
     base = R[(R["same_issue"] == 0) & (R["draw"] <= 1)]
     qs = weighted_quantiles(base["topic_tfidf"].astype(np.float64), base["weight"].astype(np.float64), [0.25, 0.5, 0.75])
+    del base
     R["topic_q"] = 1 + (R["topic_tfidf"][:, None] > np.array(qs, dtype=np.float32)[None, :]).sum(axis=1)
     np.save(os.path.join(outdir, f"pairs_{SET_NAME}.npy"), R)
+    del parts
+    return report(R, corpus, st, n, dated, qs, draws_info, snap, outdir, seeds, model, all_pairs, t0, log)
+
+
+def report(R, corpus, st, n, dated, qs, draws_info, snap, outdir, seeds, model, all_pairs, t0, log=_log):
+    """The summary (summary_machine.json) and the rows with the most reuse (pairs_machine_top.csv.gz) from the pair
+    table; the two-part model last, so that a failure there leaves the rest written."""
     # the report over the matched rows and the first draw (the second draw is the agreement check)
     R1 = R[R["draw"] <= 1]
     summary = {"set": SET_NAME, "label": LABEL, "collection": os.path.basename(snap), "stories": int(n), "dated_stories": int(dated.sum()),
@@ -722,9 +755,8 @@ def run(snap=SNAP, outdir=OUTDIR, per_cell=PER_CELL, seeds=SEEDS, model=False, l
             chk[name] = {"draw1": est[0], "draw2": est[1],
                          "abs_diff": {k: (round(abs(est[0][k] - est[1][k]), 6) if est[0][k] is not None and est[1][k] is not None else None) for k in est[0]}}
         summary["sampler_check"] = {"note": "two independent stratified draws of the unmatched pairs; p_any per cell is exact by design (every matched pair is in the table and the cell sizes are counted), so the differences show the sampling error of the finer splits", "checks": chk}
-    if model:
-        summary["models"] = fit_models(R1, corpus, log=log)
     json.dump(summary, open(os.path.join(outdir, f"summary_{SET_NAME}.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    log(f"[r05c] the summary written (background curves, the time table, the unusual pairs, the sampler check); {time.time() - t0:.0f}s")
     # the rows with the most reuse, as CSV for people
     top = R1[R1["same_issue"] == 0]
     order = np.argsort(-(top["exact_k6_longest"].astype(np.int64) * 1000 + top["para_k10_longest"].astype(np.int64)))[:50_000]
@@ -734,6 +766,9 @@ def run(snap=SNAP, outdir=OUTDIR, per_cell=PER_CELL, seeds=SEEDS, model=False, l
         f.write("a,b," + ",".join(cols) + "\n")
         for r in top[order]:
             f.write(f"{sid[int(r['a'])]},{sid[int(r['b'])]}," + ",".join(str(r[c]) for c in cols) + "\n")
+    if model:
+        log(f"[r05c] the two-part model (machinery check, L-BFGS-B) ...")
+        summary["models"] = fit_models(R1, corpus, log=log)
     summary["seconds"] = round(time.time() - t0, 1)
     json.dump(summary, open(os.path.join(outdir, f"summary_{SET_NAME}.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     log(f"[r05c] {R.size:,} rows ({summary['matched_rows']:,} matched; {summary['sampled_rows_draw1']:,} + {summary['sampled_rows_draw2']:,} sampled) "
@@ -880,6 +915,15 @@ def selftest():
               f"{'OK' if w_ok else 'FAIL'}; p_any k6 {est_p} vs full {full_p} {'OK' if p_ok else 'FAIL'}; two draws differ by "
               f"{sm['sampler_check']['checks']['exact_k6']['abs_diff']}")
         ok = ok and cells_ok and w_ok and p_ok
+        # the report again from the saved pair table (--from-pairs): the same summary, the model by L-BFGS-B
+        Rf, sf = run(snap, os.path.join(snap, "background_sampled"), per_cell=6, model=True, log=lambda *a: None, from_pairs=True)
+        drop = ("generated", "seconds", "models")
+        same = {k: v for k, v in sm.items() if k not in drop} == {k: v for k, v in sf.items() if k not in drop} and Rf.size == Rs.size
+        mod = sf.get("models", {})
+        mod_ok = "skipped" in mod or all(("fixed" in (mod.get(nm, {}).get("part1_any") or {})) or "error" in mod.get(nm, {}) for nm in ("exact_k6", "exact_k7", "para_k10"))
+        print(f"from the saved pairs: the same summary {'OK' if same else 'FAIL'}; the model (L-BFGS-B): "
+              + ("statsmodels not installed" if "skipped" in mod else ", ".join(f"{nm} {'ok' if 'fixed' in (mod.get(nm, {}).get('part1_any') or {}) else mod.get(nm)}" for nm in ("exact_k6", "exact_k7", "para_k10"))))
+        ok = ok and same and mod_ok
     print("SELFTEST", "PASSED" if ok else "FAILED")
     return ok
 
@@ -890,11 +934,12 @@ def main():
     ap.add_argument("--out", default=OUTDIR)
     ap.add_argument("--per-cell", type=int, default=PER_CELL)
     ap.add_argument("--model", action="store_true", help="also fit the pilot's two-part model on a capped subsample (statsmodels; slow)")
+    ap.add_argument("--from-pairs", action="store_true", help="skip the pair table: read the one a previous run saved (pairs_machine.npy) and write the report")
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args()
     if args.selftest:
         sys.exit(0 if selftest() else 1)
-    run(args.snap, args.out, args.per_cell, model=args.model)
+    run(args.snap, args.out, args.per_cell, model=args.model, from_pairs=args.from_pairs)
 
 
 if __name__ == "__main__":

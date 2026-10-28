@@ -1704,3 +1704,18 @@ matched pairs (36.3 million in the dry run), the TF-IDF cosines done in 2,846 s,
 kernel at the embedding cosine of the pairs — E[a] and E[b] taken whole in float64, 2 x 40 million x 384 x 8 bytes,
 246 GB; the dry run's 36 million had just fitted. Fixed: pair_dots, half a million pairs at a time (1.5 GB); the
 same numbers (checked against the old formula). r05 and the site's indexes to run again (P52am).
+
+### 2026-10-28, 18:00 KST — r05 again: killed again, at the model; the model fit by L-BFGS-B; the report from the saved pairs
+
+P52am's rerun of r05 (15:10–17:14) got through the step that had failed (the embedding cosines in chunks), drew the two
+samples of unmatched pairs (493,284 and 493,084 from 25 cells), built and **saved the pair table** (41,180,051 rows,
+pairs_machine.npy, 7.66 GB, complete), wrote the background curves and the unusual pairs — and was killed again, in
+the two-part model's machinery check (--model, which the dry run had not run). The pilot's fit (statsmodels
+BayesMixedGLM.fit_vb) optimizes by BFGS, which keeps a dense matrix of (2 x parameters)^2: with one random intercept
+for each of the 66,122 stories that is 132,000 x 132,000 x 8 bytes, 140 GB, before BFGS's working copies. The tmux
+line then printed FULLRUN-DONE although r05 had failed: the exit status of `r05 | tail` was tail's. Fixed: the corpus
+fit uses L-BFGS-B (memory linear in the parameters; on 100,000 synthetic pairs with 40,000 story effects it takes 8 s
+and 0.2 GB and recovers the planted coefficient 0.8 as 0.76 and the effect sd 0.5 as 0.55) over the effects of the
+stories in the subsample only; the summary and the top-pairs file are written before the model, so a failure there
+loses nothing else; `--from-pairs` writes the report from the saved pair table without building it again (the
+self-test checks that the summary is the same); the run line uses pipefail. The pilot's own fit is unchanged.

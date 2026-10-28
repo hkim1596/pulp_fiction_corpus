@@ -456,7 +456,7 @@ def _z(x):
     return (x - x.mean()) / (sd if sd > 0 else 1.0)
 
 
-def fit_two_part(df, units, response_prefix, thr, log=print):
+def fit_two_part(df, units, response_prefix, thr, log=print, fit_method="BFGS"):
     """Two-part hierarchical model on cross-issue pairs.
     Part 1: any reuse (longest >= thr) ~ fixed effects + story effects.
     Part 2: extent given reuse: covered tokens beyond the threshold, Poisson,
@@ -464,7 +464,9 @@ def fit_two_part(df, units, response_prefix, thr, log=print):
     Story effects: one random intercept per story, entering once for each
     member of the pair (design matrix with two ones per row). Fit by the
     variational Bayes routine in statsmodels (BayesMixedGLM); a first
-    version for Dennis to replace or refine."""
+    version for Dennis to replace or refine.
+    fit_method goes to fit_vb: BFGS (the pilot's, 287 stories) keeps a dense matrix of (2 x parameters)^2; at the
+    corpus's 66,000 story effects that is 140 GB and more, so the corpus run passes L-BFGS-B (28 October 2026)."""
     from scipy import sparse
     from statsmodels.genmod.bayes_mixed_glm import (BinomialBayesMixedGLM,
                                                     PoissonBayesMixedGLM)
@@ -492,7 +494,7 @@ def fit_two_part(df, units, response_prefix, thr, log=print):
     t0 = time.time()
     try:
         m1 = BinomialBayesMixedGLM(any_, X, Z, ident, vcp_p=0.5, fe_p=2.0)
-        r1 = m1.fit_vb()
+        r1 = m1.fit_vb(fit_method=fit_method)
         out["part1_any"] = {
             "fixed": {n: {"mean": round(float(mu), 4), "sd": round(float(sd), 4)}
                       for n, mu, sd in zip(names, r1.fe_mean, r1.fe_sd)},
@@ -513,7 +515,7 @@ def fit_two_part(df, units, response_prefix, thr, log=print):
         t0 = time.time()
         try:
             m2 = PoissonBayesMixedGLM(y, X[sel], Z[sel], ident, vcp_p=0.5, fe_p=2.0)
-            r2_ = m2.fit_vb()
+            r2_ = m2.fit_vb(fit_method=fit_method)
             out["part2_extent"] = {
                 "response": f"max covered tokens - {thr}, Poisson (overdispersion to be addressed)",
                 "n": int(sel.sum()),
