@@ -1689,3 +1689,18 @@ of the sample (Voice of Fashion 1897, Captain Billy's Whiz Bang 1921) Sujin kept
 150 slots are final, 69 of them replaced since 15 October; apply_kinds no longer redraws. Level 1: 141 of 150 checked
 and complete; 9 to finish (Argosy 1897 ×5, Argosy 1909-02, The Black Cat 1897-04, Voice of Fashion's answer, Ten
 Detective Aces 1935-02). Site v0.27.1 shows the freeze on the Verification page.
+
+### 2026-10-28, 11:30 KST — the full run (the rehearsal) and its one failure
+
+P52al ran the whole reuse pipeline on the rules-2.13 corpus (27 October 19:31 – 28 October 00:20). r00: 7,068 issues
+exported (269 set-aside issues' export files removed; their data stays). r02: 66,122 stories of 6,906 issues, 447,360,079
+tokens (63,041 and 423 million in the 2.7 dry run); k = 7: 10,346,419 cross-issue matches, 538,957 of ten tokens or more,
+119,386 clusters; k = 8: 2,474,859, 543,807, 119,339. r03, the planted controls: verbatim recall 1.0 at every k,
+near-verbatim 1.0, heavy edit 0.95 / 0.75 / 0.60 at k = 6 / 7 / 8. r04: 17,860,056 passages; embeddings 2,989 s and
+neighbours on GPU 3 (the model lane stopped for them and started again); 405,600,328 candidate regions; 9,718,472
+alignments at the keep score; K = 5 / 10 / 20: 163,414 / 167,553 / 177,164 cross-issue alignments, about 12,000
+clusters of 40 or more columns. r06: review set 20261027_233322, 275 items in 11 strata. r05 stopped: 40,193,683
+matched pairs (36.3 million in the dry run), the TF-IDF cosines done in 2,846 s, then the process was killed by the
+kernel at the embedding cosine of the pairs — E[a] and E[b] taken whole in float64, 2 x 40 million x 384 x 8 bytes,
+246 GB; the dry run's 36 million had just fitted. Fixed: pair_dots, half a million pairs at a time (1.5 GB); the
+same numbers (checked against the old formula). r05 and the site's indexes to run again (P52am).

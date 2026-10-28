@@ -303,6 +303,20 @@ def pair_cosines(X, a, b, log=None):
     return out
 
 
+def pair_dots(E, a, b, chunk=500_000):
+    """The dot product of E[a[i]] and E[b[i]] (unit rows: the cosine), NaN where either story has no vector — in
+    chunks. (27 October 2026: E[a] and E[b] taken whole as float64 were 2 x 40 million x 384 x 8 bytes, 246 GB, and the
+    kernel killed the full run at this line; a chunk of half a million pairs is 1.5 GB.)"""
+    out = np.empty(a.size, dtype=np.float64)
+    for s in range(0, a.size, chunk):
+        ea = E[a[s:s + chunk]]
+        eb = E[b[s:s + chunk]]
+        d = np.einsum("ij,ij->i", ea, eb, dtype=np.float64)
+        d[np.isnan(ea).any(axis=1) | np.isnan(eb).any(axis=1)] = np.nan
+        out[s:s + chunk] = d
+    return out
+
+
 def embedding_topic_vectors(corpus, mask, snap):
     """Mean passage vector per story (passages mostly inside masked reuse left out), unit length; nan rows where no
     passage remains; None when r04's embeddings are not there."""
@@ -474,8 +488,7 @@ def build_rows(corpus, st, exact, para, a, b, matched, draw, weight, X, E, log=_
             R[f"para_k{k}_{c}"] = col
     R["topic_tfidf"] = np.round(pair_cosines(X, a, b, log=log), 5)            # five decimals, as the pilot's rows
     if E is not None:
-        ea, eb = E[a].astype(np.float64), E[b].astype(np.float64)
-        R["topic_emb"] = np.round(np.where(np.isnan(ea).any(axis=1) | np.isnan(eb).any(axis=1), np.nan, (ea * eb).sum(axis=1)), 5)
+        R["topic_emb"] = np.round(pair_dots(E, a, b), 5)
     else:
         R["topic_emb"] = np.nan
     return R
