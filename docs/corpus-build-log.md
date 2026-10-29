@@ -1748,3 +1748,11 @@ rehearsal keeps its 41 million rows as arrays, not in the explorer's database). 
 columns and links, and the explorer's cluster pages, are the rehearsal's. The database rebuilds at the next refresh
 cycle (its sources changed). Tests: tests/test_explorer_reuse_source.py. Nothing of the pilot's is removed: its files,
 its pages and its annotations stay as they were; the switch is a setting.
+
+### 2026-10-29 — nine issues of 1891–1895 return to the corpus (P52ap)
+
+The corpus window is 1890–1955 (main.tex §2). Nine fiction-magazine items dated 1891–1895 that had been set aside on
+26 October return as magazine issues (Argosy 1891 ×4, 1892, 1894 ×2; The Black Cat vol. 1 no. 1, 1895; Pearson's
+Library 1895); Ally Sloper's Half Holiday 1895 is set aside as a comic paper; the National Police Gazette 1891–92 and
+early_pulp_fantasy_1893 wait for a person's look. The sample (frozen 27 October) is unchanged. The site's year strip
+and sitemark read 1890–1955. The counts after the apply are the paste's output, to be written here with the manifest.

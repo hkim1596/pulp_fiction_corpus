@@ -1543,7 +1543,7 @@ def page(title, body, member=True, path="/", admin=False, user_name="", flash=""
 <meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>{esc(title)} · Pulp Fiction Corpus</title><style>{CSS}</style></head>
 <body><div class='wrap'>
-<div class='sitemark'><a class='tag' href='/'>PULP MAGAZINES · 1896–1959</a>
+<div class='sitemark'><a class='tag' href='/'>PULP MAGAZINES · 1890–1955</a>
 <span class='sub'><a href='/overview'>Pulp Fiction Corpus</a> · a text-reuse study on the Internet Archive's pulp collection</span>
 <a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
 {nav}
@@ -1562,7 +1562,7 @@ def access_page(title, inner):
 <meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>{esc(title)} · Pulp Fiction Corpus</title><style>{CSS}</style></head>
 <body><div class='wrap'>
-<div class='sitemark'><a class='tag' href='/'>PULP MAGAZINES · 1896–1959</a>
+<div class='sitemark'><a class='tag' href='/'>PULP MAGAZINES · 1890–1955</a>
 <span class='sub'><a href='/'>Pulp Fiction Corpus</a> · a text-reuse study on the Internet Archive's pulp collection</span>
 <a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
 <div class='land'><div class='card pad'>{inner}</div></div>
@@ -2536,12 +2536,12 @@ administrator approves them.</p>
         stats = stats_html([(n_frame, "fiction-magazine items in the archive"), (n_issues, "issues read"),
                             (n_rec, "records"), (n_story, "stories"), (n_words, "words of story text"), (n_ver, "records verified")])
         body = f"""<div class='wrap'>
-<div class='sitemark'><span class='tag'>PULP MAGAZINES · 1896–1959</span>
+<div class='sitemark'><span class='tag'>PULP MAGAZINES · 1890–1955</span>
 <span class='sub'>Pulp Fiction Corpus</span>
 <a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
 <h1>Pulp Fiction Corpus</h1>
 <p class='lede'>A research archive in preparation: American pulp fiction magazines
-(1896–1959), rebuilt from library scans into clean, page-anchored text for
+(1890–1955), rebuilt from library scans into clean, page-anchored text for
 a study of how often stories repeat one another. {lede_run} Every story, poem, feature and advertisement
 becomes its own record, traceable to the exact spot on the scan where it was printed, and every record says how
 sure the machine was of it.</p>
@@ -3564,7 +3564,7 @@ click first.</p>"""
     def guide_page(self):
         body = """<h1>Welcome — what this site is, and what to do here</h1>
 <p>This site is where a small team turns scanned pulp fiction magazines
-(1896&ndash;1959, from the Internet Archive) into a clean, citable text
+(1890&ndash;1955, from the Internet Archive) into a clean, citable text
 collection. A computer pipeline has already read the scans and taken a
 first pass at cutting each magazine issue into its printed pieces:
 stories, poems, features, letters pages, even advertisements. The

@@ -360,3 +360,8 @@ Dropbox share carries the full context of each.
   contents search skips a first scan that looks like a cover, unless a
   reader names that scan on the check page; an issue without a contents
   page is assembled from its pages alone.
+- 2026-10-29 (Sujin) — The corpus window is 1890–1955 (main.tex §2). Nine fiction-magazine items dated 1891–1895 that
+  had been set aside on 26 October are magazine issues of the corpus (Argosy 1891 ×4, 1892, 1894 ×2; The Black Cat vol. 1
+  no. 1, 1895; Pearson's Library 1895). Ally Sloper's Half Holiday 1895 is set aside as a comic paper. The National Police
+  Gazette 1891–92 and early_pulp_fantasy_1893 wait for Sujin's own click. The site's era strip and sitemark read 1890–1955.
+  The sample is frozen and is not redrawn; none of the nine is in it.

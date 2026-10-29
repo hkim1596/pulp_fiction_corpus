@@ -1495,7 +1495,7 @@ def collection_bar(fr, downloaded, processed, verified, width=760):
     return "".join(html)
 
 
-YEAR_LO, YEAR_HI = 1896, 1959      # the era the site is framed on (the sitemark tag); the survey shows what lies outside
+YEAR_LO, YEAR_HI = 1890, 1955      # the era the site is framed on (the sitemark tag); the survey shows what lies outside
 
 
 def is_downloaded(row):
