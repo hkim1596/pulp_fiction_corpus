@@ -1732,3 +1732,19 @@ and near-verbatim) with links to the stories, the topic-measure correlation, and
 28 October in a folded section labelled as such. Test tests/test_corpus_reuse_overview.py. The label names the snapshot
 (2026-10-27 19:40). The duplicate-item section still reads "not computed": the 16 October check sat in the 2.7 dry-run
 folder that was moved aside; P52aq runs scripts/duplicate_items.py on the 2.13 snapshot (the D-5 material).
+
+### 2026-10-29 — the explorer's reuse figures from the corpus rehearsal (site v0.28.0)
+
+Until now the explorer (Overview, Authors, Magazines, Stories, Pairs, the explorer's cluster pages) drew its reuse
+figures from the pilot's files under data/reuse/ — 423 shared passages, 2,681 pairs, the ten pilot issues — while the
+corpus counts beside them were the whole corpus. Patch 0029: the explorer reads the rehearsal's files
+(data/reuse/corpus_dryrun/: the matches of ten tokens or more at every seed, the same-issue matches, the near-verbatim
+alignments of 40 columns or more, the region overlap, the background summary) whenever they are on the server, the
+pilot's otherwise (or when PULP_REUSE_SOURCE=pilot). The Overview says which source its figures come from; its section 2
+(pairs with shared text by decade of the later story) is drawn from the rehearsal's background summary — raw shares,
+labelled as such — and the genre-by-genre grid is not drawn for the corpus (genre is not among the protocol's strata);
+the pair tiles and section 7 link to the corpus pages; the Pairs page explains where the corpus's pairs are (the
+rehearsal keeps its 41 million rows as arrays, not in the explorer's database). The authors' and magazines' shared-passage
+columns and links, and the explorer's cluster pages, are the rehearsal's. The database rebuilds at the next refresh
+cycle (its sources changed). Tests: tests/test_explorer_reuse_source.py. Nothing of the pilot's is removed: its files,
+its pages and its annotations stay as they were; the switch is a setting.

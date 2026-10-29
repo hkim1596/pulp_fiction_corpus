@@ -169,17 +169,43 @@ def last_name(display):
 
 # ---------------------------------------------------------------- sources
 
+def reuse_dir():
+    """The reuse files the explorer reads (29 October 2026): data/reuse/corpus_dryrun — the rehearsal of the stages over the
+    whole corpus — when its story set and background summary are there (and PULP_REUSE_SOURCE is not "pilot"); otherwise
+    data/reuse, the pilot's run. The files have the same names and shapes in both."""
+    D = _G["DATA"]
+    corpus = os.path.join(D, "reuse", "corpus_dryrun")
+    if os.environ.get("PULP_REUSE_SOURCE", "").lower() == "pilot":
+        return os.path.join(D, "reuse")
+    if os.path.isfile(os.path.join(corpus, "tokens", "meta.json")) and os.path.isfile(os.path.join(corpus, "background", "summary_machine.json")):
+        return corpus
+    return os.path.join(D, "reuse")
+
+
+def reuse_source_label():
+    """One line naming the reuse source for the pages: which run, and when its story set was taken."""
+    R = reuse_dir()
+    if os.path.basename(R) == "corpus_dryrun":
+        meta = _json(os.path.join(R, "tokens", "meta.json")) or {}
+        return (f"the rehearsal of the reuse stages over the whole corpus (engineering, not the study's numbers; story set of "
+                f"{_esc(meta.get('generated', '?'))}; the matches of ten tokens or more) — <a href='/reuse/corpus'>its page</a>; "
+                f"the pilot's run is at <a href='/reuse'>text reuse in the pilot</a>")
+    return "the pilot's run of the reuse stages (ten issues) — <a href='/reuse'>text reuse in the pilot</a>"
+
+
 def _sources():
     """(path, mtime, size) of every file or directory the database depends on."""
     D = _G["DATA"]
+    R = reuse_dir()
     files = [os.path.join(D, "pilot_stories.jsonl"), _G["CONFIG"], os.path.join(D, "survey", "summary.json"),
-             os.path.join(D, "reuse", "machine_region_overlap.json"),
-             os.path.join(D, "reuse", "background", "pairs_machine.csv.gz"),
-             os.path.join(D, "reuse", "background", "summary_machine.json"),
+             os.path.join(R, "machine_region_overlap.json"),
+             os.path.join(R, "background", "pairs_machine.csv.gz"),
+             os.path.join(R, "background", "summary_machine.json"),
+             os.path.join(R, "tokens", "meta.json"),
              os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pipeline", "publishers.json")]
-    files += glob.glob(os.path.join(D, "reuse", "machine_k*_matches.jsonl"))
-    files += glob.glob(os.path.join(D, "reuse", "machine_k*_sameissue.jsonl"))
-    files += glob.glob(os.path.join(D, "reuse", "para", "machine_w50s25_k10_*.jsonl"))
+    files += glob.glob(os.path.join(R, "machine_k*_matches.jsonl"))
+    files += glob.glob(os.path.join(R, "machine_k*_sameissue.jsonl"))
+    files += glob.glob(os.path.join(R, "para", "machine_w50s25_k10_*.jsonl"))
     files += glob.glob(os.path.join(D, "annotations", "*.jsonl"))
     files += glob.glob(os.path.join(D, "assembly_archive", "*", "annotations", "*.jsonl"))
     files += glob.glob(os.path.join(D, "raw", "*", "meta.json"))
@@ -474,8 +500,9 @@ def build_db(sig, path, log=None):
     mag_links = defaultdict(lambda: {"n": 0, "longest": 0, "pairs": set()})
     issue_links = Counter()
     mrows = []
+    R = reuse_dir()
     for k in (6, 7, 8):
-        for n, m in enumerate(_jsonl(os.path.join(D, "reuse", f"machine_k{k}_matches.jsonl"))):
+        for n, m in enumerate(_jsonl(os.path.join(R, f"machine_k{k}_matches.jsonl"))):
             mrows.append((k, n, m["a"], m["b"], m["len"], m.get("a_issue"), m.get("b_issue"), m.get("excerpt", ""), 0, None,
                           json.dumps(m, ensure_ascii=False)))
             if k == 6:
@@ -495,13 +522,13 @@ def build_db(sig, path, log=None):
                     ML["longest"] = max(ML["longest"], m["len"])
                     ML["pairs"].add((m["a"], m["b"]))
                     issue_links[tuple(sorted((sa[0], sb[0])))] += 1
-        for n, m in enumerate(_jsonl(os.path.join(D, "reuse", f"machine_k{k}_sameissue.jsonl"))):
+        for n, m in enumerate(_jsonl(os.path.join(R, f"machine_k{k}_sameissue.jsonl"))):
             mrows.append((k, n, m["a"], m["b"], m["len"], m.get("a_issue"), m.get("b_issue"), m.get("excerpt", ""), 1,
                           m.get("cause"), json.dumps(m, ensure_ascii=False)))
     con.executemany("INSERT INTO matches VALUES (?,?,?,?,?,?,?,?,?,?,?)", mrows)
     say(f"  matches {len(mrows):,}")
     arows = []
-    for n, a in enumerate(_jsonl(os.path.join(D, "reuse", "para", "machine_w50s25_k10_alignments.jsonl"))):
+    for n, a in enumerate(_jsonl(os.path.join(R, "para", "machine_w50s25_k10_alignments.jsonl"))):
         arows.append((n, a["a"], a["b"], a.get("cols"), a.get("identity"), a.get("score"), a.get("text_a", ""), a.get("text_b", ""),
                       json.dumps(a, ensure_ascii=False)))
         n_para[a["a"]] += 1
@@ -577,7 +604,7 @@ def build_db(sig, path, log=None):
                       len(m["authors"]), m["verified"], (min(m["years"]) if m["years"] else None),
                       (max(m["years"]) if m["years"] else None)) for m in mags.values()])
     # ---- the pair table
-    pp = os.path.join(D, "reuse", "background", "pairs_machine.csv.gz")
+    pp = os.path.join(R, "background", "pairs_machine.csv.gz")       # the pilot's whole table; the corpus run keeps its 41 M rows as arrays and its summary
     n_pairs = 0
     pair_cols = []
     if os.path.exists(pp):
@@ -627,8 +654,9 @@ def build_db(sig, path, log=None):
             "build_seconds": round(time.time() - t0, 2), "counts": json.dumps(counts),
             "sources": json.dumps([os.path.relpath(p, _G["ROOT"]) for p, _, _ in sig]),
             "pair_cols": json.dumps(pair_cols),
-            "summary": json.dumps(_json(os.path.join(D, "reuse", "background", "summary_machine.json")) or {}),
-            "overlap": json.dumps(_json(os.path.join(D, "reuse", "machine_region_overlap.json")) or {}),
+            "summary": json.dumps(_json(os.path.join(R, "background", "summary_machine.json")) or {}),
+            "overlap": json.dumps(_json(os.path.join(R, "machine_region_overlap.json")) or {}),
+            "reuse_source": os.path.relpath(R, _G["ROOT"]),
             "survey": json.dumps(_json(os.path.join(D, "survey", "summary.json")) or {}),
             "corpus_included": "true", "version": "0.23.0"}
     con.executemany("INSERT INTO meta VALUES (?,?)", list(meta.items()))
@@ -717,6 +745,37 @@ def pair_row(con, a, b):
     if not _val(con, "SELECT COUNT(*) FROM sqlite_master WHERE name='pairs'"):
         return None
     return _one(con, "SELECT * FROM pairs WHERE (a=? AND b=?) OR (a=? AND b=?)", (a, b, b, a))
+
+
+def summary_decade_rows(summary):
+    """The share of cross-issue pairs with a match by decade of the later story, from the rehearsal's summary (r05 at corpus
+    scale): by_later_decade of the exact curves (string keys after JSON) and the time table for the near-verbatim form."""
+    bg = (summary or {}).get("background") or {}
+    ex = bg.get("exact") or {}
+    dec6 = (ex.get("k6") or {}).get("by_later_decade") or {}
+    if not dec6:
+        return []
+    dec8 = (ex.get("k8") or {}).get("by_later_decade") or {}
+    tt6 = (bg.get("time_table") or {}).get("exact_k6") or {}
+    ttp = (bg.get("time_table") or {}).get("para_k10") or {}
+
+    def p(curve, L):
+        v = (curve or {}).get(str(L), (curve or {}).get(L))
+        return float(v) if v is not None else 0.0
+
+    def agg(tt, d):
+        n = w = 0.0
+        for key, v in tt.items():
+            if key.split("|")[0] == f"{d}s" and v.get("n_pairs"):
+                n += v["n_pairs"]; w += v["n_pairs"] * (v.get("p_any") or 0)
+        return (n, (w / n if n else 0.0))
+    rows = []
+    for d in sorted(dec6, key=lambda x: int(x)):
+        n, _ = agg(tt6, d)
+        _, para = agg(ttp, d)
+        rows.append({"decade": f"{d}s", "n": round(n), "p6": round(100 * p(dec6[d], 6), 3), "p10": round(100 * p(dec6[d], 10), 4),
+                     "p8": round(100 * p(dec8.get(d), 8), 4), "para": round(100 * para, 4)})
+    return rows
 
 
 def _has_pairs(con):
@@ -1160,6 +1219,8 @@ def overview(qs=None, render=None):
     n_pairs = _val(con, f"SELECT COUNT(*) FROM pairs WHERE {where_pairs}", pa) if has_pairs else 0
     n_all_issues = _val(con, "SELECT COUNT(*) FROM issues")
     n_complete = _val(con, "SELECT COUNT(*) FROM issues WHERE complete=1")
+    summ = meta_json(con, "summary", {}) or {}
+    corpus_src = (meta_value(con, "reuse_source", "") or "").endswith("corpus_dryrun")
     sq = _slice_qs(sl)
     tail = ("&" + sq) if sq else ""
     # the slice form
@@ -1187,9 +1248,13 @@ def overview(qs=None, render=None):
                 ("named authors", n_authors, f"/authors?{sq}" if sq else "/authors"),
                 ("verified stories", n_verified, f"/stories?status=verified{tail}"),
                 ("annotation actions (archived logs included)", n_events, "/activity"),
-                ("shared passages (seed 6, across issues)", n_shared, "/reuse/clusters"),
-                ("paraphrase alignments", n_para, "/reuse/clusters?kind=para&k=10"),
-                ("cross-issue story pairs in the table", n_pairs, f"/pairs?{sq}" if sq else "/pairs")])]
+                ("shared passages (seed 6, across issues)" if not corpus_src else "shared passages (seed 6, ten tokens or more, across issues)",
+                 n_shared, "/reuse/clusters" if not corpus_src else "/reuse/corpus/clusters?kind=exact&k=6"),
+                ("paraphrase alignments" if not corpus_src else "near-verbatim alignments (K = 10, 40+ columns)",
+                 n_para, "/reuse/clusters?kind=para&k=10" if not corpus_src else "/reuse/corpus/clusters?kind=para&k=10"),
+                ("cross-issue story pairs in the table", n_pairs, f"/pairs?{sq}" if sq else "/pairs") if not corpus_src else
+                ("story pairs with a match (seed 6)", (summ.get("matched_rows") or 0), "/reuse/corpus/pairs?k=6")]),
+           f"<p class='fine' style='border-left:3px solid var(--accent);padding:4px 10px'>Reuse figures on this page: {reuse_source_label()}.</p>"]
     # 1. stories per year by genre (stacked); per decade when the span is wide
     yrs = _rows(con, f"SELECT CAST(year AS INTEGER) AS y, genre, COUNT(*) AS n, SUM(n_words) AS w FROM records WHERE {where_rec} "
                      f"AND year IS NOT NULL GROUP BY y, genre ORDER BY y", sa)
@@ -1256,6 +1321,18 @@ def overview(qs=None, render=None):
                         "Cross-issue story pairs with shared text, by decade of the later story", unit="%"),
             _table(["decade", "#pairs", "#share a passage", "#rate", "#paraphrase"], trows)))
         out.append(html_genre_grid(cells, sorted(gset)))
+    elif corpus_src and summary_decade_rows(summ):
+        drows = summary_decade_rows(summ)
+        out.append("<h2>2. How often stories share a passage — by decade of the later story</h2>")
+        out.append(RP._chart_row(
+            RP.svg_bars([r["decade"] for r in drows], [("% of pairs sharing a six-word passage", [r["p6"] for r in drows]),
+                                                       ("% sharing ten tokens or more", [r["p10"] for r in drows])],
+                        "Cross-issue story pairs with shared text, by decade of the later story (raw, whole corpus)", unit="%"),
+            _table(["decade", "#pairs represented", "#six-word passage (%)", "#ten tokens or more (%)", "#eight-word seed (%)", "#near-verbatim, K = 10 (%)"],
+                   [[_esc(r["decade"]), N(r["n"]), N(f"{r['p6']:.3f}"), N(f"{r['p10']:.4f}"), N(f"{r['p8']:.4f}"), N(f"{r['para']:.4f}")] for r in drows])
+            + "<p class='muted' style='font-size:12.5px'>From the rehearsal's background table (every matched pair and a stratified sample of the "
+              "unmatched, reweighted); raw shares with no condition applied — not the study's result, which the two-part model on the frozen corpus gives. "
+              "The genre-by-genre grid is not drawn for the corpus: genre is not among the protocol's strata, and the pilot's grid stays on the pilot's page.</p>"))
     # 3. authors network
     links = _rows(con, f"SELECT ka, kb, n, longest, pairs FROM author_links WHERE ka IN (SELECT author_key FROM records WHERE {where_rec}) "
                        f"OR kb IN (SELECT author_key FROM records WHERE {where_rec}) ORDER BY n DESC, longest DESC", sa + sa)
@@ -1269,8 +1346,10 @@ def overview(qs=None, render=None):
                      f"<a href='/pair/{_esc(p0[0])}/{_esc(p0[1])}'>first pair</a>" if p0[0] else ""])
     n_linked = len({L["ka"] for L in links} | {L["kb"] for L in links})
     note = (f"<p class='muted' style='font-size:12.5px'>Shared passages are exact matches of six or more words between "
-            f"stories from different issues; at pilot scale these are stock phrases, so the network shows the machinery, "
-            f"not influence. {n_linked} linked authors, {len(links)} author pairs"
+            f"stories from different issues" + (" (the corpus files hold the matches of ten tokens or more; the longest are reprints and "
+            "duplicate scans, which the real run consolidates first)" if corpus_src else
+            "; at pilot scale these are stock phrases, so the network shows the machinery, not influence") +
+            f". {n_linked} linked authors, {len(links)} author pairs"
             + (f"; the ring draws the {DRAW_LIMITS['authors']} with most shared passages" if n_linked > DRAW_LIMITS["authors"] else "")
             + f". Full list: <a href='/authors?sort=shared{tail}'>authors</a>.</p>")
     out.append(RP._chart_row(svg_network(con, links), _table(["author", "author", "#shared passages", "#longest (words)", ""], rows) + note))
@@ -1335,10 +1414,12 @@ def overview(qs=None, render=None):
         out.append("<h2>7. How common is a shared passage of a given length?</h2>")
         out.append(RP._chart_row(
             RP.svg_lines(xs, series, "P(longest exact match ≥ L words), seed 6, log scale", ylog=True, xlabel="L (words)"),
-            f"<p class='muted'>Among {s.get('cross_issue_pairs', 0):,} cross-issue story pairs (whole table, not sliced), "
+            f"<p class='muted'>Among {(s.get('cross_issue_pairs') or s.get('cross_issue_pairs_represented') or 0):,} cross-issue story pairs "
+            f"({'represented by the rehearsal' if corpus_src else 'whole table'}, not sliced), "
             f"{_fmt(bg['p_any'] * 100)}% share a passage of six or more words; the share is {_fmt(q1 * 100)}% in the "
             f"lowest topic-similarity quarter and {_fmt(q4 * 100)}% in the highest. Details, the sampler check and the "
-            f"model: <a href='/reuse'>text reuse</a>. Every pair: <a href='/pairs'>pairs</a>.</p>"))
+            f"model: <a href='{'/reuse/corpus' if corpus_src else '/reuse'}'>text reuse</a>. Every pair: "
+            f"<a href='{'/reuse/corpus/pairs?k=6' if corpus_src else '/pairs'}'>pairs</a>.</p>"))
     # 8. progress on the explorer side: complete issues
     out.append("<h2>8. What the explorer covers</h2>")
     out.append(explore_progress_html(con))
@@ -2312,7 +2393,12 @@ def story_page(sid, render=None):
 def pairs_page(qs, render=None):
     con = db()
     if not _has_pairs(con):
-        return _render(render, "Pairs", "<h1>Story pairs</h1><div class='empty'>The pair table has not been built on this server.</div>", "/pairs")
+        corpus_src = (meta_value(con, "reuse_source", "") or "").endswith("corpus_dryrun")
+        msg = ("The explorer's reuse figures come from the corpus rehearsal, whose pair table (41 million rows) is kept as arrays: the "
+               "story pairs with the most exact reuse are at <a href='/reuse/corpus/pairs?k=6'>text reuse in the corpus — pairs</a>, and the "
+               "pilot's pair table, with every one of its 2,681 cross-issue pairs, is reached from <a href='/reuse'>text reuse in the pilot</a>."
+               if corpus_src else "The pair table has not been built on this server.")
+        return _render(render, "Pairs", f"<h1>Story pairs</h1><div class='empty'>{msg}</div>", "/pairs")
     ma, mb, ia, ib = _g(qs, "ma"), _g(qs, "mb"), _g(qs, "ia"), _g(qs, "ib")
     ga, gb = _g(qs, "ga"), _g(qs, "gb")
     try:
