@@ -1719,3 +1719,16 @@ and 0.2 GB and recovers the planted coefficient 0.8 as 0.76 and the effect sd 0.
 stories in the subsample only; the summary and the top-pairs file are written before the model, so a failure there
 loses nothing else; `--from-pairs` writes the report from the saved pair table without building it again (the
 self-test checks that the summary is the same); the run line uses pipefail. The pilot's own fit is unchanged.
+
+### 2026-10-29 — the rehearsal on the website (site v0.27.2)
+
+The Reuse tab opened the pilot's page; the corpus rehearsal of 27–28 October sat one link away at /reuse/corpus, and
+there the background table's "by years apart" and "by topic quartile" columns read 0.00 % — the page looked the
+survival curves up by integer keys after their JSON round trip had made them strings. Patch 0028: the Reuse tab opens
+/reuse/corpus whenever the rehearsal's files are on the server (the pilot stays at /reuse, linked from the label); the
+columns read correctly; the page adds the share by authorship, the share of pairs with a six-word match by decade of
+the later story (raw, before any condition, with that said under it), the sampler check, the most unusual pairs (exact
+and near-verbatim) with links to the stories, the topic-measure correlation, and the two-part model's machinery check of
+28 October in a folded section labelled as such. Test tests/test_corpus_reuse_overview.py. The label names the snapshot
+(2026-10-27 19:40). The duplicate-item section still reads "not computed": the 16 October check sat in the 2.7 dry-run
+folder that was moved aside; P52aq runs scripts/duplicate_items.py on the 2.13 snapshot (the D-5 material).

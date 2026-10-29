@@ -41,9 +41,12 @@ def _snap():
 
 
 def _label():
-    return ("<p class='fine' style='border-left:3px solid var(--accent);padding:4px 10px'>Engineering dry run of 14 October 2026 onward; "
-            "not the study's numbers. The stages run on the corpus as it stands, to prove the code and show the material; the study's run "
-            "repeats them on the frozen corpus after the protocol's acceptance (manuscript CHR-2026-0073).</p>")
+    meta = _load("tokens/meta.json") or {}
+    when = f" (this snapshot: {_esc(meta['generated'])})" if meta.get("generated") else ""
+    return ("<p class='fine' style='border-left:3px solid var(--accent);padding:4px 10px'>Engineering rehearsal, not the study's numbers" + when + ". "
+            "The stages run on the corpus as it stands, to prove the code and show the material; the study's run "
+            "repeats them on the frozen corpus after the protocol's acceptance (manuscript CHR-2026-0073). "
+            "<a href='/reuse'>The pilot's pages</a> show the same stages on the ten pilot issues.</p>")
 
 
 def _load(rel, kind="json"):
@@ -89,6 +92,24 @@ def _stories():
         out = {}
     _CACHE[p] = (mt, out)
     return out
+
+
+def _p(curve, L):
+    """A weighted survival dict after its JSON round trip (keys are strings): P(longest >= L), 0 when absent."""
+    if not isinstance(curve, dict):
+        return 0.0
+    v = curve.get(str(L), curve.get(L))
+    return float(v) if v is not None else 0.0
+
+
+def _bands(d):
+    order = {"0-2": 0, "3-9": 1, "10-19": 2, "20+": 3}
+    return sorted(d.items(), key=lambda kv: order.get(kv[0], 9))
+
+
+def _story_issue(sid, st=None):
+    st = st if st is not None else _stories()
+    return (st.get(sid) or {}).get("issue") or ""
 
 
 def _name(sid, st=None):
@@ -218,24 +239,76 @@ def overview(render=None):
                     f"one ({sm['sampled_rows_draw1']:,} in the first draw, {sm['sampled_rows_draw2']:,} in the second), standing for "
                     f"{sm['cross_issue_pairs_represented']:,} cross-issue pairs of dated stories. The share of pairs with any match is exact by design; "
                     f"the finer splits carry sampling error (the two draws' estimates are in the summary file).</p>")
+        if sm.get("topic_tfidf_vs_embedding_corr") is not None:
+            body.append(f"<p class='fine'>Topic similarity: TF-IDF cosine against embedding cosine over the cross-issue rows, r = {sm['topic_tfidf_vs_embedding_corr']}.</p>")
         rows = []
         for k in (6, 7, 8):
             e = bg.get("exact", {}).get(f"k{k}")
             if e:
-                rows.append([f"exact, seed {k}", _N(f"{100 * e['p_any']:.3f}%"), _esc(", ".join(f"{b}: {100 * v.get(k, 0):.2f}%" for b, v in sorted(e.get("by_years_band", {}).items()))),
-                             _esc(", ".join(f"q{q}: {100 * v.get(k, 0):.2f}%" for q, v in sorted(e.get("by_topic_q", {}).items())))])
+                rows.append([f"exact, seed {k}", _N(f"{100 * e['p_any']:.3f}%"), _esc(", ".join(f"{b}: {100 * _p(v, k):.2f}%" for b, v in _bands(e.get("by_years_band", {})))),
+                             _esc(", ".join(f"q{q}: {100 * _p(v, k):.2f}%" for q, v in sorted(e.get("by_topic_q", {}).items()))),
+                             _esc(", ".join(f"{'same' if a == '1' else 'different'} author: {100 * _p(v, k):.2f}% (n={v.get('n', 0):,})" for a, v in sorted(e.get("by_same_author", {}).items())))])
         for k in (5, 10, 20):
             pq = bg.get("paraphrase", {}).get(f"k{k}")
             if pq:
-                rows.append([f"near-verbatim, K {k}", _N(f"{100 * pq['p_any']:.3f}%"), _esc(", ".join(f"{b}: {100 * v.get(20, 0):.2f}%" for b, v in sorted(pq.get("by_years_band", {}).items()))),
-                             _esc(", ".join(f"q{q}: {100 * v.get(20, 0):.2f}%" for q, v in sorted(pq.get("by_topic_q", {}).items())))])
-        body.append(_table(["measure", "#pairs with any match", "by years apart", "by topic quartile"], rows))
+                rows.append([f"near-verbatim, K {k}", _N(f"{100 * pq['p_any']:.3f}%"), _esc(", ".join(f"{b}: {100 * _p(v, 20):.2f}%" for b, v in _bands(pq.get("by_years_band", {})))),
+                             _esc(", ".join(f"q{q}: {100 * _p(v, 20):.2f}%" for q, v in sorted(pq.get("by_topic_q", {}).items()))), ""])
+        body.append(_table(["measure", "#pairs with any match", "by years apart", "by topic quartile", "by authorship (where both by-lines are known)"], rows))
+        e6 = bg.get("exact", {}).get("k6", {})
+        dec = e6.get("by_later_decade", {})
+        if dec:
+            cats = sorted(dec.keys(), key=lambda d: int(d))
+            vals = [round(100 * _p(dec[d], 6), 3) for d in cats]
+            body.append(RP._chart_row(RP.svg_bars([f"{d}s" for d in cats], [("pairs with a six-word match (%)", vals)], "Share of pairs with a six-word match, by decade of the later story — raw, before any condition"),
+                                      _table(["decade of the later story", "#with a six-word match (%)", "#with a ten-token match (%)", "#with an eight-word match (%)"],
+                                             [[f"{d}s", _N(f"{100 * _p(dec[d], 6):.3f}"), _N(f"{100 * _p(dec[d], 10):.4f}"),
+                                               _N(f"{100 * _p(bg.get('exact', {}).get('k8', {}).get('by_later_decade', {}).get(d, {}), 8):.4f}")] for d in cats])))
+            body.append("<p class='fine'>Raw shares: no condition applied (topic similarity, years apart, authorship, venue, OCR quality). The protocol's question — "
+                        "whether recurrence rose between comparable works — is answered by the two-part model on the frozen corpus, not by this table.</p>")
+        chk = (sm.get("sampler_check") or {}).get("checks", {})
+        if chk:
+            body.append("<p class='fine'>Sampler check (two independent draws of the unmatched pairs): " + _esc("; ".join(
+                f"{name} p_any draw 1 {100 * (c['draw1']['p_any'] or 0):.4f}% vs draw 2 {100 * (c['draw2']['p_any'] or 0):.4f}%" for name, c in chk.items())) + ".</p>")
         tt = bg.get("time_table", {}).get("exact_k6", {})
         if tt:
             cells = sorted(tt.items())
             body.append("<h3>Pairs with a six-word match, by decade of the later story and years apart</h3>")
             body.append(_table(["decade | years apart", "#pairs", "#with a match (%)", "#mean longest, given a match"],
                                [[_esc(c), _N(v["n_pairs"]), _N(f"{100 * (v['p_any'] or 0):.3f}"), _N(v["mean_longest_given_any"] if v["mean_longest_given_any"] is not None else "-")] for c, v in cells]))
+        un = sm.get("unusual", {})
+        st_ = _stories()
+        for name, title in (("exact_k6", "Most unusual exact matches (seed 6)"), ("para_k10", "Most unusual near-verbatim alignments (K = 10)")):
+            urows = (un.get(name) or {}).get("most_unusual", [])[:10]
+            if not urows:
+                continue
+            body.append(f"<h3>{title}, placed in their background</h3>")
+            body.append(_table(["pair", "#longest", "stratum", "#P(≥ this) among comparable pairs", "same author"],
+                               [[f"<a href='/article/{_esc(r['a'])}'>{_esc(_name(r['a'], st_))}</a><br><span class='fine'>{_esc(_issue_label(_story_issue(r['a'], st_)))}</span> · "
+                                 f"<a href='/article/{_esc(r['b'])}'>{_esc(_name(r['b'], st_))}</a><br><span class='fine'>{_esc(_issue_label(_story_issue(r['b'], st_)))}</span>",
+                                 _N(r["longest"]), _esc(f"topic q{r['topic_q']} · {r['years_band']} years (n={r['stratum_pairs']:,})"),
+                                 _N(("under 1 in " + format(r["stratum_pairs"], ",")) if r["p_at_least"] == 0 else f"{r['p_at_least']:.2e}"),
+                                 "yes" if r.get("same_author") else ""] for r in urows]))
+            body.append("<p class='fine'>Small = unusual among the comparable pairs (same topic quartile and years band). The pairs at the top are "
+                        "what the real run resolves first: duplicate scans of one issue and reprints (consolidated under the earliest witness).</p>")
+        models = sm.get("models") or {}
+        if models:
+            body.append("<h3>Two-part hierarchical model — machinery check</h3>")
+            body.append(f"<p class='fine'>{_esc(models.get('note', ''))}. Coefficients are standardised where the name ends in _z; a positive later_year_z means more reuse "
+                        "among later pairs in this subsample, with the other conditions held. Not a finding: the subsample is unweighted, the corpus unfrozen, "
+                        "authorship unresolved, and the OCR-quality and masked-topic conditions absent.</p>")
+            for name, m in models.items():
+                if not isinstance(m, dict) or "n_pairs" not in m:
+                    continue
+                body.append(f"<details><summary class='muted'>{_esc(name)}: {m['n_any']:,} of {m['n_pairs']:,} rows with reuse at threshold {m['threshold']}</summary>")
+                for part in ("part1_any", "part2_extent"):
+                    pm = m.get(part) or {}
+                    if "fixed" in pm:
+                        body.append(f"<p class='muted'>{'Part 1: any reuse (logistic)' if part == 'part1_any' else 'Part 2: extent given reuse (Poisson)'}"
+                                    f"{' · n = ' + format(pm['n'], ',') if 'n' in pm else ''} · story effect sd {pm.get('story_effect_sd')} · {pm.get('seconds', 0):.0f} s</p>")
+                        body.append(_table(["effect", "#posterior mean", "#sd"], [[_esc(n), _N(d["mean"]), _N(d["sd"])] for n, d in pm["fixed"].items()]))
+                    elif pm:
+                        body.append(f"<p class='muted'>{_esc(part)}: {_esc(str(pm)[:300])}</p>")
+                body.append("</details>")
     else:
         body.append("<div class='empty'>Not run yet.</div>")
     # duplicates

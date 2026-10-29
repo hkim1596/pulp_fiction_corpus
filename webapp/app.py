@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.27.1"
+APP_VERSION = "0.27.2"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -1496,6 +1496,8 @@ def nav_on(path, href):
     """The link that is 'on' for a path: the longest href the path begins with."""
     if href == "/reuse":
         return path == "/reuse" or path.startswith("/reuse/cluster")
+    if href == "/reuse/corpus":
+        return path == "/reuse" or path.startswith("/reuse/")  and not path.startswith(("/reuse/validate", "/reuse/cases", "/reuse/progress"))
     if href == "/articles":
         return path.startswith("/articles") or path.startswith("/article/") or path.startswith("/issue/")
     if href == "/stories":
@@ -1509,6 +1511,14 @@ def nav_on(path, href):
     return path == href or path.startswith(href + "/") or path.startswith(href + "?")
 
 
+def _corpus_reuse_exists():
+    """The Reuse tab opens the corpus rehearsal when its files are on this server (29 October 2026), the pilot otherwise."""
+    try:
+        return os.path.isfile(os.path.join(DATA, "reuse", "corpus_dryrun", "tokens", "meta.json"))
+    except Exception:
+        return False
+
+
 def page(title, body, member=True, path="/", admin=False, user_name="", flash=""):
     """The page frame: the sitemark (a tag pill, the site's name, the centre's
     link), two nav rows (Explore, Workroom) with the current page marked, the
@@ -1519,7 +1529,8 @@ def page(title, body, member=True, path="/", admin=False, user_name="", flash=""
                 + "".join(f"<a href='{h}'{' class=on' if nav_on(path, h) else ''}>{esc(t)}</a>" for h, t in links)
                 + "</nav>")
     work = list(NAV_WORKROOM) + ([("/users", "Users")] if admin else []) + [("/logout", "Log out")]
-    nav = (row("EXPLORE", NAV_EXPLORE) + row("WORKROOM", work)) if member else ""
+    explore = [("/reuse/corpus" if (h == "/reuse" and _corpus_reuse_exists()) else h, t) for h, t in NAV_EXPLORE]
+    nav = (row("EXPLORE", explore) + row("WORKROOM", work)) if member else ""
     fb = ("<div class='fb'><form method='POST' action='/feedback'>"
           f"<input type='hidden' name='path' value='{esc(path)}'>"
           + (f"<div class='flash'>{esc(flash)}</div>" if flash else "")
