@@ -1842,3 +1842,17 @@ Africanus, a prospector's claim in Adventure, an editorial paragraph in The Tatl
 guard to the advertisement family: a box in the third person past is not advertising without a strong selling cue (a
 coupon, a department address, "send no money", a price per year or bottle). The regression runs a third time after
 this entry; the corpus is not re-assembled until it reads clean.
+
+### 2026-11-04 — rules 2.14, step 2a read clean; step 2b, the recurring-box evidence
+
+The third regression (patch 0040 applied; the 10 pilot and the 30 double-read issues, the 2.14 rules on against off
+in memory): story records 347 → 347; 1,868 words left the story records; 256 paratext records split out (207
+advertisements, 36 masthead and copyright lines, 13 statements of ownership); 30 story texts changed, every one by
+a split or a serial notice turned into a note; the four story paragraphs the advertisement family had taken are back.
+Step 2a is done. Step 2b, patch 0041: scripts/box_recurrence.py reads every box a record owns from the layout, cuts
+it into 8-word shingles, and hashes, sorts and counts them over the whole corpus (the array engine of the reuse
+stage, on boxes instead of stories); a box of 15 tokens or more whose shingles recur in three or more issues at a
+share of 0.6 or more is written to data/corpus/p52-2026-10-16/box_recurrence.json with its share, its reach and up
+to eight partner records (issue, record, type, author, work title). The file is assembly evidence for the
+recurring-box rule (R-A, step 2c), like config/toc_page_overrides.json: no pairs of stories, no dates, no topics; it
+is deposited with corpus 1.0. The run follows this entry.
