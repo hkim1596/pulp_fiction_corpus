@@ -264,9 +264,14 @@ SERIAL_NOTICE_RE = re.compile(r"^\W*(?:this (?:story|serial|novel) (?:began|star
                               r"(?:the )?(?:\w+ )?back numbers? (?:of|will))", re.I)
 
 
+RULES_214 = {"on": True}      # the 2.14 rules can be switched off in memory for a regression (scripts/compare_assembly.py)
+
+
 def paratext_kind(r, t):
     """R-B: the family of a text box that is paratext, or None. Two cues, or one cue in a short box, so that a story
     paragraph that happens to mention a notary or a subscription is not taken."""
+    if not RULES_214["on"]:
+        return None
     n_own = len(OWNERSHIP_RE.findall(t))
     n_mast = len(MASTHEAD_RE.findall(t))
     n_pub = len(PUBLISHER_RE.findall(t))
@@ -460,7 +465,7 @@ def byline_author(t):
     ws = a.split()
     if sum(1 for w in ws if w.lower() in STOP_WORDS) > 1 or not any(w[:1].isupper() and len(w) >= 2 for w in ws):
         return None                                   # "By Relieving the Cause with" is not a person
-    if NOT_AUTHOR_RE.match(a):
+    if RULES_214["on"] and NOT_AUTHOR_RE.match(a):
         return None                                   # rules 2.14 R-D: an editorial signature or a price line, not a person
     return a
 
@@ -1951,7 +1956,7 @@ class Assembler:
         k = key(pno, i)
         if k in self.owner:
             return
-        if role == "teaser" and rec.get("type") == "story" and SERIAL_NOTICE_RE.match(region_text(self.pages[pno]["regions"][i])):
+        if role == "teaser" and RULES_214["on"] and rec.get("type") == "story" and SERIAL_NOTICE_RE.match(region_text(self.pages[pno]["regions"][i])):
             role = "note"                                 # rules 2.14 R-C: a notice about the serial is not the blurb
         self.owner[k] = rec["article_id"]
         rec["keys"].append((pno, i))
@@ -3552,7 +3557,7 @@ class Assembler:
                 self.credit(self.open, pno, i)                # the credit line on the piece's first page
             elif ILLUS_RE.match(t) and words(t) <= 30 and self.open.get("type") not in ("ad", "other"):
                 self.illustrator(self.open, pno, i)           # "Illustrated by …" wherever the layout put it
-            elif SERIAL_NOTICE_RE.match(t) and words(t) <= 60 and self.open.get("type") == "story":
+            elif RULES_214["on"] and SERIAL_NOTICE_RE.match(t) and words(t) <= 60 and self.open.get("type") == "story":
                 self.add(self.open, pno, i, "note")           # rules 2.14 R-C: a notice about the serial, not its text
             elif r["label"] == "Caption":
                 self.add(self.open, pno, i, "caption")

@@ -96,3 +96,16 @@ class ParatextBoxes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RulesSwitch(unittest.TestCase):
+    def test_switch_off_restores_2_13_behaviour(self):
+        p1 = page(1, [box("THE BLACK STONE", 100, "SectionHeader"), box("By Robert E. Howard", 200),
+                      box(BODY, 300, h=500), box(OWNERSHIP, 820, h=300), box(BODY2, 1140, h=150)])
+        rules.RULES_214["on"] = False
+        try:
+            self.assertEqual(rules.analyse({1: p1})["pages"][1]["paratext"], {})
+            self.assertIsNotNone(rules.byline_author("By the Editor"))
+        finally:
+            rules.RULES_214["on"] = True
+        self.assertEqual(rules.analyse({1: p1})["pages"][1]["paratext"], {3: "ownership statement"})

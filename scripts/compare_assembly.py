@@ -2,8 +2,10 @@
 """Compare the assembly rules now in the code with the candidate files on disk, issue by issue, without writing
 anything (rules 2.14 regression, 4 November 2026).
 
-For every issue given, the pages are read, analysed and assembled in memory (the "rules" variant, the current code)
-and set against data/assembly_v2/rules/<issue>/articles.json (the candidate the last upgrade wrote). Reported per issue:
+For every issue given, the pages are read, analysed and assembled in memory twice — with the 2.14 rules on (the current
+code) and with them off (the 2.13 behaviour: s08.RULES_214) — and the two are set against each other, so that every
+difference is the 2.14 rules' own; the candidate on disk (data/assembly_v2/rules/<issue>/articles.json, whatever rules
+version wrote it) is read only for its backend stamp. Reported per issue:
 records by type before and after, story records and story words before and after, the records the new rules split
 out (paratext family, title, words), the story records whose text changed (title, words before and after, the first
 words that left or arrived), and the author strings the by-line guard now rejects. Written as Markdown and JSON.
@@ -55,12 +57,18 @@ def compare_issue(iid, cfg_issue):
     if not pages:
         return {"issue": iid, "error": "no layout pages"}
     old_path = os.path.join(ROOT, "data", "assembly_v2", "rules", iid, "articles.json")
-    if not os.path.exists(old_path):
-        return {"issue": iid, "error": "no candidate on disk"}
-    old = json.load(open(old_path, encoding="utf-8"))
-    A = S.analyse(pages, force_scan=S.toc_page_override(iid), magazine=(cfg_issue or {}).get("magazine", ""))
-    A["magazine"] = (cfg_issue or {}).get("magazine", "")
+    disk = json.load(open(old_path, encoding="utf-8")) if os.path.exists(old_path) else {}
     kind, book = S.issue_kind(iid, cfg_issue)
+    mag = (cfg_issue or {}).get("magazine", "")
+    S.RULES_214["on"] = False
+    try:
+        A0 = S.analyse(pages, force_scan=S.toc_page_override(iid), magazine=mag)
+        A0["magazine"] = mag
+        old = S.assemble(iid, pages, A0, "rules", None, kind=kind, book=book)
+    finally:
+        S.RULES_214["on"] = True
+    A = S.analyse(pages, force_scan=S.toc_page_override(iid), magazine=mag)
+    A["magazine"] = mag
     new = S.assemble(iid, pages, A, "rules", None, kind=kind, book=book)
     ob, os_, ow = summarise(old)
     nb, ns, nw = summarise(new)
@@ -89,14 +97,14 @@ def compare_issue(iid, cfg_issue):
         for s_ in info.get("rejected_starts", []) or []:
             if "not a person" in (s_.get("rejected") or ""):
                 rejected.append(s_.get("author") or s_.get("title"))
-    return {"issue": iid, "rules_before": old.get("backend"), "rules_after": S.VERSION,
+    return {"issue": iid, "rules_before": "2.14 rules off (in memory)", "on_disk": disk.get("backend"), "rules_after": S.VERSION,
             "types_before": ob, "types_after": nb, "story_words_before": ow, "story_words_after": nw,
             "stories_before": len(os_), "stories_after": len(ns), "split_out": split, "changed_stories": changed, "notes": notes,
             "rejected_bylines": rejected}
 
 
 def report(rows):
-    L = [f"# Assembly comparison — rules {S.VERSION} in the code against the candidates on disk ({time.strftime('%Y-%m-%d %H:%M')})", "",
+    L = [f"# Assembly comparison — the 2.14 rules on against off, both in memory ({time.strftime('%Y-%m-%d %H:%M')})", "",
          "| issue | stories before → after | story words before → after | split out (paratext) | story records changed | notes |",
          "|---|---|---|---|---|---|"]
     tot = {"split": 0, "changed": 0, "wb": 0, "wa": 0, "sb": 0, "sa": 0}
