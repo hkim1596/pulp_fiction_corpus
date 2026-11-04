@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.28.0"
+APP_VERSION = "0.29.0"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -1486,7 +1486,7 @@ def esc(s):
 
 NAV_EXPLORE = [("/overview", "Overview"), ("/authors", "Authors"), ("/magazines", "Magazines"), ("/issues", "Issues"),
                ("/stories", "Stories"), ("/pairs", "Pairs"), ("/reuse", "Reuse"), ("/collection", "Collection"),
-               ("/corpus", "Corpus"), ("/datasheet", "Datasheet"), ("/method", "Method")]
+               ("/corpus", "Corpus"), ("/datasheet", "Datasheet"), ("/method", "Method"), ("/people", "People")]
 NAV_WORKROOM = [("/guide", "Guide"), ("/articles", "Workbench"), ("/verify/sample", "Verification"), ("/review/nonmagazine", "Not a magazine?"), ("/review/model", "Model check"), ("/reuse/validate", "Paraphrase review"),
                 ("/reuse/cases", "Cases"), ("/reuse/progress", "Progress"), ("/run", "Corpus run"), ("/log", "Build log"), ("/assembly", "Assembly"),
                 ("/timing", "Timing"), ("/activity", "Activity"), ("/feedback", "Feedback")]
@@ -1675,6 +1675,7 @@ import model_review_pages as MR  # noqa: E402     the model check review (v0.19.
 import verify_pages as VP  # noqa: E402           the verification sample (v0.22.0); the contents check, level 1 (v0.24.0)
 import nonmagazine_review_pages as NM  # noqa: E402   the review of the non-magazine candidates (v0.25.0)
 import corpus_reuse_pages as CRP  # noqa: E402    text reuse over the whole corpus, the dry run (v0.23.0)
+import people_pages as PP  # noqa: E402           the people page (v0.29.0)
 RP.bind(globals())
 EX.bind(globals())
 RV.bind(globals())
@@ -1690,6 +1691,7 @@ def kind_decision(iid):
 VP.bind(globals())
 NM.bind(globals())
 CRP.bind(globals())
+PP.bind(globals())
 
 
 # ---------------- request handler ----------------
@@ -1949,6 +1951,10 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, self.signup_page("", {}))
         if path == "/logout":
             return self._redirect("/", cookie="pfauth=; Max-Age=0; Path=/")
+        if path == "/people":     # public: the co-principal investigators (v0.29.0)
+            if self._member():
+                return self._send(200, self._page("People", PP.people_html(), path="/people"))
+            return self._send(200, page("People", PP.people_html(), member=False, path="/people"))
         if not self._member():
             return self._redirect("/login")
         if path == "/users":
@@ -2565,7 +2571,7 @@ edited in place.</p></div>
 <p class='fine'>With the shared passcode, or a named account (new accounts are approved by the project lead). To request access, write to {CONTACT}.</p>{note}</div>
 <div class='card pad'><h3>Contact</h3><p>Digital Humanities Engineering Center<br>Kyungpook National University<br>
 Director: Prof. Heejin Kim · {CONTACT}<br><a href='https://www.digihumeng.org'>www.digihumeng.org</a></p>
-<p class='fine'>With the Department of English and Comparative Literature, Columbia University.</p></div>
+<p class='fine'>With the Department of English and Comparative Literature, Columbia University. <a href='/people'>The people</a>.</p></div>
 </div>
 <div class='footer'>Pulp Fiction Corpus · Digital Humanities Engineering Center, Kyungpook National University, with Columbia University · v{APP_VERSION}</div>
 </div>"""

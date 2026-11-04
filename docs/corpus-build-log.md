@@ -1756,3 +1756,13 @@ The corpus window is 1890–1955 (main.tex §2). Nine fiction-magazine items dat
 Library 1895); Ally Sloper's Half Holiday 1895 is set aside as a comic paper; the National Police Gazette 1891–92 and
 early_pulp_fantasy_1893 wait for a person's look. The sample (frozen 27 October) is unchanged. The site's year strip
 and sitemark read 1890–1955. The counts after the apply are the paste's output, to be written here with the manifest.
+
+### 2026-11-04 — a People page (site v0.29.0)
+
+Dennis Yi Tenen, replying to the progress report of 2 November, asked for "a brief 'people' page listing us as co-PIs
+along with other team members participating". Patch 0030: /people, public before the passcode and in the Explore row,
+reads config/people.json on every request — the three co-principal investigators in the order Tenen, Kim, Kang (set
+by Sujin Kang on 4 November: the study was proposed and first designed by Tenen, Kim and Kang joined), each with
+the lines they asked to be listed under, a one-line role on the project and links. Other participants are not yet
+listed; a group is added to the file when they are. A line on the page is changed by editing the file. Tests:
+tests/test_people_page.py.
