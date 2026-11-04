@@ -1,5 +1,5 @@
 """The people page (site v0.29.0, 4 November 2026): the three co-principal investigators in the order of
-config/people.json (Tenen, Kim, Kang), each with their lines, role and links; a missing file renders a note, not an
+config/people.json (Tenen, Kim, Kang), side by side in one row, each with their lines and links; a missing file renders a note, not an
 error; the page is in the Explore row and is served before the passcode.
 """
 import json
@@ -34,7 +34,12 @@ class PeoplePage(unittest.TestCase):
         self.assertIn("https://dennistenen.com/about/", html)
         self.assertIn("https://www.digihumeng.org", html)
         self.assertIn("Kyungpook Institute of Humanities and Social Sciences", html)
+        self.assertNotRegex(html, r"\w@\w")                  # no e-mail address on the page
+        self.assertEqual(html.count("Columbia University"), 1)
+        self.assertEqual(html.count("Kyungpook National University"), 2)
         self.assertIn("<a href=", html)
+        self.assertIn("class='people'", html)                # one row of three
+        self.assertNotIn("Research lead", html)              # no role lines
 
     def test_missing_file_is_a_note(self):
         with tempfile.TemporaryDirectory() as d:
@@ -49,7 +54,7 @@ class PeoplePage(unittest.TestCase):
             html = PP.people_html(root=d)
             self.assertIn("A &amp; B", html)
             self.assertIn("X &lt;y&gt;", html)
-            self.assertNotIn("class='fine'", html.split("X &lt;y&gt;")[1])   # no role, no links → no fine lines
+            self.assertNotIn("class='fine'", html.split("X &lt;y&gt;")[1])   # no links → no fine line
 
     def test_nav_and_public_route(self):
         src = (ROOT / "webapp" / "app.py").read_text(encoding="utf-8")

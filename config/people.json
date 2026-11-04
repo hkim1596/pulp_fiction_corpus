@@ -1,32 +1,54 @@
 {
-  "_about": "The people page (/people, site v0.29.0). Groups in order; people in the order they are to be listed. A person has a name, lines (title and institution, as they ask to be listed), an optional role on the project, and optional links [{label, url}]. The site reads this file on every request; edit it and reload.",
+  "_about": "The people page (/people, site v0.29.1). People in the order they are to be listed, side by side in one row, each in the same shape: name; title and unit; second line; university; links. The site reads this file on every request; edit it and reload.",
   "groups": [
     {
       "heading": "Co-principal investigators",
       "people": [
         {
           "name": "Dennis Yi Tenen",
-          "lines": ["Professor of English and Comparative Literature, Columbia University",
-                    "Director, Narrative Intelligence Lab"],
-          "role": "Proposed and designed the study; the Registered Report protocol",
-          "links": [{"label": "dennistenen.com", "url": "https://dennistenen.com/about/"}]
+          "lines": [
+            "Professor of English and Comparative Literature",
+            "Director, Narrative Intelligence Lab",
+            "Columbia University"
+          ],
+          "links": [
+            {
+              "label": "dennistenen.com",
+              "url": "https://dennistenen.com/about/"
+            }
+          ]
         },
         {
           "name": "Heejin Kim",
-          "lines": ["Associate Professor, Department of English Language and Literature, College of Humanities",
-                    "Director, Digital Humanities Engineering Center",
-                    "Kyungpook National University"],
-          "role": "Pipeline architecture and the pilot study; the site and the corpus build",
-          "links": [{"label": "Department", "url": "https://english.knu.ac.kr"},
-                    {"label": "Center", "url": "https://www.digihumeng.org"}]
+          "lines": [
+            "Associate Professor, Department of English Language and Literature",
+            "Director, Digital Humanities Engineering Center",
+            "Kyungpook National University"
+          ],
+          "links": [
+            {
+              "label": "english.knu.ac.kr",
+              "url": "https://english.knu.ac.kr"
+            },
+            {
+              "label": "digihumeng.org",
+              "url": "https://www.digihumeng.org"
+            }
+          ]
         },
         {
           "name": "Sujin Kang",
-          "lines": ["Research Professor, Digital Humanities Engineering Center",
-                    "Kyungpook Institute of Humanities and Social Sciences",
-                    "Kyungpook National University",
-                    "kangsujin@knu.ac.kr"],
-          "role": "Research lead: corpus construction, verification and the analysis pipeline"
+          "lines": [
+            "Research Professor, Digital Humanities Engineering Center",
+            "Kyungpook Institute of Humanities and Social Sciences",
+            "Kyungpook National University"
+          ],
+          "links": [
+            {
+              "label": "digihumeng.org",
+              "url": "https://www.digihumeng.org"
+            }
+          ]
         }
       ]
     }

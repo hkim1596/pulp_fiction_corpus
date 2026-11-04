@@ -1,10 +1,9 @@
-"""The people page (site v0.29.0, 4 November 2026): the co-principal investigators, from config/people.json.
+"""The people page (site v0.29.1, 4 November 2026): the co-principal investigators, from config/people.json, side by side.
 
   /people    public (readable before the passcode); in the Explore row for members
 
 The file holds groups in order, each with a heading, an optional note and its people in the order they are to be
-listed; a person has a name, lines (title and institution, as they ask to be listed), an optional role on the project
-and optional links. Asked for by Dennis Yi Tenen on 4 November 2026 ("a brief 'people' page listing us as co-PIs
+listed in one row; a person has a name, lines (title and institution, as they ask to be listed) and optional links. Asked for by Dennis Yi Tenen on 4 November 2026 ("a brief 'people' page listing us as co-PIs
 along with other team members participating"); the order Tenen, Kim, Kang set by Sujin Kang the same day. Bound to
 the site's helpers with bind(globals()) from app.py.
 """
@@ -35,20 +34,19 @@ def people(root=None):
 
 def _person(p):
     lines = "".join(f"<div>{_esc(l)}</div>" for l in p.get("lines", []))
-    role = f"<p class='fine' style='margin:8px 0 0'>{_esc(p['role'])}</p>" if p.get("role") else ""
     links = " · ".join(f"<a href='{_esc(l['url'])}'>{_esc(l.get('label') or l['url'])}</a>"
                        for l in p.get("links", []) if l.get("url"))
     links = f"<p class='fine' style='margin:4px 0 0'>{links}</p>" if links else ""
     return (f"<div class='card pad'><h3 style='margin:0 0 6px'>{_esc(p.get('name', ''))}</h3>"
-            f"<div class='muted'>{lines}</div>{role}{links}</div>")
+            f"<div class='muted'>{lines}</div>{links}</div>")
 
 
 def people_html(root=None):
-    """The page body: one block per group, one card per person, in the file's order."""
+    """The page body: one block per group, its people side by side in one row, in the file's order."""
     groups = people(root)
-    out = ["<h1>People</h1>",
-           "<p class='lede'>Text Reuse in the Pulp Magazine Archive is a Registered Report by the Digital Humanities "
-           "Engineering Center, Kyungpook National University, with the Narrative Intelligence Lab, Columbia University.</p>"]
+    out = ["<style>.people{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}"
+           "@media(max-width:820px){.people{grid-template-columns:1fr}}</style>",
+           "<h1>People</h1>"]
     if not groups:
         out.append("<p class='muted'>(config/people.json is missing or empty.)</p>")
     for g in groups:
@@ -56,5 +54,5 @@ def people_html(root=None):
         if g.get("note"):
             out.append(f"<p class='muted'>{_esc(g['note'])}</p>")
         cards = [_person(p) for p in g.get("people", [])]
-        out.append(("<div class='grid2'>" + "".join(cards) + "</div>") if cards else "<p class='muted'>—</p>")
+        out.append(("<div class='people'>" + "".join(cards) + "</div>") if cards else "<p class='muted'>—</p>")
     return "".join(out)
