@@ -22,7 +22,10 @@ magazine. This script reads every written match (machine_k6_matches.jsonl: the t
 
 and, apart from the class, records for every match where it sits in each story (head / inside / foot) and what links
 the two (same work, same magazine, other), so that the report can show the cross-table the rules are written from.
-It also lists the printed author strings that do not look like a person's name (for the by-line guard). It writes
+Matches that involve an item set aside since (config/corpus_set_aside.json — the duplicate scans and editions of D-5) are
+left out, so the counts describe the corpus as it now stands. Each standing block is tagged by family (the postal
+statement of ownership, an advertisement, a department, other). It also lists the printed author strings that do not
+look like a person's name (for the by-line guard). It writes
 pilot_export/story_text_diagnosis.md and data/reuse/corpus_dryrun/story_text_diagnosis.json. Nothing else is changed.
 
     python3 scripts/diagnose_story_text.py [--snap data/reuse/corpus_dryrun] [--export data/export/corpus] [--selftest]
@@ -31,6 +34,7 @@ import argparse
 import glob
 import json
 import os
+import random
 import re
 import sys
 import time
@@ -39,6 +43,11 @@ from collections import Counter, defaultdict
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SNAP = os.path.join(ROOT, "data", "reuse", "corpus_dryrun")
 EXPORT = os.path.join(ROOT, "data", "export", "corpus")
+SET_ASIDE = os.path.join(ROOT, "config", "corpus_set_aside.json")
+OWNERSHIP_RE = re.compile(r"statement of (?:the )?ownership|postal laws and regulations|act of (?:august 24, 1912|march 3, 1933|october 23, 1962)|"
+                          r"bondholders, mortgagees|stockholders and security holders|sworn to and subscribed|notary public", re.I)
+AD_RE = re.compile(r"\b(?:send|mail|free|coupon|dept\.|department [a-z0-9]|address|write (?:to|for)|money back|guarantee|\$\d|cents?|"
+                   r"postage|agents wanted|catalog|booklet|trial|no obligation|inc\.|co\.|corp\.|ltd\.)\b", re.I)
 HEAD_TOK = 250
 FOOT_TOK = 250
 FOOT_MAX = 400
@@ -131,18 +140,37 @@ NAME_STOP = {"a", "an", "the", "of", "and", "novel", "novelette", "novelet", "st
 
 
 def looks_like_name(a):
-    """A loose test for a person's name as printed: 1–5 words, at least one capitalised word that is not a stop word and
-    not a title word; no digits; no 'of'/'where'/'next month' constructions."""
-    if not a:
+    """A loose test for a person's name as printed: each part (split at 'and' / '&') has 1–5 words and at least one
+    capitalised word that is not a stop word or a title word; no digits; an initial ("A.") is not the article "A"; no
+    'of'/'where'/'next month' constructions."""
+    if not a or re.search(r"\d", a):
         return False
-    ws = re.sub(r"[^A-Za-z.'\- ]", " ", a).split()
-    if not ws or len(ws) > NAME_WORDS_MAX or re.search(r"\d", a):
+    parts = [p for p in re.split(r"\s+(?:and|&)\s+", a.strip()) if p.strip()]
+    if not parts:
         return False
-    low = [w.strip(".'").lower() for w in ws]
-    if low[0] in ("a", "an", "the", "where", "when", "what", "how", "news", "next"):
-        return False
-    content = [w for w, l in zip(ws, low) if l not in NAME_STOP and len(l) >= 2]
-    return bool(content) and any(w[:1].isupper() for w in content)
+    for part in parts:
+        ws = re.sub(r"[^A-Za-z.'\- ]", " ", part).split()
+        if not ws or len(ws) > NAME_WORDS_MAX:
+            return False
+        low = [w.strip(".'").lower() for w in ws]
+        initial = bool(re.match(r"^[A-Z]\.$", ws[0]))
+        if not initial and low[0] in ("a", "an", "the", "where", "when", "what", "how", "news", "next"):
+            return False
+        content = [w for w, l in zip(ws, low) if l not in NAME_STOP and len(l) >= 2]
+        if not content or not any(w[:1].isupper() for w in content):
+            return False
+    return True
+
+
+def block_family(excerpt):
+    t = excerpt or ""
+    if OWNERSHIP_RE.search(t):
+        return "ownership statement"
+    if AD_RE.search(t):
+        return "advertisement"
+    if re.search(r"camp-fire|the editor|readers|letters|our readers|department|next month|next issue|coming next|in this issue", t, re.I):
+        return "department / house"
+    return "other"
 
 
 def diagnose(snap=SNAP, export_dir=EXPORT, log=print):
@@ -150,7 +178,13 @@ def diagnose(snap=SNAP, export_dir=EXPORT, log=print):
     S = load_stories(snap)
     path = os.path.join(snap, "machine_k6_matches.jsonl")
     matches = [json.loads(l) for l in open(path, encoding="utf-8")]
-    log(f"{len(matches):,} matches, {len(S):,} stories ({time.time() - t0:.0f}s)")
+    n_all = len(matches)
+    try:
+        aside = {e["id"] for e in json.load(open(SET_ASIDE, encoding="utf-8")).get("issues", [])}
+    except (OSError, ValueError):
+        aside = set()
+    matches = [m for m in matches if S[m["a"]]["issue"] not in aside and S[m["b"]]["issue"] not in aside]
+    log(f"{n_all:,} matches, {len(matches):,} between items still in the corpus ({len(aside)} items set aside), {len(S):,} stories ({time.time() - t0:.0f}s)")
     wanted = {m["a"] for m in matches} | {m["b"] for m in matches}
     L = load_links(export_dir, wanted) if os.path.isdir(export_dir) else {}
     log(f"links for {len(L):,} of {len(wanted):,} stories ({time.time() - t0:.0f}s)")
@@ -172,19 +206,32 @@ def diagnose(snap=SNAP, export_dir=EXPORT, log=print):
     block_keys = {k for k, st in by_key.items() if len(st) >= BLOCK_MIN_STORIES and len(by_key_issues[k]) >= BLOCK_MIN_ISSUES}
     counts, lens, cases = Counter(), defaultdict(list), defaultdict(list)
     cross = Counter()           # (class, side of the earlier story, side of the later story, relation)
+    rng = random.Random(20261104)
+    classes = []
     for m in matches:
         c = classify(m, S, L, block_keys)
+        classes.append(c)
         counts[c] += 1
         lens[c].append(m["len"])
-        if len(cases[c]) < 40:
-            cases[c].append(m)
         a, b = m["a"], m["b"]
         later_is_a = (S[a]["date"], a) > (S[b]["date"], b)
         e_tok, e_n, l_tok, l_n = (m["b_tok"], S[b]["n"], m["a_tok"], S[a]["n"]) if later_is_a else (m["a_tok"], S[a]["n"], m["b_tok"], S[b]["n"])
         cross[(c, side(e_tok, e_n), side(l_tok, l_n), relation(a, b, S, L))] += 1
-    blocks = sorted(({"stories": len(by_key[k]), "issues": len(by_key_issues[k]), "longest": key_len[k],
+    for c in counts:
+        pool = [m for m, cc in zip(matches, classes) if cc == c]
+        cases[c] = rng.sample(pool, min(40, len(pool)))           # a random sample, not the longest
+    bins = ((10, 19), (20, 49), (50, 99), (100, 499), (500, 10 ** 9))
+    len_bins = {c: {f"{lo}-{hi if hi < 10 ** 9 else ''}": sum(1 for x in v if lo <= x <= hi) for lo, hi in bins} for c, v in lens.items()}
+    blocks = sorted(({"stories": len(by_key[k]), "issues": len(by_key_issues[k]), "longest": key_len[k], "family": block_family(key_example[k]),
                       "magazines": dict(key_mags[k].most_common(5)), "excerpt": key_example[k]}
                      for k in block_keys), key=lambda x: -x["stories"])
+    fam = Counter()
+    fam_stories = defaultdict(set)
+    for b in blocks:
+        fam[b["family"]] += 1
+    for k in block_keys:
+        fam_stories[block_family(key_example[k])] |= by_key[k]
+    families = {f: {"blocks": n, "stories": len(fam_stories[f])} for f, n in fam.most_common()}
     # printed author strings that do not look like a name (over the whole story set, not only the matched stories)
     auth = Counter(s["author"] for s in S.values() if s.get("author"))
     odd_authors = [{"author": a_, "stories": n} for a_, n in auth.most_common() if not looks_like_name(a_)]
@@ -192,7 +239,8 @@ def diagnose(snap=SNAP, export_dir=EXPORT, log=print):
     syn_mag = Counter(S[m["a"]]["magazine"] for m in matches if classify(m, S, L, block_keys) == "synopsis")
     foot_mag = Counter(S[m["a"]]["magazine"] for m in matches if classify(m, S, L, block_keys) == "foot")
     stories_hit = {c: len({x for m in matches if classify(m, S, L, block_keys) == c for x in (m["a"], m["b"])}) for c in counts}
-    out = {"generated": time.strftime("%Y-%m-%d %H:%M"), "matches": len(matches), "counts": dict(counts), "stories_involved": stories_hit,
+    out = {"generated": time.strftime("%Y-%m-%d %H:%M"), "matches": len(matches), "matches_in_file": n_all, "items_set_aside": len(aside),
+           "counts": dict(counts), "stories_involved": stories_hit, "length_bins": len_bins, "block_families": families,
            "median_len": {c: sorted(v)[len(v) // 2] for c, v in lens.items()},
            "blocks": blocks, "synopsis_by_magazine": dict(syn_mag.most_common(40)), "foot_by_magazine": dict(foot_mag.most_common(40)),
            "cross": [{"class": k[0], "earlier": k[1], "later": k[2], "relation": k[3], "matches": v} for k, v in cross.most_common()],
@@ -206,20 +254,28 @@ def diagnose(snap=SNAP, export_dir=EXPORT, log=print):
 
 def report(d):
     L = [f"# What is in the story records that is not story — {d['generated']}", "",
-         f"{d['matches']:,} cross-issue matches of ten tokens or more (seed 6) from the rehearsal, sorted by where they sit.", "",
+         f"{d['matches']:,} cross-issue matches of ten tokens or more (seed 6) from the rehearsal between items still in the corpus "
+         f"({d['matches_in_file']:,} in the file; {d['items_set_aside']} items set aside since, D-5), sorted by where they sit.", "",
          "| class | matches | stories involved | median length |", "|---|---|---|---|"]
     for c in ("whole", "block", "synopsis", "head", "foot", "middle"):
         if c in d["counts"]:
             L.append(f"| {c} | {d['counts'][c]:,} | {d['stories_involved'].get(c, 0):,} | {d['median_len'].get(c, 0)} |")
+    L += ["", "## Length of the matches, by class", "", "| class | 10–19 | 20–49 | 50–99 | 100–499 | 500+ |", "|---|---|---|---|---|---|"]
+    for c in ("whole", "block", "synopsis", "head", "foot", "middle"):
+        if c in d["length_bins"]:
+            L.append(f"| {c} | " + " | ".join(f"{v:,}" for v in d["length_bins"][c].values()) + " |")
+    L += ["", "## Standing-block families", "", "| family | blocks | stories |", "|---|---|---|"]
+    for f, v in d["block_families"].items():
+        L.append(f"| {f} | {v['blocks']} | {v['stories']:,} |")
     L += ["", "## Where the matches sit (earlier story × later story × what links them)", "",
           "| class | in the earlier story | in the later story | relation | matches |", "|---|---|---|---|---|"]
     for r in d["cross"][:60]:
         L.append(f"| {r['class']} | {r['earlier']} | {r['later']} | {r['relation']} | {r['matches']:,} |")
     L += ["", f"## Standing blocks — the same excerpt ({d['thresholds']['block_min_tokens']}+ tokens) in {d['thresholds']['block_min_stories']}+ stories of {d['thresholds']['block_min_issues']}+ issues ({len(d['blocks'])})", "",
-          "| stories | issues | longest | magazines | excerpt |", "|---|---|---|---|---|"]
+          "| stories | issues | longest | family | magazines | excerpt |", "|---|---|---|---|---|---|"]
     for b in d["blocks"][:100]:
         mags = ", ".join(f"{k} ({v})" for k, v in b["magazines"].items())
-        L.append(f"| {b['stories']} | {b['issues']} | {b['longest']} | {mags} | {b['excerpt'][:140].replace('|', '/')} |")
+        L.append(f"| {b['stories']} | {b['issues']} | {b['longest']} | {b['family']} | {mags} | {b['excerpt'][:140].replace('|', '/')} |")
     L += ["", f"## Printed author strings that do not look like a name ({d['odd_authors_total']} strings on {d['odd_author_stories']:,} stories; the 120 most frequent)", "",
           "| author as printed | stories |", "|---|---|"] + [f"| {x['author'].replace('|', '/')} | {x['stories']} |" for x in d["odd_authors"][:120]]
     L += ["", "## Synopsis cases by magazine", "", "| magazine | matches |", "|---|---|"] + [f"| {k} | {v} |" for k, v in d["synopsis_by_magazine"].items()]
@@ -245,11 +301,16 @@ def selftest():
     assert side([10, 100], 5000) == "head" and side([4900, 4950], 5000) == "foot" and side([2000, 2100], 5000) == "inside"
     assert relation("s1", "s2", S, L) == "same work" and relation("s1", "s3", S, L) == "other"
     assert relation("s1", "s2", S, {"s1": (None, "Part 2", None)}) == "same magazine, serial part"
-    for good in ("Robert E. Howard", "H. P. Lovecraft", "Seabury Quinn", "Eando Binder", "Vargo Statten", "Anthony M. Rud", "Zane Grey"):
+    for good in ("Robert E. Howard", "H. P. Lovecraft", "Seabury Quinn", "Eando Binder", "Vargo Statten", "Anthony M. Rud", "Zane Grey",
+                 "A. E. van Vogt", "A. Merritt", "H. Bedford-Jones and Captain L. B. Williams", "L. SPRAGUE DE CAMP & FLETCHER PRATT"):
         assert looks_like_name(good), good
     for bad in ("A Novel", "An Old Scout", "Physical Director", "Where Old Paths Cross", "News of Next Month's Issue", "The Editor",
-                "Famous Authors", "Lieutenant", "", "1936"):
+                "Famous Authors", "Lieutenant", "", "1936", "THE EDITORS", "I", "page", "THE $4.00 YEAR", "Editor and Readers"):
         assert not looks_like_name(bad), bad
+    assert block_family("STATEMENT OF THE OWNERSHIP, MANAGEMENT, CIRCULATION") == "ownership statement"
+    assert block_family("Send no money. Dept. 5, 24 Union Square") == "advertisement"
+    assert block_family("Our Camp-Fire came into being May 5, 1912") == "department / house"
+    assert block_family("he rode into the sunset") == "other"
     print("selftest ok")
     return True
 
