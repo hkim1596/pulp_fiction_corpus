@@ -226,8 +226,11 @@ def _sources():
     return tuple(out)
 
 
+SCHEMA_VERSION = 2      # 4 Nov 2026: issues.kind; a database of an older schema is rebuilt
+
+
 def _signature(sig):
-    return hashlib.sha1(json.dumps([(os.path.relpath(p, _G["ROOT"]), m, s) for p, m, s in sig]).encode("utf-8")).hexdigest()
+    return hashlib.sha1(json.dumps([SCHEMA_VERSION] + [(os.path.relpath(p, _G["ROOT"]), m, s) for p, m, s in sig]).encode("utf-8")).hexdigest()
 
 
 def _year(cover_date):
@@ -249,7 +252,8 @@ CREATE TABLE issues(id TEXT PRIMARY KEY, magazine TEXT, mag_slug TEXT, cover_dat
   genre TEXT, format TEXT, ia_identifier TEXT, why TEXT, gold INTEGER, publisher TEXT, publisher_group TEXT,
   publisher_source TEXT, ia TEXT, ia_item_size INTEGER, ia_files TEXT, records INTEGER, stories INTEGER,
   words INTEGER, n_authors INTEGER, verified INTEGER, modified INTEGER, pages INTEGER, layout_pages INTEGER,
-  text_stages TEXT, assembled INTEGER, exported INTEGER, events INTEGER, complete INTEGER, events_archived INTEGER);
+  text_stages TEXT, assembled INTEGER, exported INTEGER, events INTEGER, complete INTEGER, events_archived INTEGER,
+  kind TEXT);
 CREATE TABLE records(id TEXT PRIMARY KEY, issue TEXT, magazine TEXT, mag_slug TEXT, cover_date TEXT, year REAL,
   decade INTEGER, genre TEXT, format TEXT, type TEXT, title TEXT, author TEXT, display_author TEXT, author_key TEXT,
   teaser TEXT, date TEXT, date_source TEXT, pages TEXT, first_page INTEGER, status TEXT, verified_by TEXT,
@@ -394,6 +398,10 @@ def build_db(sig, path, log=None):
     # 19 Oct 2026: the set-aside issues (config/corpus_set_aside.json: the download failures, the items that are not
     # magazine issues) are not shown; their files stay on disk and the datasheet counts them under their reasons
     aside = {e.get("id") for e in (_json(os.path.join(_G["ROOT"], "config", "corpus_set_aside.json")) or {}).get("issues", [])}
+    # 4 Nov 2026: the kind of each item (config/corpus_kinds.json: book, volume; a magazine issue otherwise), so that
+    # the Overview counts the corpus of the protocol — the magazine issues — and the books apart
+    kinds_cfg = (_json(os.path.join(_G["ROOT"], "config", "corpus_kinds.json")) or {}).get("kinds") or {}
+    kind_of = {k: (v.get("kind") if isinstance(v, dict) else v) for k, v in kinds_cfg.items()}
     n_aside = 0
     for i in corpus_cfg.get("issues", []):
         iid = i["id"]
@@ -581,12 +589,13 @@ def build_db(sig, path, log=None):
     for iid, i in issues.items():
         # complete = assembled into records by the machine (an export proves an assembly too)
         i["complete"] = 1 if (i["assembled"] or i["exported"]) else 0
-        con.execute("INSERT INTO issues VALUES (" + ",".join("?" * 31) + ")",
+        con.execute("INSERT INTO issues VALUES (" + ",".join("?" * 32) + ")",
                     (iid, i["magazine"], i["mag_slug"], i["cover_date"], i["year"], i["decade"], i["genre"], i["format"],
                      i["ia_identifier"], i["why"], i["gold"], i["publisher"], i["publisher_group"], i["publisher_source"],
                      json.dumps(i["ia"], ensure_ascii=False), i["ia_item_size"], json.dumps(i["ia_files"]), i["records"],
                      i["stories"], i["words"], len(i["authors"]), i["verified"], i["modified"], i["pages"], i["layout_pages"],
-                     json.dumps(i["text_stages"]), i["assembled"], i["exported"], i["events"], i["complete"], i["events_archived"]))
+                     json.dumps(i["text_stages"]), i["assembled"], i["exported"], i["events"], i["complete"], i["events_archived"],
+                     kind_of.get(iid, "magazine")))
         m = mags.setdefault(i["magazine"], {"name": i["magazine"], "slug": i["mag_slug"], "genre": i["genre"], "format": i["format"],
                                             "publisher_group": i["publisher_group"], "publishers": set(), "issues": [],
                                             "records": 0, "stories": 0, "words": 0, "authors": set(), "verified": 0, "years": []})
@@ -1201,13 +1210,17 @@ def overview(qs=None, render=None):
     sl = _slice(qs)
     counts = meta_json(con, "counts", {})
     sc, sa = _slice_sql(sl)
-    where_rec = " AND ".join(["is_story=1"] + sc)
-    where_iss = " AND ".join(["complete=1"] + sc)
+    # the Overview counts the corpus of the protocol: the magazine issues (kind = magazine); the books, kept as
+    # match partners, are counted in their own tile and in the datasheet (4 November 2026)
+    mag_iss = "issue IN (SELECT id FROM issues WHERE kind='magazine')"
+    where_rec = " AND ".join(["is_story=1", mag_iss] + sc)
+    where_iss = " AND ".join(["complete=1", "kind='magazine'"] + sc)
     stories_in = f"SELECT id FROM records WHERE {where_rec}"
     issues_in = f"SELECT id FROM issues WHERE {where_iss}"
     n_issues = _val(con, f"SELECT COUNT(*) FROM issues WHERE {where_iss}", sa)
+    n_books = _val(con, f"SELECT COUNT(*) FROM issues WHERE " + " AND ".join(["complete=1", "kind='book'"] + sc), sa)
     n_pages = _val(con, f"SELECT COALESCE(SUM(pages),0) FROM issues WHERE {where_iss}", sa)
-    n_records = _val(con, f"SELECT COUNT(*) FROM records WHERE " + " AND ".join(["1=1"] + sc), sa)
+    n_records = _val(con, f"SELECT COUNT(*) FROM records WHERE " + " AND ".join([mag_iss] + sc), sa)
     n_stories = _val(con, f"SELECT COUNT(*) FROM records WHERE {where_rec}", sa)
     n_words = _val(con, f"SELECT COALESCE(SUM(n_words),0) FROM records WHERE {where_rec}", sa)
     n_authors = _val(con, f"SELECT COUNT(DISTINCT author_key) FROM records WHERE author_key IS NOT NULL AND {where_rec}", sa)
@@ -1243,7 +1256,8 @@ def overview(qs=None, render=None):
         "the raw JSON record the page was built from. Only complete issues (assembled into records by the "
         "machine) are counted here; the workroom's progress page shows every issue at every step."),
         f"<h1>Overview <span class='muted' style='font-size:16px;font-weight:normal'>— {_esc(_slice_label(sl, con))}</span></h1>", form,
-        _tiles([("complete issues", n_issues, "/issues"), ("scanned pages", n_pages, "/issues"),
+        _tiles([("magazine issues (the corpus)", n_issues, "/issues"), ("books, kept as match partners", n_books, "/datasheet"),
+                ("scanned pages", n_pages, "/issues"),
                 ("records of all kinds", n_records, f"/stories?type=all{tail}"),
                 ("stories", n_stories, f"/stories?{sq}" if sq else "/stories"),
                 ("words in stories", n_words, f"/stories?sort=words{tail}"),

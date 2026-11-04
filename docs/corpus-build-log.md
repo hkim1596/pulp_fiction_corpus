@@ -1799,3 +1799,12 @@ scripts/resolve_duplicates.py --apply then added the entries to config/corpus_se
 the editions and the fragments, each naming the issue it stands for (`duplicate_of`); nothing was removed from the
 data. The counts are in the datasheet by class; the explorer was rebuilt. The set-aside list is now the record of
 every item that is not in the corpus and why.
+
+### 2026-11-04 — the Overview counts the magazine issues (site v0.29.3)
+
+After the duplicates were set aside the Overview's first tile read 6,729 "complete issues": every assembled item that
+is not set aside, the 633 books among them. Patch 0033: the explorer's issues table carries the item's kind
+(config/corpus_kinds.json), the Overview and the landing page count the magazine issues — the corpus of the protocol —
+and the books in a tile of their own ("kept as match partners"); the records, stories, words and authors of the
+Overview are those of the magazine issues. The schema version is part of the database signature, so the database
+rebuilds. Tests: tests/test_explorer_kind_column.py.

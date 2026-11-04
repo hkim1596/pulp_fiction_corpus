@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.29.2"
+APP_VERSION = "0.29.3"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -2516,7 +2516,7 @@ administrator approves them.</p>
         # the public counters read the explorer's database and the survey directly
         try:
             con = EX.db()
-            n_issues = EX._val(con, "SELECT COUNT(*) FROM issues WHERE complete=1") or 0
+            n_issues = EX._val(con, "SELECT COUNT(*) FROM issues WHERE complete=1 AND kind='magazine'") or 0
             n_rec = EX._val(con, "SELECT COUNT(*) FROM records") or 0
             n_story = EX._val(con, "SELECT COUNT(*) FROM records WHERE type='story'") or 0
             n_words = EX._val(con, "SELECT COALESCE(SUM(n_words),0) FROM records WHERE type='story'") or 0
@@ -2539,7 +2539,7 @@ administrator approves them.</p>
             lede_run = (f"{n} pilot issue{'s' if n != 1 else ''} are processed end to end: a computer pipeline reads "
                         "the scanned pages and cuts each issue into its printed pieces, and a small team checks and "
                         "repairs the result.")
-        stats = stats_html([(n_frame, "fiction-magazine items in the archive"), (n_issues, "issues read"),
+        stats = stats_html([(n_frame, "fiction-magazine items in the archive"), (n_issues, "magazine issues read"),
                             (n_rec, "records"), (n_story, "stories"), (n_words, "words of story text"), (n_ver, "records verified")])
         body = f"""<div class='wrap'>
 <div class='sitemark'><span class='tag'>PULP MAGAZINES · 1890–1955</span>
