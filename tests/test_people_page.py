@@ -59,8 +59,8 @@ class PeoplePage(unittest.TestCase):
     def test_nav_and_public_route(self):
         src = (ROOT / "webapp" / "app.py").read_text(encoding="utf-8")
         self.assertIn('("/people", "People")', src)
-        self.assertIn("""row("", [("/", "Home"), ("/people", "People"), ("/login", "Enter")])""", src)   # the public row before the passcode
-        self.assertGreaterEqual(src.count("<a class='home' href='/people'>People</a>"), 2)   # the landing page and the outside frame
+        self.assertIn(".sitemark .home+.home{margin-left:0}", src)                               # the People pill sits beside the centre's pill
+        self.assertGreaterEqual(src.count("<a class='home' href='/people'>People</a>"), 3)   # the landing page, the outside frame, the page frame before the passcode
         before = src.index('if path == "/people"')
         self.assertLess(before, src.index('if not self._member():\n            return self._redirect("/login")'))
 

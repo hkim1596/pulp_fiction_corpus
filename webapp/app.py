@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.29.4"
+APP_VERSION = "0.29.5"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -1297,6 +1297,7 @@ a{color:var(--accent2)}
 .sitemark .sub a{color:var(--ink);text-decoration:none;font-weight:600}
 .sitemark .home{margin-left:auto;color:var(--ink2);text-decoration:none;font-size:12.5px;font-weight:600;border:1px solid var(--border);border-radius:99px;padding:3px 11px;white-space:nowrap}
 .sitemark .home:hover{background:var(--surface);color:var(--ink);border-color:var(--accent)}
+.sitemark .home+.home{margin-left:0}
 nav.top{display:flex;gap:2px;flex-wrap:wrap;align-items:center;margin:14px 0 0;padding:4px 0 6px}
 nav.top+nav.top{margin-top:0;border-bottom:1px solid var(--grid);padding-bottom:10px;margin-bottom:8px}
 nav.top .navgrp{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin-right:6px;min-width:64px}
@@ -1530,8 +1531,9 @@ def page(title, body, member=True, path="/", admin=False, user_name="", flash=""
                 + "</nav>")
     work = list(NAV_WORKROOM) + ([("/users", "Users")] if admin else []) + [("/logout", "Log out")]
     explore = [("/reuse/corpus" if (h == "/reuse" and _corpus_reuse_exists()) else h, t) for h, t in NAV_EXPLORE]
-    # 4 Nov 2026: before the passcode, one public row — the landing page, the People page, the entrance
-    nav = (row("EXPLORE", explore) + row("WORKROOM", work)) if member else row("", [("/", "Home"), ("/people", "People"), ("/login", "Enter")])
+    nav = (row("EXPLORE", explore) + row("WORKROOM", work)) if member else ""
+    # 4 Nov 2026: before the passcode, a People pill beside the centre's pill in the sitemark
+    pub = "" if member else "<a class='home' href='/people'>People</a> "
     fb = ("<div class='fb'><form method='POST' action='/feedback'>"
           f"<input type='hidden' name='path' value='{esc(path)}'>"
           + (f"<div class='flash'>{esc(flash)}</div>" if flash else "")
@@ -1546,7 +1548,7 @@ def page(title, body, member=True, path="/", admin=False, user_name="", flash=""
 <body><div class='wrap'>
 <div class='sitemark'><a class='tag' href='/'>PULP MAGAZINES · 1890–1955</a>
 <span class='sub'><a href='/overview'>Pulp Fiction Corpus</a> · a text-reuse study on the Internet Archive's pulp collection</span>
-<a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
+{pub}<a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
 {nav}
 {body}{fb}
 <div class='footer'>Pulp Fiction Corpus · Digital Humanities Engineering
