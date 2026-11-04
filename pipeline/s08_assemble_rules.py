@@ -258,6 +258,11 @@ MASTHEAD_RE = re.compile(r"entered as second[- ]class matter|second[- ]class (?:
 PUBLISHER_RE = re.compile(r"\b(?:Inc|Corp|Co|Ltd|Publications?|Publishing|Press)\.?,?\s+\d{1,5}\s+(?:[A-Z][\w.]*\s+){0,3}(?:Ave|Avenue|St|Street|Place|Square|Broadway|Park|Blvd|Boulevard)\b")
 SELL_RE = re.compile(r"free (?:offer|trial|book|sample|booklet|details|information|catalog)|\boffer\b|get yours|order now|yours now|\$\s?\d|only \d|"
                      r"\bprice\b|postpaid|c\. ?o\. ?d\.|no obligation|money[- ]back|agents wanted|dept\.? [a-z0-9-]+", re.I)
+NARRATIVE_RE = re.compile(r"\b(?:he|she|his|her|him|they|them|their|said|was|were|had|himself|herself)\b", re.I)
+SECOND_PERSON_RE = re.compile(r"\b(?:you|your|yours|yourself)\b", re.I)
+STRONG_AD_RE = re.compile(r"dept\.? ?[a-z0-9-]+|send no money|free (?:booklet|book|sample|trial|details|information|catalog)|money[- ]back|c\. ?o\. ?d\.|"
+                          r"postpaid|coupon|enclosed find|\$\s?\d+(?:\.\d\d)? (?:a |per )?(?:year|copy|bottle|box|month)|write (?:for|to|today)|"
+                          r"agents wanted|no obligation|plain wrapper|results guaranteed|satisfaction guaranteed", re.I)
 # R-C: a notice about the serial, not its text ("This story began in the All-Story Weekly for July 17")
 SERIAL_NOTICE_RE = re.compile(r"^\W*(?:this (?:story|serial|novel) (?:began|started|begins) in|begin this (?:story|serial) in|"
                               r"the (?:first|preceding|previous|two|three|four) (?:instal|install)ments?|back numbers (?:will be|may be|can be)|"
@@ -285,6 +290,14 @@ def paratext_kind(r, t):
     if r.get("label") == "Text" and w >= 15 and not t[:1].islower():
         cues = {m.lower() for m in AD_WORDS.findall(t)}
         if len(cues) >= 2 and SELL_RE.search(t):
+            # a story paragraph about money ("worked for the magnificent salary of $800"), a letter inside an
+            # epistolary story ("SIR: Don't you worry about old Eneas. He came here …"): narrative in the third
+            # person past is not advertising unless the box carries a strong selling cue (a coupon, a department
+            # address, "send no money", a price per year or bottle)
+            narrative = len(NARRATIVE_RE.findall(t))
+            second = len(SECOND_PERSON_RE.findall(t))
+            if narrative >= 2 and narrative >= second and not STRONG_AD_RE.search(t):
+                return None
             return "advertisement"
     return None
 _CONT = r"\b(?:continued|cont(?:['’]d|d)?\.?)\s+"

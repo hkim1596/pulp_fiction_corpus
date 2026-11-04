@@ -76,6 +76,17 @@ class ParatextBoxes(unittest.TestCase):
         self.assertIsNone(rules.paratext_kind({"label": "Text"}, prose))
         self.assertIsNone(rules.paratext_kind({"label": "Text"}, "the notary public, he said, would never believe it; " * 5))
 
+    def test_narrative_prose_about_money_is_not_an_advertisement(self):
+        salary = ("Eddie worked for the magnificent salary of $800 for the season. But he had never asked for more, and his "
+                  "coach said that was the way it had to be. He mailed the cheque to his mother at her address in the city.")
+        letter = ("SIR: Don't you worry about old Eneas. He came here in October and said he was looking for his master. "
+                  "He had the cup with him and would not sell it for $50 to any man. Yours, TOM JOHNSON.")
+        self.assertIsNone(rules.paratext_kind({"label": "Text"}, salary))
+        self.assertIsNone(rules.paratext_kind({"label": "Text"}, letter))
+        ad = ("Hundreds of men and women between 18 and 50 make $10 to $20 in a single day giving Scientific Swedish Massage. "
+              "Write for Anatomy Charts and booklet FREE. Address The College of Swedish Massage, Dept. 663, Chicago.")
+        self.assertEqual(rules.paratext_kind({"label": "Text"}, ad), "advertisement")
+
     def test_serial_notice_is_a_note(self):
         p1 = page(1, [box("THE MOON POOL", 100, "SectionHeader"), box("By A. Merritt", 200),
                       box("This story began in the All-Story Weekly for June 22.", 300, h=40), box(BODY, 360, h=900)])

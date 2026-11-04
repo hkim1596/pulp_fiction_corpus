@@ -1827,3 +1827,18 @@ house pseudonyms (An Old Scout, A Trainer) stay. The rules module stamps 2.14. s
 issues in memory with the rules in the code and sets them against the candidates on disk, writing nothing: the
 regression over the 10 pilot issues and the 30 double-read sample issues follows this entry. Steps 2b (the
 recurring-box evidence) and 2c (R-A) come next; the corpus is not re-assembled until 2d has been read.
+
+### 2026-11-04 — rules 2.14, step 2a: the regression over 40 issues (patches 0039–0040)
+
+scripts/compare_assembly.py assembles each issue twice in memory, with the 2.14 rules on and off, and sets the two
+against each other (the first comparison, against the candidates on disk, had counted every change since the pilot
+issues' candidates of rules 2.3). Over the 10 pilot issues and the 30 double-read sample issues: story records 347
+before and 347 after — none lost, none created; 2,439 words left the story records; 270 paratext records split out
+(221 advertisements, 36 masthead and copyright lines, 13 statements of ownership); 32 story texts changed, every one by
+a split or by a serial notice turned into a note ("This story began in THE SCRAP BOOK—Second Section—for August,
+1908", four in The Cavalier 1908-10, four in All-Story Weekly 1919-12-20, four in Argosy 1905-08). Four of the 221
+advertisement splits were story prose — a sports story's paragraph about a salary of $800, a letter inside Eneas
+Africanus, a prospector's claim in Adventure, an editorial paragraph in The Tatler — so patch 0040 adds a narrative
+guard to the advertisement family: a box in the third person past is not advertising without a strong selling cue (a
+coupon, a department address, "send no money", a price per year or bottle). The regression runs a third time after
+this entry; the corpus is not re-assembled until it reads clean.
