@@ -1766,3 +1766,22 @@ by Sujin Kang on 4 November: the study was proposed and first designed by Tenen,
 the lines they asked to be listed under, a one-line role on the project and links. Other participants are not yet
 listed; a group is added to the file when they are. A line on the page is changed by editing the file. Tests:
 tests/test_people_page.py.
+
+### 2026-11-04 — the issues the archive holds twice: the plan (D-5; scripts/resolve_duplicates.py)
+
+The duplicate check of 29 October (scripts/duplicate_items.py over the rehearsal's pair table) had joined 384 issue
+pairs by same-text stories. Read again on 4 November with the two items' kinds, magazine names and dates, the pairs
+are: **324 the same issue under two identifiers** (the magazine's name spelt two ways — Galaxy / "Galaxy Magazine
+(May", Astounding / Astounding Stories, Authentic Science Fiction / … Monthly — the date given two ways, or the same
+entry twice: 262 groups, 302 items to set aside, one scan kept per issue), **25 British, Canadian or Australian
+editions** of an issue in the corpus (23 items set aside under the original), **5 fragments** of one or two stories cut
+out of a fuller issue (set aside as excerpts), **10 pairs with the same contents under two dates** that cannot both be
+right (a reader decides), **5 reprints** between issues of different dates (left to the reuse stage, which
+consolidates reprints under the earliest witness), and **15 pairs that involve a book or an item already set aside**.
+Patch 0032: scripts/resolve_duplicates.py sorts the pairs and, with --apply, adds the decisions to
+config/corpus_set_aside.json (classes "duplicate scan of an issue in the corpus", "another edition of an issue in the
+corpus", "excerpt of a magazine"; each entry names the issue it stands for), so that corpus_lib.set_aside() keeps every
+stage, the explorer and the datasheet off them; the approved list is untouched. Which scan is kept: the one in the
+frozen verification sample, then the one with records a person verified or modified, more stories, more pages, a full
+date, a cover; an item of the sample is never set aside by the script. The explorer now watches the set-aside and
+kinds files (site v0.29.2). The plan is written first (this entry); the apply follows the reader's ten decisions.

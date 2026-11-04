@@ -198,6 +198,8 @@ def _sources():
     D = _G["DATA"]
     R = reuse_dir()
     files = [os.path.join(D, "pilot_stories.jsonl"), _G["CONFIG"], os.path.join(D, "survey", "summary.json"),
+             os.path.join(_G["ROOT"], "config", "corpus_set_aside.json"),      # the set-aside list (duplicates, 4 Nov 2026)
+             os.path.join(_G["ROOT"], "config", "corpus_kinds.json"),
              os.path.join(R, "machine_region_overlap.json"),
              os.path.join(R, "background", "pairs_machine.csv.gz"),
              os.path.join(R, "background", "summary_machine.json"),
