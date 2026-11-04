@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.29.3"
+APP_VERSION = "0.29.4"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -1530,7 +1530,8 @@ def page(title, body, member=True, path="/", admin=False, user_name="", flash=""
                 + "</nav>")
     work = list(NAV_WORKROOM) + ([("/users", "Users")] if admin else []) + [("/logout", "Log out")]
     explore = [("/reuse/corpus" if (h == "/reuse" and _corpus_reuse_exists()) else h, t) for h, t in NAV_EXPLORE]
-    nav = (row("EXPLORE", explore) + row("WORKROOM", work)) if member else ""
+    # 4 Nov 2026: before the passcode, one public row — the landing page, the People page, the entrance
+    nav = (row("EXPLORE", explore) + row("WORKROOM", work)) if member else row("", [("/", "Home"), ("/people", "People"), ("/login", "Enter")])
     fb = ("<div class='fb'><form method='POST' action='/feedback'>"
           f"<input type='hidden' name='path' value='{esc(path)}'>"
           + (f"<div class='flash'>{esc(flash)}</div>" if flash else "")
@@ -1564,7 +1565,7 @@ def access_page(title, inner):
 <body><div class='wrap'>
 <div class='sitemark'><a class='tag' href='/'>PULP MAGAZINES · 1890–1955</a>
 <span class='sub'><a href='/'>Pulp Fiction Corpus</a> · a text-reuse study on the Internet Archive's pulp collection</span>
-<a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
+<a class='home' href='/people'>People</a> <a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
 <div class='land'><div class='card pad'>{inner}</div></div>
 <div class='footer'>Pulp Fiction Corpus · Digital Humanities Engineering Center, Kyungpook National University,
 with Columbia University · v{APP_VERSION} · contact {CONTACT}</div>
@@ -2544,7 +2545,7 @@ administrator approves them.</p>
         body = f"""<div class='wrap'>
 <div class='sitemark'><span class='tag'>PULP MAGAZINES · 1890–1955</span>
 <span class='sub'>Pulp Fiction Corpus</span>
-<a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
+<a class='home' href='/people'>People</a> <a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
 <h1>Pulp Fiction Corpus</h1>
 <p class='lede'>A research archive in preparation: American pulp fiction magazines
 (1890–1955), rebuilt from library scans into clean, page-anchored text for
