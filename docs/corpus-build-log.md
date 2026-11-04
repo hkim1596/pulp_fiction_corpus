@@ -1785,3 +1785,17 @@ stage, the explorer and the datasheet off them; the approved list is untouched. 
 frozen verification sample, then the one with records a person verified or modified, more stories, more pages, a full
 date, a cover; an item of the sample is never set aside by the script. The explorer now watches the set-aside and
 kinds files (site v0.29.2). The plan is written first (this entry); the apply follows the reader's ten decisions.
+
+### 2026-11-04 — the issues the archive holds twice: applied (D-5)
+
+The ten pairs with the same contents under two dates were decided from the scans on the site — the running heads,
+covers and the archive's volume numbers: IF March 1953 is one issue under three identifiers (v02n01 kept; the item
+the archive labels "v02n02 May 1953" is the March scan); Weird Tales August–September 1936 (one combined issue; the
+v28n02 scan kept); the two "Amazing Stories 1950-1954" items are the August–September 1953 issue (v27n06 kept);
+Frontier Stories Spring 1945 (the cover; the "Summer 1947" label is wrong); I Confess whole no. 25 (v09n01, January
+1923; in the verification sample, kept); Adventure May 1949 (the spine; the "May 1945" label is wrong); Jungle Stories
+Winter 1948–49 (v04n05); Wonder Stories October 1933 (the running head; the "1933 03 fixed" scan is the same issue).
+scripts/resolve_duplicates.py --apply then added the entries to config/corpus_set_aside.json: the duplicate scans,
+the editions and the fragments, each naming the issue it stands for (`duplicate_of`); nothing was removed from the
+data. The counts are in the datasheet by class; the explorer was rebuilt. The set-aside list is now the record of
+every item that is not in the corpus and why.

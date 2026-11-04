@@ -2,7 +2,7 @@
  "_comment": "Issues of the approved list set aside after the download (p50t; Heejin, 14 October 2026: 'Fetch the real scans, set the rest aside'). They stay in the approved list (its fingerprint is untouched); corpus_lib.set_aside() keeps every stage off them; the datasheet counts them by reason. Made by scripts/missing_issues.py from the run's events and the archive's item records.",
  "decided_by": "Heejin Kim",
  "decided": "2026-10-14",
- "written": "2026-10-26T18:42:41",
+ "written": "2026-11-04T10:39:45",
  "issues": [
   {
    "id": "about_the_pulps_newsletters__undated_aboutpulps",
@@ -4666,6 +4666,3048 @@
    "decided_by": "Sujin Kang",
    "decided": "2026-10-26",
    "note": "outside the period, as the note of 26 October 17:19 says ('does not appear to fall within the pulp fiction corpus'; the click said magazine); appended by P52aj"
+  },
+  {
+   "id": "ten_story_detective_1941_03_emarch1941",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as 10_story_detective_1941_03_5n02194103 under another identifier; that scan kept ()",
+   "duplicate_of": "10_story_detective_1941_03_5n02194103",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "10_story_western_undated_orywestern",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as 10_story_western_magazine_1937_05_n01may1937 under another identifier; that scan kept ()",
+   "duplicate_of": "10_story_western_magazine_1937_05_n01may1937",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "science_fiction_magazine_1941_06_nejune1941",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as 2328738s7d8f7ds_1941_06_2n05194106 under another identifier; that scan kept ()",
+   "duplicate_of": "2328738s7d8f7ds_1941_06_2n05194106",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "2_gun_western_undated_gunwestern",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as 2_gun_western_1954_02_1n04195402 under another identifier; that scan kept ()",
+   "duplicate_of": "2_gun_western_1954_02_1n04195402",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "2_gun_western_1955_11_2n05195511",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as two_gun_western_1955_11_2gw195511 under another identifier; that scan kept ()",
+   "duplicate_of": "two_gun_western_1955_11_2gw195511",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "5_western_novels_magazine_undated_ternnovels",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as 5_western_novels_magazine_1949_11_n01nov1949 under another identifier; that scan kept ()",
+   "duplicate_of": "5_western_novels_magazine_1949_11_n01nov1949",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1937_12_inationdpp",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as 622973662_weird_tales_1937_12_alesv30n06 under another identifier; that scan kept ()",
+   "duplicate_of": "622973662_weird_tales_1937_12_alesv30n06",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1937_12_wt193712",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as 622973662_weird_tales_1937_12_alesv30n06 under another identifier; that scan kept ()",
+   "duplicate_of": "622973662_weird_tales_1937_12_alesv30n06",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "a_merritt_s_fantasy_magazine_1950_02_2gorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as a_merritt_s_fantasy_magazine_1950_02_002popular under another identifier; that scan kept ()",
+   "duplicate_of": "a_merritt_s_fantasy_magazine_1950_02_002popular",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "a_merritts_fantasy_magazine_1950_02_1n02195002",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as a_merritt_s_fantasy_magazine_1950_02_002popular under another identifier; that scan kept ()",
+   "duplicate_of": "a_merritt_s_fantasy_magazine_1950_02_002popular",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "action_packed_western_undated_kedwestern",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as action_packed_western_1955_01_1n04195501 under another identifier; that scan kept ()",
+   "duplicate_of": "action_packed_western_1955_01_1n04195501",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "air_wonder_stories_1929_07_7ufikusdpp",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as air_wonder_stories_undated_1n07193001 under another identifier; that scan kept ()",
+   "duplicate_of": "air_wonder_stories_undated_1n07193001",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "all_western_1950_04_wilddogdpp",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as all_western_1950_04_aw19500406 under another identifier; that scan kept ()",
+   "duplicate_of": "all_western_1950_04_aw19500406",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "all_western_undated_allwestern",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as all_western_1950_04_aw19500406 under another identifier; that scan kept ()",
+   "duplicate_of": "all_western_1950_04_aw19500406",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1926_04_604teamdpp",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1926_04_sapril1926 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1926_04_sapril1926",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1926_es1926no16",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1926_04_sapril1926 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1926_04_sapril1926",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1926_05_iesmay1926",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1926_05_1n02192605 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1926_05_1n02192605",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1926_06_esjune1926",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1926_06_1n03192606 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1926_06_1n03192606",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1926_07_esjuly1926",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1926_07_sing289290 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1926_07_sing289290",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1926_08_august1926",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1926_08_8ufikusdpp under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1926_08_8ufikusdpp",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1926_09_tember1926",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1926_09_6ufikusc2c under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1926_09_6ufikusc2c",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1926_10_01number07",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1926_10_ctober1926 under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "amazing_stories_1926_10_ctober1926",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_undated_lume01no07",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1926_10_ctober1926 under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "amazing_stories_1926_10_ctober1926",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1926_11_missingifc",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1926_11_vember1926 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1926_11_vember1926",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1926_12_01number09",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1926_12_cember1926 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1926_12_cember1926",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1927_08_ams192708",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1927_08_02number05 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1927_08_02number05",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1928_04_ams192804",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1928_04_01192804ak under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1928_04_01192804ak",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1930_es1934no95",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1930_02_cgorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1930_02_cgorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_undated_05number01",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1930_04_ngifcibcbc under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1930_04_ngifcibcbc",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1934_05_ams193405",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1934_05_09number01 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1934_05_09number01",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1935_s1938no125",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1935_08_0n05193508 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1935_08_0n05193508",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1940_10_10cape1736",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1940_s1943no172 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1940_s1943no172",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1946_s1947no214",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1946_02_02cape1736 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1946_02_02cape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1950_02_bruary1950",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1950_02_02cape1736 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1950_02_02cape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1950_s1950no245",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1950_o245202504 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1950_o245202504",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1955_o304202504",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_1955_07_07cape1736 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_1955_07_07cape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_quarterly_1928_01s_ssingibcbc",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as amazing_stories_quarterly_undated_ly1932no52 under another identifier; that scan kept ()",
+   "duplicate_of": "amazing_stories_quarterly_undated_ly1932no52",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "argosy_1922_02_0319220204",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as argosy_all_story_weekly_1922_02_sy4feb1922 under another identifier; that scan kept ()",
+   "duplicate_of": "argosy_all_story_weekly_1922_02_sy4feb1922",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "argosy_1922_11_1104munsey",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as argosy_allstory_weekly_1922_11_ages202305 under another identifier; that scan kept ()",
+   "duplicate_of": "argosy_allstory_weekly_1922_11_ages202305",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "argosy_all_story_weekly_1923_10_ly19231006",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as argosy_1923_10_0619231006 under another identifier; that scan kept ()",
+   "duplicate_of": "argosy_1923_10_0619231006",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "argosy_all_story_weekly_1930_03_ly19300315",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as argosy_1930_03_0619300315 under another identifier; that scan kept ()",
+   "duplicate_of": "argosy_1930_03_0619300315",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_stories_1935_09_6n01193509",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as ast_1935_09_ast193509 under another identifier; that scan kept ()",
+   "duplicate_of": "ast_1935_09_ast193509",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_1935_09_09cape1736",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as ast_1935_09_ast193509 under another identifier; that scan kept ()",
+   "duplicate_of": "ast_1935_09_ast193509",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_1935_11_6n03193511",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as ast_1935_11_ast193511 under another identifier; that scan kept ()",
+   "duplicate_of": "ast_1935_11_ast193511",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_stories_1930_05_iesmay1930",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1930_05_005bogof39 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1930_05_005bogof39",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_stories_of_super__1930_10_4n01193010",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1930_10_pe1736edit under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1930_10_pe1736edit",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_stories_1931_03_5n03193103",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1931_03_6editfiche under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1931_03_6editfiche",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_stories_1931_08_7n02193108",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1931_08_6editfiche under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1931_08_6editfiche",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_1932_01_9n01193201",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_stories_1932_01_3201reedit under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_stories_1932_01_3201reedit",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_1932_05_0n02193205",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_stories_1932_05_0n02193205 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_stories_1932_05_0n02193205",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_1932_11_1n02193211",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_stories_1932_11_as193211 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_stories_1932_11_as193211",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_stories_of_super__1933_03_2n01193303",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1933_03_2n01193303 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1933_03_2n01193303",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_stories_1933_11_as193311",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1933_11_0318lennys under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1933_11_0318lennys",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_1934_01_2n05193401",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_science_fiction_1934_n1934no132 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_science_fiction_1934_n1934no132",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_stories_1936_01_as193601",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1936_01_6n05193601 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1936_01_6n05193601",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_1936_09_7n06193608",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1936_09_8n01193609 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1936_09_8n01193609",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_science_fiction_1937_n1937no194",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1937_01_01cape1736 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1937_01_01cape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_1937_05_9n03193705",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_science_fiction_1937_on1937no19 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_science_fiction_1937_on1937no19",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_science_fiction_1938_08_august1938",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1938_08_08cape1736 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1938_08_08cape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_stories_1938_08_as193808",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1938_08_08cape1736 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1938_08_08cape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_1940_10_ctober1940",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_1940_10_6n02194010 under another identifier; that scan kept ()",
+   "duplicate_of": "astounding_1940_10_6n02194010",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_1942_10_10dtsg0318",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as astounding_science_fiction_1942_10_ctober1942 under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "astounding_science_fiction_1942_10_ctober1942",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1953_03_malefactor",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1953_03_on31195303 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1953_03_on31195303",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1953_11_hadowbogof",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1953_11_on39195311 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1953_11_on39195311",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1953_12_312bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1953_12_on40195312 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1953_12_on40195312",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1954_01_401bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1954_01_on41195401 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1954_01_on41195401",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1954_04_404bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1954_04_on44195404 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1954_04_on44195404",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1954_05_405bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1954_05_on45195405 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1954_05_on45195405",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1954_06_406bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1954_06_on46195406 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1954_06_on46195406",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1954_11_411bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1954_11_on51195411 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1954_11_on51195411",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1954_12_412bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1954_12_on52195412 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1954_12_on52195412",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1955_01_501bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1955_01_on53195501 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1955_01_on53195501",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1955_04_504bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1955_04_on56195504 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1955_04_on56195504",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1955_06_506bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1955_06_on58195506 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1955_06_on58195506",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1955_08_508bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1955_08_on60195508 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1955_08_on60195508",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1955_10_510bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1955_10_on62195510 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1955_10_on62195510",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1955_11_511bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1955_11_on63195511 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1955_11_on63195511",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "authentic_science_fiction_mo_1955_12_512bogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as authentic_science_fiction_1955_12_on64195512 under another identifier; that scan kept ()",
+   "duplicate_of": "authentic_science_fiction_1955_12_on64195512",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "avon_fantasy_reader_1947_7wolfhound",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_fantasy_reader_undated_tasyreader under another identifier; that scan kept ()",
+   "duplicate_of": "avon_fantasy_reader_undated_tasyreader",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "donald_a_wollheim_ed_avon_fa_1947_derno41947",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_fantasy_reader_undated_tasyreader under another identifier; that scan kept ()",
+   "duplicate_of": "avon_fantasy_reader_undated_tasyreader",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "donald_a_wollheim_ed_avon_fa_1947_derno31947",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_fantasy_reader_1947_ader031947 under another identifier; that scan kept ()",
+   "duplicate_of": "avon_fantasy_reader_1947_ader031947",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "donald_a_wollheim_ed_avon_fa_1947_derno51947",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_fantasy_reader_1947_ader051947 under another identifier; that scan kept ()",
+   "duplicate_of": "avon_fantasy_reader_1947_ader051947",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "donald_a_wollheim_ed_avon_fa_1948_derno71948",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_fantasy_reader_1948_8wolfhound_2047a2a5f672 under another identifier; that scan kept ()",
+   "duplicate_of": "avon_fantasy_reader_1948_8wolfhound_2047a2a5f672",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "donald_a_wollheim_ed_avon_fa_1948_derno81948",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_fantasy_reader_1948_8wolfhound_394c8de2a4b2 under another identifier; that scan kept ()",
+   "duplicate_of": "avon_fantasy_reader_1948_8wolfhound_394c8de2a4b2",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "donald_a_wollheim_ed_avon_fa_1949_derno91949",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_fantasy_reader_1949_9wolfhound under another identifier; that scan kept ()",
+   "duplicate_of": "avon_fantasy_reader_1949_9wolfhound",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "donald_a_wollheim_ed_avon_fa_1949_erno101949",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_fantasy_reader_1949_micjukebox under another identifier; that scan kept ()",
+   "duplicate_of": "avon_fantasy_reader_1949_micjukebox",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "avon_fantasy_reader_1950_0wolfhound",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as donald_a_wollheim_ed_avon_fa_1950_erno131950 under another identifier; that scan kept ()",
+   "duplicate_of": "donald_a_wollheim_ed_avon_fa_1950_erno131950",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "donald_a_wollheim_ed_avon_fa_1951_erno151951",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_fantasy_reader_undated_syreader15 under another identifier; that scan kept ()",
+   "duplicate_of": "avon_fantasy_reader_undated_syreader15",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "avon_fantasy_reader_1951_ader151951",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_fantasy_reader_undated_syreader15 under another identifier; that scan kept ()",
+   "duplicate_of": "avon_fantasy_reader_undated_syreader15",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "donald_a_wollheim_ed_avon_fa_1952_erno181952",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_fantasy_reader_1952_2wolfhound under another identifier; that scan kept ()",
+   "duplicate_of": "avon_fantasy_reader_1952_2wolfhound",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "donald_a_wollheim_ed_avon_sc_1951_51cape1736_7a0d98fe41e9",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_science_fiction_reader_1951_51cape1736 under another identifier; that scan kept ()",
+   "duplicate_of": "avon_science_fiction_reader_1951_51cape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "avon_science_fiction_reader_1951_erno011951",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as avon_science_fiction_reader_undated_nreader001 under another identifier; that scan kept ()",
+   "duplicate_of": "avon_science_fiction_reader_undated_nreader001",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "cowboy_stories_undated_storiescdn",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as cowboy_stories_1935_02_tion202112 under another identifier; that scan kept ()",
+   "duplicate_of": "cowboy_stories_1935_02_tion202112",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "detective_tales_magazine_1947_11_vember1947",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as detective_tales_1947_11_4194711sas under another identifier; that scan kept ()",
+   "duplicate_of": "detective_tales_1947_11_4194711sas",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "dime_mystery_magazine_1946_09_609popular",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as dime_mystery_1946_09_3n04194609 under another identifier; that scan kept ()",
+   "duplicate_of": "dime_mystery_1946_09_3n04194609",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "ellery_queen_s_mystery_magaz_1948_11_n060194811",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as ellery_queens_mystery_magazi_1948_11_urynov1948 under another identifier; that scan kept ()",
+   "duplicate_of": "ellery_queens_mystery_magazi_1948_11_urynov1948",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "famous_fantastic_mysteries_2_undated_4106202503",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as famous_fantastic_mysteries_1939_09_09munseyak under another identifier; that scan kept ()",
+   "duplicate_of": "famous_fantastic_mysteries_1939_09_09munseyak",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fanciful_tales_of_time_and_s_1936_10s_01fall1936",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fanciful_tails_of_time_and_s_1936_10s_01fall1936 under another identifier; that scan kept ()",
+   "duplicate_of": "fanciful_tails_of_time_and_s_1936_10s_01fall1936",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_1952_11_lverdongev",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_1952_11_1n03195211 under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_1952_11_1n03195211",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_1953_01_2n01195301",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_1953_01_0119530102 under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_1953_01_0119530102",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_1953_03_2n02195303",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_1953_03_lverdongev under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_1953_03_lverdongev",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_1953_05_lverdongev",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_mai_1953_05_2n03195305 under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_mai_1953_05_2n03195305",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_1953_07_2n04195307",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_1953_07_0708dongev under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_1953_07_0708dongev",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_1953_09_lverdongev",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_1953_09_2n05195309 under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_1953_09_2n05195309",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_1953_11_lverdongev",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_1953_11_2n06195311 under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_1953_11_2n06195311",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_1954_01_lverdongev",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_1954_01_3n01195401 under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_1954_01_3n01195401",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_adventures_1939_05_bccape1736",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_adventures_1_undated_ngifc3slpn under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_adventures_1_undated_ngifc3slpn",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_magazine_1951_07s_ercape1736",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_1951_07s_1951summer under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_1951_07s_1951summer",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_1951_10s_011951fall",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_magazine_1951_10s_llcape1736 under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_magazine_1951_10s_llcape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_magazine_1952_01s_interlpmat",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_1952_01s_1952winter under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_1952_01s_1952winter",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_1952_04s_1952spring",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_magazine_1952_04s_1952spring under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_magazine_1952_04s_1952spring",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_magazine_1952_07s_dibcbcelpm",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_1952_07s_1952summer under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_1952_07s_1952summer",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_magazine_1952_10s_lgorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_1952_10s_021952fall under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_1952_10s_021952fall",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_magazine_1952_11_1gorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_1952_11_4n03195211 under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_1952_11_4n03195211",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_1953_03_5n02195303",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_magazine_1953_03_cgorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_magazine_1953_03_cgorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_1953_09_6n02195309",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_magazine_1953_09_195309elpm under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_magazine_1953_09_195309elpm",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_magazine_1954_01s_rgorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_1954_01s_1954winter under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_1954_01s_1954winter",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_1954_04s_1954spring",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_magazine_1954_04s_4springoak under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_magazine_1954_04s_4springoak",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_1955_01s_1955winter",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_magazine_1955_01s_1955winter under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_magazine_1955_01s_1955winter",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_magazine_1955_04s_ggorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_1955_04s_1955spring under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_1955_04s_1955spring",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_story_quarterly_1950_04s_ngcape1736",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fantastic_story_quarterly_undated_n011951win under another identifier; that scan kept ()",
+   "duplicate_of": "fantastic_story_quarterly_undated_n011951win",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fighting_western_1945_12_1n05194512",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as fighting_western_undated_ingwestern under another identifier; that scan kept ()",
+   "duplicate_of": "fighting_western_undated_ingwestern",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "five_star_western_novelets_undated_rnnovelets",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as five_star_western_novelets_1937_09_1n05193709 under another identifier; that scan kept ()",
+   "duplicate_of": "five_star_western_novelets_1937_09_1n05193709",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "the_frontier_1926_05_f192605",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as frontier_stories_1926_05_esv004n002 under another identifier; that scan kept ()",
+   "duplicate_of": "frontier_stories_1926_05_esv004n002",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "frontier_stories_1928_03_7n06192803",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as the_frontier_frontier_storie_undated_tier202603 under another identifier; that scan kept ()",
+   "duplicate_of": "the_frontier_frontier_storie_undated_tier202603",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "future_science_fiction_51_11_undated_iction5111",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as future_science_fiction_1951_11_95111lpmat under another identifier; that scan kept ()",
+   "duplicate_of": "future_science_fiction_1951_11_95111lpmat",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_october_1950_10_zine195010",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1950_10_1n01195010 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1950_10_1n01195010",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_november_1950_11_zine195011",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1950_11_1n02195011 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1950_11_1n02195011",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_december_1950_12_zine195012",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1950_12_1n03195012 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1950_12_1n03195012",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_january_1951_01_zine195101",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1951_01_1n04195101 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1951_01_1n04195101",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_february_1951_02_zine195102",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1951_02_1n05195102 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1951_02_1n05195102",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_march_1951_03_zine195103",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1951_03_1n06195103 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1951_03_1n06195103",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_may_1951_05_zine195105",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1951_05_2n02195105 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1951_05_2n02195105",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_june_1951_06_zine195106",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1951_06_2n03195106 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1951_06_2n03195106",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_july_1951_07_zine195107",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1951_07_2n04195107 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1951_07_2n04195107",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1951_08_2n05195108",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_magazine_august_1951_08_zine195108 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_magazine_august_1951_08_zine195108",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1951_09_2n06195109",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_magazine_september_1951_09_zine195109 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_magazine_september_1951_09_zine195109",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_october_1951_10_zine195110",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1951_10_3n01195110 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1951_10_3n01195110",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_november_1951_11_zine195111",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1951_11_3n02195111 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1951_11_3n02195111",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_december_1951_12_zine195112",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1951_12_3n03195112 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1951_12_3n03195112",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1952_01_3n04195201",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_magazine_january_1952_01_zine195201 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_magazine_january_1952_01_zine195201",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_february_1952_02_zine195202",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_02_3n05195202 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_02_3n05195202",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1952_03_y195203jpg",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_03_3n06195203 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_03_3n06195203",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_march_1952_03_zine195203",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_03_3n06195203 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_03_3n06195203",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1952_04_y195204jpg",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_04_4n01195204 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_04_4n01195204",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_april_1952_04_zine195204",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_04_4n01195204 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_04_4n01195204",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1952_05_y195205jpg",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_05_4n02195205 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_05_4n02195205",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_may_1952_05_05modified",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_05_4n02195205 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_05_4n02195205",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1952_06_y195206jpg",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_06_4n03195206 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_06_4n03195206",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_june_1952_06_zine195206",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_06_4n03195206 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_06_4n03195206",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1952_07_4n04195207",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_07_y195207jpg under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "galaxy_1952_07_y195207jpg",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_july_1952_07_zine195207",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_07_y195207jpg under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "galaxy_1952_07_y195207jpg",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_august_1952_08_zine195208",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_08_4n05195208 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_08_4n05195208",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1952_09_4n06195209",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_09_y195209jpg under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_09_y195209jpg",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_september_1952_09_zine195209",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_09_y195209jpg under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_09_y195209jpg",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1952_10_5n01195210",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_magazine_october_1952_10_zine195210 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_magazine_october_1952_10_zine195210",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1952_11_y195211jpg",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_11_5n02195211 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_11_5n02195211",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_november_1952_11_zine195211",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1952_11_5n02195211 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1952_11_5n02195211",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1952_12_5n03195212",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_magazine_december_1952_12_zine195212 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_magazine_december_1952_12_zine195212",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1953_01_5n04195301",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_magazine_january_1953_01_zine195301 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_magazine_january_1953_01_zine195301",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_february_1953_02_zine195302",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_02_5n05195302 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_02_5n05195302",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_march_1953_03_03modified",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_03_5n06195303 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_03_5n06195303",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_april_1953_04_zine195304",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_04_6n01195304 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_04_6n01195304",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1953_05_y1953akv10",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_05_6n02195305 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_05_6n02195305",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_may_1953_05_zine195305",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_05_6n02195305 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_05_6n02195305",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_june_1953_06_zine195306",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_06_6n03195306 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_06_6n03195306",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1953_07_axyjul1953",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_07_6n04195307 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_07_6n04195307",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_july_1953_07_zine195307",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_07_6n04195307 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_07_6n04195307",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1953_08_axyaug1953",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_08_6n05195308 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_08_6n05195308",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_august_1953_08_zine195308",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_08_6n05195308 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_08_6n05195308",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1953_09_6n06195309",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_magazine_september_1953_09_zine195309 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_magazine_september_1953_09_zine195309",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1953_09_axysep1953",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_magazine_september_1953_09_zine195309 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_magazine_september_1953_09_zine195309",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1953_10_axyoct1953",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_10_7n01195310 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_10_7n01195310",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_october_1953_10_zine195310",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_10_7n01195310 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_10_7n01195310",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1953_11_axynov1953",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_11_7n02195311 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_11_7n02195311",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_november_1953_11_zine195311",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_11_7n02195311 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_11_7n02195311",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1953_12_axydec1953",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_12_7n03195312 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_12_7n03195312",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_december_1953_12_zine195312",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1953_12_7n03195312 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1953_12_7n03195312",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1954_01_n1954akv10",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_01_7n04195401 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_01_7n04195401",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_january_1954_01_zine195401",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_01_7n04195401 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_01_7n04195401",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_february_1954_02_zine195402",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_02_7n05195402 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_02_7n05195402",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_march_1954_03_zine195403",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_03_axymar1954 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_03_axymar1954",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1954_03_7n06195403",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_03_axymar1954 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_03_axymar1954",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_april_1954_04_zine195404",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_04_8n01195404 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_04_8n01195404",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_may_1954_05_zine195405",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_05_8n02195405 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_05_8n02195405",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_june_1954_06_zine195406",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_06_8n03195406 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_06_8n03195406",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_july_1954_07_zine195407",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_07_8n04195407 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_07_8n04195407",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_august_1954_08_zine195408",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_08_8n05195408 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_08_8n05195408",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_september_1954_09_zine195409",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_09_8n06195409 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_09_8n06195409",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_october_1954_10_zine195410",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_10_9n01195410 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_10_9n01195410",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_november_1954_11_zine195411",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1954_11_9n02195411 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1954_11_9n02195411",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1954_12_9n03195412",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_magazine_december_1954_12_zine195412 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_magazine_december_1954_12_zine195412",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_january_1955_01_zine195501",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1955_01_9n04195501 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1955_01_9n04195501",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1955_02_9n05195502",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_magazine_february_1955_02_zine195502 under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "galaxy_magazine_february_1955_02_zine195502",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_1955_03_9n06195503",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_magazine_march_1955_03_zine195503 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_magazine_march_1955_03_zine195503",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_april_1955_04_zine195504",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1955_04_0n01195504 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1955_04_0n01195504",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_may_1955_05_zine195505",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1955_05_0n02195505 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1955_05_0n02195505",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_june_1955_06_zine195506",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1955_06_0n03195506 under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "galaxy_1955_06_0n03195506",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_july_1955_07_zine195507",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1955_07_0n04195507 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1955_07_0n04195507",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_september_1955_09_zine195509",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1955_09_0n06195509 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1955_09_0n06195509",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_october_1955_10_zine195510",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1955_10_1n01195510 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1955_10_1n01195510",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "galaxy_magazine_november_1955_11_zine195511",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as galaxy_1955_11_1n02195511 under another identifier; that scan kept ()",
+   "duplicate_of": "galaxy_1955_11_1n02195511",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "golden_west_magazine_undated_stmagazine",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as golden_west_magazine_1930_11_9n03193011 under another identifier; that scan kept ()",
+   "duplicate_of": "golden_west_magazine_1930_11_9n03193011",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "golden_west_romances_undated_stromances",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as golden_west_romances_1950_10s_031950fall under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "golden_west_romances_1950_10s_031950fall",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "two_gun_western_novels_magaz_1942_04_teammaldpp",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as gun_western_1942_04_rnv003n002 under another identifier; that scan kept ()",
+   "duplicate_of": "gun_western_1942_04_rnv003n002",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "gunsmoke_1953_06_winationia",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as gunsmoke_undated_2195308jls under another identifier; that scan kept ()",
+   "duplicate_of": "gunsmoke_undated_2195308jls",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "worlds_of_if_march_1952_03_195203if",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as if_worlds_of_science_fiction_1952_03_2gorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "if_worlds_of_science_fiction_1952_03_2gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "worlds_of_if_may_1952_05_195205if",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as if_worlds_of_science_fiction_1952_05_2gorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "if_worlds_of_science_fiction_1952_05_2gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "worlds_of_if_july_1952_07_195207if",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as if_worlds_of_science_fiction_1952_07_2gorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "if_worlds_of_science_fiction_1952_07_2gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "if_worlds_of_science_fiction_1952_09_2gorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as worlds_of_if_september_1952_09_195209if under another identifier; that scan kept ()",
+   "duplicate_of": "worlds_of_if_september_1952_09_195209if",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "if_worlds_of_science_fiction_1952_11_2gorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as worlds_of_if_november_1952_11_195211if under another identifier; that scan kept ()",
+   "duplicate_of": "worlds_of_if_november_1952_11_195211if",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "worlds_of_if_january_1953_01_195301if",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as if_worlds_of_science_fiction_1953_01_3gorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "if_worlds_of_science_fiction_1953_01_3gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "worlds_of_if_march_1953_03_195303if",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as if_worlds_of_science_fiction_1953_03_3gorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "if_worlds_of_science_fiction_1953_03_3gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "if_worlds_of_science_fiction_1953_07_quinnakv10",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as worlds_of_if_july_1953_07_195307if under another identifier; that scan kept ()",
+   "duplicate_of": "worlds_of_if_july_1953_07_195307if",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "worlds_of_if_september_1953_09_195309if",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as if_worlds_of_science_fiction_1953_09_3gorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "if_worlds_of_science_fiction_1953_09_3gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "worlds_of_if_november_1953_11_195311if",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as if_worlds_of_science_fiction_1953_11_3gorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "if_worlds_of_science_fiction_1953_11_3gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "worlds_of_if_january_1954_01_195401if",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as if_worlds_of_science_fiction_1954_01_4gorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "if_worlds_of_science_fiction_1954_01_4gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "worlds_of_if_april_1954_04_195404if",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as if_worlds_of_science_fiction_1954_04_4gorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "if_worlds_of_science_fiction_1954_04_4gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "if_worlds_of_science_fiction_1954_07_4gorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as worlds_of_if_july_1954_07_195407if under another identifier; that scan kept ()",
+   "duplicate_of": "worlds_of_if_july_1954_07_195407if",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "worlds_of_if_november_1954_11_195411if",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as if_worlds_of_science_fiction_1954_11_quinnakv10 under another identifier; that scan kept ()",
+   "duplicate_of": "if_worlds_of_science_fiction_1954_11_quinnakv10",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "imagination_undated_v02n051151",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as imagination_1951_11_11cape1736 under another identifier; that scan kept ()",
+   "duplicate_of": "imagination_1951_11_11cape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "infinity_1955_11_yscape1736",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as infinity_science_fiction_1955_11_1n01195511 under another identifier; that scan kept ()",
+   "duplicate_of": "infinity_science_fiction_1955_11_1n01195511",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "lariat_story_undated_lariat",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as lariat_story_magazine_1938_09_1n04193809 under another identifier; that scan kept ()",
+   "duplicate_of": "lariat_story_magazine_1938_09_1n04193809",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "leading_western_undated_ingwestern",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as leading_western_1946_03_2n01194603 under another identifier; that scan kept ()",
+   "duplicate_of": "leading_western_1946_03_2n01194603",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "love_story_1934_03_etandsmith",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as love_story_magazine_1934_03_sm19340310 under another identifier; that scan kept ()",
+   "duplicate_of": "love_story_magazine_1934_03_sm19340310",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "mammoth_western_1945_09_ssingibcbc",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as mammoth_western_undated_othwestern under another identifier; that scan kept ()",
+   "duplicate_of": "mammoth_western_undated_othwestern",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "mammoth_western_quarterly_undated_nquarterly",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as mammoth_western_quarterly_1948_10s_021948fall under another identifier; that scan kept ()",
+   "duplicate_of": "mammoth_western_quarterly_1948_10s_021948fall",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "mammoth_western_1948_05_4805202112",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as mammoth_western_quarterly_1948_10s_021948fall under another identifier; that scan kept ()",
+   "duplicate_of": "mammoth_western_quarterly_1948_10s_021948fall",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "marvel_science_stories_1938_08_cufikusdpp",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as marvel_1938_08_ssingibcbc under another identifier; that scan kept ()",
+   "duplicate_of": "marvel_1938_08_ssingibcbc",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "marvel_tales_1939_12_1n06193912",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as marvel_1939_12_1n06193912 under another identifier; that scan kept ()",
+   "duplicate_of": "marvel_1939_12_1n06193912",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "marvel_1941_04_ssingibcbc",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as marvel_stories_1941_04_2n03194104 under another identifier; that scan kept ()",
+   "duplicate_of": "marvel_stories_1941_04_2n03194104",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "marvel_science_stories_1950_11_ov1950130p",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as marvel_1950_11_erian32dpp under another identifier; that scan kept ()",
+   "duplicate_of": "marvel_1950_11_erian32dpp",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "masked_rider_western_undated_derwestern",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as masked_rider_western_1939_01_4113202011 under another identifier; that scan kept ()",
+   "duplicate_of": "masked_rider_western_1939_01_4113202011",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "nebula_science_fiction_1952_10s_autumnsliv",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as nebula_1952_10s_1952autumn under another identifier; that scan kept ()",
+   "duplicate_of": "nebula_1952_10s_1952autumn",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "nebula_science_fiction_1953_09_n005195309",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as nebula_1953_09_la05195309 under another identifier; that scan kept ()",
+   "duplicate_of": "nebula_1953_09_la05195309",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "nebula_1953_12_la06195312",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as nebula_science_fiction_1953_12_n006195312 under another identifier; that scan kept ()",
+   "duplicate_of": "nebula_science_fiction_1953_12_n006195312",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "nebula_science_fiction_1954_02_540203sliv",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as nebula_1954_02_0719540203 under another identifier; that scan kept ()",
+   "duplicate_of": "nebula_1954_02_0719540203",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "nebula_science_fiction_1955_11_n014195511",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as nebula_1955_11_la14195511 under another identifier; that scan kept ()",
+   "duplicate_of": "nebula_1955_11_la14195511",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "new_worlds_1949_49akv10jpg",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as new_worlds_1949_005v021949 under another identifier; that scan kept ()",
+   "duplicate_of": "new_worlds_1949_005v021949",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "orbit_science_fiction_1953_09_1n01195309",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as orbit_1953_09_1n01195309 under another identifier; that scan kept ()",
+   "duplicate_of": "orbit_1953_09_1n01195309",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "orbit_science_fiction_1953_12_1n02195312",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as orbit_1953_12_1n02195312 under another identifier; that scan kept ()",
+   "duplicate_of": "orbit_1953_12_1n02195312",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "orbit_science_fiction_1954_07_0319540708",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as orbit_1954_07_0319540708 under another identifier; that scan kept ()",
+   "duplicate_of": "orbit_1954_07_0319540708",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "orbit_science_fiction_1954_11_0519541112",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as orbit_1954_11_0519541112 under another identifier; that scan kept ()",
+   "duplicate_of": "orbit_1954_11_0519541112",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "real_western_romances_wester_undated_rnromances",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as real_western_romances_1950_01_umbiadmdpp under another identifier; that scan kept ()",
+   "duplicate_of": "real_western_romances_1950_01_umbiadmdpp",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "rodeo_romances_undated_eoromances",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as rodeo_romances_1946_12_7n03194612 under another identifier; that scan kept ()",
+   "duplicate_of": "rodeo_romances_1946_12_7n03194612",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "science_fantasy_1950_1951winter",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as science_fantasy_1950_wintersliv under another identifier; that scan kept ()",
+   "duplicate_of": "science_fantasy_1950_wintersliv",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "science_fantasy_1951_1952winter_dc728d10860e",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as science_fantasy_1951_1952winter_7fa3c612e8b0 under another identifier; that scan kept ()",
+   "duplicate_of": "science_fantasy_1951_1952winter_7fa3c612e8b0",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "science_fantasy_1952_v021952spr",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as science_fantasy_1952_04s_springsliv under another identifier; that scan kept ()",
+   "duplicate_of": "science_fantasy_1952_04s_springsliv",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "science_fiction_quarterly_n0_1942_04s_ngcolumbia",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as science_fiction_quarterly_1942_04s_ggorgon776 under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "science_fiction_quarterly_1942_04s_ggorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "spicy_western_stories_speed__undated_ernstories",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as speed_western_stories_1945_01_rfsaslpmat under another identifier; that scan kept ()",
+   "duplicate_of": "speed_western_stories_1945_01_rfsaslpmat",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "startling_detective_adventur_1936_10_n099193610",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as startling_detective_1936_10_ctober1936 under another identifier; that scan kept ()",
+   "duplicate_of": "startling_detective_1936_10_ctober1936",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "super_science_stories_britis_1949_shed194900",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as super_science_stories_britis_undated_nknowndate under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "super_science_stories_britis_undated_nknowndate",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "tales_of_wonder_undated_4bcbogof39",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as tales_of_wonder_14_no_bc_undated_obcbogof39 under another identifier; that scan kept ()",
+   "duplicate_of": "tales_of_wonder_14_no_bc_undated_obcbogof39",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "ten_detective_aces_1942_05_4n03194205",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as ten_detective_ace_1942_05_acemay1942 under another identifier; that scan kept ()",
+   "duplicate_of": "ten_detective_ace_1942_05_acemay1942",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "texas_western_undated_xaswestern",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as texas_western_1953_01_pages97100 under another identifier; that scan kept ()",
+   "duplicate_of": "texas_western_1953_01_pages97100",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "thrilling_wonder_stories_1940_01_5n01194001",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as thrilling_wonder_stories_2_undated_2n03194808 under another identifier; that scan kept ()",
+   "duplicate_of": "thrilling_wonder_stories_2_undated_2n03194808",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "thrilling_wonder_stories_1950_02_5n03195002",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as thrilling_wonder_stories_3_undated_7n02195012 under another identifier; that scan kept ()",
+   "duplicate_of": "thrilling_wonder_stories_3_undated_7n02195012",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "two_gun_stories_1932_09_1n01193209",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as two_gun_stories_undated_gunstories under another identifier; that scan kept ()",
+   "duplicate_of": "two_gun_stories_undated_gunstories",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "unknown_3_undated_5n06194204",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as unknown_1940_11_4n03194011 under another identifier; that scan kept ()",
+   "duplicate_of": "unknown_1940_11_4n03194011",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "unknown_british_ed_new_serie_1948_04s_1948spring",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as unknown_worlds_british_ed_ne_1948_04s_springsliv under another identifier; that scan kept ()",
+   "duplicate_of": "unknown_worlds_british_ed_ne_1948_04s_springsliv",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1933_01_pmurfatsas",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1933_2n05193311 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1933_2n05193311",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1935_5n01193501",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1935_01_01jvhsasv2 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1935_01_01jvhsasv2",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1936_03_93603atlpm",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1936_03_2305080145 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1936_03_2305080145",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1936_10_0gorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1936_10_wt193610 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1936_10_wt193610",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1937_0n01193707",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1937_01_1193701sas under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1937_01_1193701sas",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1937_07_esjuly1937",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1937_07_0n01193707 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1937_07_0n01193707",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1937_10_wt193710",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1937_10_0gorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1937_10_0gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1938_02_ncorrected",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1938_02_bruary1938 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1938_02_bruary1938",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1938_03_wt193803",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1938_03_n776saskia under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1938_03_n776saskia",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1938_07_wt193807",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1938_07_7gorgon776 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1938_07_7gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1938_11_1gorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1938_11_wt193811 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1938_11_wt193811",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1939_3n02193902",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1939_01_01atjvhsas under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1939_01_01atjvhsas",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1939_04_n776saskia",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1939_04_wt193904 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1939_04_wt193904",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1941_6n02194111",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1941_01_5n07194101 under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "weird_tales_1941_01_5n07194101",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1943_6n09194301",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1943_01_09194301at under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1943_01_09194301at",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1944_01_4401unzorg",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1944_01_01lpmatsas under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1944_01_01lpmatsas",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1945_01_94501dmdpp",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1945_8n03194501 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1945_8n03194501",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1946_09_dyanimator",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1946_09_09lpmatsas under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1946_09_09lpmatsas",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1947_01_4701unzorg",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1947_4711202503 under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1947_4711202503",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1949_1n06194909",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1949_01_4901unzorg under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1949_01_4901unzorg",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_1951_4n01195111",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as weird_tales_1951_01_01lpmatsas under another identifier; that scan kept ()",
+   "duplicate_of": "weird_tales_1951_01_01lpmatsas",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "west_undated_westuk",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as west_1933_02_33earlyfeb under another identifier; that scan kept ()",
+   "duplicate_of": "west_1933_02_33earlyfeb",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "western_fiction_monthly_undated_thly202604",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as western_fiction_magazine_1938_11_4n04193811 under another identifier; that scan kept ()",
+   "duplicate_of": "western_fiction_magazine_1938_11_4n04193811",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "western_love_undated_esternlove",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as western_love_1945_12_1n01194512 under another identifier; that scan kept ()",
+   "duplicate_of": "western_love_1945_12_1n01194512",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "western_novel_and_short_stor_1936_06_5n01193606",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as western_novel_and_short_stor_undated_ortstories under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "western_novel_and_short_stor_undated_ortstories",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "western_story_13_07_1935_1935_07_0319350713",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as western_story_magazine_1935_07_0319350713 under another identifier; that scan kept ()",
+   "duplicate_of": "western_story_magazine_1935_07_0319350713",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "western_story_magazine_1939_06_0319390610",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as western_story_1939_06_ry19390610 under another identifier; that scan kept ()",
+   "duplicate_of": "western_story_1939_06_ry19390610",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "western_story_1939_06_ry19390624",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as western_story_magazine_1939_06_0519390624 under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "western_story_magazine_1939_06_0519390624",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "western_story_magazine_1939_09_0319390902",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as western_story_1939_09_ry19390902 under another identifier; that scan kept ()",
+   "duplicate_of": "western_story_1939_09_ry19390902",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "western_story_magazine_1940_07_sm19400727",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as western_story_1940_07_2cdarwinia under another identifier; that scan kept ()",
+   "duplicate_of": "western_story_1940_07_2cdarwinia",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "western_story_annual_1941_annual1941",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as western_story_annual_undated_toryannual under another identifier; that scan kept (in_sample)",
+   "duplicate_of": "western_story_annual_undated_toryannual",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "wide_awake_magazine_1916_01_0319160110",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as wide_awake_1916_01_wa19160110 under another identifier; that scan kept ()",
+   "duplicate_of": "wide_awake_1916_01_wa19160110",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "wonder_stories_1930_2n07193012",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as wonder_stories_1930_06_2n01193006 under another identifier; that scan kept ()",
+   "duplicate_of": "wonder_stories_1930_06_2n01193006",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "wonder_stories_1931_01_orgon776v2",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as wonder_stories_1931_3n02193107 under another identifier; that scan kept ()",
+   "duplicate_of": "wonder_stories_1931_3n02193107",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "wonder_stories_1932_01_3n08193201",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as wonder_stories_1932_4n01193206 under another identifier; that scan kept ()",
+   "duplicate_of": "wonder_stories_1932_4n01193206",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "wonder_stories_1932_08_cape1736v2",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as wonder_stories_quarterly_1932_08_32cape1736 under another identifier; that scan kept ()",
+   "duplicate_of": "wonder_stories_quarterly_1932_08_32cape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "wonder_stories_1933_01_4n08193301",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as wonder_stories_1933_5n04193311 under another identifier; that scan kept ()",
+   "duplicate_of": "wonder_stories_1933_5n04193311",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "wonder_stories_1934_01_5n06193401",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as wonder_stories_1934_5n09193404 under another identifier; that scan kept ()",
+   "duplicate_of": "wonder_stories_1934_5n09193404",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "wonder_stories_1935_6n11193504",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as wonder_stories_1935_01_6n08193501 under another identifier; that scan kept ()",
+   "duplicate_of": "wonder_stories_1935_01_6n08193501",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "wonder_stories_1936_01_0719360102",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as wonder_stories_1936_0819360304 under another identifier; that scan kept ()",
+   "duplicate_of": "wonder_stories_1936_0819360304",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "wonder_story_annual_1950_0gorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as wonder_story_annual_undated_v01n011950 under another identifier; that scan kept ()",
+   "duplicate_of": "wonder_story_annual_undated_v01n011950",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "world_fiction_1922_11_1n04192211",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same issue as world_stories_1922_toriesvol1 under another identifier; that scan kept ()",
+   "duplicate_of": "world_stories_1922_toriesvol1",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_british_ed_1939_08_1n01193908",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of astounding_1939_08_n061939082 (Astounding / Astounding British Ed.)",
+   "duplicate_of": "astounding_1939_08_n061939082",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_british_ed_1940_06_1n11194006",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of astounding_1940_06_194006sliv (Astounding / Astounding British Ed.)",
+   "duplicate_of": "astounding_1940_06_194006sliv",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_british_ed_1953_12_1n01195312",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of fantastic_1953_09_2n05195309 (Fantastic / Fantastic British Ed.)",
+   "duplicate_of": "fantastic_1953_09_2n05195309",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_adventures_british_1952_04_nysexciter",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of fantastic_adventures_1950_12_5012unzorg (Fantastic Adventures / Fantastic Adventures British Ed.)",
+   "duplicate_of": "fantastic_adventures_1950_12_5012unzorg",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "indian_stories_australian_ed_undated_stralianed",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of indian_stories_undated_ctionhouse (Indian Stories Australian Ed. / Indian Stories)",
+   "duplicate_of": "indian_stories_undated_ctionhouse",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_canadian_ed_1945_09_9gorgon776",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of weird_tales_1945_07_6194507sas (Weird Tales / Weird Tales Canadian Ed.)",
+   "duplicate_of": "weird_tales_1945_07_6194507sas",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_canadian_ed_1947_05_inationdpp",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of weird_tales_1947_03_4703jvhsas (Weird Tales / Weird Tales Canadian Ed.)",
+   "duplicate_of": "weird_tales_1947_03_4703jvhsas",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_british_ed_1950_07_ssingibcbc",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of weird_tales_1950_07_95007lpmat (Weird Tales / Weird Tales British Ed.)",
+   "duplicate_of": "weird_tales_1950_07_95007lpmat",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_british_ed_1954_08_bcmadmaxau",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of fantastic_1954_06_lverdongev (Fantastic / Fantastic British Ed.)",
+   "duplicate_of": "fantastic_1954_06_lverdongev",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_british_ed_undated_ritished03",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of weird_tales_1941_01_5n07194101 (Weird Tales / Weird Tales British Ed.)",
+   "duplicate_of": "weird_tales_1941_01_5n07194101",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "fantastic_adventures_british_1952_03_nysexciter",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of fantastic_adventures_1950_11_1gorgon776 (Fantastic Adventures / Fantastic Adventures British Ed.)",
+   "duplicate_of": "fantastic_adventures_1950_11_1gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_british_ed_1939_10_1n03193910",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of astounding_1939_10_eccape1736 (Astounding / Astounding British Ed.)",
+   "duplicate_of": "astounding_1939_10_eccape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_british_edition_1944_02_4n03194402",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of astounding_1944_02_nguk194402 (Astounding / Astounding British edition)",
+   "duplicate_of": "astounding_1944_02_nguk194402",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_british_edition_1945_02_4n09194502",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of astounding_1945_02_4n09194502 (Astounding / Astounding British edition)",
+   "duplicate_of": "astounding_1945_02_4n09194502",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_canadian_ed_1948_11_1gorgon776",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of weird_tales_1948_11_1n01194811 (Weird Tales / Weird Tales Canadian Ed.)",
+   "duplicate_of": "weird_tales_1948_11_1n01194811",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "thrilling_wonder_stories_can_1948_04_2n01194804",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of thrilling_wonder_stories_1948_04_2n01194804 (Thrilling Wonder Stories / Thrilling Wonder Stories Canadian Ed.)",
+   "duplicate_of": "thrilling_wonder_stories_1948_04_2n01194804",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_british_edition_1945_05_4n10194505",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of astounding_1945_05_4n10194505 (Astounding / Astounding British edition)",
+   "duplicate_of": "astounding_1945_05_4n10194505",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "future_science_fiction_briti_1953_ed13195404",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of future_science_fiction_1953_01_3n05195301 (Future Science Fiction / Future Science Fiction British Ed.)",
+   "duplicate_of": "future_science_fiction_1953_01_3n05195301",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "dynamic_science_fiction_brit_1954_nysexciter",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of dynamic_science_fiction_1954_01_onstructed (Dynamic Science Fiction / Dynamic Science Fiction British Ed.)",
+   "duplicate_of": "dynamic_science_fiction_1954_01_onstructed",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_british_edition_1944_06_4n05194406",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of astounding_1944_06_nguk194406 (Astounding / Astounding British edition)",
+   "duplicate_of": "astounding_1944_06_nguk194406",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_british_edition_1944_10_4n07194410",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of astounding_1944_10_nguk194410 (Astounding / Astounding British edition)",
+   "duplicate_of": "astounding_1944_10_nguk194410",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "dynamic_science_fiction_brit_1952_12_nysexciter",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of dynamic_science_fiction_1952_12_2gorgon776 (Dynamic Science Fiction / Dynamic Science Fiction British Ed.)",
+   "duplicate_of": "dynamic_science_fiction_1952_12_2gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "astounding_british_edition_1944_08_4n06194408",
+   "class": "another edition of an issue in the corpus",
+   "reason": "a whole-issue edition of astounding_1944_08_nguk194408 (Astounding / Astounding British edition)",
+   "duplicate_of": "astounding_1944_08_nguk194408",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "american_science_fiction_1952_12_on08195212",
+   "class": "excerpt of a magazine",
+   "reason": "1 story(ies) cut out of astounding_1943_03_01194303ak, which is in the corpus",
+   "duplicate_of": "astounding_1943_03_01194303ak",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "american_science_fiction_1953_11_19195311bl",
+   "class": "excerpt of a magazine",
+   "reason": "2 story(ies) cut out of science_fiction_quarterly_ne_1951_08_1n02195108, which is in the corpus",
+   "duplicate_of": "science_fiction_quarterly_ne_1951_08_1n02195108",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "american_science_fiction_1954_darknessbl",
+   "class": "excerpt of a magazine",
+   "reason": "1 story(ies) cut out of astounding_1942_02_02cape1736, which is in the corpus",
+   "duplicate_of": "astounding_1942_02_02cape1736",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "avro_manhattan_the_cricket_b_1955_10_ricketball",
+   "class": "excerpt of a magazine",
+   "reason": "1 story(ies) cut out of fantasy_science_fiction_1955_10_9n04195510, which is in the corpus",
+   "duplicate_of": "fantasy_science_fiction_1955_10_9n04195510",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1952_05_sychainsaw",
+   "class": "excerpt of a magazine",
+   "reason": "2 story(ies) cut out of amazing_stories_1952_05_6n05195205, which is in the corpus",
+   "duplicate_of": "amazing_stories_1952_05_6n05195205",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "if_worlds_of_science_fiction_1953_05_3gorgon776",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same contents as worlds_of_if_march_1953_03_195303if; the date decided by hand (keep_b)",
+   "duplicate_of": "worlds_of_if_march_1953_03_195303if",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "weird_tales_aug_sep_1936_09_tember1936",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same contents as weird_tales_1936_08_9gorgon776; the date decided by hand (keep_a)",
+   "duplicate_of": "weird_tales_1936_08_9gorgon776",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "amazing_stories_1950_o245202504",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same contents as amazing_stories_1953_08_0619530809; the date decided by hand (keep_b)",
+   "duplicate_of": "amazing_stories_1953_08_0619530809",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "frontier_stories_1947_07s_1947summer",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same contents as frontier_stories_1945_04s_1945spring; the date decided by hand (keep_a)",
+   "duplicate_of": "frontier_stories_1945_04s_1945spring",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "i_confess_1923_12_ic19231201",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same contents as i_confess_1923_01_oydarwinia; the date decided by hand (keep_a)",
+   "duplicate_of": "i_confess_1923_01_oydarwinia",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "adventure_1945_05_n011945may",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same contents as adventure_1949_05_adv194905; the date decided by hand (keep_b)",
+   "duplicate_of": "adventure_1949_05_adv194905",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "jungle_stories_1948_01s_js1948win",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same contents as jungle_stories_1948_11_4849winter; the date decided by hand (keep_b)",
+   "duplicate_of": "jungle_stories_1948_11_4849winter",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
+  },
+  {
+   "id": "wonder_stories_1933_03_93303fixed",
+   "class": "duplicate scan of an issue in the corpus",
+   "reason": "the same contents as wonder_stories_1933_10_5n03193310; the date decided by hand (keep_b)",
+   "duplicate_of": "wonder_stories_1933_10_5n03193310",
+   "decided_by": "Sujin Kang",
+   "decided": "2026-11-04",
+   "source": "scripts/resolve_duplicates.py"
   }
  ],
  "decisions": [
