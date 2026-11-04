@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.29.5"
+APP_VERSION = "0.29.6"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -2569,13 +2569,10 @@ edited in place.</p></div>
 {stats}
 {strip}
 <p class='fine'>These counters read the working record directly and grow as issues are processed; the strip shows the era year by year.</p>
-<div class='grid2'>
-<div class='card pad'><h3>Enter</h3><p><a class='btn' href='/login'>Enter the site</a></p>
-<p class='fine'>With the shared passcode, or a named account (new accounts are approved by the project lead). To request access, write to {CONTACT}.</p>{note}</div>
-<div class='card pad'><h3>Contact</h3><p>Digital Humanities Engineering Center<br>Kyungpook National University<br>
-Director: Prof. Heejin Kim · {CONTACT}<br><a href='https://www.digihumeng.org'>www.digihumeng.org</a></p>
-<p class='fine'>With the Department of English and Comparative Literature, Columbia University. <a href='/people'>The people</a>.</p></div>
-</div>
+{PP.cards_html()}
+<div class='card pad' style='margin-top:12px'><h3>Enter</h3><p><a class='btn' href='/login'>Enter the site</a></p>
+<p class='fine'>With the shared passcode, or a named account (new accounts are approved by the project lead). To request access, write to {CONTACT}.
+Digital Humanities Engineering Center, Kyungpook National University, <a href='https://www.digihumeng.org'>www.digihumeng.org</a>, with the Narrative Intelligence Lab, Columbia University.</p>{note}</div>
 <div class='footer'>Pulp Fiction Corpus · Digital Humanities Engineering Center, Kyungpook National University, with Columbia University · v{APP_VERSION}</div>
 </div>"""
         return f"""<!doctype html><html><head><meta charset='utf-8'>

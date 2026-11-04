@@ -34,7 +34,9 @@ class PeoplePage(unittest.TestCase):
         self.assertIn("https://dennistenen.com/about/", html)
         self.assertIn("https://www.digihumeng.org", html)
         self.assertIn("Kyungpook Institute of Humanities and Social Sciences", html)
-        self.assertNotRegex(html, r"\w@\w")                  # no e-mail address on the page
+        self.assertIn("mailto:kangsujin@knu.ac.kr", html)      # e-mail lines (4 November, evening)
+        self.assertIn("mailto:hkim1596@knu.ac.kr", html)
+        self.assertIn("mailto:dt2406@columbia.edu", html)
         self.assertEqual(html.count("Columbia University"), 1)
         self.assertEqual(html.count("Kyungpook National University"), 2)
         self.assertIn("<a href=", html)
@@ -55,6 +57,14 @@ class PeoplePage(unittest.TestCase):
             self.assertIn("A &amp; B", html)
             self.assertIn("X &lt;y&gt;", html)
             self.assertNotIn("class='fine'", html.split("X &lt;y&gt;")[1])   # no links → no fine line
+
+    def test_landing_cards(self):
+        html = PP.cards_html()
+        self.assertIn("class='people'", html)
+        self.assertEqual(html.count("class='card pad'"), 3)
+        src = (ROOT / "webapp" / "app.py").read_text(encoding="utf-8")
+        self.assertIn("{PP.cards_html()}", src)                   # the landing page's People block
+        self.assertNotIn("<h3>Contact</h3>", src)
 
     def test_nav_and_public_route(self):
         src = (ROOT / "webapp" / "app.py").read_text(encoding="utf-8")

@@ -1,5 +1,5 @@
 {
-  "_about": "The people page (/people, site v0.29.1). People in the order they are to be listed, side by side in one row, each in the same shape: name; title and unit; second line; university; links. The site reads this file on every request; edit it and reload.",
+  "_about": "The people page (/people, site v0.29.1). People in the order they are to be listed, side by side in one row, each in the same shape: name; title and unit; second line; university; e-mail; links. An empty e-mail is not shown. The site reads this file on every request; edit it and reload.",
   "groups": [
     {
       "heading": "Co-principal investigators",
@@ -16,7 +16,8 @@
               "label": "dennistenen.com",
               "url": "https://dennistenen.com/about/"
             }
-          ]
+          ],
+          "email": "dt2406@columbia.edu"
         },
         {
           "name": "Heejin Kim",
@@ -34,7 +35,8 @@
               "label": "digihumeng.org",
               "url": "https://www.digihumeng.org"
             }
-          ]
+          ],
+          "email": "hkim1596@knu.ac.kr"
         },
         {
           "name": "Sujin Kang",
@@ -48,7 +50,8 @@
               "label": "digihumeng.org",
               "url": "https://www.digihumeng.org"
             }
-          ]
+          ],
+          "email": "kangsujin@knu.ac.kr"
         }
       ]
     }

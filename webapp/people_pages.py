@@ -34,19 +34,34 @@ def people(root=None):
 
 def _person(p):
     lines = "".join(f"<div>{_esc(l)}</div>" for l in p.get("lines", []))
+    mail = p.get("email") or ""
+    mail = f"<div><a href='mailto:{_esc(mail)}'>{_esc(mail)}</a></div>" if mail else ""
     links = " · ".join(f"<a href='{_esc(l['url'])}'>{_esc(l.get('label') or l['url'])}</a>"
                        for l in p.get("links", []) if l.get("url"))
     links = f"<p class='fine' style='margin:4px 0 0'>{links}</p>" if links else ""
     return (f"<div class='card pad'><h3 style='margin:0 0 6px'>{_esc(p.get('name', ''))}</h3>"
-            f"<div class='muted'>{lines}</div>{links}</div>")
+            f"<div class='muted'>{lines}{mail}</div>{links}</div>")
+
+
+PEOPLE_CSS = ("<style>.people{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}"
+              "@media(max-width:820px){.people{grid-template-columns:1fr}}</style>")
+
+
+def cards_html(root=None):
+    """The first group's people side by side, for the landing page (4 November 2026: the landing page's Contact card
+    became the People block)."""
+    groups = people(root)
+    if not groups:
+        return ""
+    g = groups[0]
+    cards = [_person(p) for p in g.get("people", [])]
+    return PEOPLE_CSS + f"<h2>{_esc(g.get('heading', 'People'))}</h2><div class='people'>" + "".join(cards) + "</div>"
 
 
 def people_html(root=None):
     """The page body: one block per group, its people side by side in one row, in the file's order."""
     groups = people(root)
-    out = ["<style>.people{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}"
-           "@media(max-width:820px){.people{grid-template-columns:1fr}}</style>",
-           "<h1>People</h1>"]
+    out = [PEOPLE_CSS, "<h1>People</h1>"]
     if not groups:
         out.append("<p class='muted'>(config/people.json is missing or empty.)</p>")
     for g in groups:
