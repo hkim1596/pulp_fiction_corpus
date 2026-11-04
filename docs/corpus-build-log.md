@@ -1808,3 +1808,22 @@ is not set aside, the 633 books among them. Patch 0033: the explorer's issues ta
 and the books in a tile of their own ("kept as match partners"); the records, stories, words and authors of the
 Overview are those of the magazine issues. The schema version is part of the database signature, so the database
 rebuilds. Tests: tests/test_explorer_kind_column.py.
+
+### 2026-11-04 — rules 2.14, step 2a: paratext boxes, serial notices, the by-line guard
+
+The diagnosis of the rehearsal's matches (scripts/diagnose_story_text.py, pilot_export/story_text_diagnosis.md) read
+again without the items set aside by D-5: 469,379 cross-issue matches of ten tokens or more, of which 100,726 are
+standing blocks (the same 20+ tokens in 5+ stories of 2+ issues: the postal statement of ownership in 259 stories,
+advertisements in prose in 1,950, Adventure's Camp-Fire paragraph 2,281 times), 58,439 sit at the foot of a record
+and 30,993 at the head — in the random sample almost all advertising, masthead and publishers' address lines that
+the assembly had given to a story. Recaps of 50 tokens or more: 167. So the matter in story records that is not
+story is, overwhelmingly, paratext in plain text boxes, and rules 2.14 are written against that (docs/corpus-1.0-and-
+stage-2-design.md §3). Step 2a, patch 0038: **R-B** — a text box that is the statement of ownership, the masthead, a
+publisher's address line or a prose advertisement (two cues, or one cue in a short box) is its own house or ad
+record before any piece claims it (ad_class house_masthead or trade; `paratext` names the family); **R-C** — a notice
+about the serial ("This story began in the All-Story Weekly for …") is a note, never the blurb or the text; **R-D** —
+editorial signatures and price strings are not authors (the Editor, THE EDITORS, THE $4.00 YEAR, Mail 30c, I, page);
+house pseudonyms (An Old Scout, A Trainer) stay. The rules module stamps 2.14. scripts/compare_assembly.py assembles
+issues in memory with the rules in the code and sets them against the candidates on disk, writing nothing: the
+regression over the 10 pilot issues and the 30 double-read sample issues follows this entry. Steps 2b (the
+recurring-box evidence) and 2c (R-A) come next; the corpus is not re-assembled until 2d has been read.

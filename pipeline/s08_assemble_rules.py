@@ -56,7 +56,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from layout_order import order_region_keys
 from corpus_lib import write_json_atomic
 
-VERSION = "2.13"
+VERSION = "2.14"
 # 2.13 (2026-10-27): the cover's record survives the model's changes. The published variant (rules_on_model) takes the
 # rules' records inside the printed page range and the model's old records for the pages outside it — the cover page
 # among them, so the 2.12 cover record never reached the site (the model's old advertisement and house blocks of the
@@ -241,6 +241,47 @@ FILLER_RE = re.compile(r"NEXT ISSUE|NEXT MONTH|NEXT WEEK|WRITE IN|A LETTER TO|ON
                        r"NEXT (?:MONTH|WEEK)'S|NOW ON SALE|OUT NOW|^\W*COMING\W*$|FEATURED IN", re.I)
 AD_WORDS = re.compile(r"\$\d|\bFREE\b|coupon|Dept\.|Send (?:no|for|me)|money back|guarantee|\bWrite (?:for|to)\b|postpaid|Address\b|catalog|Agents wanted|Learn at home|\bmail\b", re.I)
 MENTION_RE = re.compile(r"Please mention|when answering advertisements", re.I)
+# rules 2.14 (4 November 2026), R-B: paratext that the layout gives to a story as plain text boxes — the postal
+# statement of ownership (printed once a year in every magazine), the masthead (entry, subscription, copyright,
+# the fiction-disclaimer), a publisher's address line, a prose advertisement — read from the diagnosis of the
+# rehearsal's matches (scripts/diagnose_story_text.py: 259 stories carry an ownership statement; about a third of
+# the story records carry such a box at their head or foot). Such a box is its own house or ad record, never text
+# of the piece around it; the box keeps its place on the page.
+OWNERSHIP_RE = re.compile(r"statement of (?:the )?ownership|postal laws and regulations|act of (?:august 24, 1912|march 3, 1933|october 23, 1962)|"
+                          r"bondholders,? mortgagees|stockholders and security holders|sworn to and subscribed|before me,? a notary public|"
+                          r"average number of copies|paid circulation|(?:managing|business) (?:editor|manager)s?(?: are| is|:)", re.I)
+MASTHEAD_RE = re.compile(r"entered as second[- ]class matter|second[- ]class (?:matter|postage)|post ?office at [A-Z][a-z]+|"
+                         r"subscription (?:price|rate)s?|single cop(?:y|ies)|all rights reserved|copyright,? (?:19\d\d|by)|"
+                         r"(?:names of )?(?:all )?characters (?:used )?(?:in|are) (?:stories|fictitious|these stories)|"
+                         r"(?:self-addressed|stamped) envelope|printed in (?:the )?u\. ?s\. ?a|(?:manuscripts?|mss\.?) (?:must be|are) (?:accompanied|submitted)|"
+                         r"published (?:monthly|bi-monthly|semi-monthly|weekly|quarterly) by", re.I)
+PUBLISHER_RE = re.compile(r"\b(?:Inc|Corp|Co|Ltd|Publications?|Publishing|Press)\.?,?\s+\d{1,5}\s+(?:[A-Z][\w.]*\s+){0,3}(?:Ave|Avenue|St|Street|Place|Square|Broadway|Park|Blvd|Boulevard)\b")
+SELL_RE = re.compile(r"free (?:offer|trial|book|sample|booklet|details|information|catalog)|\boffer\b|get yours|order now|yours now|\$\s?\d|only \d|"
+                     r"\bprice\b|postpaid|c\. ?o\. ?d\.|no obligation|money[- ]back|agents wanted|dept\.? [a-z0-9-]+", re.I)
+# R-C: a notice about the serial, not its text ("This story began in the All-Story Weekly for July 17")
+SERIAL_NOTICE_RE = re.compile(r"^\W*(?:this (?:story|serial|novel) (?:began|started|begins) in|begin this (?:story|serial) in|"
+                              r"the (?:first|preceding|previous|two|three|four) (?:instal|install)ments?|back numbers (?:will be|may be|can be)|"
+                              r"(?:the )?(?:\w+ )?back numbers? (?:of|will))", re.I)
+
+
+def paratext_kind(r, t):
+    """R-B: the family of a text box that is paratext, or None. Two cues, or one cue in a short box, so that a story
+    paragraph that happens to mention a notary or a subscription is not taken."""
+    n_own = len(OWNERSHIP_RE.findall(t))
+    n_mast = len(MASTHEAD_RE.findall(t))
+    n_pub = len(PUBLISHER_RE.findall(t))
+    w = words(t)
+    if n_own >= 2 or (n_own >= 1 and (n_mast >= 1 or w <= 80)):
+        return "ownership statement"
+    if n_mast >= 2 or (n_mast >= 1 and (n_pub >= 1 or w <= 60)):
+        return "masthead"
+    if n_pub >= 1 and w <= 40 and not t[:1].islower():
+        return "masthead"
+    if r.get("label") == "Text" and w >= 15 and not t[:1].islower():
+        cues = {m.lower() for m in AD_WORDS.findall(t)}
+        if len(cues) >= 2 and SELL_RE.search(t):
+            return "advertisement"
+    return None
 _CONT = r"\b(?:continued|cont(?:['’]d|d)?\.?)\s+"
 CONT_FROM_RE = re.compile(_CONT + r"from\s+(?:p(?:age|p)?\.?\s*)?(\d{1,4})\b", re.I)
 CONT_TO_PAGE_RE = re.compile(_CONT + r"on\s+(?:p(?:age|p)?\.?\s*)?(\d{1,4})\b", re.I)
@@ -419,7 +460,16 @@ def byline_author(t):
     ws = a.split()
     if sum(1 for w in ws if w.lower() in STOP_WORDS) > 1 or not any(w[:1].isupper() and len(w) >= 2 for w in ws):
         return None                                   # "By Relieving the Cause with" is not a person
+    if NOT_AUTHOR_RE.match(a):
+        return None                                   # rules 2.14 R-D: an editorial signature or a price line, not a person
     return a
+
+
+# rules 2.14 R-D: by-lines that are not a person — editorial signatures and advertising or price strings. House
+# pseudonyms ("An Old Scout", "A Trainer") are by-lines and stay; the author table resolves them.
+NOT_AUTHOR_RE = re.compile(r"^(?:the )?(?:editors?|readers?|staff|management|publishers?|editor and readers|our readers|the editor and readers|"
+                           r"(?:the )?story[- ]tellers['’]? circle|i|page|mail \d+c|the \$[\d.]+ year|the year \$[\d.]+|special feature|"
+                           r"announcements? and letters|news of (?:the )?next month['’]?s? issue)\.?$|.*\$\d|.*\b\d+c\b", re.I)
 
 
 def is_display(p, r):
@@ -1588,6 +1638,15 @@ def analyse(pages, force_scan=None, magazine=None):
             elif (is_display(p, r) and r["label"] == "SectionHeader" and not any(i in s["title_idx"] for s in info["starts"])) or \
                     (words(t) <= 6 and FILLER_RE.search(t) and not any(i in s["title_idx"] + s["subtitle_idx"] for s in info["starts"])):
                 info["fillers"].append(i)
+        # rules 2.14 R-B: paratext boxes (the statement of ownership, the masthead, a publisher's address, a prose
+        # advertisement) — each its own record, never text of the piece around it
+        info["paratext"] = {}
+        for i, r in enumerate(regs):
+            if i in info["furniture"] or i in head_idx or i in info["chapters"]:
+                continue
+            fam = paratext_kind(r, region_text(r))
+            if fam:
+                info["paratext"][i] = fam
         # ballots and coupons: a form block is its own record (house_form), never text of the piece around it
         info["forms"] = {}
         taken = set()
@@ -1892,6 +1951,8 @@ class Assembler:
         k = key(pno, i)
         if k in self.owner:
             return
+        if role == "teaser" and rec.get("type") == "story" and SERIAL_NOTICE_RE.match(region_text(self.pages[pno]["regions"][i])):
+            role = "note"                                 # rules 2.14 R-C: a notice about the serial is not the blurb
         self.owner[k] = rec["article_id"]
         rec["keys"].append((pno, i))
         if role:
@@ -1935,6 +1996,7 @@ class Assembler:
                 self.open = None
                 self.ad_page(pno, p, info)
                 continue
+            self.paratext_boxes(pno, p, info)       # rules 2.14 R-B: before any piece claims them
             self.story_page(pno, p, info)
         # the second look at every record (v2.2): the piece's ends, chapter series, synopsis, departments
         for rec in list(self.records):
@@ -2784,6 +2846,8 @@ class Assembler:
                 if not advertiser:
                     m = re.search(r"(?m)^([A-Z][A-Za-z&'\.\-]+(?: [A-Z][A-Za-z&'\.\-]+){0,4}),\s*(?:Dept|Desk|Box|Studio)", full)
                     advertiser = m.group(1) if m else None
+        if rec.get("paratext") in ("ownership statement", "masthead"):
+            cls = "house_masthead"                              # rules 2.14 R-B: the magazine's own legal matter
         rec["ad_class"] = cls
         rec["advertiser"] = advertiser
         if announces:
@@ -3026,6 +3090,30 @@ class Assembler:
                 self.steal(advertisement, pn, j)
             advertisement["flags"].append(f"whole product catalogue on p.{pn} separated from a continuous story")
             self.open["flags"].append(f"reading resumes across the separate product catalogue on p.{pn}")
+
+    def paratext_boxes(self, pno, p, info):
+        """Rules 2.14 R-B (4 November 2026). The paratext boxes the analysis found on this page — the statement of
+        ownership, the masthead, a publisher's address line, a prose advertisement — each become their own house or
+        ad record before any piece claims them; consecutive boxes of one family on the page join one record. The
+        piece around them resumes as if they were not there (the record's text follows its own boxes)."""
+        regs = p["regions"]
+        prev_rec, prev_i = None, None
+        for i in sorted((info.get("paratext") or {})):
+            k = key(pno, i)
+            if k in self.owner:
+                continue
+            fam = info["paratext"][i]
+            t = region_text(regs[i])
+            between = [j for j in range(prev_i + 1, i) if j not in info["furniture"]] if prev_i is not None else [None]
+            if prev_rec is not None and prev_rec.get("paratext") == fam and not between:
+                self.add(prev_rec, pno, i)
+            else:
+                rec = self.new("ad", title=" ".join(t.split()[:12]) + (" …" if words(t) > 12 else ""), page=pno)
+                rec["paratext"] = fam
+                rec["flags"].append(f"paratext box on p.{pno}: {fam} (rules 2.14, R-B); not text of the piece around it")
+                self.add(rec, pno, i)
+                prev_rec = rec
+            prev_i = i
 
     def story_page(self, pno, p, info):
         regs = p["regions"]
@@ -3411,6 +3499,9 @@ class Assembler:
                     self.add(rec, pno, j, "title" if (j == i and rec is not prev_rec) else None)
                 i = blk[-1] + 1
                 continue
+            if key(pno, i) in self.owner:
+                i += 1                                   # rules 2.14 R-B: a paratext box already has its record
+                continue
             if i in announce_at and self.open["type"] in ("story", "poem", "letters", "feature"):
                 # an announcement block ("in the next issue": title, by-line, blurb, often a quoted excerpt)
                 # with no filler header on this page: house advertising to the end of the page
@@ -3461,6 +3552,8 @@ class Assembler:
                 self.credit(self.open, pno, i)                # the credit line on the piece's first page
             elif ILLUS_RE.match(t) and words(t) <= 30 and self.open.get("type") not in ("ad", "other"):
                 self.illustrator(self.open, pno, i)           # "Illustrated by …" wherever the layout put it
+            elif SERIAL_NOTICE_RE.match(t) and words(t) <= 60 and self.open.get("type") == "story":
+                self.add(self.open, pno, i, "note")           # rules 2.14 R-C: a notice about the serial, not its text
             elif r["label"] == "Caption":
                 self.add(self.open, pno, i, "caption")
             elif r["label"] == "SectionHeader" and words(t) <= 12 and self.open.get("type") in ("letters", "feature") and \
