@@ -16,6 +16,12 @@ config/toc_page_overrides.json, and it is deposited with corpus 1.0.
     python3 scripts/box_recurrence.py [--workers 16] [--min-issues 3] [--min-tokens 15] [--min-share 0.6] [--out …]
     python3 scripts/box_recurrence.py --selftest
     python3 scripts/box_recurrence.py --issues a,b,c --out /tmp/x.json      # a few issues, for a look
+    python3 scripts/box_recurrence.py --split-only                            # the per-issue files from an existing box_recurrence.json
+
+5 November 2026: the set-aside items (config/corpus_set_aside.json — the duplicate scans and other editions of D-5)
+are left out of the count unless --include-set-aside is given, so that a text seen in an issue's two scans is not
+"recurring"; and the result is also written issue by issue to box_recurrence/<issue>.json, which the assembly reads
+(s08_assemble_rules.box_recurrence_for; the one big file is too heavy for every assembly worker to load).
 
 Memory: about 450 M shingles × 16 bytes, sorted in place — some 8 GB; the hashes of each issue are written to a shard
 first, so the workers hold little. Time: tens of minutes on the server with 16 workers.
@@ -39,6 +45,7 @@ from r01_normalize import prepare, tokenize  # noqa: E402
 K = 8
 RUN = os.path.join(ROOT, "data", "corpus", "p52-2026-10-16")
 OUT = os.path.join(RUN, "box_recurrence.json")
+SPLIT_DIR = os.path.join(RUN, "box_recurrence")
 SHARDS = os.path.join(RUN, "box_recurrence_shards")
 TYPES_INDEXED = None          # every record type: an advertisement elsewhere is evidence for the same text in a story
 
@@ -209,6 +216,23 @@ def selftest():
     return True
 
 
+def split(res, split_dir=SPLIT_DIR):
+    """One file per issue, box_recurrence/<issue>.json: "page:idx" -> entry. Files of issues no longer in the result
+    are removed, so that the directory always mirrors the last run."""
+    os.makedirs(split_dir, exist_ok=True)
+    keep = set()
+    for iid, boxes in res["issues"].items():
+        keep.add(f"{iid}.json")
+        with open(os.path.join(split_dir, f"{iid}.json"), "w", encoding="utf-8") as f:
+            json.dump(boxes, f, ensure_ascii=False)
+    stale = [f for f in os.listdir(split_dir) if f.endswith(".json") and f not in keep]
+    for f in stale:
+        os.remove(os.path.join(split_dir, f))
+    with open(os.path.join(split_dir, "SUMMARY.json"), "w", encoding="utf-8") as f:
+        json.dump(res["summary"], f, indent=1)
+    return len(keep), len(stale)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=16)
@@ -218,19 +242,35 @@ def main():
     ap.add_argument("--issues", help="comma-separated ids (default: every assembled issue)")
     ap.add_argument("--out", default=OUT)
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--include-set-aside", action="store_true", help="count the set-aside items too (the run of 4 November did)")
+    ap.add_argument("--split-only", action="store_true", help="write the per-issue files from the existing --out file, no recount")
     a = ap.parse_args()
     if a.selftest:
         sys.exit(0 if selftest() else 1)
+    split_dir = os.path.join(os.path.dirname(a.out), "box_recurrence") if a.out != OUT else SPLIT_DIR
+    if a.split_only:
+        res = json.load(open(a.out, encoding="utf-8"))
+        n, stale = split(res, split_dir)
+        print(f"split: {n:,} issue files written to {os.path.relpath(split_dir, ROOT)} ({stale} stale files removed)")
+        return
     if a.issues:
         issues = a.issues.split(",")
     else:
         issues = sorted(os.path.basename(p) for p in glob.glob(os.path.join(ROOT, "data", "assembly_v2", "rules", "*"))
                         if os.path.exists(os.path.join(p, "articles.json")))
+    if not a.include_set_aside:
+        from corpus_lib import set_aside
+        aside = set(set_aside())
+        before = len(issues)
+        issues = [i for i in issues if i not in aside]
+        print(f"[box_recurrence] {before - len(issues):,} set-aside items left out; {len(issues):,} issues counted")
     res = compute(issues, workers=a.workers, min_issues=a.min_issues, min_tokens=a.min_tokens, min_share=a.min_share)
+    res["summary"]["set_aside_included"] = bool(a.include_set_aside)
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     json.dump(res, open(a.out, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+    n, stale = split(res, split_dir)
     print(json.dumps(res["summary"]))
-    print(f"written {os.path.relpath(a.out, ROOT)}")
+    print(f"written {os.path.relpath(a.out, ROOT)} and {n:,} issue files in {os.path.relpath(split_dir, ROOT)}")
 
 
 if __name__ == "__main__":

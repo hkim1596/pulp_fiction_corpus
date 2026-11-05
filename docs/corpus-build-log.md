@@ -1875,3 +1875,27 @@ would act on, how many it would only flag, how the count moves with the reach an
 rests on set-aside partners alone — the magazines in which the recurring story boxes concentrate, and examples to
 read by hand. Written to pilot_export/box-recurrence-read-<date>/ (report.md, records.json); nothing in data/ is
 touched. The thresholds of R-A are set from this reading, not before it.
+
+### 2026-11-05 — rules 2.14, step 2b read; step 2c, the recurring-box rule R-A (patch 0046)
+
+The reading (scripts/box_recurrence_read.py, 25 seconds over 6,099 magazine issues): 58,781 story records, 9,986 with a
+recurring box (17.0 %); 6,311 of them recur by less than a tenth of their words. The boxes are advertisements (insurance,
+patent medicines, correspondence schools), house notices ("WHEN you have read this issue … let us know") and
+departments' standing matter. Three findings changed the design: (1) 9,008 of the 9,986 records have their recurring
+boxes inside the box sequence, not at the head or tail — a story continued at the back runs through the
+advertisement pages — so the position test of the design of 4 November would have left 785 of 7,499 records to act on;
+it is dropped. (2) The 2,378 records recurring by half or more are reprints (Astounding's British editions, the Avon
+readers, Famous Fantastic Mysteries, Fantastic Novels lead the magazine table; Lovecraft's "The Temple", Merritt,
+Coblentz, del Rey among the examples): the study's object, which the record guard (half or more, or fewer than 200
+words remaining → flag, no split) already leaves whole. (3) "Same author" among the partners is no protection on its
+own: a regular author's stories carry the same advertisement issue after issue (Fox B. Holden in IF); the same work
+title is (a reprint, a serial's recap), and so is every partner being a story by the same author. Boxes shared only
+with other stories and without a selling cue (Kipling's "over the hills and far away" quoted in three stories) are
+commonplaces, flagged and kept. The guard's thresholds move the count little (reach ≥ 4 other issues: 6,228 records;
+share guard 0.25: 7,078; remainder 500: 7,166) and stay. 247 records rest on evidence from set-aside duplicate scans
+alone, so the count is redone without them. Patch 0046: s08_assemble_rules.recurring_boxes (R-A as above, reading
+box_recurrence/<issue>.json; new records carry paratext "recurring box", split_from and the evidence), box_recurrence.py
+leaves the set-aside items out and writes the per-issue files (--split-only for an existing count), compare_assembly.py
+lists the R-A splits with reach and partners, the flag-only records, and takes --random N issues; the design
+(docs/corpus-1.0-and-stage-2-design.md §3.2, §10a) records the revision. Next: the recount, the regression over the 40
+issues and 50 random ones, every changed record read.

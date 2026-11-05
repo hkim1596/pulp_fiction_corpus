@@ -120,3 +120,84 @@ class RulesSwitch(unittest.TestCase):
         finally:
             rules.RULES_214["on"] = True
         self.assertEqual(rules.analyse({1: p1})["pages"][1]["paratext"], {3: "ownership statement"})
+
+
+NOTICE = ("WHEN you have read this issue of the magazine, let us know what you think of the stories it contains. "
+          "Your letters guide the editors in choosing the stories that follow, and the Legal Reserve of good will "
+          "between reader and editor is what keeps a magazine alive.")       # a house notice R-B does not see
+VERSE = ('"And o\'er the hills, and far away, beyond their utmost purple rim, beyond the night, across the day, '
+         'through all the world she followed him," he said, and the words were older than either of them.')
+
+
+class RecurringBoxes(unittest.TestCase):
+    """Rules 2.14 R-A (5 November 2026)."""
+
+    def pages(self):
+        p1 = page(1, [box("THE BLACK STONE", 100, "SectionHeader"), box("By Robert E. Howard", 200),
+                      box(BODY, 300, h=400), box(NOTICE, 720, h=150), box(VERSE, 890, h=120), box(BODY2, 1030, h=250)])
+        return {1: p1}
+
+    def with_evidence(self, evidence):
+        import tempfile, json, os
+        d = tempfile.mkdtemp()
+        os.makedirs(os.path.join(d, "box_recurrence"))
+        json.dump(evidence, open(os.path.join(d, "box_recurrence", "x.json"), "w"))
+        old = rules.RECURRENCE_DIR
+        rules.RECURRENCE_DIR = os.path.join(d, "box_recurrence")
+        try:
+            pages = self.pages()
+            return rules.assemble("x", pages, rules.analyse(pages))
+        finally:
+            rules.RECURRENCE_DIR = old
+
+    def test_verdicts(self):
+        ad = {"n_tokens": 40, "share": 1.0, "n_issues": 12, "partners": [{"type": "ad", "author": None, "work": None}, {"type": "story", "author": "Fox B. Holden", "work": "A Gift for Terra"}]}
+        self.assertEqual(rules.recurrence_verdict(ad, NOTICE, "The Black Stone", "Robert E. Howard"), "act")
+        self.assertEqual(rules.recurrence_verdict(ad, NOTICE, "A Gift for Terra", "Fox B. Holden"), "same work")       # a reprint or a recap
+        own = {"n_tokens": 90, "share": 0.9, "n_issues": 2, "partners": [{"type": "story", "author": "Dan Duane", "work": "The Hornet's Nest, Part II"}]}
+        self.assertEqual(rules.recurrence_verdict(own, BODY, "In the Hornet's Nest", "Dan Duane"), "same author")
+        quote = {"n_tokens": 25, "share": 0.61, "n_issues": 2, "partners": [{"type": "story", "author": "A. Lang", "work": "The Romance"}]}
+        self.assertEqual(rules.recurrence_verdict(quote, VERSE, "Other", "Other"), "commonplace")
+        self.assertEqual(rules.recurrence_verdict(quote, AD, "Other", "Other"), "act")                             # a selling cue: the ad every story absorbed
+        self.assertIsNone(rules.recurrence_verdict({"n_tokens": 10, "share": 1.0, "n_issues": 9, "partners": []}, NOTICE, "", ""))
+        self.assertIsNone(rules.recurrence_verdict({"n_tokens": 40, "share": 0.5, "n_issues": 9, "partners": []}, NOTICE, "", ""))
+
+    def test_recurring_advertisement_is_split_out_and_the_verse_kept(self):
+        ev = {"1:3": {"n_tokens": 40, "share": 1.0, "n_issues": 428, "partners": [{"type": "ad", "author": None, "work": None}, {"type": "story", "author": "Lee Owens", "work": "Life in the West"}]},
+              "1:4": {"n_tokens": 25, "share": 0.61, "n_issues": 2, "partners": [{"type": "story", "author": "Andrew Lang", "work": "The Romance of the First Radical"}]}}
+        doc = self.with_evidence(ev)
+        stories = [r for r in doc["articles"] if r["type"] == "story"]
+        ads = [r for r in doc["articles"] if r["type"] in ("ad", "house")]
+        self.assertEqual(len(stories), 1)
+        self.assertNotIn("Legal Reserve", stories[0]["text"])
+        self.assertIn("purple rim", stories[0]["text"])                       # the verse stays, flagged
+        self.assertIn("wagons could cross", stories[0]["text"])
+        self.assertTrue(any(f.startswith("commonplace?") for f in stories[0]["flags"]))
+        self.assertTrue(any("split out as paratext (rules 2.14, R-A)" in f for f in stories[0]["flags"]))
+        self.assertEqual(len(ads), 1)
+        self.assertEqual(ads[0]["paratext"], "recurring box")
+        self.assertEqual(ads[0]["split_from"], stories[0]["article_id"])
+        self.assertEqual(ads[0]["recurrence"]["n_issues"], 428)
+        self.assertIn("Legal Reserve", ads[0]["text"])
+
+    def test_mostly_recurring_record_is_left_whole(self):
+        ev = {"1:2": {"n_tokens": 300, "share": 1.0, "n_issues": 3, "partners": [{"type": "ad", "author": None, "work": None}]},
+              "1:3": {"n_tokens": 40, "share": 1.0, "n_issues": 3, "partners": [{"type": "ad", "author": None, "work": None}]}}
+        doc = self.with_evidence(ev)
+        stories = [r for r in doc["articles"] if r["type"] == "story"]
+        self.assertEqual(len(stories), 1)
+        self.assertIn("Legal Reserve", stories[0]["text"])
+        self.assertTrue(any(f.startswith("mostly recurring") for f in stories[0]["flags"]))
+
+    def test_same_work_is_kept(self):
+        ev = {"1:3": {"n_tokens": 40, "share": 1.0, "n_issues": 3, "partners": [{"type": "story", "author": "Robert E. Howard", "work": "The Black Stone"}]}}
+        doc = self.with_evidence(ev)
+        stories = [r for r in doc["articles"] if r["type"] == "story"]
+        self.assertIn("Legal Reserve", stories[0]["text"])
+        self.assertTrue(any("same work or the same author" in f for f in stories[0]["flags"]))
+
+    def test_no_evidence_no_change(self):
+        doc = self.with_evidence({})
+        stories = [r for r in doc["articles"] if r["type"] == "story"]
+        self.assertIn("Legal Reserve", stories[0]["text"])
+        self.assertFalse(any("R-A" in f for f in stories[0]["flags"]))

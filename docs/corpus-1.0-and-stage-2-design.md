@@ -41,11 +41,16 @@ So the matter in story records that is not story is, overwhelmingly, **advertisi
 ### 3.2 The rules
 Order of application: R-B, R-C (typographic and regex evidence, per issue) → R-A (recurrence evidence, corpus-wide) → R-D (by-lines).
 
-**R-A, the recurring-box rule (the main rule).** Evidence: for every layout box of every record, the share of its 8-word shingles that also occur in boxes of **two or more other issues**, computed corpus-wide by the array engine of r02_verbatim_corpus (hash, sort, count; about 450 M tokens, ~6 GB, 20–30 minutes on the server) and written to `data/corpus/p52-2026-10-16/box_recurrence.json` for boxes of 15 tokens or more with share ≥ 0.6. The file is assembly evidence (like config/toc_page_overrides.json), not an analysis: no pairs, dates or topics are computed. Rule: in a story record, a recurring box is split out into an ad, house or department record when all of these hold —
-1. the record's recurring boxes are **less than half** of its tokens and the remainder is **200 tokens or more** (otherwise the record is a reprint or wholly recurring: untouched, flagged);
-2. the recurrence is **not with records of the same author or the same work title** (a series' formulaic opening paragraph is the study's object, not paratext: kept);
-3. the recurring boxes form the record's **head run or tail run**, or a group on a page where the record has no other box; a recurring box isolated inside the prose flow is **not split** but flagged `formula?` for the review set.
-The family of the split record: ownership-statement or masthead regex → house; a department head or a departments-list match → department; otherwise ad. The new record carries `split_from`, the evidence (n_issues, share) and the rule version.
+**R-A, the recurring-box rule (the main rule; revised 5 November from the reading of the evidence).** Evidence: for every layout box of every record, the share of its 8-word shingles that also occur in boxes of **two or more other issues**, computed corpus-wide by the array engine of r02_verbatim_corpus (hash, sort, count; 443 M shingles, 198 seconds on the server, 4 November) and written to `data/corpus/p52-2026-10-16/box_recurrence.json` — and, issue by issue, to `box_recurrence/<issue>.json`, which the assembly reads — for boxes of 15 tokens or more with share ≥ 0.6, with each box's reach and up to eight partner records (issue, record, type, author, work title). The set-aside items are left out of the count (the run of 4 November counted them; it is redone before the upgrade). The file is assembly evidence (like config/toc_page_overrides.json), not an analysis: no pairs, dates or topics are computed.
+
+What the reading found (scripts/box_recurrence_read.py, 5 November, 58,781 story records of the magazine issues): 9,986 records carry a recurring box, 6,311 of them by less than a tenth of their words; the boxes are advertisements, house notices and departments' standing matter. Nine in ten recurring boxes sit **inside** the record's box sequence, not at its head or tail (a story continued at the back of the issue runs through advertisement pages), so the position test of the first design would have left the rule inert (785 of 7,499 records). The records that recur by half or more (2,378) are **reprints** — the British editions of Astounding, the Avon readers, Famous Fantastic Mysteries, Fantastic Novels top the magazine table — i.e. the study's object; a partner of the same work title is a reprint or a serial's recap; a partner that is a story by the same author is, as often as not, a regular author's story carrying the same advertisement (Fox B. Holden's stories in IF, each with the same advertisement), so the same author alone is no protection. Boxes shared only with other stories and carrying no selling cue are quotations (Kipling's "over the hills and far away" in three stories) — commonplaces in the sense of §3.1 of the protocol, not paratext.
+
+Rule (s08_assemble_rules.recurring_boxes, after the second look over the records and before the texts are built): in a story record, for each plain text box (no role) with an evidence entry of 15+ tokens, share ≥ 0.6, reach ≥ 2 other issues —
+1. a partner **of the same work title** → the box stays (a reprint, a serial's recap); the record is flagged;
+2. every partner **a story by the same author** → stays (the author's own recurring text); flagged;
+3. every partner a story, and the box carries **no selling cue** (R-B's test: a strong cue, or two advertising words with a selling phrase) → stays, flagged `commonplace?`; with a selling cue it is the advertisement every story absorbed → split;
+4. otherwise → **split out** into its own record (`paratext: recurring box`, `split_from`, `recurrence: {n_issues, share, partners}`), consecutive boxes on a page into one record; the record's type and class follow its content (classify_ad: house or ad). **The box's position in the record is no test.**
+Record guard, unchanged: when the boxes to split are **half or more** of the record's words, or **fewer than 200 words** would remain, nothing is split and the record is flagged `mostly recurring` for review (a reprint, or paratext read as a story). The reading puts the rule's reach at about 7,500 records and 1.9 M words; the thresholds (three issues, share 0.6, 15 tokens, 200 words) move the count little (sensitivity table in pilot_export/box-recurrence-read-2026-11-05/report.md) and stay as proposed.
 
 **R-B, masthead, coupon and price regex (per issue, no corpus pass).** A box matching two or more cues — Statement of (the) Ownership; Entered as second-class matter; Sworn to and subscribed; Before me, a Notary Public; Subscription … single copies; All rights reserved / Names of all characters … fictitious; NAME ___ ADDRESS ___; Enclosed find … cents; Send no money; Dept. [A-Z0-9]; "…, Inc., <number> <street>, New York" — or one cue in a box that is not inside the prose flow — is split out as in R-A. Target: the 259 stories carrying an ownership statement → 0.
 
@@ -62,7 +67,7 @@ Advertising OCR'd into the same box as story text cannot be split by R-A; short 
 Recommendation: (ii) — the corrections are the product of level-2 verification and are costly to lose; the paratext rules reach every item either way.
 
 ### 3.5 Steps
-2a regex, notices, by-lines in s08 (+ docs/rules-2.14-design.md, this section in English) · 2b scripts/box_recurrence.py and its run · 2c R-A in s08 · 2d regression on the 10 pilot issues and the 30 double-read issues (every changed record read), 50 random issues' new splits read · 2e snapshot (tar of data/assembly_v2, data/annotations, data/assembly_archive, config), the upgrade over the corpus, the cross-issue pass, the report. About 7 working days and 9 machine hours.
+2a regex, notices, by-lines in s08 (+ docs/rules-2.14-design.md, this section in English) — done 4 November · 2b scripts/box_recurrence.py, its run, and the reading (scripts/box_recurrence_read.py) — done 4–5 November · 2c R-A in s08 — written 5 November (patch 0046) · 2d the evidence recounted without the set-aside items, then the regression on the 10 pilot issues and the 30 double-read issues (every changed record read), 50 random issues' new splits read · 2e snapshot (tar of data/assembly_v2, data/annotations, data/assembly_archive, config), the upgrade over the corpus, the cross-issue pass, the report. About 7 working days and 9 machine hours.
 
 ## 4. Evidence files and their standing
 | file | made by | used by | analysis? |
@@ -70,7 +75,8 @@ Recommendation: (ii) — the corrections are the product of level-2 verification
 | config/corpus_set_aside.json | D-5 and earlier decisions | every stage | no |
 | data/corpus/…/duplicates_plan.json | resolve_duplicates.py from the rehearsal's pair table | the apply | no (the pair table is read for duplicate detection only) |
 | data/reuse/corpus_dryrun/story_text_diagnosis.json | diagnose_story_text.py from the rehearsal's matches | the design of 2.14 | no (it sets no parameter of the registered analysis) |
-| data/corpus/…/box_recurrence.json (to come) | box_recurrence.py, corpus-wide shingle counts over boxes | assembly 2.14 | no (no pairs, dates or topics) |
+| data/corpus/…/box_recurrence.json and box_recurrence/<issue>.json | box_recurrence.py, corpus-wide shingle counts over boxes (set-aside items left out) | assembly 2.14 (R-A) | no (no pairs, dates or topics) |
+| pilot_export/box-recurrence-read-2026-11-05/ | box_recurrence_read.py over the evidence and the candidates | the design of R-A | no (it sets the rule's guards, not a parameter of the registered analysis) |
 All four are deposited with corpus 1.0 so that the Stage 2 Methods can say what the assembly read.
 
 ## 5. Verification sets (from the plan of 2 November)
@@ -93,6 +99,12 @@ The registered run from the settings file on corpus 1.0; V4 and V5; the model wi
 2. V2 at 70 pages.
 3. Whether the co-authors receive a `1.0rc` snapshot before the freeze or wait for 1.0: to be settled at the meeting.
 4. HK is the second reader for V1 and V4.
+
+## 10a. Decisions of 5 November (R-A, from the reading)
+1. The position of a recurring box in the record is no test; the head/tail condition of the first design is dropped.
+2. Protection by partners: the same work title; every partner a story by the same author; stories only without a selling cue (`commonplace?`). The same author alone does not protect a box.
+3. The record guard stays: half or more recurring, or fewer than 200 words remaining → flagged, not split.
+4. The recurrence is recounted without the set-aside items before the regression and the upgrade; the count of 4 November is kept as the first reading's evidence.
 
 ## 11. Timeline from 4 November (working days)
 2.14 (7) → author_norm (2) ‖ quality score (1) → release export (1) → manifest, datasheet, freeze (3) → Zenodo (0.5): **about 3 weeks** to corpus 1.0. Then V1 (7 + 1.5) ‖ V2 (5 + 5, can start now) ‖ author table (9) ‖ 3.2 tiers (8) ‖ reuse-stage additions (10) → settings file and analysis plan (3) → manuscript preparation (6): about 6–7 weeks more. Phase B after acceptance: about 9 weeks.

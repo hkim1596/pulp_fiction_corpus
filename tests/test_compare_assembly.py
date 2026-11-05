@@ -22,12 +22,17 @@ class CompareAssembly(unittest.TestCase):
                  "story_words_before": 4, "story_words_after": 3, "stories_before": 1, "stories_after": 1,
                  "split_out": [{"family": "masthead", "ad_class": "house_masthead", "title": "Entered as", "words": 20, "pages": [1]}],
                  "changed_stories": [{"title": "A", "author": "X", "change": "text", "words_before": 4, "words_after": 3, "left": "four", "arrived": "", "at_word": 3}],
-                 "notes": 0, "rejected_bylines": []}, {"issue": "i2", "error": "no layout pages"}]
+                 "notes": 0, "rejected_bylines": [], "evidence": True,
+                 "ra_flags": [{"title": "B", "author": "Y", "flag": "mostly recurring: 2 box(es), 300 of 400 words, recur in other issues"}]},
+                {"issue": "i2", "error": "no layout pages"}]
         md = C.report(rows)
         self.assertIn("| i1 | 1 → 1 | 4 → 3 | 1 | 1 | 0 |", md)
         self.assertIn("masthead", md)
         self.assertIn("no layout pages", md)
         self.assertIn("1 words left the story records", md)
+        self.assertIn("| i1 | 1 → 1 | 4 → 3 | 1 | 1 | 0 | 1 | yes |", md)
+        self.assertIn("## Flagged by R-A, not split", md)
+        self.assertIn("| i1 | B | mostly recurring", md)
 
 
 if __name__ == "__main__":

@@ -271,6 +271,63 @@ SERIAL_NOTICE_RE = re.compile(r"^\W*(?:this (?:story|serial|novel) (?:began|star
 
 RULES_214 = {"on": True}      # the 2.14 rules can be switched off in memory for a regression (scripts/compare_assembly.py)
 
+# rules 2.14 (5 November 2026), R-A: the recurring-box rule. Evidence: scripts/box_recurrence.py cuts every box a
+# record owns into 8-word shingles and counts them over the whole corpus; a box of 15+ tokens whose shingles recur in
+# three or more issues at a share of 0.6+ is written, issue by issue, to box_recurrence/<issue>.json with its share,
+# its reach (other issues) and up to eight partner records (issue, record, type, author, work title). The reading of
+# 5 November (scripts/box_recurrence_read.py over 58,781 story records of the magazine issues): 9,986 records carry
+# such a box; nine in ten of the boxes sit inside the record's box sequence, not at its ends (a story continued at the
+# back of the issue runs through advertisement pages), so the box's position is no test; the records that recur by
+# half or more are reprints (the British editions of Astounding, the Avon readers, Famous Fantastic Mysteries) — the
+# study's object, not paratext; a partner of the same work title is a reprint or a serial's recap; a partner that is
+# a story by the same author is, as often as not, a regular author's story carrying the same advertisement.
+RECURRENCE_DIR = os.environ.get("PULP_BOX_RECURRENCE") or os.path.join(ROOT, "data", "corpus", "p52-2026-10-16", "box_recurrence")
+RA_MIN_ISSUES = 2         # other issues the box's text is found in (three issues in all)
+RA_MIN_SHARE = 0.6        # of the box's shingles
+RA_MIN_TOKENS = 15
+RA_RECORD_SHARE = 0.5     # a record recurring by half or more is left as it is (a reprint, or paratext read as a story)
+RA_REMAINDER = 200        # tokens that must remain in the record
+
+
+def box_recurrence_for(iid, root=None):
+    """The recurring boxes of an issue, "page:idx" -> {share, n_issues, n_tokens, partners}; {} when there is no
+    evidence for the issue (the file is missing: the rule does nothing, and the record says so in its flags)."""
+    d = RECURRENCE_DIR if root is None else os.path.join(root, "box_recurrence")
+    try:
+        with open(os.path.join(d, f"{iid}.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def ad_cues(t):
+    """A box that sells: a strong selling cue, or two advertising words with a selling phrase (the R-B test)."""
+    if STRONG_AD_RE.search(t):
+        return True
+    return len({m.lower() for m in AD_WORDS.findall(t)}) >= 2 and bool(SELL_RE.search(t))
+
+
+def recurrence_verdict(e, t, title, author):
+    """R-A for one box of a story record, from its evidence entry e and text t: 'act' (split out), 'same work' (a
+    reprint or a serial's recap: kept), 'same author' (every partner a story by the same author — the author's own
+    recurring text: kept), 'commonplace' (every partner a story, no selling cue — a verse or a saying several stories
+    quote: kept, flagged), or None (below the thresholds)."""
+    if e.get("n_tokens", 0) < RA_MIN_TOKENS or e.get("share", 0) < RA_MIN_SHARE or e.get("n_issues", 0) < RA_MIN_ISSUES:
+        return None
+    ps = e.get("partners") or []
+    title_n, author_n = norm(title), norm(author)
+    if title_n and any(norm(p.get("work")) == title_n for p in ps):
+        return "same work"
+    types = {p.get("type") or "?" for p in ps}
+    if ps and types == {"story"}:
+        if author_n and all(norm(p.get("author")) == author_n for p in ps):
+            return "same author"
+        if not ad_cues(t):
+            return "commonplace"
+    if not ps and not ad_cues(t):
+        return "commonplace"
+    return "act"
+
 
 def paratext_kind(r, t):
     """R-B: the family of a text box that is paratext, or None. Two cues, or one cue in a short box, so that a story
@@ -1955,6 +2012,7 @@ class Assembler:
         self.suspended = None       # the piece a full advertisement page interrupted
         self.continuations = {}     # target scan page -> record named by a forward notice
         self.n = 0
+        self.recurrence = box_recurrence_for(iid) if RULES_214["on"] else {}     # rules 2.14 R-A evidence
 
     def new(self, typ, title=None, author=None, page=None, toc=None):
         if typ == "ad" and title and words(title) > 12:
@@ -2025,6 +2083,7 @@ class Assembler:
                 self.trailing_display_block(rec)
             if rec["keys"] and rec["type"] in ("story", "poem", "feature", "letters"):
                 self.empty_title_box(rec)
+        self.recurring_boxes()                     # rules 2.14 R-A: the boxes whose text recurs across the corpus
         self.merge_page_ads()
         # texts, pages
         misplaced = dict(A.get("misplaced") or [])
@@ -3132,6 +3191,67 @@ class Assembler:
                 self.add(rec, pno, i)
                 prev_rec = rec
             prev_i = i
+
+    def recurring_boxes(self):
+        """Rules 2.14 R-A (5 November 2026). In every story record, each plain text box (no role) whose text the
+        corpus-wide evidence shows in three or more issues at a share of 0.6 or more is judged by its partners
+        (recurrence_verdict): a box shared with the same work, or only with stories by the same author, is the story's
+        own text and stays; a box shared only with other stories and carrying no selling cue is a commonplace (a verse,
+        a saying), flagged and kept; any other such box — an advertisement, a house notice, a department's standing
+        matter that the layout gave to the story — is split out into its own record, consecutive boxes on a page into
+        one. The record is left whole, and flagged, when the boxes to split are half or more of its words or fewer
+        than 200 words would remain: that record is a reprint, or paratext read as a story, and the rule is not for it.
+        Without evidence for the issue the rule does nothing."""
+        if not self.recurrence:
+            return
+        pages = self.pages
+        for rec in list(self.records):
+            if rec["type"] != "story" or not rec["keys"]:
+                continue
+            total = sum(words(region_text(pages[pn]["regions"][i])) for pn, i in rec["keys"])
+            if not total:
+                continue
+            acts, kept = [], Counter()
+            for pn, i in sorted(rec["keys"]):
+                k = key(pn, i)
+                e = self.recurrence.get(k)
+                if not e or rec["roles"].get(k):
+                    continue
+                t = region_text(pages[pn]["regions"][i])
+                v = recurrence_verdict(e, t, rec.get("title"), rec.get("author"))
+                if v == "act":
+                    acts.append((pn, i, e, words(t)))
+                elif v:
+                    kept[v] += 1
+            if kept.get("commonplace"):
+                rec["flags"].append(f"commonplace? {kept['commonplace']} box(es) recur in other stories without a selling cue (rules 2.14, R-A): kept")
+            if kept.get("same work") or kept.get("same author"):
+                rec["flags"].append(f"text shared with the same work or the same author in other issues ({kept.get('same work', 0) + kept.get('same author', 0)} boxes; "
+                                    "a reprint, a serial's recap or the author's own formula): kept (rules 2.14, R-A)")
+            if not acts:
+                continue
+            split_words = sum(w for _, _, _, w in acts)
+            if split_words / total >= RA_RECORD_SHARE or total - split_words < RA_REMAINDER:
+                rec["flags"].append(f"mostly recurring: {len(acts)} box(es), {split_words} of {total} words, recur in other issues (rules 2.14, R-A): "
+                                    "left whole — a reprint, or paratext read as a story; for review")
+                continue
+            prev, prev_pn, prev_i = None, None, None
+            for pn, i, e, w in acts:
+                t = region_text(pages[pn]["regions"][i])
+                if prev is not None and pn == prev_pn and i == prev_i + 1:
+                    self.steal(prev, pn, i)
+                else:
+                    kinds = sorted({p.get("type") or "?" for p in (e.get("partners") or [])})
+                    new = self.new("ad", title=" ".join(t.split()[:12]) + (" …" if words(t) > 12 else ""), page=pn)
+                    new["paratext"] = "recurring box"
+                    new["split_from"] = rec["article_id"]
+                    new["recurrence"] = {"n_issues": e.get("n_issues"), "share": e.get("share"), "partners": kinds, "rules": VERSION}
+                    new["flags"].append(f"recurring box on p.{pn}: its text is found in {e.get('n_issues')} other issues (share {e.get('share')}; "
+                                        f"partners: {', '.join(kinds) or 'none recorded'}); split from the story around it (rules 2.14, R-A)")
+                    self.steal(new, pn, i)
+                    prev = new
+                prev_pn, prev_i = pn, i
+            rec["flags"].append(f"{len(acts)} recurring box(es), {split_words} words, split out as paratext (rules 2.14, R-A)")
 
     def story_page(self, pno, p, info):
         regs = p["regions"]
