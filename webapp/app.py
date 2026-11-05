@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.29.7"
+APP_VERSION = "0.29.8"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -2534,10 +2534,11 @@ administrator approves them.</p>
             n_sel = (CR.progress() or {}).get("issues") or CR.corpus_list()["n"]
         except Exception:
             n_sel = 0
-        if n_sel:
-            lede_run = (f"{n_sel:,} items selected from the Internet Archive's pulp magazine collection have been downloaded, "
-                        "read page by page and cut into their printed pieces by a computer pipeline; a small team checks "
-                        "and repairs the result.")
+        if n_issues:
+            # 5 Nov 2026: the corpus itself, not the approved list or the files processed — the magazine issues
+            lede_run = (f"{n_issues:,} magazine issues, selected from the Internet Archive's pulp magazine collection, have been "
+                        "downloaded, read page by page and cut into their printed pieces by a computer pipeline; a small team "
+                        "checks and repairs the result.")
         else:
             lede_run = (f"{n} pilot issue{'s' if n != 1 else ''} are processed end to end: a computer pipeline reads "
                         "the scanned pages and cuts each issue into its printed pieces, and a small team checks and "
