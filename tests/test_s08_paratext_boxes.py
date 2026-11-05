@@ -165,9 +165,18 @@ class RecurringBoxes(unittest.TestCase):
         self.assertEqual(rules.recurrence_verdict(ad, NOTICE, "A Gift for Terra", "Fox B. Holden"), "same work")       # a reprint or a recap
         own = {"n_tokens": 90, "share": 0.9, "n_issues": 2, "partners": [{"type": "story", "author": "Dan Duane", "work": "The Hornet's Nest, Part II"}]}
         self.assertEqual(rules.recurrence_verdict(own, BODY, "In the Hornet's Nest", "Dan Duane"), "same author")
-        quote = {"n_tokens": 25, "share": 0.61, "n_issues": 2, "partners": [{"type": "story", "author": "A. Lang", "work": "The Romance"}]}
+        quote = {"n_tokens": 25, "share": 0.61, "n_issues": 9, "partners": [{"type": "story", "author": "A. Lang", "work": "The Romance"}]}
         self.assertEqual(rules.recurrence_verdict(quote, VERSE, "Other", "Other"), "commonplace")
         self.assertEqual(rules.recurrence_verdict(quote, AD, "Other", "Other"), "act")                             # a selling cue: the ad every story absorbed
+        weak = dict(quote, n_issues=2)
+        self.assertEqual(rules.recurrence_verdict(weak, VERSE, "Other", "Other"), "weak")                          # two other issues, no cue: kept
+        self.assertEqual(rules.recurrence_verdict(weak, AD, "Other", "Other"), "act")                              # two other issues, a selling cue: split
+        # dialogue of a reprinted story: not prose by the grammar test, but the record shares a partner issue box after box
+        dia = {"n_tokens": 20, "share": 1.0, "n_issues": 2, "partners": [{"issue": "wt_1933_02", "type": "feature", "author": None, "work": "The Eyrie"}]}
+        self.assertEqual(rules.recurrence_verdict(dia, '"A coward?" said Sutherland. "Do not talk nonsense, Bob."', "T", "A", reprinted={"wt_1933_02"}), "reprint")
+        self.assertEqual(rules.reprint_issues([dia, dia, dia]), {"wt_1933_02"})
+        self.assertEqual(rules.reprint_issues([dia, dia]), set())
+        self.assertEqual(rules.reprint_issues([dict(dia, n_issues=40)] * 5), set())                               # a widely found box is no reprint evidence
         self.assertIsNone(rules.recurrence_verdict({"n_tokens": 10, "share": 1.0, "n_issues": 9, "partners": []}, NOTICE, "", ""))
         # narrative prose found in two other issues is a reprint whose other copies were assembled under another title
         rep = {"n_tokens": 36, "share": 1.0, "n_issues": 2, "partners": [{"type": "feature", "author": None, "work": "The Reader Speaks"}, {"type": "story", "author": "X", "work": "Y"}]}
@@ -180,7 +189,7 @@ class RecurringBoxes(unittest.TestCase):
 
     def test_recurring_advertisement_is_split_out_and_the_verse_kept(self):
         ev = {"1:3": {"n_tokens": 40, "share": 1.0, "n_issues": 428, "partners": [{"type": "ad", "author": None, "work": None}, {"type": "story", "author": "Lee Owens", "work": "Life in the West"}]},
-              "1:4": {"n_tokens": 25, "share": 0.61, "n_issues": 2, "partners": [{"type": "story", "author": "Andrew Lang", "work": "The Romance of the First Radical"}]}}
+              "1:4": {"n_tokens": 25, "share": 0.61, "n_issues": 9, "partners": [{"type": "story", "author": "Andrew Lang", "work": "The Romance of the First Radical"}]}}
         doc = self.with_evidence(ev)
         stories = [r for r in doc["articles"] if r["type"] == "story"]
         ads = [r for r in doc["articles"] if r["type"] in ("ad", "house")]
@@ -233,6 +242,30 @@ class RecurringBoxes(unittest.TestCase):
         house = [r for r in doc["articles"] if r.get("recurrence")]
         self.assertEqual(len(house), 1)
         self.assertEqual((house[0]["paratext"], house[0]["type"], house[0]["ad_class"]), ("ownership statement", "house", "house_masthead"))
+
+    def test_reprinted_story_is_recognised_box_after_box(self):
+        d1 = '"A coward?" said Sutherland. "Do not talk nonsense, Bob. There are some things a man cannot do, and this is one."'
+        d2 = '"Trust us," said the latter; "believe us, Bob. It is for your sake, and for the sake of all of us here tonight."'
+        d3 = "6th. Made 25 miles today, 20 yesterday. Did not see it today. But heard it, far off, toward the ridge, at dusk."
+        p1 = page(1, [box("THE BLACK STONE", 100, "SectionHeader"), box("By Robert E. Howard", 200),
+                      box(BODY, 300, h=300), box(d1, 620, h=60), box(d2, 700, h=60), box(d3, 780, h=60), box(NOTICE, 860, h=100), box(BODY2, 980, h=250)])
+        other = [{"issue": "wt_1933_02", "type": "feature", "author": None, "work": "The Eyrie"}, {"issue": "wt_dup", "type": "story", "author": "Q", "work": "R"}]
+        ev = {"1:3": {"n_tokens": 20, "share": 1.0, "n_issues": 2, "partners": other}, "1:4": {"n_tokens": 20, "share": 1.0, "n_issues": 2, "partners": other},
+              "1:5": {"n_tokens": 20, "share": 1.0, "n_issues": 2, "partners": other},
+              "1:6": {"n_tokens": 40, "share": 1.0, "n_issues": 428, "partners": [{"issue": "a1", "type": "ad", "author": None, "work": None}]}}
+        import tempfile, json, os
+        d = tempfile.mkdtemp(); os.makedirs(os.path.join(d, "box_recurrence"))
+        json.dump(ev, open(os.path.join(d, "box_recurrence", "x.json"), "w"))
+        old = rules.RECURRENCE_DIR; rules.RECURRENCE_DIR = os.path.join(d, "box_recurrence")
+        try:
+            doc = rules.assemble("x", {1: p1}, rules.analyse({1: p1}))
+        finally:
+            rules.RECURRENCE_DIR = old
+        s = [r for r in doc["articles"] if r["type"] == "story"][0]
+        self.assertIn("A coward?", s["text"]); self.assertIn("Made 25 miles", s["text"])      # the reprint's dialogue and diary stay
+        self.assertNotIn("Legal Reserve", s["text"])                                            # the notice found in 428 issues goes
+        self.assertTrue(any(f.startswith("reprinted, by the recurrence evidence, in wt_1933_02, wt_dup") for f in s["flags"]))
+        self.assertTrue(any(f.startswith("reprint? 3 box(es)") for f in s["flags"]))
 
     def test_no_evidence_no_change(self):
         doc = self.with_evidence({})

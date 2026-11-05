@@ -1921,3 +1921,17 @@ as a trade advertisement; a split recurring box that matches the ownership or ma
 that family and classified house_masthead. The one story record that disappeared (Worlds Beyond 1951-02, "Farmer in the
 Sky / Robert A. Heinlein; Scribner's, $2.50") is a book review in a review column whose by-line R-D rejects; it joins
 the column — correct. The regression runs again after this entry.
+
+### 2026-11-05 — rules 2.14, step 2d: the second regression of R-A (patch 0048)
+
+The second regression (patch 0047; the same 90 issues): story words 5,464,369 → 5,444,216 (20,153 left the story
+records, against 23,909 before), 874 paratext records split out, 121 story records changed, 75 flagged. The prose test
+saved most of the reprints' pages but not their dialogue and diary entries: "In Amundsen's Tent" still lost 1,094 words
+('"A coward?" said Sutherland …'; '6th.—Made 25 mi. today …'), "Pygmalion's Spectacles" 241; of the 58 boxes split with a
+reach below six, about 25 were story text (dialogue of a reprinted story, a quoted verse, a story's own paragraph with
+story-only partners) and the rest advertisements and house notices of three to five issues. Patch 0048 treats a reach
+below six as weak evidence: (a) a reprint is recognised record by record — three or more of the record's weakly
+recurring boxes sharing a partner issue mean that issue reprints the story, and every box shared with it is kept,
+whatever its grammar; (b) narrative prose is kept; (c) a box without a selling cue is kept and flagged `weakly
+recurring`; only a weakly recurring box with a selling cue is split. Boxes found in six or more other issues are judged
+as before. The regression runs a third time after this entry; the corpus is not re-assembled until it reads clean.

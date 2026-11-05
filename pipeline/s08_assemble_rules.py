@@ -287,10 +287,13 @@ RA_MIN_SHARE = 0.6        # of the box's shingles
 RA_MIN_TOKENS = 15
 RA_RECORD_SHARE = 0.5     # a record recurring by half or more is left as it is (a reprint, or paratext read as a story)
 RA_REMAINDER = 200        # tokens that must remain in the record
-RA_PROSE_REACH = 6        # a box of narrative prose is split only when its text is found in this many other issues (the
-                          # regression of 5 November: a reprinted story's pages, found in two other issues whose assembly
-                          # had given the text to a feature or an advertisement, were being split as "recurring"; the
-                          # Psychiana advertisement, narrative in the first person, is found in 46)
+RA_PROSE_REACH = 6        # below this reach (other issues) the evidence is weak: a box is split only with a selling cue,
+                          # narrative prose is not split, and boxes that share a partner issue are a reprint (the
+                          # regressions of 5 November: a reprinted story's pages, found in two other issues whose assembly
+                          # had given the text to a feature or an advertisement, were being split as "recurring" — its
+                          # dialogue and diary pages even after the prose test; the Psychiana advertisement, narrative in
+                          # the first person, is found in 46 issues and is split)
+RA_REPRINT_BOXES = 3      # boxes of one record found in the same other issue: that issue reprints the story
 
 
 def box_recurrence_for(iid, root=None):
@@ -317,13 +320,26 @@ def is_prose(t):
     return narrative >= 2 and narrative >= len(SECOND_PERSON_RE.findall(t)) and not STRONG_AD_RE.search(t)
 
 
-def recurrence_verdict(e, t, title, author):
+def reprint_issues(entries):
+    """The other issues that reprint the record: those that hold RA_REPRINT_BOXES or more of the record's weakly
+    recurring boxes (reach below RA_PROSE_REACH). A story reprinted in issue X recurs with X box after box; an
+    advertisement's partners are scattered."""
+    c = Counter()
+    for e in entries:
+        if e.get("n_issues", 0) < RA_PROSE_REACH:
+            for iss in {p.get("issue") for p in (e.get("partners") or []) if p.get("issue")}:
+                c[iss] += 1
+    return {iss for iss, n in c.items() if n >= RA_REPRINT_BOXES}
+
+
+def recurrence_verdict(e, t, title, author, reprinted=()):
     """R-A for one box of a story record, from its evidence entry e and text t: 'act' (split out), 'same work' (a
     reprint or a serial's recap: kept), 'same author' (every partner a story by the same author — the author's own
-    recurring text: kept), 'reprint' (narrative prose found in fewer than RA_PROSE_REACH other issues — a reprinted
-    story whose other copies the assembly titled differently, or a duplicate scan not set aside: kept, flagged),
-    'commonplace' (every partner a story, no selling cue — a verse or a saying several stories quote: kept, flagged),
-    or None (below the thresholds)."""
+    recurring text: kept), 'reprint' (a weakly recurring box — fewer than RA_PROSE_REACH other issues — that shares a
+    partner issue with RA_REPRINT_BOXES or more of the record's boxes (reprint_issues), or is narrative prose: a
+    reprinted story whose other copies the assembly titled differently, or a duplicate scan not set aside: kept,
+    flagged), 'weak' (weakly recurring, no selling cue: kept, flagged), 'commonplace' (every partner a story, no selling
+    cue — a verse or a saying several stories quote: kept, flagged), or None (below the thresholds)."""
     if e.get("n_tokens", 0) < RA_MIN_TOKENS or e.get("share", 0) < RA_MIN_SHARE or e.get("n_issues", 0) < RA_MIN_ISSUES:
         return None
     ps = e.get("partners") or []
@@ -333,8 +349,13 @@ def recurrence_verdict(e, t, title, author):
     types = {p.get("type") or "?" for p in ps}
     if ps and types == {"story"} and author_n and all(norm(p.get("author")) == author_n for p in ps):
         return "same author"
-    if is_prose(t) and e.get("n_issues", 0) < RA_PROSE_REACH:
-        return "reprint"
+    if e.get("n_issues", 0) < RA_PROSE_REACH:
+        if reprinted and any(p.get("issue") in reprinted for p in ps):
+            return "reprint"
+        if is_prose(t):
+            return "reprint"
+        if not ad_cues(t):
+            return "weak"
     if (not ps or types == {"story"}) and not ad_cues(t):
         return "commonplace"
     return "act"
@@ -3223,13 +3244,15 @@ class Assembler:
             if not total:
                 continue
             acts, kept = [], Counter()
-            for pn, i in sorted(rec["keys"]):
-                k = key(pn, i)
-                e = self.recurrence.get(k)
-                if not e or rec["roles"].get(k):
-                    continue
+            entries = [(pn, i, self.recurrence.get(key(pn, i))) for pn, i in sorted(rec["keys"])]
+            entries = [(pn, i, e) for pn, i, e in entries if e and not rec["roles"].get(key(pn, i))]
+            reprinted = reprint_issues([e for _, _, e in entries])
+            if reprinted:
+                rec["flags"].append(f"reprinted, by the recurrence evidence, in {', '.join(sorted(reprinted))} (rules 2.14, R-A): the boxes shared with "
+                                    "that issue are kept")
+            for pn, i, e in entries:
                 t = region_text(pages[pn]["regions"][i])
-                v = recurrence_verdict(e, t, rec.get("title"), rec.get("author"))
+                v = recurrence_verdict(e, t, rec.get("title"), rec.get("author"), reprinted)
                 if v == "act":
                     acts.append((pn, i, e, words(t)))
                 elif v:
@@ -3237,6 +3260,8 @@ class Assembler:
             if kept.get("reprint"):
                 rec["flags"].append(f"reprint? {kept['reprint']} box(es) of narrative prose recur in fewer than {RA_PROSE_REACH} other issues (rules 2.14, R-A): kept "
                                     "— a reprinted story whose other copies the assembly titled differently, or a duplicate scan not set aside")
+            if kept.get("weak"):
+                rec["flags"].append(f"weakly recurring: {kept['weak']} box(es) found in fewer than {RA_PROSE_REACH} other issues without a selling cue (rules 2.14, R-A): kept")
             if kept.get("commonplace"):
                 rec["flags"].append(f"commonplace? {kept['commonplace']} box(es) recur in other stories without a selling cue (rules 2.14, R-A): kept")
             if kept.get("same work") or kept.get("same author"):
