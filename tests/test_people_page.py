@@ -56,7 +56,7 @@ class PeoplePage(unittest.TestCase):
             html = PP.people_html(root=d)
             self.assertIn("A &amp; B", html)
             self.assertIn("X &lt;y&gt;", html)
-            self.assertNotIn("class='fine'", html.split("X &lt;y&gt;")[1])   # no links → no fine line
+            self.assertNotIn("<p>", html.split("X &lt;y&gt;")[1])             # no links → no link line
 
     def test_landing_cards(self):
         html = PP.cards_html()
@@ -65,6 +65,9 @@ class PeoplePage(unittest.TestCase):
         src = (ROOT / "webapp" / "app.py").read_text(encoding="utf-8")
         self.assertIn("{PP.cards_html()}", src)                   # the landing page's People block
         self.assertNotIn("<h3>Contact</h3>", src)
+        self.assertNotIn("annotator account you repair", src)      # the landing copy of 5 November
+        self.assertIn("What the team does here", src)
+        self.assertIn(".people .card div,.people .card p,.people .card a{font-size:14px", PP.PEOPLE_CSS)
 
     def test_nav_and_public_route(self):
         src = (ROOT / "webapp" / "app.py").read_text(encoding="utf-8")

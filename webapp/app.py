@@ -31,7 +31,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-APP_VERSION = "0.29.6"
+APP_VERSION = "0.29.7"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 sys.path.insert(0, os.path.join(ROOT, "pipeline"))
@@ -2535,9 +2535,9 @@ administrator approves them.</p>
         except Exception:
             n_sel = 0
         if n_sel:
-            lede_run = (f"The whole corpus is being built now: {n_sel:,} issues selected from the Internet Archive's "
-                        "pulp magazine collection are downloaded, read and cut into their printed pieces by a computer "
-                        "pipeline, a language model checks the cuts, and a small team checks and repairs the result.")
+            lede_run = (f"{n_sel:,} items selected from the Internet Archive's pulp magazine collection have been downloaded, "
+                        "read page by page and cut into their printed pieces by a computer pipeline; a small team checks "
+                        "and repairs the result.")
         else:
             lede_run = (f"{n} pilot issue{'s' if n != 1 else ''} are processed end to end: a computer pipeline reads "
                         "the scanned pages and cuts each issue into its printed pieces, and a small team checks and "
@@ -2549,21 +2549,20 @@ administrator approves them.</p>
 <span class='sub'>Pulp Fiction Corpus</span>
 <a class='home' href='/people'>People</a> <a class='home' href='https://www.digihumeng.org'>Digital Humanities Engineering Center</a></div>
 <h1>Pulp Fiction Corpus</h1>
-<p class='lede'>A research archive in preparation: American pulp fiction magazines
-(1890–1955), rebuilt from library scans into clean, page-anchored text for
-a study of how often stories repeat one another. {lede_run} Every story, poem, feature and advertisement
-becomes its own record, traceable to the exact spot on the scan where it was printed, and every record says how
-sure the machine was of it.</p>
+<p class='lede'>A research corpus in preparation: American pulp fiction magazines of 1890 to 1955, rebuilt from
+the Internet Archive's scans into clean, page-anchored text for a registered study of how often stories repeat
+one another. {lede_run} Every story, poem, article and advertisement is its own record, traceable to the place on
+the scan where it was printed.</p>
 <div class='grid2'>
-<div class='card pad'><h3>What the site can do</h3><p>Read everything in layers: an overview of charts,
-then lists of authors, magazines, issues, records and story pairs, then one page per entity, then the
-printed page on the scan and the raw record behind it — every number on the site can be followed down to
-the data it came from. The full method is on one page, with the Registered Report protocol quoted step by
-step and what the pipeline does for each step.</p></div>
-<div class='card pad'><h3>What the team does here</h3><p>With an annotator account you repair and verify
-articles on the workbench, judge the pairs the paraphrase detector proposes, and mark the cases worth
-reading in full — every action recorded under your name in an append-only log, the machine's draft never
-edited in place.</p></div>
+<div class='card pad'><h3>What the site shows</h3><p>The corpus in layers: an overview of charts, lists of
+authors, magazines, issues, stories and story pairs, a page for each of them, and the printed page on the scan with
+the record behind it. Every number on the site can be followed down to the data it came from. The method page
+quotes the Registered Report protocol step by step and says what the pipeline does for each step.</p></div>
+<div class='card pad'><h3>What the team does here</h3><p>Behind the passcode is the team's workroom. The records the
+pipeline made are read against the scans and corrected where they are wrong; every correction is kept in a log
+beside the machine's draft, which is never edited in place. The reuse the detectors propose is judged by hand. Every
+step of the corpus, from selection and reading to reconstruction and verification, is written down in the build log,
+so that the corpus can be rebuilt and every figure on the site can be checked.</p></div>
 </div>
 <h2>The record so far</h2>
 {stats}

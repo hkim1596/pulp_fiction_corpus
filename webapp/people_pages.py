@@ -38,12 +38,14 @@ def _person(p):
     mail = f"<div><a href='mailto:{_esc(mail)}'>{_esc(mail)}</a></div>" if mail else ""
     links = " · ".join(f"<a href='{_esc(l['url'])}'>{_esc(l.get('label') or l['url'])}</a>"
                        for l in p.get("links", []) if l.get("url"))
-    links = f"<p class='fine' style='margin:4px 0 0'>{links}</p>" if links else ""
-    return (f"<div class='card pad'><h3 style='margin:0 0 6px'>{_esc(p.get('name', ''))}</h3>"
+    links = f"<p>{links}</p>" if links else ""
+    return (f"<div class='card pad'><h3>{_esc(p.get('name', ''))}</h3>"
             f"<div class='muted'>{lines}{mail}</div>{links}</div>")
 
 
 PEOPLE_CSS = ("<style>.people{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}"
+              ".people .card h3{font-size:15.5px;margin:0 0 6px}.people .card div,.people .card p,.people .card a{font-size:14px;line-height:1.5}"
+              ".people .card p{margin:6px 0 0}"
               "@media(max-width:820px){.people{grid-template-columns:1fr}}</style>")
 
 
