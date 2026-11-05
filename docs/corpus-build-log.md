@@ -1935,3 +1935,26 @@ recurring boxes sharing a partner issue mean that issue reprints the story, and 
 whatever its grammar; (b) narrative prose is kept; (c) a box without a selling cue is kept and flagged `weakly
 recurring`; only a weakly recurring box with a selling cue is split. Boxes found in six or more other issues are judged
 as before. The regression runs a third time after this entry; the corpus is not re-assembled until it reads clean.
+
+### 2026-11-05 — rules 2.14, step 2d read clean; step 2e, the upgrade over the corpus (patch 0049)
+
+The third regression (patch 0048; the same 90 issues): story words 5,464,369 → 5,447,276 (17,093 left the story
+records), 819 paratext records split out, 115 story records changed, 124 flagged by R-A without a split (same work or
+author 44, reprinted 35, weakly recurring 21, prose 13, commonplace 9, mostly recurring 2). The reprints keep their
+text: "Pygmalion's Spectacles" 6,061 → 6,055 (its copyright line), "In Amundsen's Tent" 7,168 → 7,123 (two
+advertisement boxes), "The Moon Pool" unchanged; "Marry In Haste" (Sweetheart Stories 1942-08) is recognised as a
+reprint of a 1919 All-Story serial, 260 boxes kept, and the Psychiana advertisement found in 46 issues (345 words) still
+leaves it. One box with a reach below six is split (a gun catalogue's price line); the 162 split with a reach of six or
+more are advertisements, house notices and departments' standing matter (Adventure's "Ask Adventure" list of experts
+among them), read one by one. One side effect to record: a story sharing its advertisement pages with two sister
+magazines of the same publisher (Double Action Western 1955-03, "Hard Breed", with Famous Western and Science Fiction
+Quarterly of 1955) is flagged as "reprinted" in them; its widely found advertisements (1,758 words) are split all the
+same, and eight weakly recurring boxes stay, flagged. Step 2d is done; over the corpus the rule should take about
+1.1 M words of advertising and notices out of the story text. Patch 0049 prepares step 2e: scripts/upgrade_continuity.py
+leaves the set-aside items alone (they keep their assembly; named explicitly they are still upgraded) and copies
+config/toc_page_overrides.json into the staged config — the assembler reads the file under the staged ROOT and caches
+the first reading for the worker's life, so a reader's word on the contents page had not been reaching the bulk
+upgrades since rules 2.10; the 2.14 upgrade applies it. The run (P52bq): a snapshot of data/assembly_v2,
+data/annotations, data/assembly_archive and config to /mnt/sda/pulp/snapshots, then the upgrade to 2.14 over every
+active assembled issue (8 workers), the cross-issue pass, the explorer rebuild. The refusals are compared with 2.13's 381
+afterwards; the paratext splits reach the refused items as a post-process (decision §3.4 (ii)), step 2f.

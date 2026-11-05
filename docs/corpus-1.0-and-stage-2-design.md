@@ -68,7 +68,7 @@ Advertising OCR'd into the same box as story text cannot be split by R-A; short 
 Recommendation: (ii) — the corrections are the product of level-2 verification and are costly to lose; the paratext rules reach every item either way.
 
 ### 3.5 Steps
-2a regex, notices, by-lines in s08 (+ docs/rules-2.14-design.md, this section in English) — done 4 November · 2b scripts/box_recurrence.py, its run, and the reading (scripts/box_recurrence_read.py) — done 4–5 November · 2c R-A in s08 — written 5 November (patch 0046) · 2d the evidence recounted without the set-aside items, then the regression on the 10 pilot issues and the 30 double-read issues (every changed record read), 50 random issues' new splits read · 2e snapshot (tar of data/assembly_v2, data/annotations, data/assembly_archive, config), the upgrade over the corpus, the cross-issue pass, the report. About 7 working days and 9 machine hours.
+2a regex, notices, by-lines in s08 (+ docs/rules-2.14-design.md, this section in English) — done 4 November · 2b scripts/box_recurrence.py, its run, and the reading (scripts/box_recurrence_read.py) — done 4–5 November · 2c R-A in s08 — written 5 November (patch 0046) · 2d the evidence recounted without the set-aside items, then the regression on the 10 pilot issues and the 30 double-read issues (every changed record read), 50 random issues' new splits read — three regressions, read clean on 5 November (patches 0047, 0048) · 2e snapshot (patch 0049, P52bq) (tar of data/assembly_v2, data/annotations, data/assembly_archive, config), the upgrade over the corpus, the cross-issue pass, the report. About 7 working days and 9 machine hours.
 
 ## 4. Evidence files and their standing
 | file | made by | used by | analysis? |

@@ -167,6 +167,17 @@ class UpgradeTest(unittest.TestCase):
         self.assertIn("collision", note["conflicting_ids_held"])
         self.assertEqual(note["skipped"]["not_assembled"], 1)
 
+    def test_plan_leaves_set_aside_items_alone_unless_named(self):
+        issues = [{"id": "x", "ia_identifier": "source"}, {"id": "dup", "ia_identifier": "dup"}]
+        self.put(upgrade.output_paths("dup")[0], doc())
+        states = {"x": {"stages": {"assembled": {}}}, "dup": {"stages": {"assembled": {}}}}
+        with patch.object(upgrade, "set_aside", return_value={"dup": {"reason": "duplicate scan"}}):
+            selected, note = upgrade.plan(self.root, issues, states)
+            self.assertEqual([m["id"] for m in selected], ["x"])
+            self.assertEqual(note["skipped"]["set_aside"], 1)
+            selected, _ = upgrade.plan(self.root, issues, states, only=["dup"])
+            self.assertEqual([m["id"] for m in selected], ["dup"])
+
     def test_force_rechecks_current_issue_without_replacing_original_backup(self):
         with patch.object(rules, "run_issue", side_effect=self.fake_run):
             first = upgrade.upgrade_one(str(self.root), {"id": "x"}, "rules")

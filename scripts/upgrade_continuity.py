@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "pipeline"))
 sys.path.insert(0, str(ROOT / "scripts"))
 from corpus_lib import (all_states, corpus_config, partition_issue_ids,
-                        require_approved, settings, write_json_atomic)
+                        require_approved, set_aside, settings, write_json_atomic)
 from s08_assemble_rules import VERSION as RULES_VERSION
 from continuity_metadata_splits import corrected_story_prefix, printed_identity
 from article_guard import article_write_lock
@@ -1246,7 +1246,10 @@ def stage_modules(stage):
 def stage_issue(root, stage, meta, mode, look_below):
     iid = meta["id"]
     (stage / "config").mkdir()
-    for name in ("departments.json", "illustrators.json", "corpus_settings.json"):
+    # 5 November 2026: toc_page_overrides.json joins the staged config — the assembler reads it under the staged ROOT
+    # and caches the first reading for the worker's life, so without the copy a reader's word on the contents page
+    # did not reach the bulk upgrades
+    for name in ("departments.json", "illustrators.json", "corpus_settings.json", "toc_page_overrides.json"):
         source = root / "config" / name
         if source.exists():
             shutil.copy2(source, stage / "config" / name)
@@ -1459,9 +1462,13 @@ def plan(root, issues, states, only=None, limit=None, force=False):
     if requested is not None and set(requested) & set(conflicts):
         raise ValueError("explicit issue selection contains IDs naming conflicting archive sources")
     selected, skipped = [], Counter()
-    for meta in safe:
+    aside = set_aside()           # 5 November 2026: the set-aside items (duplicate scans, other editions, excerpts) keep
+    for meta in safe:             # their assembly as it stands — no stage touches them — unless named explicitly
         iid = safe_id(meta["id"])
         if requested is not None and iid not in requested:
+            continue
+        if requested is None and iid in aside:
+            skipped["set_aside"] += 1
             continue
         if "assembled" not in states.get(iid, {}).get("stages", {}):
             skipped["not_assembled"] += 1
