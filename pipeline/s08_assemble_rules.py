@@ -287,6 +287,10 @@ RA_MIN_SHARE = 0.6        # of the box's shingles
 RA_MIN_TOKENS = 15
 RA_RECORD_SHARE = 0.5     # a record recurring by half or more is left as it is (a reprint, or paratext read as a story)
 RA_REMAINDER = 200        # tokens that must remain in the record
+RA_PROSE_REACH = 6        # a box of narrative prose is split only when its text is found in this many other issues (the
+                          # regression of 5 November: a reprinted story's pages, found in two other issues whose assembly
+                          # had given the text to a feature or an advertisement, were being split as "recurring"; the
+                          # Psychiana advertisement, narrative in the first person, is found in 46)
 
 
 def box_recurrence_for(iid, root=None):
@@ -307,11 +311,19 @@ def ad_cues(t):
     return len({m.lower() for m in AD_WORDS.findall(t)}) >= 2 and bool(SELL_RE.search(t))
 
 
+def is_prose(t):
+    """Narrative prose: the third person past outweighs the second person, and no strong selling cue (R-B's test)."""
+    narrative = len(NARRATIVE_RE.findall(t))
+    return narrative >= 2 and narrative >= len(SECOND_PERSON_RE.findall(t)) and not STRONG_AD_RE.search(t)
+
+
 def recurrence_verdict(e, t, title, author):
     """R-A for one box of a story record, from its evidence entry e and text t: 'act' (split out), 'same work' (a
     reprint or a serial's recap: kept), 'same author' (every partner a story by the same author — the author's own
-    recurring text: kept), 'commonplace' (every partner a story, no selling cue — a verse or a saying several stories
-    quote: kept, flagged), or None (below the thresholds)."""
+    recurring text: kept), 'reprint' (narrative prose found in fewer than RA_PROSE_REACH other issues — a reprinted
+    story whose other copies the assembly titled differently, or a duplicate scan not set aside: kept, flagged),
+    'commonplace' (every partner a story, no selling cue — a verse or a saying several stories quote: kept, flagged),
+    or None (below the thresholds)."""
     if e.get("n_tokens", 0) < RA_MIN_TOKENS or e.get("share", 0) < RA_MIN_SHARE or e.get("n_issues", 0) < RA_MIN_ISSUES:
         return None
     ps = e.get("partners") or []
@@ -319,12 +331,11 @@ def recurrence_verdict(e, t, title, author):
     if title_n and any(norm(p.get("work")) == title_n for p in ps):
         return "same work"
     types = {p.get("type") or "?" for p in ps}
-    if ps and types == {"story"}:
-        if author_n and all(norm(p.get("author")) == author_n for p in ps):
-            return "same author"
-        if not ad_cues(t):
-            return "commonplace"
-    if not ps and not ad_cues(t):
+    if ps and types == {"story"} and author_n and all(norm(p.get("author")) == author_n for p in ps):
+        return "same author"
+    if is_prose(t) and e.get("n_issues", 0) < RA_PROSE_REACH:
+        return "reprint"
+    if (not ps or types == {"story"}) and not ad_cues(t):
         return "commonplace"
     return "act"
 
@@ -3223,6 +3234,9 @@ class Assembler:
                     acts.append((pn, i, e, words(t)))
                 elif v:
                     kept[v] += 1
+            if kept.get("reprint"):
+                rec["flags"].append(f"reprint? {kept['reprint']} box(es) of narrative prose recur in fewer than {RA_PROSE_REACH} other issues (rules 2.14, R-A): kept "
+                                    "— a reprinted story whose other copies the assembly titled differently, or a duplicate scan not set aside")
             if kept.get("commonplace"):
                 rec["flags"].append(f"commonplace? {kept['commonplace']} box(es) recur in other stories without a selling cue (rules 2.14, R-A): kept")
             if kept.get("same work") or kept.get("same author"):
@@ -3243,7 +3257,9 @@ class Assembler:
                 else:
                     kinds = sorted({p.get("type") or "?" for p in (e.get("partners") or [])})
                     new = self.new("ad", title=" ".join(t.split()[:12]) + (" …" if words(t) > 12 else ""), page=pn)
-                    new["paratext"] = "recurring box"
+                    # the magazine's own legal matter that R-B's two-cue test missed ("2. That the owners are: Street &
+                    # Smith Publications, Inc., …", found in 287 issues) is house_masthead, not trade
+                    new["paratext"] = ("ownership statement" if OWNERSHIP_RE.search(t) else "masthead" if MASTHEAD_RE.search(t) else "recurring box")
                     new["split_from"] = rec["article_id"]
                     new["recurrence"] = {"n_issues": e.get("n_issues"), "share": e.get("share"), "partners": kinds, "rules": VERSION}
                     new["flags"].append(f"recurring box on p.{pn}: its text is found in {e.get('n_issues')} other issues (share {e.get('share')}; "

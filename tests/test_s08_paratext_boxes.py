@@ -125,8 +125,17 @@ class RulesSwitch(unittest.TestCase):
 NOTICE = ("WHEN you have read this issue of the magazine, let us know what you think of the stories it contains. "
           "Your letters guide the editors in choosing the stories that follow, and the Legal Reserve of good will "
           "between reader and editor is what keeps a magazine alive.")       # a house notice R-B does not see
-VERSE = ('"And o\'er the hills, and far away, beyond their utmost purple rim, beyond the night, across the day, '
-         'through all the world she followed him," he said, and the words were older than either of them.')
+VERSE = ("Early to bed and early to rise makes a man healthy, wealthy and wise, as the proverb runs; so the old "
+         "copybooks taught, and so the almanacs repeat it year after year, in every town and every county of the land.")
+REPRINT = ("Galatea stood in a doorway to his left, leaning half-wearily against the frame, and she watched him as he "
+           "came in. He had not slept at all; the chamber was dim and the lamps were out.")
+PSYCHIANA = ("and as a result of that little talk with God a strange Power came into my life. It was as if the whole world "
+             "had changed; the troubles that had weighed on me were gone, and he who reads this may know the same thing.")
+OWNERS = ("2. That the owners are: Street & Smith Publications, Incorporated, Seventh Avenue, New York, a corporation whose "
+          "stockholders and security holders are: Ormond G. Smith, New York; George C. Smith, New York; Cora A. Gould, New York; "
+          "Ormond V. Gould, New York; Artemas Holmes, New York; Henry W. Ralston, New York; Gerald H. Smith, New York; "
+          "George C. Smith, Jr., New York; and the estate of Annie K. Smith, New York, of which the executors are "
+          "named above, together with such other holders as the records of the corporation show on this date.")       # one cue, over 80 words: R-B does not see it
 
 
 class RecurringBoxes(unittest.TestCase):
@@ -160,6 +169,13 @@ class RecurringBoxes(unittest.TestCase):
         self.assertEqual(rules.recurrence_verdict(quote, VERSE, "Other", "Other"), "commonplace")
         self.assertEqual(rules.recurrence_verdict(quote, AD, "Other", "Other"), "act")                             # a selling cue: the ad every story absorbed
         self.assertIsNone(rules.recurrence_verdict({"n_tokens": 10, "share": 1.0, "n_issues": 9, "partners": []}, NOTICE, "", ""))
+        # narrative prose found in two other issues is a reprint whose other copies were assembled under another title
+        rep = {"n_tokens": 36, "share": 1.0, "n_issues": 2, "partners": [{"type": "feature", "author": None, "work": "The Reader Speaks"}, {"type": "story", "author": "X", "work": "Y"}]}
+        self.assertEqual(rules.recurrence_verdict(rep, REPRINT, "Pygmalion's Spectacles", "Stanley G. Weinbaum"), "reprint")
+        # the same prose in 46 other issues is an advertisement (Psychiana), narrative or not
+        psy = {"n_tokens": 40, "share": 1.0, "n_issues": 46, "partners": [{"type": "feature", "author": None, "work": None}, {"type": "story", "author": "X", "work": "Y"}]}
+        self.assertEqual(rules.recurrence_verdict(psy, PSYCHIANA, "Marry in Haste", "Z"), "act")
+        self.assertTrue(rules.is_prose(REPRINT) and rules.is_prose(PSYCHIANA) and not rules.is_prose(NOTICE) and not rules.is_prose(VERSE))
         self.assertIsNone(rules.recurrence_verdict({"n_tokens": 40, "share": 0.5, "n_issues": 9, "partners": []}, NOTICE, "", ""))
 
     def test_recurring_advertisement_is_split_out_and_the_verse_kept(self):
@@ -170,7 +186,7 @@ class RecurringBoxes(unittest.TestCase):
         ads = [r for r in doc["articles"] if r["type"] in ("ad", "house")]
         self.assertEqual(len(stories), 1)
         self.assertNotIn("Legal Reserve", stories[0]["text"])
-        self.assertIn("purple rim", stories[0]["text"])                       # the verse stays, flagged
+        self.assertIn("healthy, wealthy and wise", stories[0]["text"])          # the proverb stays, flagged
         self.assertIn("wagons could cross", stories[0]["text"])
         self.assertTrue(any(f.startswith("commonplace?") for f in stories[0]["flags"]))
         self.assertTrue(any("split out as paratext (rules 2.14, R-A)" in f for f in stories[0]["flags"]))
@@ -181,8 +197,8 @@ class RecurringBoxes(unittest.TestCase):
         self.assertIn("Legal Reserve", ads[0]["text"])
 
     def test_mostly_recurring_record_is_left_whole(self):
-        ev = {"1:2": {"n_tokens": 300, "share": 1.0, "n_issues": 3, "partners": [{"type": "ad", "author": None, "work": None}]},
-              "1:3": {"n_tokens": 40, "share": 1.0, "n_issues": 3, "partners": [{"type": "ad", "author": None, "work": None}]}}
+        ev = {"1:2": {"n_tokens": 300, "share": 1.0, "n_issues": 30, "partners": [{"type": "ad", "author": None, "work": None}]},
+              "1:3": {"n_tokens": 40, "share": 1.0, "n_issues": 30, "partners": [{"type": "ad", "author": None, "work": None}]}}
         doc = self.with_evidence(ev)
         stories = [r for r in doc["articles"] if r["type"] == "story"]
         self.assertEqual(len(stories), 1)
@@ -195,6 +211,28 @@ class RecurringBoxes(unittest.TestCase):
         stories = [r for r in doc["articles"] if r["type"] == "story"]
         self.assertIn("Legal Reserve", stories[0]["text"])
         self.assertTrue(any("same work or the same author" in f for f in stories[0]["flags"]))
+
+    def test_reprint_prose_is_kept_and_an_owners_line_is_house(self):
+        p1 = page(1, [box("THE BLACK STONE", 100, "SectionHeader"), box("By Robert E. Howard", 200),
+                      box(BODY, 300, h=400), box(REPRINT, 720, h=120), box(OWNERS, 860, h=120), box(BODY2, 1000, h=250)])
+        ev = {"1:3": {"n_tokens": 36, "share": 1.0, "n_issues": 2, "partners": [{"type": "feature", "author": None, "work": "Letters"}]},
+              "1:4": {"n_tokens": 30, "share": 1.0, "n_issues": 287, "partners": [{"type": "letters", "author": None, "work": None}, {"type": "story", "author": "Q", "work": "R"}]}}
+        import tempfile, json, os
+        d = tempfile.mkdtemp(); os.makedirs(os.path.join(d, "box_recurrence"))
+        json.dump(ev, open(os.path.join(d, "box_recurrence", "x.json"), "w"))
+        old = rules.RECURRENCE_DIR; rules.RECURRENCE_DIR = os.path.join(d, "box_recurrence")
+        try:
+            doc = rules.assemble("x", {1: p1}, rules.analyse({1: p1}))
+        finally:
+            rules.RECURRENCE_DIR = old
+        stories = [r for r in doc["articles"] if r["type"] == "story"]
+        self.assertEqual(len(stories), 1)
+        self.assertIn("Galatea stood", stories[0]["text"])                              # the reprint's prose stays
+        self.assertNotIn("Street & Smith", stories[0]["text"])                           # the owners' line goes
+        self.assertTrue(any(f.startswith("reprint?") for f in stories[0]["flags"]))
+        house = [r for r in doc["articles"] if r.get("recurrence")]
+        self.assertEqual(len(house), 1)
+        self.assertEqual((house[0]["paratext"], house[0]["type"], house[0]["ad_class"]), ("ownership statement", "house", "house_masthead"))
 
     def test_no_evidence_no_change(self):
         doc = self.with_evidence({})

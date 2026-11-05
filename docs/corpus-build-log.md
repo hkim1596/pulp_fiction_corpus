@@ -1899,3 +1899,25 @@ leaves the set-aside items out and writes the per-issue files (--split-only for 
 lists the R-A splits with reach and partners, the flag-only records, and takes --random N issues; the design
 (docs/corpus-1.0-and-stage-2-design.md §3.2, §10a) records the revision. Next: the recount, the regression over the 40
 issues and 50 random ones, every changed record read.
+
+### 2026-11-05 — rules 2.14, step 2d: the recount and the first regression of R-A (patch 0047)
+
+The recount without the set-aside items (15:19; 607 set-aside items left out, 6,740 issues, 16,350,404 boxes, 419 M
+shingles, 177 s): 619,159 recurring boxes, of them 216,672 in story records — against 458,333 when the duplicate scans
+were counted: the duplicates had doubled the evidence for the story records. The count of 4 November is kept as
+box_recurrence_2026-11-04.json; the per-issue files are in box_recurrence/. The first regression of R-A (patch 0046;
+the 10 pilot, the 30 double-read and 50 random magazine issues, the 2.14 rules on against off in memory): story records
+809 → 808, story words 5,464,369 → 5,440,460, 904 paratext records split out (advertisement 554, recurring box 248,
+masthead 76, ownership statement 26), 121 story records changed, 64 flagged. Read record by record: the 248 recurring
+boxes are advertisements (Blue Star blades, Anacin, Joan the Wad, correspondence schools), house notices and legal
+matter — with two faults. (1) Two reprinted stories lost their pages: "Pygmalion's Spectacles" (Fantastic Story 1955,
+6,061 → 3,530 words) and "In Amundsen's Tent" (Weird Tales 1928-01, 7,168 → 5,260): their text is found in two other
+issues whose assembly had given it to a feature or an advertisement record, so the same-work test did not see the
+reprint. Patch 0047: narrative prose (R-B's test) is split only when found in six or more other issues; below that it
+is flagged `reprint?` and kept. The Psychiana advertisement, narrative in the first person and found in 46 issues
+(Sweetheart Stories 1942-08, 345 words), is still split. (2) The owners' paragraph of a statement of ownership that
+R-B's two-cue test missed ("2. That the owners are: Street & Smith Publications, Inc. …", found in 287 issues) came out
+as a trade advertisement; a split recurring box that matches the ownership or masthead regex once is now named by
+that family and classified house_masthead. The one story record that disappeared (Worlds Beyond 1951-02, "Farmer in the
+Sky / Robert A. Heinlein; Scribner's, $2.50") is a book review in a review column whose by-line R-D rejects; it joins
+the column — correct. The regression runs again after this entry.
