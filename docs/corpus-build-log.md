@@ -1958,3 +1958,24 @@ upgrades since rules 2.10; the 2.14 upgrade applies it. The run (P52bq): a snaps
 data/annotations, data/assembly_archive and config to /mnt/sda/pulp/snapshots, then the upgrade to 2.14 over every
 active assembled issue (8 workers), the cross-issue pass, the explorer rebuild. The refusals are compared with 2.13's 381
 afterwards; the paratext splits reach the refused items as a post-process (decision §3.4 (ii)), step 2f.
+
+### 2026-11-05, 18:50–19:40 KST — rules 2.14 over the corpus (P52bq); step 2f prepared (patch 0050)
+
+P52bq: the snapshot (data/assembly_v2, data/annotations, data/assembly_archive, config → /mnt/sda/pulp/snapshots/
+corpus-before-2.14-2026-11-05.tar.zst, 3.9 GB), then the upgrade to rules 2.14 over every active assembled issue —
+**6,301 installed, 429 refused** (the set-aside items left alone for the first time), then the cross-issue pass and the
+explorer rebuild (done 19:39). Of the 6,734 active issues: 6,301 at 2.14; 69 at 2.13 (refused by 2.14, accepted by
+2.13: new refusals); 360 at 2.5–2.11 (refused before too; 2.13 had 381, so 21 of the old refusals came through); 4 not
+assembled. Every refusal reads "cannot safely retain cross-issue metadata for <record>": a record linked across issues
+whose identity the new candidate did not preserve — the new 69 are pieces that lost a paratext box and so changed shape
+(Adventure 79, Amazing Stories 36, Wonder Stories 19, Short Stories 15 by magazine among all 429). The list is
+pilot_export/upgrade-2.14-2026-11-05/refusals.json. Step 2f, decision §3.4 (ii): scripts/paratext_postprocess.py (patch
+0050) assembles the 2.14 candidate of each refused active issue in memory, takes out of the installed pieces the boxes
+the candidate gives to a paratext record (an advertisement, a masthead, an ownership statement, a recurring box),
+rebuilds their text from the remaining boxes (exactly as s08 builds it when the assembly is recent; by removing the
+paragraphs when it is older), and adds the paratext records at the end of the file with the candidate's family, class
+and evidence and `split_from`. Record identities and links do not change; every box stays owned once (checked); the
+rules file is written and the live file republished, or — where a correction log holds the live file — changed in
+place, leaving alone any box or record a correction names; each file is copied first to data/corpus/paratext-<date>/.
+The documents carry `paratext_postprocess`; their backend is unchanged. The plan runs first (nothing written), then
+the application, then the explorer rebuild.
