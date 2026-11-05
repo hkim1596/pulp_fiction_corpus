@@ -1856,3 +1856,22 @@ share of 0.6 or more is written to data/corpus/p52-2026-10-16/box_recurrence.jso
 to eight partner records (issue, record, type, author, work title). The file is assembly evidence for the
 recurring-box rule (R-A, step 2c), like config/toc_page_overrides.json: no pairs of stories, no dates, no topics; it
 is deposited with corpus 1.0. The run follows this entry.
+
+### 2026-11-05 — rules 2.14, step 2b: the recurrence run and its reading (patches 0041, 0045)
+
+The run of scripts/box_recurrence.py (4 November, evening): 7,347 assembled issues, 17,255,730 boxes, 442,883,323
+shingles (382,086,033 distinct), 198 seconds; 906,892 boxes of 15+ tokens recur at a share of 0.6+ in three or more
+issues — by the record that owns them: story 458,333, advertisement 333,383, feature 52,789, house 32,421, letters
+14,750, table of contents 12,444, other 1,936, poem 836. Half of the recurring boxes sit inside story records, which is
+the contamination R-A is for; but the run counted the set-aside duplicate scans among the issues, so part of the
+evidence is a text seen twice in the same issue's two scans, and the rule must not act on that. Before R-A is written,
+patch 0045 adds scripts/box_recurrence_read.py, the reading: for every story record of the magazine issues (set-aside
+items and books left out) it takes the boxes in reading order, counts their tokens, and reports the record's recurring
+share and remainder, where the recurring boxes sit (a run at the head, at the tail, both, the whole record, or an
+interior box; on a page shared with the record's own prose or alone), what their partners are (advertisement and
+house records elsewhere, other stories, the same author or work — a series' own formula), their reach and size; then
+the counts the guards need — how many records the proposed guard (recurring share under 50 %, 200+ tokens remaining)
+would act on, how many it would only flag, how the count moves with the reach and share thresholds, how much evidence
+rests on set-aside partners alone — the magazines in which the recurring story boxes concentrate, and examples to
+read by hand. Written to pilot_export/box-recurrence-read-<date>/ (report.md, records.json); nothing in data/ is
+touched. The thresholds of R-A are set from this reading, not before it.
