@@ -1285,14 +1285,6 @@
    "decided_by": "Sujin Kang",
    "decided": "2026-10-21"
   },
-  "deep_red_horror_handbook_undated_orhandbook": {
-   "kind": "book",
-   "ia_identifier": "Deep_Red_Horror_Handbook",
-   "magazine": "Deep Red Horror Handbook",
-   "class_by_rule": "book",
-   "decided_by": "Sujin Kang",
-   "decided": "2026-10-21"
-  },
   "detective_weekly_1933_04_0919330422": {
    "kind": "book",
    "ia_identifier": "detective-weekly-009-1933-04-22",
@@ -1479,14 +1471,6 @@
   "earth_s_last_citadel_c_l_moo_1943_argosy1943": {
    "kind": "book",
    "ia_identifier": "moorekuttnerearthslastcitadelargosy1943",
-   "magazine": "Earth's Last Citadel - C. L. Moore & Henry Kuttner",
-   "class_by_rule": "book",
-   "decided_by": "Sujin Kang",
-   "decided": "2026-10-21"
-  },
-  "earth_s_last_citadel_c_l_moo_1943_serial1943": {
-   "kind": "book",
-   "ia_identifier": "moorec.l.kuttnerhenryearthslastcitadelargosyserial1943",
    "magazine": "Earth's Last Citadel - C. L. Moore & Henry Kuttner",
    "class_by_rule": "book",
    "decided_by": "Sujin Kang",
@@ -3773,14 +3757,6 @@
    "decided_by": "Sujin Kang",
    "decided": "2026-10-21"
   },
-  "the_human_pets_of_mars_1936_10_petsofmars": {
-   "kind": "book",
-   "ia_identifier": "TheHumanPetsOfMars",
-   "magazine": "The Human Pets of Mars",
-   "class_by_rule": "book",
-   "decided_by": "Sujin Kang",
-   "decided": "2026-10-21"
-  },
   "the_immortal_storm_a_history_1954_owitzsipdf": {
    "kind": "book",
    "ia_identifier": "The_Immortal_Storm_A_History_of_Science_Fiction_Fandom_1954_Sam_Moskowitz_siPDF",
@@ -5123,14 +5099,6 @@
    "decided": "2026-10-21",
    "note": "corrected: the bulk click of 10:30 (excerpt) was meant as BOOK"
   },
-  "yellow_men_of_mars_undated_wmenofmars": {
-   "kind": "book",
-   "ia_identifier": "YellowMenOfMars",
-   "magazine": "Yellow Men of Mars",
-   "class_by_rule": "book",
-   "decided_by": "Sujin Kang",
-   "decided": "2026-10-21"
-  },
   "young_rough_riders_weekly_ro_undated_dersweekly": {
    "kind": "book",
    "ia_identifier": "young-rough-riders-weekly",
@@ -5312,5 +5280,5 @@
    "note": "book, as the note of 26 October 11:05 says (the click said magazine); appended by P52ag"
   }
  },
- "written": "2026-10-26T13:24:06"
+ "written": "2026-11-12T03:00:53"
 }

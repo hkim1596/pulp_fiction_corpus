@@ -365,3 +365,11 @@ Dropbox share carries the full context of each.
   no. 1, 1895; Pearson's Library 1895). Ally Sloper's Half Holiday 1895 is set aside as a comic paper. The National Police
   Gazette 1891–92 and early_pulp_fantasy_1893 wait for Sujin's own click. The site's era strip and sitemark read 1890–1955.
   The sample is frozen and is not redrawn; none of the nine is in it.
+- 2026-11-11 (Sujin) — Two items leave the corpus, found when the trial of rules 2.14 step 2f was read record by
+  record: the Deep Red Horror Handbook, kept as a book on 21 October, is outside the period (a film handbook of the late
+  1980s; the five Deep Red issues were set aside for that reason on 21 October); Ken, May 1938, the one issue of a
+  news magazine in the selection, is set aside as "not a fiction magazine" (a new reason; the corpus is fiction
+  magazines). Both stay on disk. Neither is in the verification sample. Three items set aside as excerpts on 26
+  October (Earth's Last Citadel 1943, The Human Pets of Mars 1936, Yellow Men of Mars) had kept their line as books
+  in config/corpus_kinds.json; the lines are removed: 634 books and volumes are listed, none of them set aside. The
+  remaining 413 issues of step 2f wait for the audit of the paratext records (scripts/paratext_audit.py).
