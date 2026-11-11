@@ -2007,3 +2007,39 @@ waited behind the same lock from 17:12. The waiting process was ended by hand; t
 itself. Patch 0051: the post-process calls the publisher's locked body (`_publish_issue_locked`) inside the lock it
 already holds; a test runs process_issue with a stand-in publisher whose `publish_issue` fails if it is called.
 
+### 2026-11-11 (evening) — step 2f tried on 16 issues and read; two items leave the corpus; the audit before the rest (patch 0052)
+
+The trial (P52bv-1c, 18:50, after patch 0051): 16 chosen issues post-processed in 42 seconds; the first had been
+written at 17:13. Checked on all 16: every record identity kept; the words of each issue the same before and after
+(the text moves to new records, nothing is dropped); every new record in the live file; the two issues held by hand
+corrections changed in place; the four rebuilt by paragraph in order. 193 new records, about 18,100 words.
+
+Read record by record: all 50 R-A records split from stories (a box found in 6 to 470 other issues) are advertisements
+or house matter — among them an advertisement written as dialogue ("How did you ever do it?" her husband asked), which
+the count finds in seven issues. Of the R-B records split from stories (typographic cues, no count), every one of 40
+words or more was read, and all 21 of True Detective Mysteries 1929-12: right in the fiction and true-story magazines
+(10 Story Western, True Story, True Detective Mysteries, Wild West Weekly, Pluck and Luck, Amazing Stories, Fantastic
+Adventures); wrong in three items — Ken, May 1938, a news magazine (936, 416, 174, 103 and 45 words of news briefs
+and articles with dollar figures read as advertisements); the Deep Red Horror Handbook (the entries of a
+bibliography, with publishers' addresses, read as mastheads); The Lovecraft Collector's Library, 1955 (one entry of a
+checklist) — and one reply of Ask Adventure inside a story record of Adventure, 1 January 1930 (not story text, not
+an advertisement either). In two departments (Other Worlds, July 1950; Amazing Stories, February 1943) readers'
+notices were split as advertisements. The cues of R-B misfire on non-fiction prose that names prices, addresses and
+publishers; the same rules have been on 6,301 issues since 5 November.
+
+Decisions (Sujin Kang, 11 November): the Deep Red Horror Handbook, kept as a book on 21 October, is outside the
+period (a film handbook of the late 1980s; the five Deep Red issues were set aside for that reason on 21 October);
+Ken, May 1938, the one issue of a news magazine in the selection, is set aside as not a fiction magazine; the
+remaining 413 issues of step 2f wait for an audit of the paratext records over the whole corpus.
+
+Patch 0052. scripts/apply_kinds.py takes the reason `not_fiction` ("not a fiction magazine") and removes from
+config/corpus_kinds.json an item that is set aside for a reason (the site's buttons do not offer the new reason yet;
+the decision is written to the click log by the paste). scripts/paratext_audit.py (read-only) counts every paratext
+record of the active issues by kind, rule, family and length; an R-B record is confirmed when one of its boxes is in
+the issue's recurrence evidence (the same text in three or more issues) and unconfirmed otherwise; the unconfirmed
+records of 40 words or more are listed with their text — the longest of each magazine and a seeded sample of 300 — and
+summed by magazine, so that a title where the cues misfire stands out by its unconfirmed words per issue. Unconfirmed
+does not mean wrong: an advertisement printed in one issue only is unconfirmed and right; the list is what a reader
+judges. From its result: whether R-B needs a narrower test (rules 2.15), which titles are not fiction magazines, and
+then the remaining 413 issues, the cross-issue pass and the explorer rebuild.
+

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Apply the decisions clicked on /review/nonmagazine (data/review/nonmagazine_review.jsonl, joined to the candidate
 table data/corpus/p52-2026-10-16/nonmagazine_candidates.json): the kinds go to config/corpus_kinds.json (book), the
-reasons to config/corpus_set_aside.json (excerpt of a magazine, not English, not a text, comic, outside the period),
+reasons to config/corpus_set_aside.json (excerpt of a magazine, not English, not a text, comic, outside the period, not a
+fiction magazine),
 the verification sample's slots held by books or set-aside items are redrawn (scripts/draw_verification_sample.py
 --replace), and the books are re-assembled in the book mode (scripts/reassemble_books.py) unless --no-reassemble.
 
@@ -36,7 +37,10 @@ REASONS = {"excerpt": ("excerpt of a magazine", "pages cut out of a magazine iss
            "not_english": ("not English", "not in English"),
            "not_text": ("not a text", "an index, a checklist, a cover gallery or another item without reading text"),
            "comic": ("comic", "a comic"),
-           "outside": ("outside the period", "a reprint, fanzine or magazine from after the period")}
+           "outside": ("outside the period", "a reprint, fanzine or magazine from after the period"),
+           # Sujin Kang, 11 November 2026 (Ken, May 1938: a news magazine whose articles the paratext cues misread):
+           # a magazine that is not a fiction magazine is set aside under its own reason
+           "not_fiction": ("not a fiction magazine", "a magazine that is not a fiction magazine (news, politics, general interest without fiction)")}
 PROPOSED = {"book": "book", "dime novel": "book", "index or portfolio": "not_text", "comic": "comic", "outside the period": "outside",
             "not a fiction magazine": "magazine", "single story": "excerpt"}      # single story: Sujin, 21 Oct — the suggestions stand
 
@@ -162,6 +166,26 @@ def write_kinds(kinds, rows, D, decided_by, decided, path=None, dry_run=False):
     return added, changed
 
 
+def drop_kinds(ids, path=None, dry_run=False):
+    """An item set aside for a reason is no longer a book or a volume of the data: its line leaves config/corpus_kinds.json
+    (11 November 2026: the Deep Red Horror Handbook, kept as a book on 21 October, is outside the period). Returns the ids dropped."""
+    path = path or os.path.join(ROOT, "config", "corpus_kinds.json")
+    try:
+        d = json.load(open(path, encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    have = d.get("kinds") or {}
+    gone = sorted(i for i in ids if i in have)
+    if gone and not dry_run:
+        for i in gone:
+            del have[i]
+        d["written"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+        tmp = path + ".tmp"
+        json.dump(d, open(tmp, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+        os.replace(tmp, path)
+    return gone
+
+
 def write_set_aside(reasons, rows, D, decided_by, decided, path=None, selection=None, dry_run=False):
     path = path or os.path.join(ROOT, "config", "corpus_set_aside.json")
     try:
@@ -222,6 +246,9 @@ def main():
     print(f"kinds: {len(added)} added, {len(changed)} changed" + ("" if args.dry_run else "; config/corpus_kinds.json written"))
     a2, skipped = write_set_aside(reasons, rows, D, args.decided_by, args.decided, selection=selection, dry_run=args.dry_run)
     print(f"set aside: {len(a2)} added, {len(skipped)} were already set aside" + ("" if args.dry_run else "; config/corpus_set_aside.json written"))
+    gone = drop_kinds(list(reasons), dry_run=args.dry_run)
+    if gone:
+        print(f"kinds: {len(gone)} set-aside item(s) no longer listed as a book or volume: " + ", ".join(gone[:8]))
     if args.dry_run:
         return
     frozen = None

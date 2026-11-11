@@ -115,5 +115,37 @@ class Page(unittest.TestCase):
         self.assertNotIn("plattner", json.load(open(kp, encoding="utf-8"))["kinds"])
 
 
+class NotFictionAndSetAsideKinds(unittest.TestCase):
+    """11 November 2026: a magazine that is not a fiction magazine is set aside under its own reason; an item set aside
+    for a reason leaves the kinds file."""
+
+    def test_not_fiction_reason_and_drop_kinds(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            log = os.path.join(d, "log.jsonl")
+            table = os.path.join(d, "table.json")
+            json.dump({"items": [{"id": "handbook", "proposed": "EXCLUDE", "class": "book", "ia_identifier": "H", "magazine": "A Handbook", "signals": ["M3"]}]},
+                      open(table, "w"))
+            with open(log, "w") as f:
+                f.write(json.dumps({"ts": "t1", "user": "u", "id": "handbook", "decision": "book"}) + "\n")
+                f.write(json.dumps({"ts": "t2", "user": "u", "id": "handbook", "decision": "outside", "note": "a book of 1989"}) + "\n")
+                f.write(json.dumps({"ts": "t3", "user": "u", "id": "ken_x", "decision": "not_fiction", "note": "a news magazine"}) + "\n")
+            sel = {"handbook": {"ia_identifier": "H", "magazine": "A Handbook"}, "ken_x": {"ia_identifier": "K", "magazine": "Ken"}}
+            kinds, reasons, und, rows, D = AK.decide(table, log, selection_rows=sel)
+            self.assertEqual(reasons, {"handbook": "outside", "ken_x": "not_fiction"})
+            self.assertEqual(kinds, {})
+            kp, sp = os.path.join(d, "kinds.json"), os.path.join(d, "aside.json")
+            json.dump({"kinds": {"handbook": {"kind": "book"}, "other": {"kind": "book"}}}, open(kp, "w"))
+            a2, skipped = AK.write_set_aside(reasons, rows, D, "Sujin Kang", "2026-11-11", path=sp, selection=set(sel))
+            by = {e["id"]: e for e in a2}
+            self.assertEqual(by["ken_x"]["class"], "not a fiction magazine")
+            self.assertEqual(by["ken_x"]["ia_identifier"], "K")
+            self.assertEqual(by["handbook"]["class"], "outside the period")
+            self.assertEqual(AK.drop_kinds(list(reasons), path=kp, dry_run=True), ["handbook"])
+            self.assertIn("handbook", json.load(open(kp))["kinds"])
+            self.assertEqual(AK.drop_kinds(list(reasons), path=kp), ["handbook"])
+            self.assertEqual(sorted(json.load(open(kp))["kinds"]), ["other"])
+            self.assertEqual(AK.drop_kinds(list(reasons), path=kp), [])
+
 if __name__ == "__main__":
     unittest.main()
