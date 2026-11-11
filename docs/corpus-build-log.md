@@ -1979,3 +1979,31 @@ rules file is written and the live file republished, or — where a correction l
 place, leaving alone any box or record a correction names; each file is copied first to data/corpus/paratext-<date>/.
 The documents carry `paratext_postprocess`; their backend is unchanged. The plan runs first (nothing written), then
 the application, then the explorer rebuild.
+
+### 2026-11-11 — the state read again; the site refresh restarted; step 2f: a lock taken twice stopped the first application (patch 0051)
+
+The server, read on 11 November 15:38 KST (PASTE P52bw, read only): no reboot since 15 October; git at 03ac329; the
+site running; tmux `siterefresh` gone and the refresh log's last line at 8 November 16:55 (no error in the log, no
+STOP_SITE file: the cause is not known); the plan of step 2f finished on 5 November 22:29 (429 issues read, 2 held by
+hand corrections, 0 errors: 916 pieces changed, 2,740 paratext boxes out, 143,286 words out, 2,084 records added) and
+never copied; the four cards free of this project's work; /mnt/sda 1.2 TB free. The refresh loop was started again at
+15:52 (P52bx). Its first build counts 358,675 records, 66,688 stories, 17,993 authors, 348 verified, against 375,824,
+70,508, 18,291 and 350 on 8 November: the status file now carries `set_aside: 706`, so the old loop, started before the
+code of 4–5 November, had kept the set-aside items in the count; nothing was removed from the data.
+
+The plan read: by backend, 2.6 305 issues (71,755 words out), 2.13 69 (32,567), 2.10 15 (25,558), 2.8 18, 2.5 9, 2.11
+7, 2.9 5, 2.7 1; 81 issues unchanged; 908 pieces rebuilt exactly, 8 by paragraph (6 issues of 2.9 and 2.11); the most
+words leave True Detective Mysteries 1927–1930 and Adventure 1925-03. Because the plan holds counts and no text, the
+application was begun on 16 chosen issues (the largest, the largest boxes, the by-paragraph ones, the two held, two
+plain ones), to be read record by record before the rest.
+
+That application (17:13, P52bv-1) wrote the first issue and stopped: process_issue held the issue's write lock and
+called s13_publish.publish_issue, which takes the same lock on a second file handle and waits for itself for ever
+(the selftest runs outside the real root and never reached the publisher). The rules file of True Detective Mysteries
+1929-12 was written whole (149 → 200 records, identities kept, 4,412 words out of 11 stories and a feature; the 51 new
+records read: 49 advertisements, 2 house notices, no story text among them) and its copy is in
+data/corpus/paratext-2026-11-11/; the live file was not republished; the site refresh, reaching the same issue,
+waited behind the same lock from 17:12. The waiting process was ended by hand; the refresh then publishes the issue
+itself. Patch 0051: the post-process calls the publisher's locked body (`_publish_issue_locked`) inside the lock it
+already holds; a test runs process_issue with a stand-in publisher whose `publish_issue` fails if it is called.
+

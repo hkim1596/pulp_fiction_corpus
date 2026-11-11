@@ -283,7 +283,10 @@ def process_issue(iid, cfg_issue, apply=False, root=ROOT, log=print):
             import s13_publish as s13
             from corpus_lib import settings
             pub = settings().get("publish", {})
-            what = s13.publish_issue(iid, pub.get("prefer", "rules_flagged"), float(pub.get("look_below", .9)), force=True)
+            # the issue's write lock is already held here: publish_issue would take it a second time on another
+            # file handle and wait for itself for ever (11 November 2026: the first application stopped after one issue
+            # and held the site refresh behind the same lock), so the locked body is called directly
+            what = s13._publish_issue_locked(iid, pub.get("prefer", "rules_flagged"), float(pub.get("look_below", .9)), force=True)
             row["published"] = what[0] if isinstance(what, tuple) else str(what)
     row["written"] = True
     return row
