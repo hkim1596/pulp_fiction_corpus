@@ -56,7 +56,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from layout_order import order_region_keys
 from corpus_lib import write_json_atomic
 
-VERSION = "2.14"
+VERSION = "2.15"
 # 2.13 (2026-10-27): the cover's record survives the model's changes. The published variant (rules_on_model) takes the
 # rules' records inside the printed page range and the model's old records for the pages outside it — the cover page
 # among them, so the 2.12 cover record never reached the site (the model's old advertisement and house blocks of the
@@ -270,6 +270,86 @@ SERIAL_NOTICE_RE = re.compile(r"^\W*(?:this (?:story|serial|novel) (?:began|star
 
 
 RULES_214 = {"on": True}      # the 2.14 rules can be switched off in memory for a regression (scripts/compare_assembly.py)
+# rules 2.15 (12 November 2026), R-B narrowed. The audit of 12 November (scripts/paratext_audit.py: 54,789 paratext
+# records over 6,732 issues) set every R-B record against the recurrence evidence: 29,153 are confirmed by it (the
+# same text in three or more issues), 16,366 are not. Of the unconfirmed ones of 40 words or more (8,157), a seeded
+# sample of 300 was read: 250 advertisements or house matter, 17 story prose (5.7 %: dialogue or narration that names
+# a sum of money, a letter or a sign inside a story, "or your money back" in a character's mouth, "managing editor" in
+# a newsroom scene read as an ownership statement), 29 text of a department, a letter or an article (9.7 %), 4
+# unclear. So a box that R-B's cues take and the count does not confirm must pass a second test (paratext_stands):
+# selling apparatus (a coupon, a department address, "send no money", "write today", a free booklet …) against
+# narrative (said-verbs, the third person, the past tense), per hundred words. On the full texts of the 300: 232 of
+# the 250 advertisements still taken (93 %), 15 of the 17 story passages and 21 of the 29 department or article
+# passages left in their piece. A box left in place is by construction text that no other issue carries, so it cannot
+# make a reuse match; a story passage taken out can lose one — the test errs toward leaving text where it is, and
+# says so in a flag ("R-B withheld").
+RULES_215 = {"on": True}
+HARD_SELL_RE = re.compile(
+    r"send no money|mail (?:the |this |your )?coupon|\bcoupon\b|clip (?:this|the)|dept\.? ?[a-z]{0,3}-?\d|"
+    r"free (?:booklet|book|sample|trial|details|information|catalog|outfit|list|circular)|"
+    r"write (?:today|now|at once|for (?:free|our|your|catalog|particulars|booklet|details|information|circular))|agents? wanted|"
+    r"satisfaction guaranteed|money[- ]back guarantee|guaranteed? or (?:your )?money|money (?:back|refunded) if|c\. ?o\. ?d\.|postpaid|"
+    r"pay (?:the )?postman|plain wrapper|no obligation|without (?:cost or )?obligation|please send me|send me (?:free|your|the|a )|"
+    r"enclosed find|i enclose|rush (?:me|coupon|name)|order (?:now|today|by mail|direct)|sent? on (?:approval|trial)|days'? (?:free )?trial|"
+    r"easy (?:terms|payments)|learn at home|at home in (?:your )?spare time|big (?:money|profits|pay)|earn \$|make \$|"
+    r"(?:name|address|city|state)\s?[._…]{3,}|\bonly \$\s?\d|\bnow \$\s?\d|special (?:offer|price)|introductory (?:offer|price)|sample free|"
+    r"send (?:for|today|name|\d+c|10c|stamp|your name)|at (?:your|all) (?:dealer|druggist|newsstand)s?|your (?:dealer|druggist)|"
+    r"mail (?:today|now)|act (?:now|quick|at once)|get (?:this|your) (?:free|copy)|illustrated (?:catalog|booklet|book)|\bcatalog\b", re.I)
+SAID_RE = re.compile(
+    r"[\"“”'’,]\s*(?:he|she|i|they|we|the \w+|[A-Z][a-z]+)?\s*(?:said|asked|replied|replies|answered|cried|laughed|muttered|whispered|"
+    r"shouted|demanded|growled|sobbed|snapped|grinned|went on|exclaimed|inquired|declared|drawled|roared)\b|"
+    r"\b(?:said|asked|replied|answered|cried|muttered|whispered|shouted|demanded|growled|sobbed|drawled)\s+(?:the|he|she|[A-Z][a-z]+)\b", re.I)
+THIRD_RE = re.compile(r"\b(?:he|she|his|her|him|they|them|their|himself|herself)\b", re.I)
+PAST_RE = re.compile(r"\b(?:was|were|had|went|came|saw|got|gave|told|took|knew|thought|looked|turned|stood|sat|walked)\b", re.I)
+FIRST_RE = re.compile(r"\b(?:I|we|I'm|I'll|I've|I'd|me|my)\b")
+CAPS_WORD_RE = re.compile(r"\b[A-Z]{4,}\b")
+MASTHEAD_STRONG_RE = re.compile(r"entered as second|second[- ]class|subscription (?:price|rate)|all rights reserved|copyright,? (?:19\d\d|by)|"
+                                r"published (?:monthly|bi-monthly|semi-monthly|weekly|quarterly) by|printed in (?:the )?u", re.I)
+
+
+def narrative_score(t):
+    """Said-verbs count three, the third person and the past tense up to six each, two or more double quotes two."""
+    return (3 * len(SAID_RE.findall(t)) + min(len(THIRD_RE.findall(t)), 6) + min(len(PAST_RE.findall(t)), 6)
+            + (2 if len(re.findall(r"[\"“”]", t)) >= 2 else 0))
+
+
+def paratext_stands(fam, t):
+    """Rules 2.15: does a box that R-B's cues read as paratext (fam) stand when the recurrence count does not confirm
+    it? An ownership statement needs two of its cues; a masthead a strong cue and little narrative (or a publisher's
+    address in a short box); an advertisement two pieces of selling apparatus, or one with little narrative, or — with
+    none — display type or copy addressed to "you", and little narrative."""
+    w = max(1, words(t))
+    per100 = 100.0 / w
+    n = narrative_score(t) * per100
+    if fam == "ownership statement":
+        return len(OWNERSHIP_RE.findall(t)) >= 2
+    if fam == "masthead":
+        return (bool(MASTHEAD_STRONG_RE.search(t)) and n < 8) or (bool(PUBLISHER_RE.search(t)) and w <= 40 and narrative_score(t) < 3)
+    hard = len({m.lower()[:10] for m in HARD_SELL_RE.findall(t)})
+    if hard >= 2:
+        return True
+    if hard == 1:
+        return n < 10
+    display = len(CAPS_WORD_RE.findall(t)) * per100 >= 4 or t.count("!") >= 2
+    you = len(SECOND_PERSON_RE.findall(t)) * per100 >= 3 and len(re.findall(r"\$\s?\d", t)) <= 1 and len(FIRST_RE.findall(t)) * per100 < 2
+    return n < 6 and (display or you)
+
+
+def sells(t):
+    """R-A's selling test for a weakly recurring box or one whose partners are all stories: the R-B cues, and since
+    rules 2.15 the second test too, so that dialogue which names a price and stands in a reprint is not split."""
+    return ad_cues(t) and (not RULES_215["on"] or paratext_stands("advertisement", t))
+
+
+def recurrence_confirms(e):
+    """An evidence entry confirms a paratext box when the same text stands in three or more issues and its partners
+    are not all stories (a passage several stories share is a commonplace or a reprint, not an advertisement)."""
+    if not e or e.get("n_issues", 0) < RA_MIN_ISSUES:
+        return False
+    ps = e.get("partners") or []
+    return not ps or {p.get("type") or "?" for p in ps} != {"story"}
+
+
 
 # rules 2.14 (5 November 2026), R-A: the recurring-box rule. Evidence: scripts/box_recurrence.py cuts every box a
 # record owns into 8-word shingles and counts them over the whole corpus; a box of 15+ tokens whose shingles recur in
@@ -354,9 +434,9 @@ def recurrence_verdict(e, t, title, author, reprinted=()):
             return "reprint"
         if is_prose(t):
             return "reprint"
-        if not ad_cues(t):
+        if not sells(t):
             return "weak"
-    if (not ps or types == {"story"}) and not ad_cues(t):
+    if (not ps or types == {"story"}) and not sells(t):
         return "commonplace"
     return "act"
 
@@ -2045,6 +2125,7 @@ class Assembler:
         self.continuations = {}     # target scan page -> record named by a forward notice
         self.n = 0
         self.recurrence = box_recurrence_for(iid) if RULES_214["on"] else {}     # rules 2.14 R-A evidence
+        self.withheld = {}          # rules 2.15: R-B boxes the second test left in their piece (key -> (family, page))
 
     def new(self, typ, title=None, author=None, page=None, toc=None):
         if typ == "ad" and title and words(title) > 12:
@@ -2116,6 +2197,7 @@ class Assembler:
             if rec["keys"] and rec["type"] in ("story", "poem", "feature", "letters"):
                 self.empty_title_box(rec)
         self.recurring_boxes()                     # rules 2.14 R-A: the boxes whose text recurs across the corpus
+        self.withheld_flags()                      # rules 2.15: the R-B boxes left in their piece are named in its flags
         self.merge_page_ads()
         # texts, pages
         misplaced = dict(A.get("misplaced") or [])
@@ -3200,6 +3282,26 @@ class Assembler:
             advertisement["flags"].append(f"whole product catalogue on p.{pn} separated from a continuous story")
             self.open["flags"].append(f"reading resumes across the separate product catalogue on p.{pn}")
 
+    def withheld_flags(self):
+        """Rules 2.15. A box R-B's cues read as paratext, that the recurrence count does not confirm and the second test
+        (paratext_stands) reads as text, stays in the piece that claimed it; the piece says so, once per family."""
+        by_rec = {}
+        for k, (fam, pno) in self.withheld.items():
+            own = self.owner.get(k)
+            if own and own != "furniture":
+                by_rec.setdefault(own, {}).setdefault(fam, []).append(pno)
+        if not by_rec:
+            return
+        recs = {r["article_id"]: r for r in self.records}
+        for aid, fams in by_rec.items():
+            rec = recs.get(aid)
+            if rec is None:
+                continue
+            for fam, pages in sorted(fams.items()):
+                pp = ", ".join(str(x) for x in sorted(set(pages))[:6])
+                rec["flags"].append(f"R-B withheld: {len(pages)} box(es) on p.{pp} read as {fam} by their cues, not found in other issues and "
+                                    "narrative in form: left in the piece (rules 2.15)")
+
     def paratext_boxes(self, pno, p, info):
         """Rules 2.14 R-B (4 November 2026). The paratext boxes the analysis found on this page — the statement of
         ownership, the masthead, a publisher's address line, a prose advertisement — each become their own house or
@@ -3213,6 +3315,9 @@ class Assembler:
                 continue
             fam = info["paratext"][i]
             t = region_text(regs[i])
+            if RULES_215["on"] and not recurrence_confirms(self.recurrence.get(k)) and not paratext_stands(fam, t):
+                self.withheld[k] = (fam, pno)       # rules 2.15: not confirmed by the count, and it reads as text: left to its piece
+                continue
             between = [j for j in range(prev_i + 1, i) if j not in info["furniture"]] if prev_i is not None else [None]
             if prev_rec is not None and prev_rec.get("paratext") == fam and not between:
                 self.add(prev_rec, pno, i)

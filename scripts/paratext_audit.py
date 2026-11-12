@@ -57,6 +57,9 @@ def magazine_of(iid, cfg_issue=None):
     return name or re.sub(r"_(18|19)\d\d.*$|_undated.*$", "", iid).replace("_", " ")
 
 
+TEXT_CHARS = [400]      # characters of text kept per listed record (--text-chars)
+
+
 def audit_doc(doc, evidence, iid="", magazine="", kind="magazine"):
     """The rows of one assembly: one per paratext record. evidence: the issue's recurrence evidence ("page:idx" -> entry)."""
     recs = doc.get("articles") or []
@@ -82,7 +85,7 @@ def audit_doc(doc, evidence, iid="", magazine="", kind="magazine"):
                      "type": r.get("type"), "words": _words(r), "confirmed": rule == "R-A" or bool(hits),
                      "n_issues": max((h.get("n_issues") or 0 for h in hits), default=(r.get("recurrence") or {}).get("n_issues") or 0),
                      "from": (by_id.get(src) or {}).get("type") if src else None, "around": around, "page": pages[0] if pages else None,
-                     "text": (r.get("text") or "")[:400]})
+                     "text": (r.get("text") or "")[:TEXT_CHARS[0]]})
     return rows
 
 
@@ -99,12 +102,14 @@ def _one(args):
     except (OSError, ValueError):
         ev = {}
     backend = doc.get("backend") or ""
-    state = "2.14" if backend.startswith("rules_v2.14") else "post-processed" if doc.get("paratext_postprocess") else "not yet"
+    m = re.match(r"rules_v(2\.(?:1[4-9]|[2-9]\d))(?!\d)", backend)
+    state = m.group(1) if m else "post-processed" if doc.get("paratext_postprocess") else "not yet"
     return {"issue": iid, "magazine": magazine, "kind": kind, "state": state, "has_evidence": bool(ev),
             "rows": audit_doc(doc, ev, iid, magazine, kind)}
 
 
-def summarise(results, sample=300, seed=20261111, per_magazine=3):
+def summarise(results, sample=300, seed=20261111, per_magazine=3, min_words=None, max_words=None):
+    min_words = MIN_WORDS if min_words is None else min_words
     issues = [r for r in results if "rows" in r]
     rows = [x for r in issues for x in r["rows"]]
     tot = collections.Counter()
@@ -129,7 +134,7 @@ def summarise(results, sample=300, seed=20261111, per_magazine=3):
                 m["unconfirmed 100+ words"] += x["words"]
         elif x["rule"] == "R-B":
             mags[(x["magazine"], x["kind"])]["confirmed words"] += x["words"]
-    listed = [x for x in rows if x["rule"] == "R-B" and not x["confirmed"] and x["words"] >= MIN_WORDS]
+    listed = [x for x in rows if x["rule"] == "R-B" and not x["confirmed"] and x["words"] >= min_words and (max_words is None or x["words"] < max_words)]
     listed.sort(key=lambda x: (-x["words"], x["issue"], x["id"] or ""))
     rnd = random.Random(seed)
     pool = sorted(listed, key=lambda x: (x["issue"], x["id"] or ""))
@@ -148,7 +153,7 @@ def summarise(results, sample=300, seed=20261111, per_magazine=3):
                          "unconfirmed_100_words": c["unconfirmed 100+ words"], "confirmed_words": c["confirmed words"],
                          "unconfirmed_100_words_per_issue": round(c["unconfirmed 100+ words"] / n, 1) if n else 0})
     mag_rows.sort(key=lambda m: (-m["unconfirmed_100_words_per_issue"], -m["unconfirmed_100_words"], m["magazine"]))
-    return {"totals": dict(tot), "errors": [r for r in results if "error" in r],
+    return {"totals": dict(tot), "errors": [r for r in results if "error" in r], "listed_from": min_words, "listed_below": max_words,
             "by": [{"key": list(k), **dict(v)} for k, v in sorted(by.items(), key=lambda kv: [str(s) for s in kv[0]])],
             "magazines": mag_rows, "listed": listed}
 
@@ -171,7 +176,8 @@ def report(S, stamp):
         L.append(f"| {m['magazine']} | {m['kind']} | {m['issues']:,} | {m['unconfirmed_100_records']:,} | {m['unconfirmed_100_words']:,} | "
                  f"{m['unconfirmed_100_words_per_issue']:,} | {m['unconfirmed_words']:,} | {m['confirmed_words']:,} |")
     lst = S["listed"]
-    L += ["", f"## The unconfirmed R-B records of {MIN_WORDS} words or more: {len(lst):,} records, {sum(x['words'] for x in lst):,} words", "",
+    rng = f"{S.get('listed_from', MIN_WORDS)} words or more" + (f" and under {S['listed_below']}" if S.get("listed_below") else "")
+    L += ["", f"## The unconfirmed R-B records of {rng}: {len(lst):,} records, {sum(x['words'] for x in lst):,} words", "",
           f"In paratext_audit_records.json, each with 400 characters of text; {sum(1 for x in lst if x['in_sample']):,} are the seeded random sample "
           f"(`in_sample`), {sum(1 for x in lst if x['longest_of_magazine']):,} the longest of their magazine (`longest_of_magazine`). The 40 longest:", "",
           "| issue | record | family | words | pieces on its page | text |", "|---|---|---|---|---|---|"]
@@ -212,11 +218,15 @@ def main():
     ap.add_argument("--sample", type=int, default=300)
     ap.add_argument("--seed", type=int, default=20261111)
     ap.add_argument("--limit", type=int)
+    ap.add_argument("--min-words", type=int, default=MIN_WORDS, help="list the unconfirmed R-B records from this length (default 40)")
+    ap.add_argument("--max-words", type=int, help="… and below this length (to sample the short ones: --min-words 15 --max-words 40)")
+    ap.add_argument("--text-chars", type=int, default=400, help="characters of text kept per listed record")
     ap.add_argument("--out-dir", default=os.path.join(ROOT, "pilot_export", "paratext-audit-" + time.strftime("%Y-%m-%d")))
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
     if a.selftest:
         sys.exit(0 if selftest() else 1)
+    TEXT_CHARS[0] = a.text_chars
     from corpus_lib import corpus_config, active_issues, corpus_kinds
     cfg = corpus_config().get("issues", [])
     active, n_aside = active_issues(cfg)
@@ -227,20 +237,20 @@ def main():
     t0 = time.time()
     if a.workers > 1:
         from multiprocessing import Pool
-        with Pool(a.workers) as pool:
+        with Pool(a.workers, initializer=TEXT_CHARS.__setitem__, initargs=(0, a.text_chars)) as pool:
             results = pool.map(_one, jobs, chunksize=32)
     else:
         results = [_one(j) for j in jobs]
-    S = summarise(results, sample=a.sample, seed=a.seed)
+    S = summarise(results, sample=a.sample, seed=a.seed, min_words=a.min_words, max_words=a.max_words)
     os.makedirs(a.out_dir, exist_ok=True)
     stamp = time.strftime("%Y-%m-%d %H:%M")
     open(os.path.join(a.out_dir, "paratext_audit.md"), "w", encoding="utf-8").write(report(S, stamp))
-    json.dump({k: S[k] for k in ("totals", "by", "magazines", "errors")}, open(os.path.join(a.out_dir, "paratext_audit.json"), "w", encoding="utf-8"),
+    json.dump({k: S[k] for k in ("totals", "by", "magazines", "errors", "listed_from", "listed_below")}, open(os.path.join(a.out_dir, "paratext_audit.json"), "w", encoding="utf-8"),
               ensure_ascii=False, indent=1)
     json.dump(S["listed"], open(os.path.join(a.out_dir, "paratext_audit_records.json"), "w", encoding="utf-8"), ensure_ascii=False)
     lst = S["listed"]
     print(f"{len(results)} issues in {time.time() - t0:.0f}s: {sum(len(r.get('rows', [])) for r in results):,} paratext records; "
-          f"unconfirmed R-B of {MIN_WORDS}+ words: {len(lst):,} records, {sum(x['words'] for x in lst):,} words")
+          f"unconfirmed R-B listed ({a.min_words}+ words" + (f", under {a.max_words}" if a.max_words else "") + f"): {len(lst):,} records, {sum(x['words'] for x in lst):,} words")
     print(f"written {os.path.relpath(a.out_dir, ROOT)}/paratext_audit.md, .json and paratext_audit_records.json")
 
 

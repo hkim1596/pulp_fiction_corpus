@@ -2043,3 +2043,47 @@ does not mean wrong: an advertisement printed in one issue only is unconfirmed a
 judges. From its result: whether R-B needs a narrower test (rules 2.15), which titles are not fiction magazines, and
 then the remaining 413 issues, the cross-issue pass and the explorer rebuild.
 
+### 2026-11-12 — the paratext records audited; rules 2.15: R-B's second test (patch 0053)
+
+The audit (scripts/paratext_audit.py, 12 November 03:01, 8 seconds; pilot_export/paratext-audit-2026-11-12/): 6,732
+active issues (708 set aside), 54,789 paratext records. R-A: 9,270 records, 668,813 words. R-B confirmed by the
+recurrence evidence (a box of the record stands in three or more issues): 29,153 records, 1,952,932 words. R-B
+unconfirmed: 16,366 records, 836,629 words — advertisements 12,093 (753,257 words), mastheads 4,051, ownership
+statements 222; 8,157 of them of 40 words or more (668,627 words). The seeded sample of 300 of those, read from the
+text (sample_reading_2026-11-12.json; full texts in sample_full_text_2026-11-12.json): 250 advertisements or house
+matter; 17 story prose (5.7 %, 95 % interval 3.6–8.9 %; mean 85 words) — dialogue or narration that names a sum of
+money, a letter, a telegram or a shop sign inside a story, "or yore money back" in a character's mouth, two newsroom
+scenes read as ownership statements for "managing editor", one "stamped envelope" read as a masthead; 29 text of a
+department, a letter or an article (9.7 %) — replies of Ask Adventure, fanzine reviews, science fillers with dollar
+figures; 4 unclear. Carried to the corpus: about 460 story passages (290–725; some 39,000 words) and about 790
+department or article passages stand as advertisement records. They are spread over the main titles (Adventure,
+Argosy, The Popular Magazine, Popular Detective, Astounding), not confined to magazines that are not fiction
+magazines; the titles with the most unconfirmed words per issue are hobby, health and general magazines (Air Trails,
+Physical Culture, Pictorial Review, Boys' Life, Science and Invention, The American Magazine) — a list for the kind
+decisions, not a cause.
+
+Decision (Sujin Kang, 12 November): R-B is narrowed before the remaining 413 issues of step 2f are touched.
+
+Rules 2.15 (pipeline/s08_assemble_rules.py). A box that R-B's cues read as paratext is split as before when the
+recurrence evidence confirms it (recurrence_confirms: three or more issues, partners not all stories). Otherwise it
+must pass a second test (paratext_stands): an ownership statement needs two of its cues; a masthead a strong cue
+(second-class entry, subscription price, copyright, "published monthly by", "printed in") with little narrative, or a
+publisher's address in a short box; an advertisement two pieces of selling apparatus (a coupon, a department address,
+"send no money", "write today", a free booklet, C.O.D., a trial offer, NAME…… blanks, …), or one with a narrative
+score under 10 per hundred words, or none with a score under 6 and display type or copy addressed to "you". The
+narrative score counts said-verbs three times, the third person and the past tense up to six each, quotation marks
+two. A box that fails stays in the piece that claims it, and the piece carries "R-B withheld: n box(es) on p.… read
+as … by their cues, not found in other issues and narrative in form: left in the piece (rules 2.15)". R-A's selling
+test for weakly recurring boxes and for boxes whose partners are all stories (sells) uses the same second test. On
+the full texts of the 300 labelled records: 232 of 250 advertisements still taken (93 %; 18,949 of 20,332 words), 15
+of 17 story passages left in place, 21 of 29 department or article passages left in place. These figures are
+in-sample (the test was written from these records); the regression and a fresh sample give the held-out ones. The
+direction of the remaining error is chosen: a box left in place is text no other issue carries, so it cannot make a
+reuse match, while a story passage taken out can lose one.
+
+Tools. scripts/compare_assembly.py --against 2.14 assembles each issue twice in memory (rules 2.15 off and on) and
+lists every paratext record of 2.14 that 2.15 leaves in its piece, with its text and the piece that holds it.
+scripts/paratext_audit.py takes --min-words/--max-words (to sample the records under 40 words, not yet read) and
+--text-chars. Not yet done: the regression read; the upgrade to 2.15 through the continuity guard; the 16 issues
+post-processed on 11 November restored from data/corpus/paratext-2026-11-11/ and post-processed again with the rest.
+

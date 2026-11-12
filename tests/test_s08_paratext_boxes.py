@@ -102,7 +102,7 @@ class ParatextBoxes(unittest.TestCase):
             self.assertIsNotNone(rules.byline_author(good), good)
 
     def test_version(self):
-        self.assertEqual(rules.VERSION, "2.14")
+        self.assertEqual(rules.VERSION, "2.15")
 
 
 if __name__ == "__main__":
