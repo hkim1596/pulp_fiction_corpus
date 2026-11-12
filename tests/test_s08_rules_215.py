@@ -41,6 +41,22 @@ class SecondTest(unittest.TestCase):
         self.assertTrue(rules.paratext_stands("ownership statement", OWNERSHIP))
         self.assertTrue(rules.paratext_stands("masthead", "Popular Fiction Publishing Co., 840 North Michigan Avenue, Chicago."))
 
+    def test_statement_and_masthead_set_in_several_boxes(self):
+        """From the regression of 12 November (240 issues): the statement's parts and a story's copyright line stand
+        on one cue; narration with the same words does not."""
+        for t in ("Sworn to and subscribed before me this 16th day of September, 1942.",
+                  "3. That the known bondholders, mortgagees, and other security holders owning or holding 1 per cent or more are: None.",
+                  "Editor, managing editor, and business managers are: Publisher, Harold Hammond, 60 Hudson St., New York City."):
+            self.assertTrue(rules.paratext_stands("ownership statement", t), t)
+        for t in ('"The Book of the Tiger," copyright, 1926, by Harold Lamb.',
+                  "Series began in the November, 1908, Railroad Man's Magazine. Single copies, 10 cents.",
+                  "When sending for the button enclose a strong, self-addressed, unstamped envelope."):
+            self.assertTrue(rules.paratext_stands("masthead", t), t)
+        for t in ("To address a stamped envelope and slip it in with the outgoing mail was",
+                  '"Yes. It has long been deemed sacrilege for mortal eyes to view the ancient writings. The single copy is kept in a great '
+                  'vault, built of indestructible metals, and protectively sheathed to last for all time, and no man may open it without the word of the council."'):
+            self.assertFalse(rules.paratext_stands("masthead", t), t)
+
     def test_recurrence_confirms(self):
         ad = {"n_issues": 12, "share": 1.0, "partners": [{"type": "ad"}, {"type": "story"}]}
         self.assertTrue(rules.recurrence_confirms(ad))

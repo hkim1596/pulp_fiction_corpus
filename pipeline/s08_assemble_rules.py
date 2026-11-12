@@ -303,8 +303,9 @@ THIRD_RE = re.compile(r"\b(?:he|she|his|her|him|they|them|their|himself|herself)
 PAST_RE = re.compile(r"\b(?:was|were|had|went|came|saw|got|gave|told|took|knew|thought|looked|turned|stood|sat|walked)\b", re.I)
 FIRST_RE = re.compile(r"\b(?:I|we|I'm|I'll|I've|I'd|me|my)\b")
 CAPS_WORD_RE = re.compile(r"\b[A-Z]{4,}\b")
-MASTHEAD_STRONG_RE = re.compile(r"entered as second|second[- ]class|subscription (?:price|rate)|all rights reserved|copyright,? (?:19\d\d|by)|"
-                                r"published (?:monthly|bi-monthly|semi-monthly|weekly|quarterly) by|printed in (?:the )?u", re.I)
+OWNERSHIP_LEGAL_RE = re.compile(r"statement of (?:the )?ownership|postal laws and regulations|act of (?:august 24, 1912|march 3, 1933|october 23, 1962)|"
+                                r"bondholders,? mortgagees|stockholders and security holders|sworn to and subscribed|before me,? a notary public|"
+                                r"duly sworn|deposes and says|average number of copies|paid circulation", re.I)
 
 
 def narrative_score(t):
@@ -315,16 +316,28 @@ def narrative_score(t):
 
 def paratext_stands(fam, t):
     """Rules 2.15: does a box that R-B's cues read as paratext (fam) stand when the recurrence count does not confirm
-    it? An ownership statement needs two of its cues; a masthead a strong cue and little narrative (or a publisher's
-    address in a short box); an advertisement two pieces of selling apparatus, or one with little narrative, or — with
+    it? An ownership statement needs a legal cue (or "managing editor are" without narrative); a masthead its cue
+    and no narrative — a short box by its raw score, "a stamped envelope" only as a request to the reader; an advertisement two pieces of selling apparatus, or one with little narrative, or — with
     none — display type or copy addressed to "you", and little narrative."""
     w = max(1, words(t))
     per100 = 100.0 / w
     n = narrative_score(t) * per100
+    raw = narrative_score(t)
     if fam == "ownership statement":
-        return len(OWNERSHIP_RE.findall(t)) >= 2
+        # the statement is set in several boxes (its heading, "Sworn to and subscribed …", "3. That the known
+        # bondholders …"), each with one cue: a legal cue stands alone; "managing editor are" alone only without narrative
+        return bool(OWNERSHIP_LEGAL_RE.search(t)) or (bool(OWNERSHIP_RE.search(t)) and raw < 3 and not SAID_RE.search(t))
     if fam == "masthead":
-        return (bool(MASTHEAD_STRONG_RE.search(t)) and n < 8) or (bool(PUBLISHER_RE.search(t)) and w <= 40 and narrative_score(t) < 3)
+        # a short box (a copyright line under a title, "Single copies, 10 cents") is judged by its raw score: per
+        # hundred words, one pair of quotation marks in ten words reads as narrative
+        calm = raw < 3 if w <= 40 else n < 8
+        cues = {m.lower() for m in MASTHEAD_RE.findall(t)}
+        envelope_only = bool(cues) and all("envelope" in c for c in cues)
+        if envelope_only:       # "a stamped envelope" stands only as a request to the reader (enclose, send), never in narration
+            return calm and bool(re.search(r"\b(?:enclos\w+|inclos\w+|send(?:ing)?)\b", t, re.I))
+        if w > 40 and len(cues) < 2 and not PUBLISHER_RE.search(t):
+            return False        # one weak cue in a long box ("the single copy is kept in a great vault") is not a masthead
+        return calm and (bool(cues) or bool(PUBLISHER_RE.search(t)))
     hard = len({m.lower()[:10] for m in HARD_SELL_RE.findall(t)})
     if hard >= 2:
         return True

@@ -2087,3 +2087,39 @@ scripts/paratext_audit.py takes --min-words/--max-words (to sample the records u
 --text-chars. Not yet done: the regression read; the upgrade to 2.15 through the continuity guard; the 16 issues
 post-processed on 11 November restored from data/corpus/paratext-2026-11-11/ and post-processed again with the rest.
 
+### 2026-11-12 (evening) — rules 2.15, the first regression read; the ownership and masthead tests corrected (patch 0054)
+
+The Stage 1 submission is on record since today: CHR-2026-0073, submitted by Prof. Tenen on 5 October 2026, "Awaiting
+Reviewer Assignment" on 12 November (Stage 1 Latex/CHR-2026-0073_Proof_hi.pdf).
+
+The regression (scripts/compare_assembly.py --against 2.14; the 10 pilot issues, the 30 double-read issues and 200
+random magazine issues, seed 20261112; in memory; pilot_export/compare-2.15-2026-11-12/): 2,370 stories before and
+after; story words 15,815,313 → 15,818,282; 2,150 paratext records under 2.14, of which 2.15 leaves 133 in their
+piece (8,972 words; 87 advertisements, 32 mastheads, 14 ownership statements; 80 of 40 words or more); 36 story
+records changed. Where the 133 went: a story 51, a feature 32, a letters record 10, an advertisement record next to
+them 35, a house record 4.
+
+All 133 were read. Right to leave in place (text of the piece): a letter of a story told in letters ("how much will I
+take to resign straight out … I will accept $3,000", Blue Book, July 1919), an article on Navy pay (Adventure, July
+1926), replies of Ask Adventure, science and railroad fillers with dollar figures, dialogue ("we'll need every cent
+… on our capital stock", Short Stories, December 1923), a reader's letter enclosing gold for a subscription (The
+Popular Magazine), the pen-friends' column of Amazing Stories. Wrong to leave in place, two classes that were the
+test's own fault: (a) the ownership statement, which the layout sets in several boxes — its heading, "Before me, a
+Notary Public …", "3. That the known bondholders …", "Sworn to and subscribed before me this 16th day of September" —
+each carrying one cue where the test asked for two (14 boxes, among them whole statements of 211 and 427 words); (b)
+short masthead lines — the copyright line under a story's title ('"The Book of the Tiger," copyright, 1926, by Harold
+Lamb'), "Series began in the November, 1908, Railroad Man's Magazine. Single copies, 10 cents.", "Enclose a stamped,
+self-addressed envelope …" — judged narrative because the score was taken per hundred words (one pair of quotation
+marks in ten words). And a third class that stays: advertisements with no selling apparatus and no display type — a
+land company's "Do You Know that Growers of Figs …", a tailor's "We deal directly with you", a travel page, a stamp
+dealer's price list — about twelve of the 133.
+
+Patch 0054. An ownership statement stands on any legal cue (statement of ownership, the Acts, notary, duly sworn,
+deposes and says, bondholders, sworn to and subscribed, circulation figures), and "managing editor are" alone only
+without narrative. A masthead box of 40 words or fewer is judged by its raw narrative score; a longer one needs two
+cues or a publisher's address; "a stamped envelope" stands only as a request to the reader (enclose, send). Applied to
+the 98 single-box records of the regression: 8 of 8 ownership boxes and 27 of 29 mastheads are taken again, 60 of 61
+advertisements stay in their piece. On the 300 labelled records: 233 of 250 advertisements taken, 15 of 17 story
+passages and 18 of 29 department or article passages left in place. The regression is run again with the same seed
+before anything is installed.
+
