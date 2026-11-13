@@ -2123,3 +2123,31 @@ advertisements stay in their piece. On the 300 labelled records: 233 of 250 adve
 passages and 18 of 29 department or article passages left in place. The regression is run again with the same seed
 before anything is installed.
 
+
+### 2026-11-13 — rules 2.15, the checks before the install read (P52ca, 13:15–13:35 KST); the install (patch 0056, P52cc)
+
+The checks (pilot_export/upgrade-2.15-2026-11-12/; the corpus only read). The plan: 6,728 active assembled issues
+selected (708 set aside, 4 not assembled) — 6,301 at 2.14, 413 held at older rules, 14 of the step-2f trial. The guard
+run for real in a separate root on 698 issues: of 600 drawn from the 6,301 installed at 2.14, 599 install at 2.15 and
+1 is refused; all 84 drawn from the 413 held stay refused; the 14 trial issues, restored first, are refused — every
+refusal "cannot safely retain cross-issue metadata". So the install should leave about 6,290 issues at 2.15 and about
+440 held, which the post-process reaches. The held-out comparison (scripts/heldout_paratext.py; 150 magazine issues,
+seed 20261113, outside the 605 issues the rules were written or corrected from): story words 10,189,759 → 10,191,559;
+paratext records 1,359 → 1,287; 82 boxes (4,807 words) that 2.14 split and 2.15 leaves in place. All 82 read: 51 are
+text of the piece or of the page (2,803 words back in stories, features and letters — an article on the national
+wealth in The American Magazine, July 1932; replies of Ask Adventure on yachts, passports and Foreign Legion pay; a
+story's sums in Argosy, June 1908; a ransom note and a reward in True Detective Mysteries; the readers' Trading Post
+of Battle Stories; a telephone scene with "the managing editor"; 797 words of trade notes and notices that land in
+advertisement or house records anyway); 31 are advertisements, of which 17 land in an advertisement or house record
+all the same and 14 (569 words) stay inside a story or feature — short copy without apparatus (a Zippo price line, a
+Gillette paragraph, "FREE—Write for …", a publisher's book offer of 1907). Held-out, then: for each word of
+advertising left in a piece, about five words of the piece's own text are returned to it; the direction of the
+remaining error is the chosen one (text no other issue carries cannot make a reuse match). Not a regression of 2.15
+and left for later: both versions keep some coupon fragments inside stories ("Name ..... Address .....", a
+department address line) where the layout cut a coupon into boxes of a few words.
+
+Decision (Sujin Kang, 13 November): rules 2.15 are installed. P52cc, in one tmux session (up215): a snapshot
+(/mnt/sda/pulp/snapshots/corpus-before-2.15-2026-11-13.tar.zst); the 14 active issues of the step-2f trial restored
+(paratext_postprocess.py --restore); the upgrade through the continuity guard (8 workers); the refusals reported by
+magazine, decade and reason (upgrade_report.py); the post-process applied to every active issue not at 2.15
+(pilot_export/upgrade-2.15-2026-11-13/); the cross-issue pass; the explorer rebuild.
