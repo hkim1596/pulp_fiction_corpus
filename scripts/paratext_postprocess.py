@@ -313,9 +313,58 @@ def report(rows, apply):
     return "\n".join(L) + "\n", tot
 
 
+def restore_issue(iid, root=ROOT, publish=True):
+    """Undo the post-process for one issue (12 November 2026: the 16 issues of the trial go back to their state before
+    it, so that the continuity guard judges rules 2.15 against the assembly it held, not against a hand-made mixture).
+    The rules file comes back from data/corpus/paratext-<date>/<issue>/rules.before.json (the earliest such backup),
+    the live file from live.before.json where the issue is held by hand corrections; the post-processed files are
+    kept beside the backups (rules.postprocessed.json, live.postprocessed.json): nothing is deleted. An issue whose
+    corrections changed after the post-process is left as it is, for a person to decide."""
+    import glob
+    rules_p = os.path.join(root, "data", "assembly_v2", "rules", iid, "articles.json")
+    live_p = os.path.join(root, "data", "articles", iid, "articles.json")
+    ann_p = os.path.join(root, "data", "annotations", f"{iid}.jsonl")
+    row = {"issue": iid}
+    try:
+        doc = json.load(open(rules_p, encoding="utf-8"))
+    except (OSError, ValueError):
+        return dict(row, error="no rules file")
+    if not doc.get("paratext_postprocess"):
+        return dict(row, error="not post-processed: nothing to restore")
+    dirs = sorted(d for d in glob.glob(os.path.join(root, "data", "corpus", "paratext-*", iid)) if os.path.exists(os.path.join(d, "rules.before.json")))
+    if not dirs:
+        return dict(row, error="no rules.before.json backup")
+    bdir = dirs[0]
+    before = json.load(open(os.path.join(bdir, "rules.before.json"), encoding="utf-8"))
+    if before.get("paratext_postprocess"):
+        return dict(row, error="the backup is itself post-processed")
+    live_before = os.path.join(bdir, "live.before.json")
+    if os.path.exists(ann_p) and os.path.getmtime(ann_p) > os.path.getmtime(rules_p) + 1:
+        return dict(row, error="hand corrections changed after the post-process: left as it is")
+    from article_guard import article_write_lock
+    from corpus_lib import write_json_atomic
+    with article_write_lock(root, iid):
+        shutil.copy2(rules_p, os.path.join(bdir, "rules.postprocessed.json"))
+        write_json_atomic(rules_p, before)
+        row["backend"] = before.get("backend")
+        if os.path.exists(live_before):
+            shutil.copy2(live_p, os.path.join(bdir, "live.postprocessed.json"))
+            write_json_atomic(live_p, json.load(open(live_before, encoding="utf-8")))
+            row["published"] = "held: the live file restored in place"
+        elif publish and root == ROOT:
+            import s13_publish as s13
+            from corpus_lib import settings
+            pub = settings().get("publish", {})
+            what = s13._publish_issue_locked(iid, pub.get("prefer", "rules_flagged"), float(pub.get("look_below", .9)), force=True)
+            row["published"] = what[0] if isinstance(what, tuple) else str(what)
+    row["restored"] = True
+    return row
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--restore", action="store_true", help="undo the post-process for the issues of --issues-file (their backups come back; nothing is deleted)")
     ap.add_argument("--issues-file")
     ap.add_argument("--limit", type=int)
     ap.add_argument("--out-dir", default=OUT_DIR)
@@ -323,6 +372,19 @@ def main():
     a = ap.parse_args()
     if a.selftest:
         sys.exit(0 if selftest() else 1)
+    if a.restore:
+        if not a.issues_file or a.apply:
+            ap.error("--restore needs --issues-file and excludes --apply")
+        rows = []
+        for iid in json.load(open(a.issues_file, encoding="utf-8")):
+            try:
+                rows.append(restore_issue(iid))
+            except Exception as exc:
+                rows.append({"issue": iid, "error": f"{type(exc).__name__}: {exc}"})
+            r = rows[-1]
+            print(f"{iid}: " + (f"restored ({r.get('backend')}; {r.get('published', 'not published')})" if r.get("restored") else f"NOT restored — {r.get('error')}"), flush=True)
+        print(f"restored {sum(1 for r in rows if r.get('restored'))} of {len(rows)}")
+        sys.exit(0 if all(r.get("restored") for r in rows) else 1)
     from corpus_lib import corpus_config, active_issues
     cfg = {i["id"]: i for i in corpus_config().get("issues", [])}
     active, _ = active_issues(list(cfg.values()))
@@ -402,6 +464,12 @@ def selftest():
         # the second pass does nothing
         row2 = process_issue("x", {"id": "x", "magazine": "Weird Tales"}, apply=True, root=d, log=lambda *a: None)
         assert row2.get("error") == "already post-processed", row2
+        # the restore brings the held assembly back, keeps the post-processed file, and does nothing the second time
+        r3 = restore_issue("x", root=d)
+        back = json.load(open(os.path.join(d, "data", "assembly_v2", "rules", "x", "articles.json")))
+        assert r3.get("restored") and back == held and not back.get("paratext_postprocess"), r3
+        assert json.load(open(os.path.join(d, "data", "corpus", f"paratext-{STAMP}", "x", "rules.postprocessed.json"))) == after
+        assert restore_issue("x", root=d).get("error", "").startswith("not post-processed")
     print("selftest ok")
     return True
 
