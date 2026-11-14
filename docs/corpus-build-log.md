@@ -2151,3 +2151,39 @@ Decision (Sujin Kang, 13 November): rules 2.15 are installed. P52cc, in one tmux
 (paratext_postprocess.py --restore); the upgrade through the continuity guard (8 workers); the refusals reported by
 magazine, decade and reason (upgrade_report.py); the post-process applied to every active issue not at 2.15
 (pilot_export/upgrade-2.15-2026-11-13/); the cross-issue pass; the explorer rebuild.
+
+### 2026-11-14 — rules 2.15 installed (13 November, P52cc): the result, the held issues, the audit
+
+The install (pilot_export/upgrade-2.15-2026-11-13/; 13 November 13:41–15:45 KST). Snapshot
+/mnt/sda/pulp/snapshots/corpus-before-2.15-2026-11-13.tar.zst (3.88 GB). Of 6,728 active assembled issues, **6,295 are
+at rules 2.15 and 433 were refused by the continuity guard** and keep their earlier assembly (2.6 305, 2.13 69, 2.8 18,
+2.10 14, 2.5 9, 2.11 7, 2.14 6, 2.9 4, 2.7 1). Reasons: "cannot safely retain cross-issue metadata" 432, "conflicting
+excerpt_of in merged nonstory metadata" 1 (weird_tales_1938_04_04atlpmurf). By decade (refused / named): 1890s 3/91,
+1900s 8/175, 1910s 23/390, 1920s 94/1,056, 1930s 111/1,398, 1940s 108/1,743, 1950s 80/1,595, undated 6/280. By
+magazine, 93 titles, the largest: Adventure 90/340, Amazing Stories 56/301, Fantastic Adventures 26/128, Wonder Stories
+23/64, The Popular Magazine 19/256, Weird Tales 19/284, Short Stories 18/102, True Detective Mysteries 13/28, Startling
+Stories 11/92 (upgrade_report.md). The cross-issue pass linked 1,308 magazines; the explorer was rebuilt.
+
+The held issues. The paratext post-process (scripts/paratext_postprocess.py, with the 2.15 test) was applied to all 433:
+323 changed, 2 held by hand corrections; 818 pieces changed, 2,514 boxes and 127,540 words out of their pieces, 1,876
+records added; backups in data/corpus/paratext-2026-11-13/ (`--restore` undoes an issue). Sujin had asked on
+12 November that the post-process not be applied to the refused issues wholesale, since it cannot return text wrongly
+taken out; it was applied in the install of 13 November. On 14 November the question was put again and decided on a
+reading: of 36 changed issues (seed 20261114; 186 added records), 110 of the 135 records split out of stories were read
+(6,524 words): 106 rightly out, **4 story prose (3.6% of records, 98 words, 1.5% of the words)** — two passages naming
+sums of money, a directory line set apart inside a story (seen on the scan), a line quoting Hamlet that R-A found in 100
+other issues. Under the 5.7% that prompted 2.15 and not gathered in one title: **the post-process is kept** (Sujin Kang,
+14 November, on that reading). The datasheet is to say: 6,295 issues assembled by rules 2.15; 433 by earlier rules
+with the 2.15 paratext post-process (323 changed by it).
+
+The audit after the install (scripts/paratext_audit.py, 14 November; pilot_export/paratext-audit-after-2.15-2026-11-14/).
+Paratext records 54,789 → 53,787; unconfirmed R-B records 16,366 (836,629 words) → 14,078 (673,436 words), those of 40+
+words 8,157 → 6,458. The seeded sample of 300 of the latter, read from the kept text as on 12 November: 283
+advertisements or notices, **2 story prose (0.7%; before 2.15: 17, 5.7%)**, 13 department, letter or article text (4.3%;
+before 29), 2 unclear. About 40 story passages wrongly split would remain in the corpus, against about 460; two in 300
+is compatible with 0.2% to 2.4%.
+
+Known and left as it is: R-A can take a much-quoted line for a recurring box; coupon fragments of a few words stay
+inside some stories; the flags of the post-processed records name "rules 2.14" though the test applied was 2.15's.
+No rule is added from samples already used to write the rules. Assembly is closed at 2.15 for corpus 1.0 unless a
+later reading shows otherwise.
